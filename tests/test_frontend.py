@@ -45,3 +45,18 @@ def test_static_site_search_index_includes_code_and_research_nodes(tmp_path):
     entries = json.loads((out / "search-index.json").read_text(encoding="utf-8"))
     names = {entry["title"] for entry in entries}
     assert {"demo-app", "src/api.py", "route", "Demo Paper"}.issubset(names)
+
+
+def test_static_site_embeds_parseable_search_json(tmp_path):
+    out = tmp_path / "site"
+    StaticSiteBuilder(site_title="Demo Wiki").write_site(frontend_sample_graph(), out)
+
+    html = (out / "index.html").read_text(encoding="utf-8")
+    marker = '<script id="search-data" type="application/json">'
+    start = html.index(marker) + len(marker)
+    end = html.index("</script>", start)
+    embedded = html[start:end]
+
+    assert "&quot;" not in embedded
+    payload = json.loads(embedded)
+    assert payload[0]["title"] == "demo-app"

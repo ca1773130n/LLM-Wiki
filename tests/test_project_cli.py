@@ -185,6 +185,30 @@ def test_cli_project_build_site_and_serve_smoke(tmp_path, capsys):
     assert "Frontend site ready" in captured
 
 
+def test_cli_project_serve_reports_bind_errors_before_claiming_ready(tmp_path, capsys):
+    project = tmp_path / "busy-port-project"
+    project.mkdir()
+    (project / "note.md").write_text("# Busy Port Note\nGaussian Splatting supports novel view synthesis.", encoding="utf-8")
+
+    assert main(["project", "init", "--project", str(project), "--name", "busy_port", "--source-kind", "Paper", "--source", "note.md"]) == 0
+    assert main(["project", "compile", "--project", str(project)]) == 0
+
+    import socket
+
+    sock = socket.socket()
+    sock.bind(("127.0.0.1", 0))
+    sock.listen(1)
+    port = sock.getsockname()[1]
+    try:
+        assert main(["project", "serve", "--project", str(project), "--host", "127.0.0.1", "--port", str(port)]) == 2
+    finally:
+        sock.close()
+
+    captured = capsys.readouterr()
+    assert "Could not serve frontend site" in captured.err
+    assert "Serving frontend site" not in captured.out
+
+
 def test_cli_project_init_ingest_and_mcp_config_from_working_directory(tmp_path, capsys):
     project = tmp_path / "demo-project"
     project.mkdir()

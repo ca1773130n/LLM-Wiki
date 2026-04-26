@@ -101,7 +101,7 @@ def render_index_html(title: str, graph: ResearchGraph, search_index: List[Dict[
     </section>
     <section class="card"><h2>Search results</h2><div id="results"></div></section>
   </main>
-  <script id="search-data" type="application/json">{html.escape(json.dumps(search_index, ensure_ascii=False))}</script>
+  <script id="search-data" type="application/json">{safe_json_for_script(search_index)}</script>
   <script>{JS}</script>
 </body>
 </html>
@@ -113,6 +113,10 @@ def render_stats(type_counts: Dict[str, int], nodes: int, edges: int) -> str:
     for key, value in sorted(type_counts.items())[:8]:
         cards.append(f"<div class='stat'><b>{value}</b><span>{html.escape(key)}</span></div>")
     return "".join(cards)
+
+
+def safe_json_for_script(payload: object) -> str:
+    return json.dumps(payload, ensure_ascii=False).replace("</", "<\\/")
 
 
 def render_node_list(nodes: List[ResearchNode]) -> str:

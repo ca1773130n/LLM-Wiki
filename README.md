@@ -1,20 +1,35 @@
-# LLM-Wiki Research Intelligence Graph
+# LLM-Wiki
 
-This project is the workspace for building a research-domain LLM wiki: an evolving literature intelligence graph for a user's fields of interest.
+LLM-Wiki builds a project-local, typed knowledge graph from research notes, documentation, and development code, then projects that graph into markdown, Obsidian, static HTML, MCP tools, agent harnesses, SQLite/Kuzu, Cognee bundles, and Graphiti-style temporal facts.
 
-The goal is **not** a generic noun-phrase knowledge graph. The graph should track:
+The goal is **not** a generic noun-phrase knowledge graph. LLM-Wiki keeps a controlled ontology so the graph can track high-value objects explicitly:
 
-- research fields/topics/problem areas
-- papers, repositories, models, datasets, benchmarks, metrics, and results
-- reusable concepts, mathematical ideas, algorithms, training/inference strategies, and technical terms
-- contribution/performance/comparison/limitation/causal claims
-- evidence spans grounding claims in source documents
-- approach families and trends across time
+- research fields/topics/problem areas;
+- papers, repositories, models, datasets, benchmarks, metrics, and results;
+- reusable concepts, mathematical ideas, algorithms, training/inference strategies, and technical terms;
+- contribution/performance/comparison/limitation/causal claims;
+- evidence spans grounding claims in source documents;
+- approach families and trends across time;
+- development-code projects, source files, classes, functions, and dependencies.
+
+Research and development code use different ontology slices, but they share the same durable pipeline:
+
+```text
+raw sources → validated graph → reproducible projections → human/agent interfaces
+```
+
+## Documentation
+
+- [Installation](docs/installation.md)
+- [Quickstart](docs/quickstart.md)
+- [Architecture](docs/architecture.md)
+- [Feature map](docs/feature-map.md)
+- [Self-dogfood demo](docs/self-dogfood.md)
+- [Publishing checklist](docs/publishing-checklist.md)
 
 ## Current implementation
 
-The first implementation is a deterministic guardrail extractor in `llm_wiki.research_graph`.
-It defines controlled node/edge vocabularies and prevents arbitrary node types such as `software`, `technique`, `domain`, or generic `Entity` from becoming graph schema.
+The baseline implementation uses deterministic guardrail extractors and optional CLI/OAuth enrichment. `llm_wiki.research_graph` defines controlled node/edge vocabularies and prevents arbitrary node types such as `software`, `technique`, `domain`, or generic `Entity` from becoming graph schema.
 
 Run tests:
 

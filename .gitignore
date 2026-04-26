@@ -7,8 +7,11 @@ output/
 __pycache__/
 *.py[cod]
 .pytest_cache/
+.venv/
+*.egg-info/
 
 # Local graph/database outputs
+.llm-wiki/
 *.sqlite
 *.kuzu/
 *.duckdb

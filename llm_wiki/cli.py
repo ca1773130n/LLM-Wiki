@@ -220,9 +220,16 @@ def project_main(argv: List[str] | None = None) -> int:
         import http.server
         import socketserver
         handler = partial(http.server.SimpleHTTPRequestHandler, directory=str(wiki.paths.site))
-        print(f"Serving frontend site: {wiki.paths.site} at {url}")
-        with socketserver.TCPServer((args.host, args.port), handler) as httpd:
-            httpd.serve_forever()
+        class ReusableTCPServer(socketserver.TCPServer):
+            allow_reuse_address = True
+
+        try:
+            with ReusableTCPServer((args.host, args.port), handler) as httpd:
+                print(f"Serving frontend site: {wiki.paths.site} at {url}")
+                httpd.serve_forever()
+        except OSError as exc:
+            print(f"Could not serve frontend site at {url}: {exc}", file=sys.stderr)
+            return 2
         return 0
     raise ValueError(f"Unknown project command: {args.command}")
 
