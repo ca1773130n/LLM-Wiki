@@ -11,6 +11,7 @@ from typing import Iterable, List
 from .batch import BatchIngestRunner
 from .canonicalization import GraphCanonicalizer, ReviewDecision
 from .cognee_adapter import CogneeResearchGraphAdapter
+from .cognee_codex import CogneeCodexPatch
 from .cognee_direct import CogneeDirectImporter
 from .llm_extractor import ClaudeCLIResearchExtractor
 from .markdown_projection import GraphMarkdownProjector
@@ -88,6 +89,10 @@ def main(argv: List[str] | None = None) -> int:
     parser.add_argument("--cognee-output", help="Write a Cognee-friendly JSONL export bundle to this directory")
     parser.add_argument("--cognee-add", action="store_true", help="Add the generated --cognee-output bundle to Cognee without running cognify")
     parser.add_argument("--cognee-cognify", action="store_true", help="After --cognee-add, run Cognee cognify for the dataset; may invoke configured LLM/embedding providers")
+    parser.add_argument("--cognee-codex-cognify", action="store_true", help="Run Cognee cognify with Cognee's LLM client patched to Codex CLI/OAuth")
+    parser.add_argument("--cognee-codex-model", default="gpt-5.4", help="Codex CLI model for --cognee-codex-cognify")
+    parser.add_argument("--cognee-codex-timeout", type=int, default=300, help="Timeout per Codex CLI structured call")
+    parser.add_argument("--cognee-local-embedding-dimensions", type=int, default=128, help="Deterministic local embedding dimensions for --cognee-codex-cognify smoke runs")
     parser.add_argument("--cognee-dataset", default="llm_wiki_research_graph", help="Cognee dataset name for --cognee-add")
     parser.add_argument("--batch-manifest", help="Track file hashes for incremental changed-only batch ingestion")
     parser.add_argument("--changed-only", action="store_true", help="When used with --batch-manifest, skip files whose content hash is unchanged")
@@ -163,7 +168,15 @@ def main(argv: List[str] | None = None) -> int:
         KuzuResearchGraphStore(Path(args.kuzu_output)).write_graph(graph, replace=True)
     if args.cognee_output:
         CogneeResearchGraphAdapter().write_bundle(graph, Path(args.cognee_output))
-        if args.cognee_add or args.cognee_cognify:
+        if args.cognee_codex_cognify:
+            with CogneeCodexPatch(
+                model=args.cognee_codex_model,
+                timeout=args.cognee_codex_timeout,
+                deterministic_embeddings=True,
+                embedding_dimensions=args.cognee_local_embedding_dimensions,
+            ):
+                asyncio.run(CogneeDirectImporter().add_bundle(Path(args.cognee_output), dataset_name=args.cognee_dataset, cognify=True))
+        elif args.cognee_add or args.cognee_cognify:
             asyncio.run(CogneeDirectImporter().add_bundle(Path(args.cognee_output), dataset_name=args.cognee_dataset, cognify=args.cognee_cognify))
     if args.report_output:
         report = GraphReporter().render_markdown(GraphReporter().summarize(graph))

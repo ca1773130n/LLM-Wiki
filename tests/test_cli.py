@@ -382,6 +382,59 @@ def test_cli_can_add_cognee_bundle_directly(monkeypatch, tmp_path):
     assert calls == [{"bundle_dir": str(cognee_output), "dataset_name": "llm_wiki_test", "cognify": False}]
 
 
+def test_cli_can_cognify_cognee_bundle_with_codex_patch(monkeypatch, tmp_path):
+    source = tmp_path / "paper.md"
+    source.write_text("# Cognee Codex Paper\nGaussian Splatting supports novel view synthesis.", encoding="utf-8")
+    graph_output = tmp_path / "graph.json"
+    cognee_output = tmp_path / "cognee"
+    calls = []
+    patches = []
+
+    class FakeCogneeDirectImporter:
+        async def add_bundle(self, bundle_dir, dataset_name="llm_wiki_research_graph", cognify=False):
+            calls.append({"bundle_dir": str(bundle_dir), "dataset_name": dataset_name, "cognify": cognify})
+            return {"dataset_name": dataset_name, "files_added": 2, "cognified": cognify}
+
+    class FakeCogneeCodexPatch:
+        def __init__(self, model="gpt-5.4", timeout=300, deterministic_embeddings=False, embedding_dimensions=128):
+            patches.append({"model": model, "timeout": timeout, "deterministic_embeddings": deterministic_embeddings, "embedding_dimensions": embedding_dimensions, "event": "init"})
+
+        def __enter__(self):
+            patches.append({"event": "enter"})
+            return self
+
+        def __exit__(self, exc_type, exc, tb):
+            patches.append({"event": "exit"})
+            return False
+
+    import llm_wiki.cli as cli
+
+    monkeypatch.setattr(cli, "CogneeDirectImporter", FakeCogneeDirectImporter)
+    monkeypatch.setattr(cli, "CogneeCodexPatch", FakeCogneeCodexPatch)
+
+    assert main([
+        str(source),
+        "--source-kind",
+        "Paper",
+        "--cognee-output",
+        str(cognee_output),
+        "--cognee-codex-cognify",
+        "--cognee-dataset",
+        "llm_wiki_codex_test",
+        "--cognee-codex-model",
+        "gpt-5.4",
+        "--cognee-codex-timeout",
+        "11",
+        "--cognee-local-embedding-dimensions",
+        "16",
+        "-o",
+        str(graph_output),
+    ]) == 0
+
+    assert calls == [{"bundle_dir": str(cognee_output), "dataset_name": "llm_wiki_codex_test", "cognify": True}]
+    assert patches == [{"model": "gpt-5.4", "timeout": 11, "deterministic_embeddings": True, "embedding_dimensions": 16, "event": "init"}, {"event": "enter"}, {"event": "exit"}]
+
+
 def test_cli_changed_only_uses_batch_manifest(tmp_path):
     source = tmp_path / "paper.md"
     source.write_text("# Batch Paper\nGaussian Splatting supports novel view synthesis.", encoding="utf-8")

@@ -155,6 +155,21 @@ python3 -m llm_wiki.cli data/research/daily/2026-04-26/papers/2601.17835/paper.m
 
 `--cognee-cognify` is available, but it may invoke configured LLM/embedding providers, so the default direct path is add-only.
 
+Run Cognee `cognify` through Codex CLI/OAuth instead of API-key LLM calls. This runtime-patches Cognee's LLM client to call `codex exec` via stdin and uses deterministic local embeddings for no-API-key smoke runs:
+
+```bash
+python3 -m llm_wiki.cli data/research/daily/2026-04-26/papers/2601.17835/paper.md \
+  --source-kind Paper \
+  --cognee-output output/cognee_codex_cognify_smoke_bundle \
+  --cognee-codex-cognify \
+  --cognee-codex-model gpt-5.4 \
+  --cognee-codex-timeout 180 \
+  --cognee-local-embedding-dimensions 128 \
+  --cognee-dataset llm_wiki_codex_cognify_smoke \
+  -o output/cognee_codex_cognify_smoke_graph.json
+```
+
+For production retrieval quality, replace deterministic embeddings with a real local embedding provider such as Ollama/nomic once the local embedding server is running.
 
 Run a full deterministic corpus ingest without `--limit`:
 
