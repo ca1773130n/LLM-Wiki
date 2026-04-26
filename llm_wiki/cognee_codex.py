@@ -8,12 +8,15 @@ import importlib
 import json
 import os
 import tempfile
+import urllib.error
+import urllib.request
 from pathlib import Path
-from typing import Awaitable, Callable, Dict, Optional, Type
+from typing import Awaitable, Callable, Dict, List, Optional, Type
 
 from pydantic import BaseModel
 
 CodexRunner = Callable[[str, str, int], Awaitable[str]]
+OllamaEmbedder = Callable[[List[str], str, str, int], Awaitable[List[List[float]]]]
 
 COGNEE_LLM_IMPORT_MODULES = [
     "cognee.modules.data.extraction.extract_categories",
@@ -203,6 +206,69 @@ class DeterministicEmbeddingEngine:
         return values
 
 
+class OllamaEmbeddingEngine:
+    """Cognee-compatible embedding engine backed by Ollama `/api/embed`.
+
+    Use Qwen3 embedding models for real no-API-key retrieval quality. Queries are
+    instruction-prefixed because Qwen3 Embedding is instruction-aware; documents
+    are embedded as-is, matching Qwen's retrieval guidance.
+    """
+
+    DEFAULT_QUERY_INSTRUCTION = "Given a research intelligence query, retrieve relevant papers, claims, evidence spans, methods, datasets, benchmarks, and technical concepts."
+
+    def __init__(
+        self,
+        model: str = "qwen3-embedding:0.6b",
+        dimensions: int = 1024,
+        endpoint: str = "http://127.0.0.1:11434/api/embed",
+        timeout: int = 120,
+        query_instruction: str = DEFAULT_QUERY_INSTRUCTION,
+        embedder: Optional[OllamaEmbedder] = None,
+    ) -> None:
+        self.model = model
+        self.dimensions = dimensions
+        self.endpoint = endpoint
+        self.timeout = timeout
+        self.query_instruction = query_instruction
+        self.embedder = embedder or ollama_embed
+
+    async def embed_text(self, text):
+        return await self.embedder(list(text), self.model, self.endpoint, self.timeout)
+
+    async def embed_query(self, query: str):
+        instructed = f"Instruct: {self.query_instruction}\nQuery: {query}"
+        return await self.embed_text([instructed])
+
+    def get_vector_size(self) -> int:
+        return self.dimensions
+
+
+async def ollama_embed(texts: List[str], model: str, endpoint: str, timeout: int) -> List[List[float]]:
+    return await asyncio.to_thread(_ollama_embed_sync, texts, model, endpoint, timeout)
+
+
+def _ollama_embed_sync(texts: List[str], model: str, endpoint: str, timeout: int) -> List[List[float]]:
+    payload = json.dumps({"model": model, "input": texts}).encode("utf-8")
+    request = urllib.request.Request(
+        endpoint,
+        data=payload,
+        headers={"Content-Type": "application/json"},
+        method="POST",
+    )
+    try:
+        with urllib.request.urlopen(request, timeout=timeout) as response:
+            raw = response.read().decode("utf-8", errors="replace")
+    except urllib.error.URLError as exc:
+        raise RuntimeError(f"Ollama embedding request failed for {model} at {endpoint}: {exc}") from exc
+    parsed = json.loads(raw)
+    embeddings = parsed.get("embeddings")
+    if embeddings is None and "embedding" in parsed:
+        embeddings = [parsed["embedding"]]
+    if not isinstance(embeddings, list):
+        raise RuntimeError(f"Ollama response did not contain embeddings: {raw[:500]}")
+    return embeddings
+
+
 async def retrieve_existing_edges_uuid_safe(data_chunks, chunk_graphs, graph_engine) -> Dict[str, bool]:
     """Cognee 0.1.20-compatible retrieve_existing_edges that stringifies UUIDs.
 
@@ -257,11 +323,15 @@ async def retrieve_existing_edges_uuid_safe(data_chunks, chunk_graphs, graph_eng
 class CogneeCodexPatch:
     """Runtime patch Cognee's get_llm_client() to return CodexCLICogneeAdapter."""
 
-    def __init__(self, model: str = "gpt-5.4", timeout: int = 300, runner: Optional[CodexRunner] = None, deterministic_embeddings: bool = False, embedding_dimensions: int = 128) -> None:
+    def __init__(self, model: str = "gpt-5.4", timeout: int = 300, runner: Optional[CodexRunner] = None, deterministic_embeddings: bool = False, ollama_embeddings: bool = False, ollama_model: str = "qwen3-embedding:0.6b", ollama_endpoint: str = "http://127.0.0.1:11434/api/embed", ollama_timeout: int = 120, embedding_dimensions: int = 128) -> None:
         self.model = model
         self.timeout = timeout
         self.runner = runner
         self.deterministic_embeddings = deterministic_embeddings
+        self.ollama_embeddings = ollama_embeddings
+        self.ollama_model = ollama_model
+        self.ollama_endpoint = ollama_endpoint
+        self.ollama_timeout = ollama_timeout
         self.embedding_dimensions = embedding_dimensions
         self._module = None
         self._original = None
@@ -290,11 +360,18 @@ class CogneeCodexPatch:
             if hasattr(module, "get_llm_client"):
                 self._patched_llm_refs.append((module, module.get_llm_client))
                 module.get_llm_client = patched_get_llm_client
-        if self.deterministic_embeddings:
+        if self.deterministic_embeddings or self.ollama_embeddings:
             self._embedding_module = importlib.import_module("cognee.infrastructure.databases.vector.embeddings.get_embedding_engine")
             self._original_embedding = self._embedding_module.get_embedding_engine
 
             def patched_get_embedding_engine():
+                if self.ollama_embeddings:
+                    return OllamaEmbeddingEngine(
+                        model=self.ollama_model,
+                        dimensions=self.embedding_dimensions,
+                        endpoint=self.ollama_endpoint,
+                        timeout=self.ollama_timeout,
+                    )
                 return DeterministicEmbeddingEngine(dimensions=self.embedding_dimensions)
 
             self._embedding_module.get_embedding_engine = patched_get_embedding_engine

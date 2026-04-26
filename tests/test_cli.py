@@ -358,8 +358,8 @@ def test_cli_can_add_cognee_bundle_directly(monkeypatch, tmp_path):
     calls = []
 
     class FakeCogneeDirectImporter:
-        async def add_bundle(self, bundle_dir, dataset_name="llm_wiki_research_graph", cognify=False):
-            calls.append({"bundle_dir": str(bundle_dir), "dataset_name": dataset_name, "cognify": cognify})
+        async def add_bundle(self, bundle_dir, dataset_name="llm_wiki_research_graph", cognify=False, system_root=None, data_root=None):
+            calls.append({"bundle_dir": str(bundle_dir), "dataset_name": dataset_name, "cognify": cognify, "system_root": system_root, "data_root": data_root})
             return {"dataset_name": dataset_name, "files_added": 2, "cognified": cognify}
 
     import llm_wiki.cli as cli
@@ -379,7 +379,7 @@ def test_cli_can_add_cognee_bundle_directly(monkeypatch, tmp_path):
         str(graph_output),
     ]) == 0
 
-    assert calls == [{"bundle_dir": str(cognee_output), "dataset_name": "llm_wiki_test", "cognify": False}]
+    assert calls == [{"bundle_dir": str(cognee_output), "dataset_name": "llm_wiki_test", "cognify": False, "system_root": None, "data_root": None}]
 
 
 def test_cli_can_cognify_cognee_bundle_with_codex_patch(monkeypatch, tmp_path):
@@ -391,13 +391,13 @@ def test_cli_can_cognify_cognee_bundle_with_codex_patch(monkeypatch, tmp_path):
     patches = []
 
     class FakeCogneeDirectImporter:
-        async def add_bundle(self, bundle_dir, dataset_name="llm_wiki_research_graph", cognify=False):
-            calls.append({"bundle_dir": str(bundle_dir), "dataset_name": dataset_name, "cognify": cognify})
+        async def add_bundle(self, bundle_dir, dataset_name="llm_wiki_research_graph", cognify=False, system_root=None, data_root=None):
+            calls.append({"bundle_dir": str(bundle_dir), "dataset_name": dataset_name, "cognify": cognify, "system_root": str(system_root) if system_root else None, "data_root": str(data_root) if data_root else None})
             return {"dataset_name": dataset_name, "files_added": 2, "cognified": cognify}
 
     class FakeCogneeCodexPatch:
-        def __init__(self, model="gpt-5.4", timeout=300, deterministic_embeddings=False, embedding_dimensions=128):
-            patches.append({"model": model, "timeout": timeout, "deterministic_embeddings": deterministic_embeddings, "embedding_dimensions": embedding_dimensions, "event": "init"})
+        def __init__(self, model="gpt-5.4", timeout=300, deterministic_embeddings=False, ollama_embeddings=False, ollama_model="qwen3-embedding:0.6b", ollama_endpoint="http://127.0.0.1:11434/api/embed", ollama_timeout=120, embedding_dimensions=128):
+            patches.append({"model": model, "timeout": timeout, "deterministic_embeddings": deterministic_embeddings, "ollama_embeddings": ollama_embeddings, "ollama_model": ollama_model, "ollama_endpoint": ollama_endpoint, "ollama_timeout": ollama_timeout, "embedding_dimensions": embedding_dimensions, "event": "init"})
 
         def __enter__(self):
             patches.append({"event": "enter"})
@@ -426,13 +426,23 @@ def test_cli_can_cognify_cognee_bundle_with_codex_patch(monkeypatch, tmp_path):
         "--cognee-codex-timeout",
         "11",
         "--cognee-local-embedding-dimensions",
-        "16",
+        "1024",
+        "--cognee-embedding-provider",
+        "ollama",
+        "--cognee-ollama-embedding-model",
+        "qwen3-embedding:0.6b",
+        "--cognee-ollama-embedding-timeout",
+        "44",
+        "--cognee-system-root",
+        str(tmp_path / "cognee_system"),
+        "--cognee-data-root",
+        str(tmp_path / "cognee_data"),
         "-o",
         str(graph_output),
     ]) == 0
 
-    assert calls == [{"bundle_dir": str(cognee_output), "dataset_name": "llm_wiki_codex_test", "cognify": True}]
-    assert patches == [{"model": "gpt-5.4", "timeout": 11, "deterministic_embeddings": True, "embedding_dimensions": 16, "event": "init"}, {"event": "enter"}, {"event": "exit"}]
+    assert calls == [{"bundle_dir": str(cognee_output), "dataset_name": "llm_wiki_codex_test", "cognify": True, "system_root": str(tmp_path / "cognee_system"), "data_root": str(tmp_path / "cognee_data")}]
+    assert patches == [{"model": "gpt-5.4", "timeout": 11, "deterministic_embeddings": False, "ollama_embeddings": True, "ollama_model": "qwen3-embedding:0.6b", "ollama_endpoint": "http://127.0.0.1:11434/api/embed", "ollama_timeout": 44, "embedding_dimensions": 1024, "event": "init"}, {"event": "enter"}, {"event": "exit"}]
 
 
 def test_cli_changed_only_uses_batch_manifest(tmp_path):

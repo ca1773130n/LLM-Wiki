@@ -8,6 +8,7 @@ from llm_wiki.cognee_codex import (
     CodexCLICogneeAdapter,
     CogneeCodexPatch,
     DeterministicEmbeddingEngine,
+    OllamaEmbeddingEngine,
     extract_json_object,
     build_structured_prompt,
     ensure_event_loop,
@@ -93,6 +94,54 @@ def test_retrieve_existing_edges_uuid_safe_stringifies_uuid_edges():
     assert len(result) == 1
     assert next(iter(result.values())) is True
     assert isinstance(next(iter(result.keys())), str)
+
+
+def test_ollama_embedding_engine_formats_instructed_queries_and_documents():
+    calls = []
+
+    async def fake_embed(texts, model, endpoint, timeout):
+        calls.append({"texts": texts, "model": model, "endpoint": endpoint, "timeout": timeout})
+        return [[float(index), float(index + 1), float(index + 2)] for index, _ in enumerate(texts)]
+
+    engine = OllamaEmbeddingEngine(
+        model="qwen3-embedding:0.6b",
+        dimensions=3,
+        endpoint="http://ollama.test/api/embed",
+        timeout=11,
+        embedder=fake_embed,
+    )
+
+    query = asyncio.run(engine.embed_query("Gaussian Splatting limitations"))
+    docs = asyncio.run(engine.embed_text(["paper passage", "claim evidence"]))
+
+    assert query == [[0.0, 1.0, 2.0]]
+    assert docs == [[0.0, 1.0, 2.0], [1.0, 2.0, 3.0]]
+    assert calls[0]["model"] == "qwen3-embedding:0.6b"
+    assert calls[0]["endpoint"] == "http://ollama.test/api/embed"
+    assert calls[0]["timeout"] == 11
+    assert calls[0]["texts"] == ["Instruct: Given a research intelligence query, retrieve relevant papers, claims, evidence spans, methods, datasets, benchmarks, and technical concepts.\nQuery: Gaussian Splatting limitations"]
+    assert calls[1]["texts"] == ["paper passage", "claim evidence"]
+    assert engine.get_vector_size() == 3
+
+
+def test_cognee_codex_patch_can_use_ollama_embedding_engine(monkeypatch):
+    ensure_event_loop()
+    import cognee.infrastructure.llm.get_llm_client as llm_module
+    embed_module = importlib.import_module("cognee.infrastructure.databases.vector.embeddings.get_embedding_engine")
+
+    original = object()
+    original_embedding = object()
+    monkeypatch.setattr(llm_module, "get_llm_client", lambda: original)
+    monkeypatch.setattr(embed_module, "get_embedding_engine", lambda: original_embedding)
+
+    with CogneeCodexPatch(model="gpt-5.4", ollama_embeddings=True, ollama_model="qwen3-embedding:0.6b", embedding_dimensions=1024):
+        embedding = embed_module.get_embedding_engine()
+        assert isinstance(embedding, OllamaEmbeddingEngine)
+        assert embedding.model == "qwen3-embedding:0.6b"
+        assert embedding.get_vector_size() == 1024
+
+    assert llm_module.get_llm_client() is original
+    assert embed_module.get_embedding_engine() is original_embedding
 
 
 def test_deterministic_embedding_engine_is_stable_and_sized():

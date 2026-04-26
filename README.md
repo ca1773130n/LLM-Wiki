@@ -155,21 +155,27 @@ python3 -m llm_wiki.cli data/research/daily/2026-04-26/papers/2601.17835/paper.m
 
 `--cognee-cognify` is available, but it may invoke configured LLM/embedding providers, so the default direct path is add-only.
 
-Run Cognee `cognify` through Codex CLI/OAuth instead of API-key LLM calls. This runtime-patches Cognee's LLM client to call `codex exec` via stdin and uses deterministic local embeddings for no-API-key smoke runs:
+Run Cognee `cognify` through Codex CLI/OAuth instead of API-key LLM calls. This runtime-patches Cognee's LLM client to call `codex exec` via stdin. For smoke-only runs you can use deterministic local embeddings, but for real no-API-key retrieval quality prefer Ollama `qwen3-embedding:0.6b`:
 
 ```bash
+ollama serve
+ollama pull qwen3-embedding:0.6b
 python3 -m llm_wiki.cli data/research/daily/2026-04-26/papers/2601.17835/paper.md \
   --source-kind Paper \
-  --cognee-output output/cognee_codex_cognify_smoke_bundle \
+  --cognee-output output/cognee_qwen_embedding_sample_bundle \
   --cognee-codex-cognify \
   --cognee-codex-model gpt-5.4 \
-  --cognee-codex-timeout 180 \
-  --cognee-local-embedding-dimensions 128 \
-  --cognee-dataset llm_wiki_codex_cognify_smoke \
-  -o output/cognee_codex_cognify_smoke_graph.json
+  --cognee-codex-timeout 300 \
+  --cognee-embedding-provider ollama \
+  --cognee-ollama-embedding-model qwen3-embedding:0.6b \
+  --cognee-local-embedding-dimensions 1024 \
+  --cognee-system-root output/cognee_qwen_embedding_sample_system \
+  --cognee-data-root output/cognee_qwen_embedding_sample_data \
+  --cognee-dataset llm_wiki_qwen_embedding_sample \
+  -o output/cognee_qwen_embedding_sample_graph.json
 ```
 
-For production retrieval quality, replace deterministic embeddings with a real local embedding provider such as Ollama/nomic once the local embedding server is running.
+Important: keep `--cognee-system-root` isolated when changing embedding dimensions. Previous deterministic runs create 128-dim LanceDB tables; Qwen3 embeddings are 1024-dim, so reusing the same Cognee system root causes LanceDB/Arrow dimension errors.
 
 Run a full deterministic corpus ingest without `--limit`:
 

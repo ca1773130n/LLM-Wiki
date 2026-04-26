@@ -92,8 +92,14 @@ def main(argv: List[str] | None = None) -> int:
     parser.add_argument("--cognee-codex-cognify", action="store_true", help="Run Cognee cognify with Cognee's LLM client patched to Codex CLI/OAuth")
     parser.add_argument("--cognee-codex-model", default="gpt-5.4", help="Codex CLI model for --cognee-codex-cognify")
     parser.add_argument("--cognee-codex-timeout", type=int, default=300, help="Timeout per Codex CLI structured call")
-    parser.add_argument("--cognee-local-embedding-dimensions", type=int, default=128, help="Deterministic local embedding dimensions for --cognee-codex-cognify smoke runs")
+    parser.add_argument("--cognee-local-embedding-dimensions", type=int, default=128, help="Embedding dimensions for --cognee-codex-cognify; qwen3-embedding:0.6b uses 1024")
+    parser.add_argument("--cognee-embedding-provider", choices=["deterministic", "ollama"], default="deterministic", help="Embedding provider for --cognee-codex-cognify")
+    parser.add_argument("--cognee-ollama-embedding-model", default="qwen3-embedding:0.6b", help="Ollama embedding model for --cognee-embedding-provider ollama")
+    parser.add_argument("--cognee-ollama-embedding-endpoint", default="http://127.0.0.1:11434/api/embed", help="Ollama /api/embed endpoint for Cognee embeddings")
+    parser.add_argument("--cognee-ollama-embedding-timeout", type=int, default=120, help="Ollama embedding request timeout in seconds")
     parser.add_argument("--cognee-dataset", default="llm_wiki_research_graph", help="Cognee dataset name for --cognee-add")
+    parser.add_argument("--cognee-system-root", help="Optional isolated Cognee system root directory, useful when changing vector dimensions")
+    parser.add_argument("--cognee-data-root", help="Optional isolated Cognee data root directory")
     parser.add_argument("--batch-manifest", help="Track file hashes for incremental changed-only batch ingestion")
     parser.add_argument("--changed-only", action="store_true", help="When used with --batch-manifest, skip files whose content hash is unchanged")
     parser.add_argument("--limit", type=int, help="Maximum number of files to process in this run")
@@ -172,12 +178,28 @@ def main(argv: List[str] | None = None) -> int:
             with CogneeCodexPatch(
                 model=args.cognee_codex_model,
                 timeout=args.cognee_codex_timeout,
-                deterministic_embeddings=True,
+                deterministic_embeddings=args.cognee_embedding_provider == "deterministic",
+                ollama_embeddings=args.cognee_embedding_provider == "ollama",
+                ollama_model=args.cognee_ollama_embedding_model,
+                ollama_endpoint=args.cognee_ollama_embedding_endpoint,
+                ollama_timeout=args.cognee_ollama_embedding_timeout,
                 embedding_dimensions=args.cognee_local_embedding_dimensions,
             ):
-                asyncio.run(CogneeDirectImporter().add_bundle(Path(args.cognee_output), dataset_name=args.cognee_dataset, cognify=True))
+                asyncio.run(CogneeDirectImporter().add_bundle(
+                    Path(args.cognee_output),
+                    dataset_name=args.cognee_dataset,
+                    cognify=True,
+                    system_root=args.cognee_system_root,
+                    data_root=args.cognee_data_root,
+                ))
         elif args.cognee_add or args.cognee_cognify:
-            asyncio.run(CogneeDirectImporter().add_bundle(Path(args.cognee_output), dataset_name=args.cognee_dataset, cognify=args.cognee_cognify))
+            asyncio.run(CogneeDirectImporter().add_bundle(
+                Path(args.cognee_output),
+                dataset_name=args.cognee_dataset,
+                cognify=args.cognee_cognify,
+                system_root=args.cognee_system_root,
+                data_root=args.cognee_data_root,
+            ))
     if args.report_output:
         report = GraphReporter().render_markdown(GraphReporter().summarize(graph))
         Path(args.report_output).parent.mkdir(parents=True, exist_ok=True)
