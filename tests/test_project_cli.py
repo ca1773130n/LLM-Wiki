@@ -152,6 +152,39 @@ def test_cli_project_export_agent_harness_and_obsidian(tmp_path, capsys):
     assert (project / ".llm-wiki" / "obsidian_vault" / "_meta" / "dashboard.md").exists()
 
 
+def test_project_compile_includes_code_graph_and_frontend_site_for_repository(tmp_path):
+    project = tmp_path / "code-project"
+    project.mkdir()
+    src = project / "src"
+    src.mkdir()
+    (src / "app.py").write_text("import os\n\ndef main():\n    return os.getcwd()\n", encoding="utf-8")
+    wiki = ProjectWiki.init(project, name="code_wiki", source_kind="CodeProject", sources=["src"])
+
+    result = wiki.compile()
+
+    assert result["site_path"] == str(project / ".llm-wiki" / "site")
+    graph = json.loads((project / ".llm-wiki" / "graph.json").read_text(encoding="utf-8"))
+    types = {node["type"] for node in graph["nodes"]}
+    assert {"CodeProject", "SourceFile", "CodeFunction", "Dependency"}.issubset(types)
+    assert (project / ".llm-wiki" / "site" / "index.html").exists()
+    assert (project / ".llm-wiki" / "site" / "search-index.json").exists()
+
+
+def test_cli_project_build_site_and_serve_smoke(tmp_path, capsys):
+    project = tmp_path / "site-project"
+    project.mkdir()
+    (project / "note.md").write_text("# Site Note\nGaussian Splatting supports novel view synthesis.", encoding="utf-8")
+
+    assert main(["project", "init", "--project", str(project), "--name", "site_wiki", "--source-kind", "Paper", "--source", "note.md"]) == 0
+    assert main(["project", "compile", "--project", str(project)]) == 0
+    assert main(["project", "build-site", "--project", str(project)]) == 0
+    assert main(["project", "serve", "--project", str(project), "--dry-run"]) == 0
+
+    captured = capsys.readouterr().out
+    assert "Built frontend site" in captured
+    assert "Frontend site ready" in captured
+
+
 def test_cli_project_init_ingest_and_mcp_config_from_working_directory(tmp_path, capsys):
     project = tmp_path / "demo-project"
     project.mkdir()

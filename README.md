@@ -54,6 +54,7 @@ This creates project-local artifacts under `.llm-wiki/`:
   markdown_projection/
   obsidian_vault/
   agent_harness/
+  site/
   cognee_bundle/
 ```
 
@@ -63,6 +64,7 @@ Competitive hardening versus MegaMem/Graphiti-style systems:
 - `graphiti_episodes.jsonl` exports those temporal facts as Graphiti-compatible episodes without requiring Graphiti at compile time; `project sync-graphiti` can optionally push them to Graphiti/Neo4j when `graphiti_core` is installed.
 - `obsidian_vault/` is a ready-to-open Obsidian projection with `.obsidian` defaults, graph coloring, attachments under `raw/assets`, and a Dataview dashboard.
 - `agent_harness/` writes shared context and target-specific harness files for Claude Code, Codex, Gemini CLI, Kiro, Cursor, and OpenCode so external coding agents can discover the graph and MCP server.
+- `site/` is a dependency-light static frontend inspired by Pratiyush/llm-wiki: it writes `index.html`, `graph.json`, `search-index.json`, and `llms.txt` so humans and agents can browse research and development nodes together.
 - `competitive_report.md` records what was absorbed from MegaMem, Graphiti/Zep, MCP graph servers, and agentic RAG systems while preserving LLM-Wiki's controlled ontology/no-API-key differentiators.
 - MCP now exposes temporal tools as well as node tools: `search_facts` and `timeline` join `schema`, `graph_summary`, `search_nodes`, and `node_context`.
 
@@ -113,6 +115,29 @@ The agent harness currently emits:
 - Kiro: `kiro/.kiro/steering/llm-wiki.md`, `kiro/.kiro/settings/mcp.json`
 - Cursor: `cursor/.cursor/rules/llm-wiki.mdc`, `cursor/.cursor/mcp.json`
 - OpenCode: `opencode/AGENTS.md`, `opencode/opencode.json`
+
+Build and serve the local frontend:
+
+```bash
+python3 -m llm_wiki.cli project build-site \
+  --project /path/to/my-project
+python3 -m llm_wiki.cli project serve \
+  --project /path/to/my-project \
+  --port 8765
+```
+
+For development projects, initialize with `--source-kind CodeProject` or `Repository` and include code directories. Code files become graph nodes (`CodeProject`, `SourceFile`, `CodeClass`, `CodeFunction`, `Dependency`) alongside research nodes, while source files remain raw evidence and generated markdown/site outputs remain projections:
+
+```bash
+python3 -m llm_wiki.cli project init \
+  --project /path/to/my-app \
+  --name my_app_wiki \
+  --source-kind CodeProject \
+  --source README.md \
+  --source docs \
+  --source src
+python3 -m llm_wiki.cli project compile --project /path/to/my-app
+```
 
 Optional graph/storage packages currently used by the local environment:
 

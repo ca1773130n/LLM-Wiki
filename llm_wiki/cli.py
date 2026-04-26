@@ -120,6 +120,16 @@ def project_main(argv: List[str] | None = None) -> int:
     obsidian_parser.add_argument("--project", default=".", help="Project root directory; defaults to current working directory")
     obsidian_parser.add_argument("--vault", help="Vault output directory; defaults to .llm-wiki/obsidian_vault")
 
+    site_parser = subparsers.add_parser("build-site", help="Build the static frontend site for this project wiki")
+    site_parser.add_argument("--project", default=".", help="Project root directory; defaults to current working directory")
+    site_parser.add_argument("--output", help="Site output directory; defaults to .llm-wiki/site")
+
+    serve_parser = subparsers.add_parser("serve", help="Serve the static frontend site")
+    serve_parser.add_argument("--project", default=".", help="Project root directory; defaults to current working directory")
+    serve_parser.add_argument("--host", default="127.0.0.1", help="Host to bind")
+    serve_parser.add_argument("--port", type=int, default=8765, help="Port to bind")
+    serve_parser.add_argument("--dry-run", action="store_true", help="Print the site URL without starting a server")
+
     args = parser.parse_args(argv)
     if args.command == "init":
         wiki = ProjectWiki.init(args.project, name=args.name, source_kind=args.source_kind, sources=args.source)
@@ -194,6 +204,25 @@ def project_main(argv: List[str] | None = None) -> int:
         wiki = ProjectWiki.load(args.project)
         result = wiki.export_obsidian(vault=args.vault)
         print(f"Exported Obsidian vault: notes={result['notes']} path={result['vault_path']}")
+        return 0
+    if args.command == "build-site":
+        wiki = ProjectWiki.load(args.project)
+        result = wiki.build_site(output=args.output)
+        print(f"Built frontend site: nodes={result['nodes']} edges={result['edges']} path={result['site_path']}")
+        return 0
+    if args.command == "serve":
+        wiki = ProjectWiki.load(args.project)
+        url = f"http://{args.host}:{args.port}/"
+        if args.dry_run:
+            print(f"Frontend site ready: {wiki.paths.site} at {url}")
+            return 0
+        from functools import partial
+        import http.server
+        import socketserver
+        handler = partial(http.server.SimpleHTTPRequestHandler, directory=str(wiki.paths.site))
+        print(f"Serving frontend site: {wiki.paths.site} at {url}")
+        with socketserver.TCPServer((args.host, args.port), handler) as httpd:
+            httpd.serve_forever()
         return 0
     raise ValueError(f"Unknown project command: {args.command}")
 

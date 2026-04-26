@@ -36,6 +36,12 @@ class ResearchNodeType(str, Enum):
     RESULT = "Result"
     ORGANIZATION = "Organization"
     PERSON = "Person"
+    CODE_PROJECT = "CodeProject"
+    SOURCE_FILE = "SourceFile"
+    CODE_MODULE = "CodeModule"
+    CODE_CLASS = "CodeClass"
+    CODE_FUNCTION = "CodeFunction"
+    DEPENDENCY = "Dependency"
 
     # Concept layer
     CONCEPT = "Concept"
@@ -96,6 +102,11 @@ ALLOWED_EDGE_TYPES: Set[str] = {
     "rising_in",
     "declining_in",
     "emerged_after",
+    "contains",
+    "defines",
+    "imports",
+    "calls",
+    "documents",
 }
 
 
@@ -575,7 +586,7 @@ def normalize_display_name(name: str) -> str:
     if not text:
         return "Unnamed"
     # Preserve common all-caps acronyms; otherwise title-case only all-lower labels.
-    if text.islower():
+    if text.islower() and " " in text and re.fullmatch(r"[a-z0-9 ]+", text):
         return text.title()
     return text
 

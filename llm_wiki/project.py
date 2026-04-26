@@ -15,7 +15,9 @@ from typing import Iterable, List, Optional
 
 from .agent_harness import AgentHarnessAdapter, SUPPORTED_AGENT_HARNESSES
 from .batch import BatchIngestRunner
+from .code_graph import CodeGraphExtractor
 from .cognee_adapter import CogneeResearchGraphAdapter
+from .frontend import StaticSiteBuilder
 from .graphiti_adapter import GraphitiResearchGraphAdapter
 from .markdown_projection import GraphMarkdownProjector
 from .obsidian_adapter import ObsidianVaultAdapter
@@ -40,6 +42,7 @@ class ProjectPaths:
     graphiti_episodes: Path
     agent_harness: Path
     obsidian_vault: Path
+    site: Path
 
 
 class ProjectWiki:
@@ -62,6 +65,7 @@ class ProjectWiki:
             graphiti_episodes=self.root / "graphiti_episodes.jsonl",
             agent_harness=self.root / "agent_harness",
             obsidian_vault=self.root / "obsidian_vault",
+            site=self.root / "site",
         )
 
     @classmethod
@@ -72,6 +76,7 @@ class ProjectWiki:
         wiki.paths.cognee_bundle.mkdir(parents=True, exist_ok=True)
         wiki.paths.agent_harness.mkdir(parents=True, exist_ok=True)
         wiki.paths.obsidian_vault.mkdir(parents=True, exist_ok=True)
+        wiki.paths.site.mkdir(parents=True, exist_ok=True)
         if not wiki.paths.graph.exists():
             wiki.paths.graph.write_text(ResearchGraph().to_json(indent=2) + "\n", encoding="utf-8")
         if not wiki.paths.manifest.exists():
@@ -93,6 +98,7 @@ class ProjectWiki:
             "graphiti_episodes_path": ".llm-wiki/graphiti_episodes.jsonl",
             "agent_harness_path": ".llm-wiki/agent_harness",
             "obsidian_vault_path": ".llm-wiki/obsidian_vault",
+            "site_path": ".llm-wiki/site",
         }
         wiki.paths.config.write_text(json.dumps(config, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
         return wiki
@@ -119,10 +125,12 @@ class ProjectWiki:
         cfg = self.config()
         kind = source_kind or cfg.get("source_kind", "SourceDocument")
         input_paths = [resolve_project_input(self.project_root, item) for item in inputs]
+        extractor = ResearchGraphExtractor()
         markdown_files: List[Path] = []
+        code_inputs: List[Path] = []
         for input_path in input_paths:
             markdown_files.extend(iter_markdown_files(input_path))
-        extractor = ResearchGraphExtractor()
+            code_inputs.append(input_path)
         batch = BatchIngestRunner(extractor=extractor, manifest_path=self.paths.manifest).run(
             markdown_files,
             source_kind=kind,
@@ -131,7 +139,10 @@ class ProjectWiki:
         )
         graphs = batch.graphs or [batch.graph]
         graph = ResearchCorpusAnalyzer().summarize_trends(graphs, min_sources=min_trend_sources) if trends else batch.graph
-        if changed_only and batch.processed == 0 and self.paths.graph.exists():
+        if kind in {"CodeProject", "Repository", "Project"}:
+            code_graph = CodeGraphExtractor(self.project_root).extract_paths(code_inputs)
+            graph = merge_graphs([graph, code_graph])
+        if changed_only and batch.processed == 0 and self.paths.graph.exists() and not graph.nodes:
             graph = load_graph_file(self.paths.graph)
         self._write_artifacts(graph)
         return {
@@ -146,6 +157,7 @@ class ProjectWiki:
             "graphiti_episodes_path": str(self.paths.graphiti_episodes),
             "agent_harness_path": str(self.paths.agent_harness),
             "obsidian_vault_path": str(self.paths.obsidian_vault),
+            "site_path": str(self.paths.site),
             "mcp_server_name": cfg.get("name", sanitize_server_name(self.project_root.name)),
         }
 
@@ -215,6 +227,13 @@ class ProjectWiki:
         name = cfg.get("name") or sanitize_server_name(self.project_root.name)
         return ObsidianVaultAdapter(vault_name=name).write_vault(graph, target)
 
+    def build_site(self, output: Optional[str | Path] = None) -> dict:
+        cfg = self.config()
+        graph = load_graph_file(self.paths.graph)
+        target = Path(output) if output else self.paths.site
+        name = cfg.get("name") or sanitize_server_name(self.project_root.name)
+        return StaticSiteBuilder(site_title=name).write_site(graph, target)
+
     def sync_graphiti(
         self,
         neo4j_uri: Optional[str] = None,
@@ -246,7 +265,19 @@ class ProjectWiki:
         self.export_graphiti()
         self.export_agent_harness()
         self.export_obsidian()
+        self.build_site()
         self.paths.competitive_report.write_text(render_competitive_report(), encoding="utf-8")
+
+
+def merge_graphs(graphs: Iterable[ResearchGraph]) -> ResearchGraph:
+    nodes = {}
+    edges = {}
+    for graph in graphs:
+        for node in graph.nodes:
+            nodes.setdefault(node.id, node)
+        for edge in graph.edges:
+            edges[(edge.source, edge.type, edge.target)] = edge
+    return ResearchGraph(nodes=list(nodes.values()), edges=list(edges.values()))
 
 
 def load_graph_file(path: str | Path) -> ResearchGraph:
