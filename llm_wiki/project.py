@@ -18,7 +18,7 @@ from .cognee_adapter import CogneeResearchGraphAdapter
 from .markdown_projection import GraphMarkdownProjector
 from .persistence import SQLiteResearchGraphStore
 from .report import GraphReporter
-from .research_graph import ResearchCorpusAnalyzer, ResearchGraph, ResearchGraphExtractor
+from .research_graph import ResearchCorpusAnalyzer, ResearchEdge, ResearchGraph, ResearchGraphExtractor, ResearchNode, ResearchNodeType
 
 
 @dataclass(frozen=True)
@@ -51,7 +51,7 @@ class ProjectWiki:
         )
 
     @classmethod
-    def init(cls, project_root: str | Path = ".", name: Optional[str] = None, source_kind: str = "SourceDocument") -> "ProjectWiki":
+    def init(cls, project_root: str | Path = ".", name: Optional[str] = None, source_kind: str = "SourceDocument", sources: Optional[Iterable[str | Path]] = None) -> "ProjectWiki":
         wiki = cls(project_root)
         wiki.root.mkdir(parents=True, exist_ok=True)
         wiki.paths.markdown_projection.mkdir(parents=True, exist_ok=True)
@@ -65,6 +65,7 @@ class ProjectWiki:
             "project_root": str(wiki.project_root),
             "created": date.today().isoformat(),
             "source_kind": source_kind,
+            "sources": [str(source) for source in (sources or [])],
             "graph_path": ".llm-wiki/graph.json",
             "manifest_path": ".llm-wiki/manifest.json",
             "sqlite_path": ".llm-wiki/sqlite.db",
@@ -109,6 +110,8 @@ class ProjectWiki:
         )
         graphs = batch.graphs or [batch.graph]
         graph = ResearchCorpusAnalyzer().summarize_trends(graphs, min_sources=min_trend_sources) if trends else batch.graph
+        if changed_only and batch.processed == 0 and self.paths.graph.exists():
+            graph = load_graph_file(self.paths.graph)
         self._write_artifacts(graph)
         return {
             "project_root": str(self.project_root),
@@ -121,6 +124,25 @@ class ProjectWiki:
             "graph_path": str(self.paths.graph),
             "mcp_server_name": cfg.get("name", sanitize_server_name(self.project_root.name)),
         }
+
+    def compile(
+        self,
+        source_kind: Optional[str] = None,
+        changed_only: bool = False,
+        limit: Optional[int] = None,
+        trends: bool = False,
+        min_trend_sources: int = 2,
+    ) -> dict:
+        cfg = self.config()
+        sources = cfg.get("sources") or ["."]
+        return self.ingest(
+            sources,
+            source_kind=source_kind,
+            changed_only=changed_only,
+            limit=limit,
+            trends=trends,
+            min_trend_sources=min_trend_sources,
+        )
 
     def render_mcp_config(self, server_name: Optional[str] = None, pythonpath: Optional[str] = None) -> str:
         cfg = self.config() if self.paths.config.exists() else {}
@@ -148,6 +170,34 @@ class ProjectWiki:
         CogneeResearchGraphAdapter().write_bundle(graph, self.paths.cognee_bundle)
         report = GraphReporter().render_markdown(GraphReporter().summarize(graph))
         self.paths.report.write_text(report, encoding="utf-8")
+
+
+def load_graph_file(path: str | Path) -> ResearchGraph:
+    payload = json.loads(Path(path).read_text(encoding="utf-8"))
+    return ResearchGraph(
+        nodes=[
+            ResearchNode(
+                id=str(raw["id"]),
+                name=str(raw["name"]),
+                type=ResearchNodeType(str(raw["type"])),
+                aliases=[str(alias) for alias in raw.get("aliases", [])],
+                description=str(raw.get("description") or ""),
+                source_path=raw.get("source_path"),
+                metadata=dict(raw.get("metadata") or {}),
+            )
+            for raw in payload.get("nodes", [])
+        ],
+        edges=[
+            ResearchEdge(
+                source=str(raw["source"]),
+                target=str(raw["target"]),
+                type=str(raw["type"]),
+                evidence=raw.get("evidence"),
+                metadata=dict(raw.get("metadata") or {}),
+            )
+            for raw in payload.get("edges", [])
+        ],
+    )
 
 
 def resolve_project_input(project_root: Path, item: str | Path) -> Path:

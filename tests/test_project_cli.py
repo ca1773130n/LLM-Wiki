@@ -77,6 +77,41 @@ def test_cli_project_init_ingest_and_mcp_config_from_working_directory(tmp_path,
     assert (project / ".llm-wiki" / "graph.json").exists()
 
 
+def test_project_compile_scans_configured_sources_and_changed_only(tmp_path):
+    project = tmp_path / "compile-project"
+    project.mkdir()
+    docs = project / "docs"
+    docs.mkdir()
+    (docs / "paper.md").write_text("# Compile Paper\nGaussian Splatting supports novel view synthesis.", encoding="utf-8")
+    wiki = ProjectWiki.init(project, source_kind="Paper", sources=["docs"])
+
+    first = wiki.compile(changed_only=True)
+    second = wiki.compile(changed_only=True)
+
+    assert first["processed_files"] == 1
+    assert first["node_count"] > 0
+    assert second["processed_files"] == 0
+    assert second["skipped_files"] == 1
+    graph = json.loads((project / ".llm-wiki" / "graph.json").read_text(encoding="utf-8"))
+    assert any(node["name"] == "Compile Paper" for node in graph["nodes"])
+
+
+def test_cli_project_compile_uses_configured_sources(tmp_path, capsys):
+    project = tmp_path / "compile-cli-project"
+    project.mkdir()
+    docs = project / "docs"
+    docs.mkdir()
+    (docs / "paper.md").write_text("# CLI Compile Paper\nGaussian Splatting supports novel view synthesis.", encoding="utf-8")
+
+    assert main(["project", "init", "--project", str(project), "--name", "compile_wiki", "--source-kind", "Paper", "--source", "docs"]) == 0
+    assert main(["project", "compile", "--project", str(project), "--changed-only"]) == 0
+
+    captured = capsys.readouterr().out
+    assert "Compiled project wiki" in captured
+    graph = json.loads((project / ".llm-wiki" / "graph.json").read_text(encoding="utf-8"))
+    assert any(node["name"] == "CLI Compile Paper" for node in graph["nodes"])
+
+
 def test_cli_module_can_init_from_current_working_directory(tmp_path):
     project = tmp_path / "cwd-project"
     project.mkdir()

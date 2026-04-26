@@ -28,11 +28,16 @@ Initialize a self-contained LLM-Wiki inside any project directory:
 cd /path/to/my-project
 python3 -m llm_wiki.cli project init \
   --name my_project_wiki \
-  --source-kind Repository
-python3 -m llm_wiki.cli project ingest README.md docs/ src/
+  --source-kind Repository \
+  --source README.md \
+  --source docs \
+  --source src
+python3 -m llm_wiki.cli project compile --changed-only
 python3 -m llm_wiki.cli project mcp-config \
   --server-name my_project_wiki
 ```
+
+`project compile` uses the default `sources` saved in `.llm-wiki/config.json`, writes every durable artifact, and preserves the previous graph when `--changed-only` skips all files. Use `project ingest <paths>` when you want to compile ad-hoc paths without changing the saved source list.
 
 This creates project-local artifacts under `.llm-wiki/`:
 

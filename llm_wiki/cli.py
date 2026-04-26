@@ -73,6 +73,7 @@ def project_main(argv: List[str] | None = None) -> int:
     init_parser.add_argument("--project", default=".", help="Project root directory; defaults to current working directory")
     init_parser.add_argument("--name", help="MCP server/config name; defaults to sanitized project directory name")
     init_parser.add_argument("--source-kind", default="SourceDocument", help="Default source kind for project ingest")
+    init_parser.add_argument("--source", action="append", default=[], help="Default project-relative source path for project compile; repeat for multiple paths")
 
     ingest_parser = subparsers.add_parser("ingest", help="Ingest markdown files into the project graph artifacts")
     ingest_parser.add_argument("inputs", nargs="+", help="Project-relative or absolute markdown files/directories")
@@ -83,6 +84,14 @@ def project_main(argv: List[str] | None = None) -> int:
     ingest_parser.add_argument("--trends", action="store_true", help="Add corpus-level Trend nodes")
     ingest_parser.add_argument("--min-trend-sources", type=int, default=2, help="Minimum sources needed for Trend nodes")
 
+    compile_parser = subparsers.add_parser("compile", help="Compile configured project sources into all .llm-wiki artifacts")
+    compile_parser.add_argument("--project", default=".", help="Project root directory; defaults to current working directory")
+    compile_parser.add_argument("--source-kind", help="Override configured source kind")
+    compile_parser.add_argument("--changed-only", action="store_true", help="Skip unchanged files using .llm-wiki/manifest.json")
+    compile_parser.add_argument("--limit", type=int, help="Maximum number of changed files to process")
+    compile_parser.add_argument("--trends", action="store_true", help="Add corpus-level Trend nodes")
+    compile_parser.add_argument("--min-trend-sources", type=int, default=2, help="Minimum sources needed for Trend nodes")
+
     mcp_parser = subparsers.add_parser("mcp-config", help="Print a Hermes mcp_servers config snippet for this project")
     mcp_parser.add_argument("--project", default=".", help="Project root directory; defaults to current working directory")
     mcp_parser.add_argument("--server-name", help="MCP server name in Hermes config")
@@ -90,7 +99,7 @@ def project_main(argv: List[str] | None = None) -> int:
 
     args = parser.parse_args(argv)
     if args.command == "init":
-        wiki = ProjectWiki.init(args.project, name=args.name, source_kind=args.source_kind)
+        wiki = ProjectWiki.init(args.project, name=args.name, source_kind=args.source_kind, sources=args.source)
         print(f"Initialized project wiki: {wiki.root}")
         print(f"Graph: {wiki.paths.graph}")
         print("Next: python3 -m llm_wiki.cli project ingest <paths>")
@@ -107,6 +116,22 @@ def project_main(argv: List[str] | None = None) -> int:
         )
         print(
             "Ingested project wiki: "
+            f"processed={result['processed_files']} skipped={result['skipped_files']} "
+            f"nodes={result['node_count']} edges={result['edge_count']}"
+        )
+        print(f"Graph: {result['graph_path']}")
+        return 0
+    if args.command == "compile":
+        wiki = ProjectWiki.load(args.project)
+        result = wiki.compile(
+            source_kind=args.source_kind,
+            changed_only=args.changed_only,
+            limit=args.limit,
+            trends=args.trends,
+            min_trend_sources=args.min_trend_sources,
+        )
+        print(
+            "Compiled project wiki: "
             f"processed={result['processed_files']} skipped={result['skipped_files']} "
             f"nodes={result['node_count']} edges={result['edge_count']}"
         )
