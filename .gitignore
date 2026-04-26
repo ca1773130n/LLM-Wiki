@@ -1,0 +1,14 @@
+# Local research corpus and generated artifacts
+data/
+evals/
+output/
+
+# Python caches
+__pycache__/
+*.py[cod]
+.pytest_cache/
+
+# Local graph/database outputs
+*.sqlite
+*.kuzu/
+*.duckdb

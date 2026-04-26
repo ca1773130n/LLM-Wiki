@@ -1,0 +1,83 @@
+<?xml version="1.0"?>
+<rdf:RDF xmlns="http://llmwiki.local/research#"
+     xml:base="http://llmwiki.local/research"
+     xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#"
+     xmlns:owl="http://www.w3.org/2002/07/owl#"
+     xmlns:rdfs="http://www.w3.org/2000/01/rdf-schema#">
+
+  <owl:Ontology rdf:about="http://llmwiki.local/research">
+    <rdfs:comment>Research-domain ontology for LLM-Wiki literature intelligence graphs.</rdfs:comment>
+  </owl:Ontology>
+
+  <owl:Class rdf:about="#ResearchField"/>
+  <owl:Class rdf:about="#ResearchTopic"/>
+  <owl:Class rdf:about="#ProblemArea"/>
+  <owl:Class rdf:about="#ApproachFamily"/>
+  <owl:Class rdf:about="#Trend"/>
+
+  <owl:Class rdf:about="#SourceDocument"/>
+  <owl:Class rdf:about="#Paper"><rdfs:subClassOf rdf:resource="#SourceDocument"/></owl:Class>
+  <owl:Class rdf:about="#Repository"><rdfs:subClassOf rdf:resource="#SourceDocument"/></owl:Class>
+  <owl:Class rdf:about="#Project"/>
+  <owl:Class rdf:about="#Model"/>
+  <owl:Class rdf:about="#Dataset"/>
+  <owl:Class rdf:about="#Benchmark"/>
+  <owl:Class rdf:about="#Metric"/>
+  <owl:Class rdf:about="#Result"/>
+  <owl:Class rdf:about="#Organization"/>
+  <owl:Class rdf:about="#Person"/>
+
+  <owl:Class rdf:about="#Concept"/>
+  <owl:Class rdf:about="#TechnicalTerm"><rdfs:subClassOf rdf:resource="#Concept"/></owl:Class>
+  <owl:Class rdf:about="#MathematicalConcept"><rdfs:subClassOf rdf:resource="#Concept"/></owl:Class>
+  <owl:Class rdf:about="#MethodologicalConcept"><rdfs:subClassOf rdf:resource="#Concept"/></owl:Class>
+  <owl:Class rdf:about="#Algorithm"><rdfs:subClassOf rdf:resource="#Concept"/></owl:Class>
+  <owl:Class rdf:about="#ObjectiveFunction"><rdfs:subClassOf rdf:resource="#MathematicalConcept"/></owl:Class>
+  <owl:Class rdf:about="#ArchitecturePattern"><rdfs:subClassOf rdf:resource="#Concept"/></owl:Class>
+  <owl:Class rdf:about="#TrainingParadigm"><rdfs:subClassOf rdf:resource="#MethodologicalConcept"/></owl:Class>
+  <owl:Class rdf:about="#InferenceStrategy"><rdfs:subClassOf rdf:resource="#MethodologicalConcept"/></owl:Class>
+  <owl:Class rdf:about="#EvaluationProtocol"><rdfs:subClassOf rdf:resource="#Concept"/></owl:Class>
+  <owl:Class rdf:about="#Task"><rdfs:subClassOf rdf:resource="#Concept"/></owl:Class>
+  <owl:Class rdf:about="#Capability"><rdfs:subClassOf rdf:resource="#Concept"/></owl:Class>
+
+  <owl:Class rdf:about="#Claim"/>
+  <owl:Class rdf:about="#ContributionClaim"><rdfs:subClassOf rdf:resource="#Claim"/></owl:Class>
+  <owl:Class rdf:about="#PerformanceClaim"><rdfs:subClassOf rdf:resource="#Claim"/></owl:Class>
+  <owl:Class rdf:about="#ComparisonClaim"><rdfs:subClassOf rdf:resource="#Claim"/></owl:Class>
+  <owl:Class rdf:about="#LimitationClaim"><rdfs:subClassOf rdf:resource="#Claim"/></owl:Class>
+  <owl:Class rdf:about="#CausalClaim"><rdfs:subClassOf rdf:resource="#Claim"/></owl:Class>
+  <owl:Class rdf:about="#OpenQuestion"/>
+  <owl:Class rdf:about="#EvidenceSpan"/>
+
+  <owl:ObjectProperty rdf:about="#is_a"/>
+  <owl:ObjectProperty rdf:about="#part_of"/>
+  <owl:ObjectProperty rdf:about="#subfield_of"/>
+  <owl:ObjectProperty rdf:about="#introduces"/>
+  <owl:ObjectProperty rdf:about="#uses"/>
+  <owl:ObjectProperty rdf:about="#extends"/>
+  <owl:ObjectProperty rdf:about="#improves_on"/>
+  <owl:ObjectProperty rdf:about="#compares_against"/>
+  <owl:ObjectProperty rdf:about="#criticizes"/>
+  <owl:ObjectProperty rdf:about="#addresses"/>
+  <owl:ObjectProperty rdf:about="#optimizes_for"/>
+  <owl:ObjectProperty rdf:about="#uses_dataset"/>
+  <owl:ObjectProperty rdf:about="#evaluated_on"/>
+  <owl:ObjectProperty rdf:about="#uses_metric"/>
+  <owl:ObjectProperty rdf:about="#reports_result"/>
+  <owl:ObjectProperty rdf:about="#achieves_score"/>
+  <owl:ObjectProperty rdf:about="#belongs_to_approach_family"/>
+  <owl:ObjectProperty rdf:about="#shares_concept_with"/>
+  <owl:ObjectProperty rdf:about="#derived_from"/>
+  <owl:ObjectProperty rdf:about="#supports_claim"/>
+  <owl:ObjectProperty rdf:about="#contradicts_claim"/>
+  <owl:ObjectProperty rdf:about="#attributes_improvement_to"/>
+  <owl:ObjectProperty rdf:about="#has_limitation"/>
+  <owl:ObjectProperty rdf:about="#evidenced_by"/>
+  <owl:ObjectProperty rdf:about="#mentioned_in"/>
+  <owl:ObjectProperty rdf:about="#authored_by"/>
+  <owl:ObjectProperty rdf:about="#released_by"/>
+  <owl:ObjectProperty rdf:about="#implemented_in"/>
+  <owl:ObjectProperty rdf:about="#rising_in"/>
+  <owl:ObjectProperty rdf:about="#declining_in"/>
+  <owl:ObjectProperty rdf:about="#emerged_after"/>
+</rdf:RDF>

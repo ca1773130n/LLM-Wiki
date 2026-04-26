@@ -1,0 +1,182 @@
+"""CLI for LLM-Wiki research graph extraction."""
+
+from __future__ import annotations
+
+import argparse
+import asyncio
+import json
+from pathlib import Path
+from typing import Iterable, List
+
+from .batch import BatchIngestRunner
+from .canonicalization import GraphCanonicalizer, ReviewDecision
+from .cognee_adapter import CogneeResearchGraphAdapter
+from .cognee_direct import CogneeDirectImporter
+from .llm_extractor import ClaudeCLIResearchExtractor
+from .markdown_projection import GraphMarkdownProjector
+from .persistence import KuzuResearchGraphStore, SQLiteResearchGraphStore
+from .report import GraphReporter
+from .research_graph import ResearchCorpusAnalyzer, ResearchGraph, ResearchGraphExtractor
+from .review_workflow import ReviewQueueExporter
+from .selective_extractor import SelectiveClaudeResearchExtractor
+
+
+def iter_markdown_files(path: Path) -> Iterable[Path]:
+    if path.is_file():
+        if path.suffix.lower() == ".md":
+            yield path
+        return
+    for child in sorted(path.rglob("*.md")):
+        if any(part.startswith(".") for part in child.relative_to(path).parts):
+            continue
+        yield child
+
+
+def merge_graphs(graphs: Iterable[ResearchGraph]) -> ResearchGraph:
+    nodes = {}
+    edges = {}
+    for graph in graphs:
+        for node in graph.nodes:
+            nodes[node.id] = node
+        for edge in graph.edges:
+            edges[(edge.source, edge.type, edge.target)] = edge
+    return ResearchGraph(nodes=list(nodes.values()), edges=list(edges.values()))
+
+
+def load_review_decisions(path: Path) -> List[ReviewDecision]:
+    payload = json.loads(path.read_text(encoding="utf-8"))
+    raw_decisions = payload.get("decisions", payload if isinstance(payload, list) else [])
+    if not isinstance(raw_decisions, list):
+        raise ValueError("Review decision file must contain a decisions list")
+    decisions = []
+    for raw in raw_decisions:
+        if not isinstance(raw, dict):
+            raise ValueError("Every review decision must be an object")
+        decisions.append(
+            ReviewDecision(
+                item_id=str(raw["item_id"]),
+                action=str(raw["action"]),
+                canonical_node_id=raw.get("canonical_node_id"),
+            )
+        )
+    return decisions
+
+
+def main(argv: List[str] | None = None) -> int:
+    parser = argparse.ArgumentParser(description="Extract a typed research intelligence graph from LLM-Wiki notes.")
+    parser.add_argument("paths", nargs="+", help="Markdown file or directory paths to extract")
+    parser.add_argument("--source-kind", default="SourceDocument", help="Default source kind: Paper, Repository, ResearchDigest, SourceDocument")
+    parser.add_argument("--output", "-o", help="Write JSON graph to this path instead of stdout")
+    parser.add_argument("--pretty", action="store_true", help="Pretty-print JSON")
+    parser.add_argument("--trends", action="store_true", help="Add corpus-level Trend nodes for concepts repeated across sources")
+    parser.add_argument("--min-trend-sources", type=int, default=2, help="Minimum distinct sources required to create a Trend node")
+    parser.add_argument("--extractor", choices=["deterministic", "claude-cli", "selective-claude"], default="deterministic", help="Extractor backend to use")
+    parser.add_argument("--claude-config-dir", action="append", default=[], help="CLAUDE_CONFIG_DIR to try for Claude-backed extractors; repeat for fallbacks")
+    parser.add_argument("--claude-model", default="sonnet", help="Claude CLI model alias for Claude-backed extractors")
+    parser.add_argument("--claude-timeout", type=int, default=180, help="Claude CLI timeout in seconds")
+    parser.add_argument("--claude-include", action="append", default=[], help="Glob pattern selecting files for --extractor selective-claude; repeat for multiple subsets")
+    parser.add_argument("--claude-limit", type=int, help="Maximum number of files to send to Claude in --extractor selective-claude")
+    parser.add_argument("--canonicalize", action="store_true", help="Merge high-confidence aliases and produce review candidates for ambiguous duplicates")
+    parser.add_argument("--review-output", help="Write canonicalization review queue JSON to this path")
+    parser.add_argument("--review-markdown-output", help="Write a human-readable markdown review queue")
+    parser.add_argument("--review-jsonl-output", help="Write review queue items as JSONL")
+    parser.add_argument("--review-decisions-template", help="Write a starter review decisions JSON template")
+    parser.add_argument("--apply-review-decisions", help="Apply review decisions JSON after canonicalization; implies --canonicalize")
+    parser.add_argument("--project-markdown", help="Write a human-readable markdown projection of the final graph to this directory")
+    parser.add_argument("--sqlite-output", help="Persist the final graph to a local SQLite database")
+    parser.add_argument("--kuzu-output", help="Persist the final graph to a local Kuzu database")
+    parser.add_argument("--cognee-output", help="Write a Cognee-friendly JSONL export bundle to this directory")
+    parser.add_argument("--cognee-add", action="store_true", help="Add the generated --cognee-output bundle to Cognee without running cognify")
+    parser.add_argument("--cognee-cognify", action="store_true", help="After --cognee-add, run Cognee cognify for the dataset; may invoke configured LLM/embedding providers")
+    parser.add_argument("--cognee-dataset", default="llm_wiki_research_graph", help="Cognee dataset name for --cognee-add")
+    parser.add_argument("--batch-manifest", help="Track file hashes for incremental changed-only batch ingestion")
+    parser.add_argument("--changed-only", action="store_true", help="When used with --batch-manifest, skip files whose content hash is unchanged")
+    parser.add_argument("--limit", type=int, help="Maximum number of files to process in this run")
+    parser.add_argument("--report-output", help="Write a markdown summary report for the final graph")
+    args = parser.parse_args(argv)
+
+    if args.extractor == "claude-cli":
+        extractor = ClaudeCLIResearchExtractor(
+            config_dirs=args.claude_config_dir or ["/Users/neo/.claude-personal1", "/Users/neo/.claude-personal2"],
+            model=args.claude_model,
+            timeout=args.claude_timeout,
+        )
+    elif args.extractor == "selective-claude":
+        deterministic = ResearchGraphExtractor()
+        claude = ClaudeCLIResearchExtractor(
+            config_dirs=args.claude_config_dir or ["/Users/neo/.claude-personal1", "/Users/neo/.claude-personal2"],
+            model=args.claude_model,
+            timeout=args.claude_timeout,
+        )
+        extractor = SelectiveClaudeResearchExtractor(
+            deterministic=deterministic,
+            claude=claude,
+            include_patterns=args.claude_include,
+            claude_limit=args.claude_limit,
+        )
+    else:
+        extractor = ResearchGraphExtractor()
+    graphs = []
+    markdown_files = []
+    for raw_path in args.paths:
+        markdown_files.extend(iter_markdown_files(Path(raw_path)))
+    if args.batch_manifest:
+        batch = BatchIngestRunner(extractor=extractor, manifest_path=Path(args.batch_manifest)).run(
+            markdown_files,
+            source_kind=args.source_kind,
+            changed_only=args.changed_only,
+            limit=args.limit,
+        )
+        graphs = [batch.graph]
+    else:
+        if args.limit is not None:
+            markdown_files = markdown_files[: args.limit]
+        for md in markdown_files:
+            graphs.append(extractor.extract_file(md, source_kind=args.source_kind))
+
+    graph = merge_graphs(graphs)
+    if args.trends:
+        graph = ResearchCorpusAnalyzer().summarize_trends(graphs, min_sources=args.min_trend_sources)
+    if args.canonicalize or args.review_output or args.apply_review_decisions or args.review_markdown_output or args.review_jsonl_output or args.review_decisions_template:
+        canonicalization = GraphCanonicalizer().canonicalize(graph)
+        graph = canonicalization.graph
+        if args.apply_review_decisions:
+            decisions = load_review_decisions(Path(args.apply_review_decisions))
+            graph = canonicalization.review_queue().apply_decisions(graph, decisions)
+        review_queue = canonicalization.review_queue()
+        if args.review_output:
+            review_payload = review_queue.model_dump()
+            Path(args.review_output).parent.mkdir(parents=True, exist_ok=True)
+            Path(args.review_output).write_text(json.dumps(review_payload, ensure_ascii=False, indent=2 if args.pretty else None) + "\n", encoding="utf-8")
+        if args.review_markdown_output or args.review_jsonl_output or args.review_decisions_template:
+            ReviewQueueExporter().write_files(
+                review_queue,
+                markdown_path=args.review_markdown_output,
+                jsonl_path=args.review_jsonl_output,
+                decision_template_path=args.review_decisions_template,
+            )
+    if args.project_markdown:
+        GraphMarkdownProjector().write_projection(graph, Path(args.project_markdown))
+    if args.sqlite_output:
+        SQLiteResearchGraphStore(Path(args.sqlite_output)).write_graph(graph, replace=True)
+    if args.kuzu_output:
+        KuzuResearchGraphStore(Path(args.kuzu_output)).write_graph(graph, replace=True)
+    if args.cognee_output:
+        CogneeResearchGraphAdapter().write_bundle(graph, Path(args.cognee_output))
+        if args.cognee_add or args.cognee_cognify:
+            asyncio.run(CogneeDirectImporter().add_bundle(Path(args.cognee_output), dataset_name=args.cognee_dataset, cognify=args.cognee_cognify))
+    if args.report_output:
+        report = GraphReporter().render_markdown(GraphReporter().summarize(graph))
+        Path(args.report_output).parent.mkdir(parents=True, exist_ok=True)
+        Path(args.report_output).write_text(report, encoding="utf-8")
+    payload = graph.to_json(indent=2 if args.pretty else None)
+    if args.output:
+        Path(args.output).parent.mkdir(parents=True, exist_ok=True)
+        Path(args.output).write_text(payload + "\n", encoding="utf-8")
+    else:
+        print(payload)
+    return 0
+
+
+if __name__ == "__main__":
+    raise SystemExit(main())
