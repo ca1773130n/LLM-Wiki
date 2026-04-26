@@ -22,6 +22,33 @@ Run tests:
 PYTEST_DISABLE_PLUGIN_AUTOLOAD=1 python3 -m pytest tests/ -q
 ```
 
+Initialize a self-contained LLM-Wiki inside any project directory:
+
+```bash
+cd /path/to/my-project
+python3 -m llm_wiki.cli project init \
+  --name my_project_wiki \
+  --source-kind Repository
+python3 -m llm_wiki.cli project ingest README.md docs/ src/
+python3 -m llm_wiki.cli project mcp-config \
+  --server-name my_project_wiki
+```
+
+This creates project-local artifacts under `.llm-wiki/`:
+
+```text
+.llm-wiki/
+  config.json
+  graph.json
+  manifest.json
+  sqlite.db
+  report.md
+  markdown_projection/
+  cognee_bundle/
+```
+
+Paste the `project mcp-config` output into Hermes `~/.hermes/config.yaml` under `mcp_servers`, then restart Hermes/gateway. The project wiki will be exposed as native MCP tools such as `mcp_my_project_wiki_search_nodes` and `mcp_my_project_wiki_node_context`.
+
 Optional graph/storage packages currently used by the local environment:
 
 ```bash

@@ -5,6 +5,7 @@ from __future__ import annotations
 import argparse
 import asyncio
 import json
+import sys
 from pathlib import Path
 from typing import Iterable, List
 
@@ -16,6 +17,7 @@ from .cognee_direct import CogneeDirectImporter
 from .llm_extractor import ClaudeCLIResearchExtractor
 from .markdown_projection import GraphMarkdownProjector
 from .persistence import KuzuResearchGraphStore, SQLiteResearchGraphStore
+from .project import ProjectWiki
 from .report import GraphReporter
 from .research_graph import ResearchCorpusAnalyzer, ResearchGraph, ResearchGraphExtractor
 from .review_workflow import ReviewQueueExporter
@@ -63,7 +65,65 @@ def load_review_decisions(path: Path) -> List[ReviewDecision]:
     return decisions
 
 
+def project_main(argv: List[str] | None = None) -> int:
+    parser = argparse.ArgumentParser(description="Manage a per-project .llm-wiki workspace.")
+    subparsers = parser.add_subparsers(dest="command", required=True)
+
+    init_parser = subparsers.add_parser("init", help="Initialize .llm-wiki in a project directory")
+    init_parser.add_argument("--project", default=".", help="Project root directory; defaults to current working directory")
+    init_parser.add_argument("--name", help="MCP server/config name; defaults to sanitized project directory name")
+    init_parser.add_argument("--source-kind", default="SourceDocument", help="Default source kind for project ingest")
+
+    ingest_parser = subparsers.add_parser("ingest", help="Ingest markdown files into the project graph artifacts")
+    ingest_parser.add_argument("inputs", nargs="+", help="Project-relative or absolute markdown files/directories")
+    ingest_parser.add_argument("--project", default=".", help="Project root directory; defaults to current working directory")
+    ingest_parser.add_argument("--source-kind", help="Override configured source kind")
+    ingest_parser.add_argument("--changed-only", action="store_true", help="Skip unchanged files using .llm-wiki/manifest.json")
+    ingest_parser.add_argument("--limit", type=int, help="Maximum number of changed files to process")
+    ingest_parser.add_argument("--trends", action="store_true", help="Add corpus-level Trend nodes")
+    ingest_parser.add_argument("--min-trend-sources", type=int, default=2, help="Minimum sources needed for Trend nodes")
+
+    mcp_parser = subparsers.add_parser("mcp-config", help="Print a Hermes mcp_servers config snippet for this project")
+    mcp_parser.add_argument("--project", default=".", help="Project root directory; defaults to current working directory")
+    mcp_parser.add_argument("--server-name", help="MCP server name in Hermes config")
+    mcp_parser.add_argument("--pythonpath", help="PYTHONPATH pointing at the LLM-Wiki checkout")
+
+    args = parser.parse_args(argv)
+    if args.command == "init":
+        wiki = ProjectWiki.init(args.project, name=args.name, source_kind=args.source_kind)
+        print(f"Initialized project wiki: {wiki.root}")
+        print(f"Graph: {wiki.paths.graph}")
+        print("Next: python3 -m llm_wiki.cli project ingest <paths>")
+        return 0
+    if args.command == "ingest":
+        wiki = ProjectWiki.load(args.project)
+        result = wiki.ingest(
+            args.inputs,
+            source_kind=args.source_kind,
+            changed_only=args.changed_only,
+            limit=args.limit,
+            trends=args.trends,
+            min_trend_sources=args.min_trend_sources,
+        )
+        print(
+            "Ingested project wiki: "
+            f"processed={result['processed_files']} skipped={result['skipped_files']} "
+            f"nodes={result['node_count']} edges={result['edge_count']}"
+        )
+        print(f"Graph: {result['graph_path']}")
+        return 0
+    if args.command == "mcp-config":
+        wiki = ProjectWiki.load(args.project)
+        print(wiki.render_mcp_config(server_name=args.server_name, pythonpath=args.pythonpath), end="")
+        return 0
+    raise ValueError(f"Unknown project command: {args.command}")
+
+
 def main(argv: List[str] | None = None) -> int:
+    if argv is None:
+        argv = sys.argv[1:]
+    if argv and argv[0] == "project":
+        return project_main(argv[1:])
     parser = argparse.ArgumentParser(description="Extract a typed research intelligence graph from LLM-Wiki notes.")
     parser.add_argument("paths", nargs="+", help="Markdown file or directory paths to extract")
     parser.add_argument("--source-kind", default="SourceDocument", help="Default source kind: Paper, Repository, ResearchDigest, SourceDocument")
