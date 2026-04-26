@@ -15,6 +15,7 @@ from typing import Iterable, List, Optional
 
 from .batch import BatchIngestRunner
 from .cognee_adapter import CogneeResearchGraphAdapter
+from .graphiti_adapter import GraphitiResearchGraphAdapter
 from .markdown_projection import GraphMarkdownProjector
 from .persistence import SQLiteResearchGraphStore
 from .report import GraphReporter
@@ -34,6 +35,7 @@ class ProjectPaths:
     report: Path
     temporal_facts: Path
     competitive_report: Path
+    graphiti_episodes: Path
 
 
 class ProjectWiki:
@@ -53,6 +55,7 @@ class ProjectWiki:
             report=self.root / "report.md",
             temporal_facts=self.root / "temporal_facts.jsonl",
             competitive_report=self.root / "competitive_report.md",
+            graphiti_episodes=self.root / "graphiti_episodes.jsonl",
         )
 
     @classmethod
@@ -79,6 +82,7 @@ class ProjectWiki:
             "report_path": ".llm-wiki/report.md",
             "temporal_facts_path": ".llm-wiki/temporal_facts.jsonl",
             "competitive_report_path": ".llm-wiki/competitive_report.md",
+            "graphiti_episodes_path": ".llm-wiki/graphiti_episodes.jsonl",
         }
         wiki.paths.config.write_text(json.dumps(config, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
         return wiki
@@ -129,6 +133,7 @@ class ProjectWiki:
             "node_count": len(graph.nodes),
             "edge_count": len(graph.edges),
             "graph_path": str(self.paths.graph),
+            "graphiti_episodes_path": str(self.paths.graphiti_episodes),
             "mcp_server_name": cfg.get("name", sanitize_server_name(self.project_root.name)),
         }
 
@@ -169,6 +174,33 @@ class ProjectWiki:
             f"      PYTHONPATH: \"{python_path}\"\n"
         )
 
+    def export_graphiti(self, group_id: Optional[str] = None, output: Optional[str | Path] = None) -> dict:
+        cfg = self.config()
+        graph = load_graph_file(self.paths.graph)
+        target = Path(output) if output else self.paths.graphiti_episodes
+        adapter = GraphitiResearchGraphAdapter(group_id=group_id or cfg.get("name") or self.project_root.name)
+        episodes = adapter.write_episodes(graph, target)
+        return {"episodes": len(episodes), "path": str(target), "group_id": adapter.group_id}
+
+    def sync_graphiti(
+        self,
+        neo4j_uri: Optional[str] = None,
+        neo4j_user: Optional[str] = None,
+        neo4j_password: Optional[str] = None,
+        group_id: Optional[str] = None,
+        dry_run: bool = False,
+    ) -> dict:
+        cfg = self.config()
+        graph = load_graph_file(self.paths.graph)
+        adapter = GraphitiResearchGraphAdapter(group_id=group_id or cfg.get("name") or self.project_root.name)
+        return adapter.sync(
+            graph,
+            neo4j_uri=neo4j_uri or "bolt://localhost:7687",
+            neo4j_user=neo4j_user or "neo4j",
+            neo4j_password=neo4j_password or "password",
+            dry_run=dry_run,
+        )
+
     def _write_artifacts(self, graph: ResearchGraph) -> None:
         self.root.mkdir(parents=True, exist_ok=True)
         self.paths.graph.write_text(graph.to_json(indent=2) + "\n", encoding="utf-8")
@@ -178,6 +210,7 @@ class ProjectWiki:
         report = GraphReporter().render_markdown(GraphReporter().summarize(graph))
         self.paths.report.write_text(report, encoding="utf-8")
         TemporalFactProjector().write_jsonl(graph, self.paths.temporal_facts)
+        self.export_graphiti()
         self.paths.competitive_report.write_text(render_competitive_report(), encoding="utf-8")
 
 

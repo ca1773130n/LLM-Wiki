@@ -50,6 +50,7 @@ This creates project-local artifacts under `.llm-wiki/`:
   sqlite.db
   report.md
   competitive_report.md
+  graphiti_episodes.jsonl
   markdown_projection/
   cognee_bundle/
 ```
@@ -57,15 +58,34 @@ This creates project-local artifacts under `.llm-wiki/`:
 Competitive hardening versus MegaMem/Graphiti-style systems:
 
 - `temporal_facts.jsonl` projects every validated edge into a Graphiti-style fact with `valid_from`, `current`, `invalidated_by`, `confidence`, evidence, and source provenance.
+- `graphiti_episodes.jsonl` exports those temporal facts as Graphiti-compatible episodes without requiring Graphiti at compile time; `project sync-graphiti` can optionally push them to Graphiti/Neo4j when `graphiti_core` is installed.
 - `competitive_report.md` records what was absorbed from MegaMem, Graphiti/Zep, MCP graph servers, and agentic RAG systems while preserving LLM-Wiki's controlled ontology/no-API-key differentiators.
 - MCP now exposes temporal tools as well as node tools: `search_facts` and `timeline` join `schema`, `graph_summary`, `search_nodes`, and `node_context`.
 
 Paste the `project mcp-config` output into Hermes `~/.hermes/config.yaml` under `mcp_servers`, then restart Hermes/gateway. The project wiki will be exposed as native MCP tools such as `mcp_my_project_wiki_search_nodes` and `mcp_my_project_wiki_node_context`.
 
+Export or optionally sync project-local temporal facts into Graphiti/Zep-style storage:
+
+```bash
+python3 -m llm_wiki.cli project export-graphiti \
+  --project /path/to/my-project
+python3 -m llm_wiki.cli project sync-graphiti \
+  --project /path/to/my-project \
+  --dry-run
+# Live sync requires graphiti_core plus a reachable Neo4j backend:
+python3 -m llm_wiki.cli project sync-graphiti \
+  --project /path/to/my-project \
+  --neo4j-uri bolt://localhost:7687 \
+  --neo4j-user neo4j \
+  --neo4j-password '<password>'
+```
+
+`export-graphiti` is dependency-free and writes `.llm-wiki/graphiti_episodes.jsonl`. `sync-graphiti --dry-run` counts the same episodes without importing Graphiti, which is useful for local smoke tests.
+
 Optional graph/storage packages currently used by the local environment:
 
 ```bash
-python3 -m pip install --user kuzu cognee
+python3 -m pip install --user kuzu cognee graphiti-core
 ```
 
 Extract a JSON graph from a paper note:

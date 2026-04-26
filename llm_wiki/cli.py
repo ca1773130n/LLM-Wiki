@@ -17,6 +17,7 @@ from .cognee_direct import CogneeDirectImporter
 from .llm_extractor import ClaudeCLIResearchExtractor
 from .markdown_projection import GraphMarkdownProjector
 from .persistence import KuzuResearchGraphStore, SQLiteResearchGraphStore
+from .graphiti_adapter import GraphitiSyncUnavailableError
 from .project import ProjectWiki
 from .report import GraphReporter
 from .research_graph import ResearchCorpusAnalyzer, ResearchGraph, ResearchGraphExtractor
@@ -97,6 +98,19 @@ def project_main(argv: List[str] | None = None) -> int:
     mcp_parser.add_argument("--server-name", help="MCP server name in Hermes config")
     mcp_parser.add_argument("--pythonpath", help="PYTHONPATH pointing at the LLM-Wiki checkout")
 
+    export_graphiti_parser = subparsers.add_parser("export-graphiti", help="Export project graph as dependency-free Graphiti episode JSONL")
+    export_graphiti_parser.add_argument("--project", default=".", help="Project root directory; defaults to current working directory")
+    export_graphiti_parser.add_argument("--group-id", help="Graphiti group_id; defaults to project wiki name")
+    export_graphiti_parser.add_argument("--output", help="Episode JSONL output path; defaults to .llm-wiki/graphiti_episodes.jsonl")
+
+    sync_graphiti_parser = subparsers.add_parser("sync-graphiti", help="Sync project graph episodes into Graphiti/Neo4j")
+    sync_graphiti_parser.add_argument("--project", default=".", help="Project root directory; defaults to current working directory")
+    sync_graphiti_parser.add_argument("--group-id", help="Graphiti group_id; defaults to project wiki name")
+    sync_graphiti_parser.add_argument("--neo4j-uri", default="bolt://localhost:7687", help="Neo4j URI for Graphiti")
+    sync_graphiti_parser.add_argument("--neo4j-user", default="neo4j", help="Neo4j username")
+    sync_graphiti_parser.add_argument("--neo4j-password", default="password", help="Neo4j password")
+    sync_graphiti_parser.add_argument("--dry-run", action="store_true", help="Count episodes without requiring Graphiti or Neo4j")
+
     args = parser.parse_args(argv)
     if args.command == "init":
         wiki = ProjectWiki.init(args.project, name=args.name, source_kind=args.source_kind, sources=args.source)
@@ -140,6 +154,27 @@ def project_main(argv: List[str] | None = None) -> int:
     if args.command == "mcp-config":
         wiki = ProjectWiki.load(args.project)
         print(wiki.render_mcp_config(server_name=args.server_name, pythonpath=args.pythonpath), end="")
+        return 0
+    if args.command == "export-graphiti":
+        wiki = ProjectWiki.load(args.project)
+        result = wiki.export_graphiti(group_id=args.group_id, output=args.output)
+        print(f"Exported Graphiti episodes: episodes={result['episodes']} path={result['path']} group_id={result['group_id']}")
+        return 0
+    if args.command == "sync-graphiti":
+        wiki = ProjectWiki.load(args.project)
+        try:
+            result = wiki.sync_graphiti(
+                neo4j_uri=args.neo4j_uri,
+                neo4j_user=args.neo4j_user,
+                neo4j_password=args.neo4j_password,
+                group_id=args.group_id,
+                dry_run=args.dry_run,
+            )
+        except GraphitiSyncUnavailableError as exc:
+            print(str(exc), file=sys.stderr)
+            return 2
+        prefix = "Graphiti dry-run" if result.get("dry_run") else "Synced Graphiti"
+        print(f"{prefix}: episodes={result['episodes']} group_id={result['group_id']}")
         return 0
     raise ValueError(f"Unknown project command: {args.command}")
 

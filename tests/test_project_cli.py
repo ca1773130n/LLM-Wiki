@@ -75,6 +75,50 @@ def test_project_temporal_artifacts_include_provenance(tmp_path):
     assert "MegaMem" in (project / ".llm-wiki" / "competitive_report.md").read_text(encoding="utf-8")
 
 
+def test_project_compile_writes_graphiti_episode_export(tmp_path):
+    project = tmp_path / "graphiti-project"
+    project.mkdir()
+    (project / "note.md").write_text("# Graphiti Note\nGaussian Splatting supports novel view synthesis.", encoding="utf-8")
+    wiki = ProjectWiki.init(project, name="graphiti_demo", source_kind="Paper", sources=["note.md"])
+
+    result = wiki.compile()
+
+    episodes_path = project / ".llm-wiki" / "graphiti_episodes.jsonl"
+    episodes = [json.loads(line) for line in episodes_path.read_text(encoding="utf-8").splitlines()]
+    assert result["graphiti_episodes_path"] == str(episodes_path)
+    assert episodes
+    assert all(row["group_id"] == "graphiti_demo" for row in episodes)
+    assert any("Graphiti Note" in row["content"] for row in episodes)
+
+
+def test_cli_project_export_graphiti_writes_episode_jsonl(tmp_path, capsys):
+    project = tmp_path / "graphiti-cli-project"
+    project.mkdir()
+    (project / "note.md").write_text("# CLI Graphiti Note\nGaussian Splatting supports novel view synthesis.", encoding="utf-8")
+
+    assert main(["project", "init", "--project", str(project), "--name", "graphiti_cli", "--source-kind", "Paper", "--source", "note.md"]) == 0
+    assert main(["project", "compile", "--project", str(project)]) == 0
+    assert main(["project", "export-graphiti", "--project", str(project)]) == 0
+
+    captured = capsys.readouterr().out
+    assert "Exported Graphiti episodes" in captured
+    assert (project / ".llm-wiki" / "graphiti_episodes.jsonl").exists()
+
+
+def test_cli_project_sync_graphiti_dry_run_reports_episode_count(tmp_path, capsys):
+    project = tmp_path / "graphiti-sync-project"
+    project.mkdir()
+    (project / "note.md").write_text("# Sync Graphiti Note\nGaussian Splatting supports novel view synthesis.", encoding="utf-8")
+
+    assert main(["project", "init", "--project", str(project), "--name", "graphiti_sync", "--source-kind", "Paper", "--source", "note.md"]) == 0
+    assert main(["project", "compile", "--project", str(project)]) == 0
+    assert main(["project", "sync-graphiti", "--project", str(project), "--dry-run"]) == 0
+
+    captured = capsys.readouterr().out
+    assert "Graphiti dry-run" in captured
+    assert "episodes=" in captured
+
+
 def test_cli_project_init_ingest_and_mcp_config_from_working_directory(tmp_path, capsys):
     project = tmp_path / "demo-project"
     project.mkdir()
