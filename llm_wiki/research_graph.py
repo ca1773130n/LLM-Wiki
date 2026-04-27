@@ -67,6 +67,9 @@ class ResearchNodeType(str, Enum):
     OPEN_QUESTION = "OpenQuestion"
     EVIDENCE_SPAN = "EvidenceSpan"
 
+    # Synthesis layer (higher-order, generated)
+    SYNTHESIS = "Synthesis"
+
 
 ALLOWED_NODE_TYPES: Set[str] = {item.value for item in ResearchNodeType}
 
@@ -107,6 +110,8 @@ ALLOWED_EDGE_TYPES: Set[str] = {
     "imports",
     "calls",
     "documents",
+    "synthesizes",
+    "summarizes",
 }
 
 
