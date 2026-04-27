@@ -17,7 +17,10 @@ from .agent_harness import AgentHarnessAdapter, SUPPORTED_AGENT_HARNESSES
 from .batch import BatchIngestRunner
 from .code_graph import CodeGraphExtractor
 from .cognee_adapter import CogneeResearchGraphAdapter
-from .frontend import StaticSiteBuilder
+from .site import StaticSiteBuilder
+from .synthesis import SynthesisProjector
+from .wiki_projector import WikiLayerProjector
+from .wiki_store import WikiPageStore
 from .graphiti_adapter import GraphitiResearchGraphAdapter
 from .markdown_projection import GraphMarkdownProjector
 from .obsidian_adapter import ObsidianVaultAdapter
@@ -43,6 +46,7 @@ class ProjectPaths:
     agent_harness: Path
     obsidian_vault: Path
     site: Path
+    wiki: Path
 
 
 class ProjectWiki:
@@ -66,6 +70,7 @@ class ProjectWiki:
             agent_harness=self.root / "agent_harness",
             obsidian_vault=self.root / "obsidian_vault",
             site=self.root / "site",
+            wiki=self.root / "wiki",
         )
 
     @classmethod
@@ -77,6 +82,9 @@ class ProjectWiki:
         wiki.paths.agent_harness.mkdir(parents=True, exist_ok=True)
         wiki.paths.obsidian_vault.mkdir(parents=True, exist_ok=True)
         wiki.paths.site.mkdir(parents=True, exist_ok=True)
+        wiki.paths.wiki.mkdir(parents=True, exist_ok=True)
+        for kind in ("sources", "concepts", "entities", "papers", "repos", "topics", "syntheses", "questions"):
+            (wiki.paths.wiki / kind).mkdir(parents=True, exist_ok=True)
         if not wiki.paths.graph.exists():
             wiki.paths.graph.write_text(ResearchGraph().to_json(indent=2) + "\n", encoding="utf-8")
         if not wiki.paths.manifest.exists():
@@ -233,7 +241,8 @@ class ProjectWiki:
         graph = load_graph_file(self.paths.graph)
         target = Path(output) if output else self.paths.site
         name = cfg.get("name") or sanitize_server_name(self.project_root.name)
-        return StaticSiteBuilder(site_title=name).write_site(graph, target)
+        self.paths.wiki.mkdir(parents=True, exist_ok=True)
+        return StaticSiteBuilder(site_title=name).write_site(graph, self.paths.wiki, target)
 
     def sync_graphiti(
         self,
@@ -256,6 +265,10 @@ class ProjectWiki:
 
     def _write_artifacts(self, graph: ResearchGraph) -> None:
         self.root.mkdir(parents=True, exist_ok=True)
+        self.paths.wiki.mkdir(parents=True, exist_ok=True)
+        wiki_store = WikiPageStore(self.paths.wiki)
+        WikiLayerProjector(wiki_store).project(graph)
+        graph, _written = SynthesisProjector(wiki_store, manifest_path=self.paths.manifest).project(graph)
         self.paths.graph.write_text(graph.to_json(indent=2) + "\n", encoding="utf-8")
         SQLiteResearchGraphStore(self.paths.sqlite).write_graph(graph, replace=True)
         GraphMarkdownProjector().write_projection(graph, self.paths.markdown_projection)
