@@ -15,6 +15,7 @@ from __future__ import annotations
 import html as _html
 import math
 from dataclasses import dataclass
+from datetime import date as _date, timedelta as _timedelta
 from typing import Iterable, Mapping, Sequence
 
 
@@ -299,26 +300,69 @@ def sparkline_svg(values: list[int], *, width: int = 120, height: int = 28) -> s
     )
 
 
-def heatmap_svg(weeks: list[list[int]], *, weeks_back: int = 26) -> str:
+_MONTH_NAMES: tuple[str, ...] = (
+    "Jan", "Feb", "Mar", "Apr", "May", "Jun",
+    "Jul", "Aug", "Sep", "Oct", "Nov", "Dec",
+)
+
+
+def heatmap_svg(
+    weeks: list[list[int]],
+    *,
+    weeks_back: int = 26,
+    with_labels: bool = True,
+    start_date: _date | None = None,
+) -> str:
     """Render the activity heatmap (GitHub-style 7-row grid).
 
     ``weeks`` is a list of week-columns; each column is a list of 7 ints
     (Mon..Sun). Cells without a corresponding entry are rendered empty.
     Only the most-recent ``weeks_back`` columns are kept.
+
+    When ``with_labels`` is ``True`` (default) the SVG renders:
+      - Month-name labels along the top, one per first-week-of-month
+        transition.
+      - Weekday labels (Mon, Wed, Fri) on the left edge, mimicking GitHub.
+
+    Pass ``with_labels=False`` for tight contexts (sparkline-sized).
+
+    When ``start_date`` is provided the renderer stamps each cell with a
+    ``data-day-click="YYYY-MM-DD"`` attribute (computed from the cell's
+    column and row offsets), so JS can hook day-level click handlers.
+    ``start_date`` should be the Monday of the first week-column.
     """
     cell = 12
     gap = 2
     cols = (weeks or [])[-weeks_back:]
-    width = max(weeks_back, 1) * (cell + gap) + gap
-    height = 7 * (cell + gap) + gap
+
+    # Reserved gutters for labels (kept stable across the with_labels switch
+    # so the SVG always uses a 420×130 viewBox per the design spec).
+    left_gutter = 28 if with_labels else 0
+    top_gutter = 16 if with_labels else 0
+    grid_w = max(weeks_back, 1) * (cell + gap) + gap
+    grid_h = 7 * (cell + gap) + gap
+
+    if with_labels:
+        view_w, view_h = 420, 130
+    else:
+        view_w, view_h = grid_w, grid_h
+
+    label_attrs = ' class="heatmap-label"'
 
     if not cols:
+        empty_labels = ""
+        if with_labels:
+            # Render the weekday labels even on the empty stub so the layout
+            # doesn't visually jump when data first appears.
+            empty_labels = _heatmap_weekday_labels(top_gutter, cell, gap)
         return (
-            f'<svg class="heatmap" viewBox="0 0 {width} {height}" '
+            f'<svg class="heatmap" viewBox="0 0 {view_w} {view_h}" '
             f'preserveAspectRatio="xMidYMid meet" '
             f'style="width:100%;height:auto" '
             f'role="img" '
-            f'aria-label="No activity yet"><title>No activity yet</title></svg>'
+            f'aria-label="No activity yet"><title>No activity yet</title>'
+            f"{empty_labels}"
+            f"</svg>"
         )
 
     flat = [v for col in cols for v in col if v > 0]
@@ -336,30 +380,84 @@ def heatmap_svg(weeks: list[list[int]], *, weeks_back: int = 26) -> str:
             return 3
         return 4
 
+    # Optional date computation. When ``start_date`` is given, ``col_date``
+    # for column ``c`` is ``start_date + c*7 days``; row ``r`` adds ``r``
+    # days. The caller is responsible for passing a Monday.
     cells: list[str] = []
+    month_label_cols: list[tuple[int, str]] = []
+    last_month: int | None = None
     for col_idx, week in enumerate(cols):
+        # Track first-week-of-month transitions for the top labels.
+        if start_date is not None and with_labels:
+            col_first_day = start_date + _timedelta(days=col_idx * 7)
+            if last_month is None or col_first_day.month != last_month:
+                month_label_cols.append((col_idx, _MONTH_NAMES[col_first_day.month - 1]))
+                last_month = col_first_day.month
         for row_idx in range(7):
             v = week[row_idx] if row_idx < len(week) else 0
             level = _level(v)
-            x = gap + col_idx * (cell + gap)
-            y = gap + row_idx * (cell + gap)
+            x = left_gutter + gap + col_idx * (cell + gap)
+            y = top_gutter + gap + row_idx * (cell + gap)
             cls = f"day l-{level}" if level else "day"
+            day_attr = ""
+            if start_date is not None:
+                day = start_date + _timedelta(days=col_idx * 7 + row_idx)
+                day_attr = f' data-day-click="{day.isoformat()}"'
             cells.append(
                 f'<rect class="{cls}" x="{x}" y="{y}" width="{cell}" '
-                f'height="{cell}" rx="2" ry="2">'
+                f'height="{cell}" rx="2" ry="2"{day_attr}>'
                 f"<title>{v} on day {row_idx} (week {col_idx})</title>"
                 "</rect>"
             )
 
+    # When no start_date is supplied, fall back to a coarse month label
+    # heuristic: divide the columns into ~quarters and label them. This
+    # keeps the visual hint useful even for callers that don't track dates.
+    if with_labels and not month_label_cols:
+        n = len(cols)
+        if n > 0:
+            # Pick 4 evenly-spaced label positions. Use generic labels so the
+            # output is deterministic without a real date to anchor against.
+            for idx, name in enumerate(("now-6mo", "now-4mo", "now-2mo", "now")):
+                col_idx = min(n - 1, int(idx * n / 4))
+                month_label_cols.append((col_idx, name))
+
+    label_svg = ""
+    if with_labels:
+        # Month labels along the top.
+        month_label_svg: list[str] = []
+        for col_idx, name in month_label_cols:
+            x = left_gutter + gap + col_idx * (cell + gap)
+            month_label_svg.append(
+                f'<text{label_attrs} x="{x}" y="{top_gutter - 4}">{_esc(name)}</text>'
+            )
+        # Weekday labels (Mon, Wed, Fri) on the left.
+        weekday_svg = _heatmap_weekday_labels(top_gutter, cell, gap)
+        label_svg = "".join(month_label_svg) + weekday_svg
+
     return (
-        f'<svg class="heatmap" viewBox="0 0 {width} {height}" '
+        f'<svg class="heatmap" viewBox="0 0 {view_w} {view_h}" '
         f'preserveAspectRatio="xMidYMid meet" '
         f'style="width:100%;height:auto" '
         f'role="img" '
         f'aria-label="Activity heatmap, last {len(cols)} weeks">'
+        + label_svg
         + "".join(cells)
         + "</svg>"
     )
+
+
+def _heatmap_weekday_labels(top_gutter: int, cell: int, gap: int) -> str:
+    """Emit the GitHub-style weekday labels (Mon/Wed/Fri only)."""
+    # row indices 0=Mon, 2=Wed, 4=Fri.
+    parts: list[str] = []
+    for row_idx, name in ((0, "Mon"), (2, "Wed"), (4, "Fri")):
+        # baseline-adjusted y so text sits roughly centred on the row.
+        y = top_gutter + gap + row_idx * (cell + gap) + cell - 2
+        parts.append(
+            f'<text class="heatmap-label" x="0" y="{y}">{name}</text>'
+        )
+    return "".join(parts)
 
 
 # ---------------------------------------------------------------------------

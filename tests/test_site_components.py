@@ -209,6 +209,54 @@ def test_heatmap_caps_to_weeks_back():
     assert out.count("<rect") == 70
 
 
+def test_heatmap_renders_month_and_weekday_labels():
+    """With ``with_labels=True`` (default) and a real start_date the SVG
+    should carry month-name labels along the top + weekday labels on the
+    left edge (Mon/Wed/Fri only, GitHub-style)."""
+    from datetime import date
+
+    weeks = [[1] * 7] * 26
+    out = heatmap_svg(weeks, weeks_back=26, start_date=date(2026, 1, 5))
+    # Default viewBox bumps to 420x130 to make space for labels.
+    assert 'viewBox="0 0 420 130"' in out
+    # Weekday labels on the left.
+    assert "<text" in out
+    assert ">Mon<" in out
+    assert ">Wed<" in out
+    assert ">Fri<" in out
+    # Month labels along the top — at least 3 distinct months for a 26-week
+    # window starting in early January.
+    months_seen = sum(1 for m in ("Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul")
+                      if f">{m}<" in out)
+    assert months_seen >= 3, f"expected >=3 month labels, got {months_seen}"
+
+
+def test_heatmap_with_labels_false_drops_labels():
+    out = heatmap_svg([[1] * 7] * 8, weeks_back=8, with_labels=False)
+    assert "<text" not in out  # no month/weekday labels
+    assert "heatmap-label" not in out
+
+
+def test_heatmap_start_date_stamps_data_day_click():
+    from datetime import date
+
+    weeks = [[1] * 7] * 4
+    out = heatmap_svg(weeks, weeks_back=4, start_date=date(2026, 4, 6))
+    # First cell is the Monday start_date itself.
+    assert 'data-day-click="2026-04-06"' in out
+    # And a later cell several days in.
+    assert 'data-day-click="2026-04-08"' in out
+
+
+def test_heatmap_without_start_date_uses_generic_month_labels():
+    """When the caller does not supply a start_date the renderer still
+    surfaces month-style hints so the top axis is not blank."""
+    out = heatmap_svg([[1] * 7] * 26, weeks_back=26)
+    assert "<text" in out
+    # Generic placeholder labels.
+    assert ">now<" in out
+
+
 # ---------------------------------------------------------------------------
 # AI siblings footer
 # ---------------------------------------------------------------------------

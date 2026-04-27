@@ -49,6 +49,7 @@ CSS: str = r"""
   --toc-w: 220px;
   --read-w: 720px;
   --page-w: 1280px;
+  --topbar-height: 56px;
 }
 
 [data-theme="dark"] {
@@ -181,13 +182,16 @@ hr {
 
 /* Layout grid (§5.2)
    ------------------------------------------------------------ */
+html, body { overflow-x: clip; }
 .shell {
   max-width: var(--page-w);
   margin: 0 auto;
   display: grid;
   grid-template-columns: 1fr;
   gap: var(--space-5);
-  padding: var(--space-5) var(--space-4);
+  padding: var(--space-5) clamp(12px, 4vw, 24px);
+  /* sticky position requires no overflow:hidden on ancestors. */
+  overflow: visible;
 }
 .rail {
   display: none; /* mobile: hidden by default */
@@ -261,10 +265,20 @@ hr {
   .toc-rail {
     display: block;
     position: sticky;
-    top: 64px;
+    top: var(--topbar-height, 56px);
     align-self: start;
-    max-height: calc(100vh - 80px);
-    overflow-y: auto;
+    max-height: calc(100vh - 96px);
+    overflow: auto;
+  }
+  /* The inner ``aside.toc`` (rendered by components.toc) sticks too so the
+     "On this page" rail follows long article scrolls. */
+  .toc-rail .toc,
+  aside.toc {
+    position: sticky;
+    top: var(--topbar-height, 56px);
+    align-self: start;
+    max-height: calc(100vh - 96px);
+    overflow: auto;
   }
 }
 
@@ -810,6 +824,132 @@ hr {
 [data-theme="dark"] .graph-page .graph-tooltip {
   background: var(--surface-2);
 }
+
+/* Stat row (home hero §5.3)
+   ------------------------------------------------------------ */
+.stats {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 12px;
+  margin: var(--space-4) 0 var(--space-6);
+  padding: 0;
+  list-style: none;
+}
+.stat {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  padding: 16px 20px;
+  background: var(--surface);
+  border: 1px solid var(--rule);
+  border-radius: var(--radius);
+  box-shadow: var(--shadow);
+}
+.stat b,
+.stat .stat-value {
+  font-family: var(--type-serif);
+  font-weight: 600;
+  font-size: clamp(28px, 3vw, 44px);
+  line-height: 1;
+  font-variant-numeric: tabular-nums;
+  color: var(--ink);
+}
+.stat span,
+.stat .stat-label {
+  font-family: var(--type-sans);
+  font-size: 13px;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: var(--ink-muted);
+}
+
+/* Button labels (consistent padding, hit area, icon+label gap)
+   ------------------------------------------------------------ */
+.button,
+button:not([class*="graph-legend"]):not(.tag-chip),
+a.button,
+.theme-toggle,
+.search-button,
+.rail-toggle,
+.toc-toggle {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  padding: 8px 16px;
+  letter-spacing: 0.02em;
+  min-block-size: 36px;
+  font-family: var(--type-sans);
+  font-size: 0.92rem;
+  border: 1px solid var(--rule);
+  border-radius: var(--radius);
+  background: var(--surface);
+  color: var(--ink);
+  text-decoration: none;
+  cursor: pointer;
+  transition: border-color 160ms ease, color 160ms ease, background 160ms ease;
+}
+.button:hover,
+button:not([class*="graph-legend"]):not(.tag-chip):hover,
+a.button:hover,
+.theme-toggle:hover,
+.search-button:hover,
+.rail-toggle:hover,
+.toc-toggle:hover {
+  border-color: var(--accent);
+  color: var(--accent);
+}
+
+/* Panel / section spacing on detail pages
+   ------------------------------------------------------------ */
+section.panel,
+.panel {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  padding: 24px;
+  margin-block: 28px;
+  background: var(--surface);
+  border: 1px solid var(--rule);
+  border-radius: var(--radius);
+  box-shadow: var(--shadow);
+}
+section.panel > h2,
+section.panel > h3,
+.panel > h2,
+.panel > h3 {
+  margin: 0;
+}
+
+/* Table scroll wrapper — keeps wide tables from busting mobile layout. */
+.table-scroll {
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+  margin: var(--space-3) 0;
+}
+.table-scroll > table { margin: 0; }
+
+/* Auto-fill card grid (self-tunes 1/2/3/4-up by viewport).
+   Used by index pages on top of the existing ``.card-grid``. */
+.card-grid {
+  grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+}
+
+/* Card-row tap targets — every <a> inside a card or table row gets a
+   reasonable hit area on touch devices. */
+.card a,
+.node-table tbody tr a {
+  min-block-size: 44px;
+  display: inline-flex;
+  align-items: center;
+}
+
+/* Heatmap label glyphs (month names along the top, weekday names on left). */
+.heatmap text.heatmap-label {
+  font-family: var(--type-sans);
+  font-size: 10px;
+  fill: var(--ink-muted);
+}
 """
 
 
@@ -835,24 +975,28 @@ body {
 }
 
 /* 2. Touch-safe minimum hit area for every clickable target.
-      iOS HIG = 44pt; we hit it via min-block-size on inline-flex items. */
-.topbar nav a,
-.topbar .search-button,
-.topbar .theme-toggle,
-.rail-toggle,
-.toc-toggle,
-.button,
-a.card,
-.card,
-.tag-chip,
-.badge,
-.node-table td a,
-.edge-list a,
-.ai-siblings a,
-.mobile-bottom-nav a {
-  min-block-size: 44px;
-  display: inline-flex;
-  align-items: center;
+      iOS HIG = 44pt; we hit it via min-block-size on inline-flex items.
+      Scoped to <= 1023px so desktop keeps a denser 36px hit area. */
+@media (max-width: 1023px) {
+  .topbar nav a,
+  .topbar .search-button,
+  .topbar .theme-toggle,
+  .rail-toggle,
+  .toc-toggle,
+  .button,
+  button,
+  a.button,
+  a.card,
+  .card,
+  .tag-chip,
+  .node-table td a,
+  .edge-list a,
+  .ai-siblings a,
+  .mobile-bottom-nav a {
+    min-block-size: 44px;
+    display: inline-flex;
+    align-items: center;
+  }
 }
 
 /* The card body needs a bit more breathing room so the entire surface
@@ -990,9 +1134,10 @@ a.card,
     grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
     gap: var(--space-3) !important;
   }
-  .stat { font-size: .9rem; }
+  .stat { font-size: .9rem; padding: 12px 14px; }
+  .stat b,
   .stat .stat-value,
-  .stat strong { font-size: 1.4rem; }
+  .stat strong { font-size: clamp(22px, 7vw, 32px); }
 
   /* Cards stack one per row. */
   .card-grid { grid-template-columns: 1fr; gap: var(--space-3); }
