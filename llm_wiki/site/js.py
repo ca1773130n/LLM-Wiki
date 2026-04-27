@@ -1,22 +1,29 @@
 """Client-side JavaScript bundles for the LLM-Wiki static site.
 
-Three module-level constants compose into the bundle that gets written to
+Module-level string constants compose into the bundle that gets written to
 ``assets/app.js`` by the StaticSiteBuilder:
 
-- :data:`JS_THEME_TOGGLE` — toggles ``data-theme`` on the root element and
-  persists the choice to ``localStorage``.
-- :data:`JS_SEARCH_PALETTE` — full-text + fuzzy search over
-  ``search-index.json`` (built by Subagent F). Opens with ``cmd+k`` or ``/``,
-  arrow keys to navigate, enter to open, escape to close. Recent results are
-  remembered between sessions.
+- :data:`JS_THEME_TOGGLE` — Reads the persisted theme from ``localStorage``
+  (``llm-wiki-theme``), falls back to ``prefers-color-scheme``, and toggles
+  ``data-theme`` on ``<html>`` for any ``[data-toggle-theme]`` click. Updates
+  the ``aria-label`` of the toggle to reflect the current theme. Listens to
+  the system colour-scheme media query and follows it while the user has
+  not explicitly chosen.
+- :data:`JS_RAIL_DRAWER` — left rail and TOC drawers (mobile chrome).
+- :data:`JS_SEARCH_PALETTE` — command palette: opens with ``cmd/ctrl+k`` or
+  ``/`` (when not in a textfield) or any ``[data-open-search]`` click.
+  Fetches ``/search-index.json`` once per session, then filters in memory.
+  Up/Down navigates highlighted result, Enter opens, Escape closes,
+  click-outside closes. Recents persisted to ``localStorage``.
 - :data:`JS_GRAPH` — interactive 3D force-directed graph view powered by
-  ``3d-force-graph`` (with ``three`` as a peer dependency) loaded as ES
-  modules from esm.sh. Reads the ``#graph-data`` payload script, renders
-  nodes colored by group, edges thickness-coded, with hover-highlight,
-  hover-tooltip on edges, info panel, search, type-legend, 2D/3D toggle,
-  and keyboard shortcuts (``f`` fit, ``r`` reset, ``2``/``3`` toggle,
-  ``/`` focus search, ``Esc`` clear). Falls back to an inline SVG layout
-  + error banner if the CDN is blocked. Respects ``prefers-reduced-motion``.
+  ``3d-force-graph`` (with ``three`` dynamically imported from esm.sh as a
+  peer dep). Cursor-anchored wheel zoom (raycast through cursor → world).
+  Per-node ``THREE.Sprite`` labels for high-degree nodes; canvas labels in
+  2D. Edge labels via ``linkThreeObject`` / ``linkCanvasObject``. Edge
+  hover via ``linkHoverPrecision`` + ``onLinkHover`` populates the
+  ``.graph-tooltip``. Fit-to-view computes a bounding sphere over node
+  positions inside ``onEngineStop`` and reframes the camera. Falls back
+  to an inline SVG layout + error banner if the CDN is blocked.
 
 The bundle stays vanilla (no npm) and feature-detects everything it touches.
 DOM updates use ``textContent`` and explicit ``createElement`` calls — never
@@ -27,138 +34,409 @@ even when the search index contains arbitrary corpus strings.
 from __future__ import annotations
 
 
+# ---------------------------------------------------------------------------
+# Theme toggle
+# ---------------------------------------------------------------------------
 JS_THEME_TOGGLE = r"""
 (function(){
-  const root = document.documentElement;
-  const KEY = 'llmwiki-theme';
-  const saved = (function(){ try { return localStorage.getItem(KEY); } catch(_) { return null; } })();
-  if (saved === 'dark' || saved === 'light') root.dataset.theme = saved;
-  function toggle(){
-    const next = root.dataset.theme === 'dark' ? 'light' : 'dark';
-    root.dataset.theme = next;
-    try { localStorage.setItem(KEY, next); } catch(_) {}
+  var root = document.documentElement;
+  var KEY = 'llm-wiki-theme';
+  var EXPLICIT_KEY = 'llm-wiki-theme-explicit';
+
+  function readSaved(){
+    try { return localStorage.getItem(KEY); } catch (_) { return null; }
+  }
+  function readExplicit(){
+    try { return localStorage.getItem(EXPLICIT_KEY) === '1'; } catch (_) { return false; }
+  }
+  function writeSaved(value, explicit){
+    try {
+      localStorage.setItem(KEY, value);
+      if (explicit) localStorage.setItem(EXPLICIT_KEY, '1');
+    } catch (_) {}
+  }
+  function systemPref(){
+    try {
+      return (window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches)
+        ? 'dark' : 'light';
+    } catch (_) { return 'light'; }
+  }
+
+  // Compute and apply the initial theme as early as the bundle runs.
+  // (The bundle is loaded with `defer` so this happens before paint of
+  // user-influenced sections; if a future change inlines theme apply in
+  // the document <head>, this block stays correct as the duplicate apply
+  // is cheap and idempotent.)
+  var initial = readSaved();
+  if (initial !== 'dark' && initial !== 'light') initial = systemPref();
+  root.setAttribute('data-theme', initial);
+
+  function syncButtons(){
+    var current = root.getAttribute('data-theme') || 'light';
+    var nextLabel = current === 'dark' ? 'Switch to light theme' : 'Switch to dark theme';
+    var btns = document.querySelectorAll('[data-toggle-theme]');
+    for (var i = 0; i < btns.length; i++) {
+      btns[i].setAttribute('aria-label', nextLabel);
+      btns[i].setAttribute('aria-pressed', current === 'dark' ? 'true' : 'false');
+      btns[i].dataset.themeCurrent = current;
+    }
+  }
+
+  function setTheme(next, explicit){
+    root.setAttribute('data-theme', next);
+    writeSaved(next, !!explicit);
+    syncButtons();
+  }
+
+  function cycle(){
+    var current = root.getAttribute('data-theme') === 'dark' ? 'dark' : 'light';
+    setTheme(current === 'dark' ? 'light' : 'dark', true);
+  }
+
+  // Click on any data-toggle-theme button toggles the theme.
+  document.addEventListener('click', function(e){
+    var t = e.target && e.target.closest && e.target.closest('[data-toggle-theme], #theme-toggle');
+    if (!t) return;
+    e.preventDefault();
+    cycle();
+  });
+
+  // Follow OS theme while the user has not explicitly chosen.
+  try {
+    var mq = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)');
+    if (mq) {
+      var listener = function(evt){
+        if (readExplicit()) return;
+        setTheme(evt.matches ? 'dark' : 'light', false);
+      };
+      if (mq.addEventListener) mq.addEventListener('change', listener);
+      else if (mq.addListener) mq.addListener(listener);
+    }
+  } catch (_) {}
+
+  // Sync labels once the DOM is ready (the bundle defers, but be defensive).
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', syncButtons);
+  } else {
+    syncButtons();
+  }
+})();
+"""
+
+
+# ---------------------------------------------------------------------------
+# Rail / TOC drawer chrome (mobile)
+# ---------------------------------------------------------------------------
+JS_RAIL_DRAWER = r"""
+(function(){
+  var root = document.documentElement;
+  function setOpen(attr, btnSel, open){
+    if (open) root.setAttribute(attr, ''); else root.removeAttribute(attr);
+    var btns = document.querySelectorAll(btnSel);
+    for (var i = 0; i < btns.length; i++) btns[i].setAttribute('aria-expanded', open ? 'true' : 'false');
+  }
+  function toggle(attr, btnSel){
+    setOpen(attr, btnSel, !root.hasAttribute(attr));
   }
   document.addEventListener('click', function(e){
-    const target = e.target.closest('#theme-toggle, [data-theme-toggle]');
-    if (target) { e.preventDefault(); toggle(); }
+    var rail = e.target.closest('[data-toggle-rail]');
+    if (rail) { e.preventDefault(); toggle('data-rail-open', '[data-toggle-rail]'); return; }
+    var toc = e.target.closest('[data-toggle-toc]');
+    if (toc) { e.preventDefault(); toggle('data-toc-open', '[data-toggle-toc]'); return; }
+    if (root.hasAttribute('data-rail-open')) {
+      var inRail = e.target.closest('#rail a');
+      if (inRail) setOpen('data-rail-open', '[data-toggle-rail]', false);
+    }
+    if (root.hasAttribute('data-toc-open')) {
+      var inToc = e.target.closest('#toc a');
+      if (inToc) setOpen('data-toc-open', '[data-toggle-toc]', false);
+    }
+  });
+  document.addEventListener('keydown', function(e){
+    if (e.key !== 'Escape') return;
+    if (root.hasAttribute('data-rail-open')) setOpen('data-rail-open', '[data-toggle-rail]', false);
+    if (root.hasAttribute('data-toc-open')) setOpen('data-toc-open', '[data-toggle-toc]', false);
   });
 })();
 """
 
 
+# ---------------------------------------------------------------------------
+# Search palette (cmd+k / / opens; fetches /search-index.json)
+# ---------------------------------------------------------------------------
 JS_SEARCH_PALETTE = r"""
 (function(){
-  let data = null;
-  let dataReady = null;
-  const palette = document.getElementById('palette');
-  const input = document.getElementById('search');
-  const results = document.getElementById('results');
-  const RECENTS_KEY = 'llmwiki-recents';
+  var data = null;
+  var dataReady = null;
+  var palette = null;
+  var input = null;
+  var resultsEl = null;
+  var statusEl = null;
+  var highlightIndex = 0;
+  var currentItems = [];
+  var RECENTS_KEY = 'llm-wiki-recents';
+
   function loadRecents(){
-    try { return JSON.parse(localStorage.getItem(RECENTS_KEY) || '[]'); } catch(_) { return []; }
+    try { return JSON.parse(localStorage.getItem(RECENTS_KEY) || '[]'); } catch (_) { return []; }
   }
   function saveRecent(item){
     try {
-      const list = loadRecents().filter(x => x.href !== item.href);
-      list.unshift({ title: item.title, href: item.href, type: item.type });
+      var list = loadRecents().filter(function(x){ return x.href !== item.href; });
+      list.unshift({ title: item.title, href: item.href, kind: item.kind || item.type });
       localStorage.setItem(RECENTS_KEY, JSON.stringify(list.slice(0, 10)));
-    } catch(_) {}
+    } catch (_) {}
   }
+
+  // Resolve search-index location relative to the document. The site emits
+  // it at the site root; pages live at depth 0..2, so a single absolute
+  // URL would 404 if served from a sub-path. We try the inline payload
+  // first (if rendered into the page), then the relative `search-index.json`,
+  // then the absolute `/search-index.json` as a final fallback.
   function ensureData(){
     if (data) return Promise.resolve(data);
     if (dataReady) return dataReady;
-    const inline = document.getElementById('search-data');
+    var inline = document.getElementById('search-data');
     if (inline) {
-      try { data = JSON.parse(inline.textContent || '[]'); return Promise.resolve(data); } catch(_) {}
+      try { data = JSON.parse(inline.textContent || '[]'); return Promise.resolve(data); } catch (_) {}
     }
-    dataReady = fetch('search-index.json').then(r => r.ok ? r.json() : []).then(j => { data = j || []; return data; }).catch(() => { data = []; return data; });
+    var prefix = '';
+    var brand = document.querySelector('.topbar .brand');
+    if (brand && brand.getAttribute('href')) {
+      var href = brand.getAttribute('href');
+      // strip trailing 'index.html'
+      prefix = href.replace(/index\.html$/, '');
+    }
+    dataReady = fetch(prefix + 'search-index.json')
+      .then(function(r){ return r.ok ? r.json() : Promise.reject(new Error('not ok')); })
+      .catch(function(){ return fetch('/search-index.json').then(function(r){ return r.ok ? r.json() : []; }); })
+      .then(function(j){ data = Array.isArray(j) ? j : (j && j.items) || []; return data; })
+      .catch(function(){ data = []; return data; });
     return dataReady;
   }
-  function score(query, item){
-    if (!query) return 0;
-    const q = query.toLowerCase();
-    const hay = ((item.title || '') + ' ' + (item.description || '') + ' ' + (item.type || '')).toLowerCase();
-    if (hay.indexOf(q) !== -1) return 10 - hay.indexOf(q) / 200;
-    let i = 0; let s = 0;
-    for (const ch of q) { const idx = hay.indexOf(ch, i); if (idx === -1) return 0; s += 1 / (idx - i + 1); i = idx + 1; }
-    return s;
-  }
-  function buildResultRow(item){
-    const a = document.createElement('a');
-    a.className = 'result';
-    a.href = item.href || '#';
-    a.dataset.href = item.href || '';
-    const badge = document.createElement('span');
-    badge.className = 'badge';
-    badge.textContent = item.type || '';
-    const strong = document.createElement('strong');
-    strong.textContent = item.title || item.id || '';
-    const desc = document.createElement('p');
-    desc.textContent = item.description || item.source_path || '';
-    a.appendChild(badge);
-    a.appendChild(strong);
-    a.appendChild(desc);
-    return a;
-  }
-  function render(items){
-    if (!results) return;
-    while (results.firstChild) results.removeChild(results.firstChild);
-    if (!items.length) {
-      const p = document.createElement('p');
-      p.className = 'muted';
-      p.textContent = 'No matches.';
-      results.appendChild(p);
-      return;
+
+  function ensurePaletteShell(){
+    palette = document.getElementById('palette');
+    if (!palette) return false;
+    input = palette.querySelector('#search') || document.getElementById('search');
+    // Add the missing pieces (results list + status row) lazily on first open.
+    var box = palette.querySelector('.palette-box');
+    if (!box) return false;
+    resultsEl = palette.querySelector('#palette-results');
+    if (!resultsEl) {
+      resultsEl = document.createElement('ul');
+      resultsEl.id = 'palette-results';
+      resultsEl.className = 'palette-results';
+      resultsEl.setAttribute('role', 'listbox');
+      box.appendChild(resultsEl);
     }
-    items.slice(0, 30).forEach(function(it){ results.appendChild(buildResultRow(it)); });
-  }
-  function open(){
-    if (!palette) return;
-    palette.hidden = false;
-    setTimeout(() => { input && input.focus(); }, 0);
-    ensureData().then(items => {
-      const recents = loadRecents();
-      render(recents.length ? recents : items.slice(0, 12));
-    });
-  }
-  function close(){ if (palette) palette.hidden = true; }
-  function search(){
-    if (!input) return;
-    ensureData().then(items => {
-      const q = (input.value || '').trim();
-      if (!q) { render(items.slice(0, 12)); return; }
-      const ranked = items.map(it => ({ it, s: score(q, it) })).filter(r => r.s > 0).sort((a, b) => b.s - a.s).map(r => r.it);
-      render(ranked);
-    });
-  }
-  document.addEventListener('click', function(e){
-    const opener = e.target.closest('[data-open-search]');
-    if (opener) { e.preventDefault(); open(); return; }
-    const result = e.target.closest('.result[data-href]');
-    if (result) {
-      saveRecent({
-        title: (result.querySelector('strong') && result.querySelector('strong').textContent) || '',
-        href: result.dataset.href,
-        type: (result.querySelector('.badge') && result.querySelector('.badge').textContent) || ''
+    statusEl = palette.querySelector('#palette-status');
+    if (!statusEl) {
+      statusEl = document.createElement('p');
+      statusEl.id = 'palette-status';
+      statusEl.className = 'palette-status muted';
+      box.appendChild(statusEl);
+    }
+    if (input && !input.dataset.paletteWired) {
+      input.dataset.paletteWired = '1';
+      input.setAttribute('role', 'combobox');
+      input.setAttribute('aria-controls', 'palette-results');
+      input.setAttribute('aria-autocomplete', 'list');
+      input.addEventListener('input', onInput);
+      input.addEventListener('keydown', onInputKeydown);
+    }
+    if (!palette.dataset.paletteWired) {
+      palette.dataset.paletteWired = '1';
+      palette.addEventListener('click', function(e){
+        if (e.target === palette) closePalette();
       });
     }
-    if (palette && e.target === palette) close();
+    return true;
+  }
+
+  function setStatus(text){
+    if (!statusEl) return;
+    statusEl.textContent = text || '';
+  }
+
+  function makeRow(item, index){
+    var li = document.createElement('li');
+    li.className = 'palette-result';
+    li.setAttribute('role', 'option');
+    li.dataset.index = String(index);
+    li.dataset.href = item.href || '';
+    var a = document.createElement('a');
+    a.href = item.href || '#';
+    a.className = 'palette-result-link';
+    var badge = document.createElement('span');
+    badge.className = 'palette-result-kind badge';
+    badge.textContent = (item.kind || item.type || '').toString();
+    var title = document.createElement('strong');
+    title.className = 'palette-result-title';
+    title.textContent = item.title || item.id || '';
+    var summary = document.createElement('span');
+    summary.className = 'palette-result-summary muted';
+    var summaryText = (item.summary || item.description || item.source_path || '').toString();
+    if (summaryText.length > 160) summaryText = summaryText.slice(0, 157) + '…';
+    summary.textContent = summaryText;
+    a.appendChild(badge);
+    a.appendChild(title);
+    a.appendChild(summary);
+    li.appendChild(a);
+    return li;
+  }
+
+  function render(items, label){
+    if (!resultsEl) return;
+    while (resultsEl.firstChild) resultsEl.removeChild(resultsEl.firstChild);
+    currentItems = items.slice(0, 30);
+    if (!currentItems.length) {
+      setStatus(label || 'No results.');
+      return;
+    }
+    setStatus(label || (currentItems.length + ' result' + (currentItems.length === 1 ? '' : 's')));
+    for (var i = 0; i < currentItems.length; i++) {
+      resultsEl.appendChild(makeRow(currentItems[i], i));
+    }
+    highlightIndex = 0;
+    updateHighlight();
+  }
+
+  function updateHighlight(){
+    if (!resultsEl) return;
+    var rows = resultsEl.querySelectorAll('.palette-result');
+    for (var i = 0; i < rows.length; i++) {
+      if (i === highlightIndex) {
+        rows[i].classList.add('is-active');
+        rows[i].setAttribute('aria-selected', 'true');
+        if (rows[i].scrollIntoView) {
+          try { rows[i].scrollIntoView({ block: 'nearest' }); } catch (_) {}
+        }
+      } else {
+        rows[i].classList.remove('is-active');
+        rows[i].setAttribute('aria-selected', 'false');
+      }
+    }
+  }
+
+  function matches(query, item){
+    if (!query) return true;
+    var q = query.toLowerCase();
+    var title = (item.title || '').toString().toLowerCase();
+    var summary = (item.summary || item.description || '').toString().toLowerCase();
+    var kind = (item.kind || item.type || '').toString().toLowerCase();
+    return title.indexOf(q) !== -1 || summary.indexOf(q) !== -1 || kind.indexOf(q) !== -1;
+  }
+
+  function runSearch(){
+    if (!input) return;
+    var q = (input.value || '').trim();
+    ensureData().then(function(items){
+      if (!q) {
+        var recents = loadRecents();
+        if (recents.length) {
+          render(recents, 'Recent');
+        } else {
+          render(items.slice(0, 12), 'Browse');
+        }
+        return;
+      }
+      var matched = items.filter(function(it){ return matches(q, it); });
+      render(matched, matched.length ? null : 'No matches for “' + q + '”');
+    });
+  }
+
+  function onInput(){
+    runSearch();
+  }
+
+  function onInputKeydown(e){
+    if (e.key === 'ArrowDown') {
+      e.preventDefault();
+      if (currentItems.length) {
+        highlightIndex = (highlightIndex + 1) % currentItems.length;
+        updateHighlight();
+      }
+    } else if (e.key === 'ArrowUp') {
+      e.preventDefault();
+      if (currentItems.length) {
+        highlightIndex = (highlightIndex - 1 + currentItems.length) % currentItems.length;
+        updateHighlight();
+      }
+    } else if (e.key === 'Enter') {
+      var item = currentItems[highlightIndex];
+      if (item && item.href) {
+        e.preventDefault();
+        saveRecent({ title: item.title, href: item.href, kind: item.kind || item.type });
+        window.location.href = item.href;
+      }
+    } else if (e.key === 'Escape') {
+      e.preventDefault();
+      closePalette();
+    }
+  }
+
+  function openPalette(){
+    if (!ensurePaletteShell()) return;
+    palette.hidden = false;
+    palette.setAttribute('data-open', '');
+    document.body.classList.add('palette-open');
+    setTimeout(function(){ try { input && input.focus(); input && input.select(); } catch (_) {} }, 0);
+    runSearch();
+  }
+
+  function closePalette(){
+    if (!palette) return;
+    palette.hidden = true;
+    palette.removeAttribute('data-open');
+    document.body.classList.remove('palette-open');
+  }
+
+  document.addEventListener('click', function(e){
+    var opener = e.target && e.target.closest && e.target.closest('[data-open-search]');
+    if (opener) { e.preventDefault(); openPalette(); return; }
+    var resultLink = e.target && e.target.closest && e.target.closest('.palette-result-link');
+    if (resultLink) {
+      var li = resultLink.closest('.palette-result');
+      var idx = li ? parseInt(li.dataset.index || '0', 10) : -1;
+      var item = currentItems[idx];
+      if (item) {
+        saveRecent({ title: item.title, href: item.href, kind: item.kind || item.type });
+      }
+      // allow default navigation
+    }
   });
-  if (input) input.addEventListener('input', search);
+
   document.addEventListener('keydown', function(e){
-    const tag = (document.activeElement && document.activeElement.tagName) || '';
-    if (e.key === '/' && !['INPUT', 'TEXTAREA'].includes(tag)) { e.preventDefault(); open(); return; }
-    if ((e.metaKey || e.ctrlKey) && (e.key || '').toLowerCase() === 'k') { e.preventDefault(); open(); return; }
-    if (e.key === 'Escape') { close(); }
+    var tag = (document.activeElement && document.activeElement.tagName) || '';
+    var inField = tag === 'INPUT' || tag === 'TEXTAREA' || tag === 'SELECT' || (document.activeElement && document.activeElement.isContentEditable);
+    if ((e.metaKey || e.ctrlKey) && (e.key || '').toLowerCase() === 'k') {
+      e.preventDefault();
+      openPalette();
+      return;
+    }
+    if (e.key === '/' && !inField) {
+      e.preventDefault();
+      openPalette();
+      return;
+    }
+    if (e.key === 'Escape') {
+      var p = document.getElementById('palette');
+      if (p && !p.hidden) {
+        e.preventDefault();
+        closePalette();
+      }
+    }
   });
 })();
 """
 
 
+# ---------------------------------------------------------------------------
+# Graph view (3D / 2D force-graph)
+# ---------------------------------------------------------------------------
 JS_GRAPH = r"""
 (function(){
-  // ----- Color map (terracotta family, harmonised with palette tokens) -----
-  const GROUP_COLORS = {
+  var GROUP_COLORS = {
     sources:   '#5b574f',
     papers:    '#be185d',
     repos:     '#2563eb',
@@ -169,9 +447,10 @@ JS_GRAPH = r"""
     questions: '#c08a1a',
     other:     '#64748b'
   };
-  const EDGE_COLOR_LIGHT = 'rgba(91,87,79,0.35)';
-  const EDGE_COLOR_DIM   = 'rgba(91,87,79,0.06)';
-  const EDGE_COLOR_HOT   = 'rgba(179,80,43,0.95)';
+  var EDGE_COLOR_LIGHT = 'rgba(91,87,79,0.35)';
+  var EDGE_COLOR_DIM   = 'rgba(91,87,79,0.06)';
+  var EDGE_COLOR_HOT   = 'rgba(179,80,43,0.95)';
+  var THREE_URL = 'https://esm.sh/three@0.169.0';
 
   function ready(fn){
     if (document.readyState === 'loading') {
@@ -180,18 +459,16 @@ JS_GRAPH = r"""
   }
 
   ready(function(){
-    const dataNode  = document.getElementById('graph-data');
-    const container = document.getElementById('graph-canvas');
+    var dataNode  = document.getElementById('graph-data');
+    var container = document.getElementById('graph-canvas');
     if (!dataNode || !container) return;
 
-    // ---- payload -------------------------------------------------------
-    let payload = { nodes: [], links: [] };
-    try { payload = JSON.parse(dataNode.textContent || '{}') || payload; } catch(_) {}
+    var payload = { nodes: [], links: [] };
+    try { payload = JSON.parse(dataNode.textContent || '{}') || payload; } catch (_) {}
     if (!Array.isArray(payload.nodes)) payload.nodes = [];
     if (!Array.isArray(payload.links)) payload.links = (payload.edges || []);
 
-    // Decorate nodes for fast neighbour lookup; build adjacency.
-    const byId = new Map();
+    var byId = new Map();
     payload.nodes.forEach(function(n){
       n.color = n.color || GROUP_COLORS[n.group || 'other'] || GROUP_COLORS.other;
       n.neighbors = new Set();
@@ -200,48 +477,50 @@ JS_GRAPH = r"""
       byId.set(n.id, n);
     });
     payload.links.forEach(function(l){
-      const a = byId.get(typeof l.source === 'object' ? l.source.id : l.source);
-      const b = byId.get(typeof l.target === 'object' ? l.target.id : l.target);
+      var a = byId.get(typeof l.source === 'object' ? l.source.id : l.source);
+      var b = byId.get(typeof l.target === 'object' ? l.target.id : l.target);
       if (!a || !b) return;
       a.neighbors.add(b); b.neighbors.add(a);
       a.edges.push(l); b.edges.push(l);
       a.degree += 1; b.degree += 1;
     });
 
-    // ---- DOM slots -----------------------------------------------------
-    const infoPanel = document.getElementById('graph-info-panel');
-    const tooltip   = document.getElementById('graph-tooltip');
-    const legendEl  = document.getElementById('graph-legend');
-    const searchEl  = document.getElementById('graph-search-input');
-    const banner    = document.getElementById('graph-error-banner');
-    const btn2D     = document.querySelector('[data-graph-mode="2d"]');
-    const btn3D     = document.querySelector('[data-graph-mode="3d"]');
-    const btnFit    = document.querySelector('[data-graph-action="fit"]');
-    const btnReset  = document.querySelector('[data-graph-action="reset"]');
+    // Compute the median val (or degree if val missing) for label visibility.
+    var vals = payload.nodes.map(function(n){ return Math.max(1, n.val || n.degree || 1); }).slice().sort(function(a,b){ return a - b; });
+    var medianVal = vals.length ? vals[Math.floor(vals.length / 2)] : 1;
 
-    const reduceMotion = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    var infoPanel = document.getElementById('graph-info-panel');
+    var tooltip   = document.getElementById('graph-tooltip');
+    var legendEl  = document.getElementById('graph-legend');
+    var searchEl  = document.getElementById('graph-search-input');
+    var banner    = document.getElementById('graph-error-banner');
+    var btn2D     = document.querySelector('[data-graph-mode="2d"]');
+    var btn3D     = document.querySelector('[data-graph-mode="3d"]');
+    var btnFit    = document.querySelector('[data-graph-action="fit"]');
+    var btnReset  = document.querySelector('[data-graph-action="reset"]');
 
-    // ---- Build legend (color swatches with counts; click toggles type) -
-    const typeCounts = {};
+    var reduceMotion = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+    var typeCounts = {};
     payload.nodes.forEach(function(n){
-      const g = n.group || 'other';
+      var g = n.group || 'other';
       typeCounts[g] = (typeCounts[g] || 0) + 1;
     });
-    const hiddenGroups = new Set();
+    var hiddenGroups = new Set();
     if (legendEl) {
       while (legendEl.firstChild) legendEl.removeChild(legendEl.firstChild);
       Object.keys(typeCounts).sort().forEach(function(group){
-        const chip = document.createElement('button');
+        var chip = document.createElement('button');
         chip.type = 'button';
         chip.className = 'graph-legend-chip';
         chip.dataset.group = group;
-        const dot = document.createElement('span');
+        var dot = document.createElement('span');
         dot.className = 'graph-legend-dot';
         dot.style.background = GROUP_COLORS[group] || GROUP_COLORS.other;
-        const label = document.createElement('span');
+        var label = document.createElement('span');
         label.className = 'graph-legend-label';
         label.textContent = group;
-        const count = document.createElement('span');
+        var count = document.createElement('span');
         count.className = 'graph-legend-count';
         count.textContent = String(typeCounts[group]);
         chip.appendChild(dot); chip.appendChild(label); chip.appendChild(count);
@@ -255,47 +534,53 @@ JS_GRAPH = r"""
       });
     }
 
-    // ---- Highlight + info-panel state ---------------------------------
-    let highlightNodes = new Set();
-    let highlightLinks = new Set();
-    let hoverNode = null;
-    let pinnedNode = null;
-    let Graph = null;        // current renderer instance
-    let mode = '3d';
-    let searchQuery = '';
+    var highlightNodes = new Set();
+    var highlightLinks = new Set();
+    var hoverNode = null;
+    var hoverLink = null;
+    var pinnedNode = null;
+    var Graph = null;
+    var THREE = null;
+    var mode = '3d';
+    var searchQuery = '';
+    var dayFilter = null;
+
+    function nodeAccent(n){
+      return GROUP_COLORS[n.group || 'other'] || GROUP_COLORS.other;
+    }
 
     function showInfoPanel(node){
       if (!infoPanel) return;
       while (infoPanel.firstChild) infoPanel.removeChild(infoPanel.firstChild);
       if (!node) { infoPanel.classList.remove('is-visible'); return; }
-      const h = document.createElement('h3');
+      var h = document.createElement('h3');
       h.className = 'graph-info-title';
       h.textContent = node.name || node.id || '';
       infoPanel.appendChild(h);
-      const meta = document.createElement('p');
+      var meta = document.createElement('p');
       meta.className = 'graph-info-meta';
-      const t = document.createElement('span');
+      var t = document.createElement('span');
       t.className = 'graph-info-badge';
-      t.style.background = GROUP_COLORS[node.group || 'other'] || GROUP_COLORS.other;
+      t.style.background = nodeAccent(node);
       t.textContent = node.group || node.kind || '';
       meta.appendChild(t);
-      const typeSpan = document.createElement('span');
+      var typeSpan = document.createElement('span');
       typeSpan.textContent = ' ' + (node.type || '');
       meta.appendChild(typeSpan);
-      const degSpan = document.createElement('span');
+      var degSpan = document.createElement('span');
       degSpan.className = 'graph-info-degree';
       degSpan.textContent = ' · degree ' + (node.degree || 0);
       meta.appendChild(degSpan);
       infoPanel.appendChild(meta);
       if (node.description) {
-        const desc = document.createElement('p');
+        var desc = document.createElement('p');
         desc.className = 'graph-info-desc';
-        const text = String(node.description);
+        var text = String(node.description);
         desc.textContent = text.length > 200 ? text.slice(0, 197) + '…' : text;
         infoPanel.appendChild(desc);
       }
       if (node.href) {
-        const a = document.createElement('a');
+        var a = document.createElement('a');
         a.className = 'graph-info-link';
         a.href = node.href;
         a.textContent = 'Open page →';
@@ -322,62 +607,64 @@ JS_GRAPH = r"""
         node.edges.forEach(function(e){ highlightLinks.add(e); });
       }
       if (Graph && Graph.refresh) {
-        try { Graph.refresh(); } catch(_) {}
+        try { Graph.refresh(); } catch (_) {}
       }
       if (Graph && Graph.nodeColor) {
-        // Kick a re-render in 2D builds
-        Graph.nodeColor(Graph.nodeColor());
+        try { Graph.nodeColor(Graph.nodeColor()); } catch (_) {}
       }
     }
 
     function isVisible(node){
       if (!node) return false;
-      const g = node.group || 'other';
+      var g = node.group || 'other';
       if (hiddenGroups.has(g)) return false;
       if (searchQuery && !(node.name || '').toLowerCase().includes(searchQuery)) return false;
+      if (dayFilter) {
+        var created = node.metadata && node.metadata.created;
+        if (!created || String(created).slice(0, 10) !== dayFilter) return false;
+      }
       return true;
     }
 
     function refreshVisibility(){
       if (!Graph) return;
-      // Force a repaint by re-applying accessors.
-      try { Graph.nodeVisibility(function(n){ return isVisible(n); }); } catch(_) {}
+      try { Graph.nodeVisibility(function(n){ return isVisible(n); }); } catch (_) {}
       try { Graph.linkVisibility(function(l){
-        const s = typeof l.source === 'object' ? l.source : byId.get(l.source);
-        const t = typeof l.target === 'object' ? l.target : byId.get(l.target);
+        var s = typeof l.source === 'object' ? l.source : byId.get(l.source);
+        var t = typeof l.target === 'object' ? l.target : byId.get(l.target);
         return isVisible(s) && isVisible(t);
-      }); } catch(_) {}
+      }); } catch (_) {}
     }
 
-    // ---- 2D-fallback (SVG) renderer for CDN-blocked environments ------
+    // ---- 2D fallback (SVG) for when force-graph never loads --------------
     function renderFallback(message){
       if (banner) {
         banner.textContent = message || 'Interactive 3D renderer unavailable — showing static fallback.';
         banner.classList.add('is-visible');
       }
-      const NS = 'http://www.w3.org/2000/svg';
+      var NS = 'http://www.w3.org/2000/svg';
       while (container.firstChild) container.removeChild(container.firstChild);
-      const svg = document.createElementNS(NS, 'svg');
-      const w = container.clientWidth || 800;
-      const h = container.clientHeight || 480;
+      var svg = document.createElementNS(NS, 'svg');
+      var w = container.clientWidth || 800;
+      var h = container.clientHeight || 480;
       svg.setAttribute('viewBox', '0 0 ' + w + ' ' + h);
       svg.setAttribute('width', '100%');
       svg.setAttribute('height', '100%');
       svg.setAttribute('role', 'img');
       svg.setAttribute('aria-label', 'Knowledge graph (static fallback)');
-      const cx = w / 2, cy = h / 2, r = Math.min(w, h) * 0.42;
-      const positions = {};
-      const visible = payload.nodes.filter(isVisible);
+      var cx = w / 2, cy = h / 2, r = Math.min(w, h) * 0.42;
+      var positions = {};
+      var visible = payload.nodes.filter(isVisible);
       visible.forEach(function(n, i){
-        const angle = (i / Math.max(visible.length, 1)) * Math.PI * 2;
+        var angle = (i / Math.max(visible.length, 1)) * Math.PI * 2;
         positions[n.id] = { x: cx + r * Math.cos(angle), y: cy + r * Math.sin(angle) };
       });
       payload.links.forEach(function(e){
-        const sId = typeof e.source === 'object' ? e.source.id : e.source;
-        const tId = typeof e.target === 'object' ? e.target.id : e.target;
-        const a = positions[sId]; const b = positions[tId];
+        var sId = typeof e.source === 'object' ? e.source.id : e.source;
+        var tId = typeof e.target === 'object' ? e.target.id : e.target;
+        var a = positions[sId]; var b = positions[tId];
         if (!a || !b) return;
-        const line = document.createElementNS(NS, 'line');
+        var line = document.createElementNS(NS, 'line');
         line.setAttribute('x1', a.x); line.setAttribute('y1', a.y);
         line.setAttribute('x2', b.x); line.setAttribute('y2', b.y);
         line.setAttribute('stroke', EDGE_COLOR_LIGHT);
@@ -385,14 +672,14 @@ JS_GRAPH = r"""
         svg.appendChild(line);
       });
       visible.forEach(function(n){
-        const p = positions[n.id]; if (!p) return;
-        const link = document.createElementNS(NS, 'a');
+        var p = positions[n.id]; if (!p) return;
+        var link = document.createElementNS(NS, 'a');
         link.setAttribute('href', n.href || '#');
-        const circle = document.createElementNS(NS, 'circle');
+        var circle = document.createElementNS(NS, 'circle');
         circle.setAttribute('cx', p.x); circle.setAttribute('cy', p.y);
         circle.setAttribute('r', String(3 + Math.min(8, Math.sqrt(n.val || 1))));
         circle.setAttribute('fill', n.color);
-        const title = document.createElementNS(NS, 'title');
+        var title = document.createElementNS(NS, 'title');
         title.textContent = (n.name || '') + ' — ' + (n.type || '');
         circle.appendChild(title);
         link.appendChild(circle);
@@ -401,18 +688,138 @@ JS_GRAPH = r"""
       container.appendChild(svg);
     }
 
-    // ---- Build interactive renderer (3D by default) -------------------
+    // ---- Sprite label cache ---------------------------------------------
+    var spriteCache = new Map();
+    function makeSpriteLabel(text, color){
+      if (!THREE) return null;
+      var key = text + '|' + color;
+      if (spriteCache.has(key)) return spriteCache.get(key).clone();
+      var canvas = document.createElement('canvas');
+      var fontSize = 32;
+      var pad = 12;
+      var ctx = canvas.getContext('2d');
+      ctx.font = '500 ' + fontSize + 'px "Inter", system-ui, sans-serif';
+      var metrics = ctx.measureText(text);
+      var w = Math.ceil(metrics.width) + pad * 2;
+      var h = fontSize + pad * 2;
+      canvas.width = w;
+      canvas.height = h;
+      ctx = canvas.getContext('2d');
+      ctx.font = '500 ' + fontSize + 'px "Inter", system-ui, sans-serif';
+      ctx.fillStyle = 'rgba(20,18,15,0.78)';
+      ctx.fillRect(0, 0, w, h);
+      ctx.fillStyle = color;
+      ctx.textBaseline = 'middle';
+      ctx.fillText(text, pad, h / 2);
+      var tex = new THREE.CanvasTexture(canvas);
+      tex.minFilter = THREE.LinearFilter;
+      var mat = new THREE.SpriteMaterial({ map: tex, transparent: true, depthWrite: false });
+      var sprite = new THREE.Sprite(mat);
+      var scale = 0.18;
+      sprite.scale.set(w * scale, h * scale, 1);
+      sprite.userData.isLabel = true;
+      spriteCache.set(key, sprite);
+      return sprite.clone();
+    }
+
+    // ---- Cursor-anchored zoom (raycast through cursor → world) -----------
+    function installCursorZoom(inst){
+      if (!THREE) return;
+      var renderer = inst.renderer && inst.renderer();
+      var camera = inst.camera && inst.camera();
+      var controls = inst.controls && inst.controls();
+      if (!renderer || !camera || !controls) return;
+      var dom = renderer.domElement;
+      if (!dom) return;
+      var raycaster = new THREE.Raycaster();
+      var mouseNDC = new THREE.Vector2();
+      var plane = new THREE.Plane();
+      var intersect = new THREE.Vector3();
+      var camDir = new THREE.Vector3();
+      dom.addEventListener('wheel', function(e){
+        if (mode !== '3d') return;
+        e.preventDefault();
+        var rect = dom.getBoundingClientRect();
+        mouseNDC.x = ((e.clientX - rect.left) / rect.width) * 2 - 1;
+        mouseNDC.y = -((e.clientY - rect.top) / rect.height) * 2 + 1;
+        raycaster.setFromCamera(mouseNDC, camera);
+        // Build a plane at the controls.target perpendicular to the camera view.
+        camera.getWorldDirection(camDir);
+        plane.setFromNormalAndCoplanarPoint(camDir, controls.target);
+        if (!raycaster.ray.intersectPlane(plane, intersect)) return;
+        var factor = Math.exp(e.deltaY * 0.001);
+        // Move the camera and target toward (or away from) the intersect point.
+        var dxC = camera.position.x - intersect.x;
+        var dyC = camera.position.y - intersect.y;
+        var dzC = camera.position.z - intersect.z;
+        camera.position.set(
+          intersect.x + dxC * factor,
+          intersect.y + dyC * factor,
+          intersect.z + dzC * factor
+        );
+        var dxT = controls.target.x - intersect.x;
+        var dyT = controls.target.y - intersect.y;
+        var dzT = controls.target.z - intersect.z;
+        controls.target.set(
+          intersect.x + dxT * factor,
+          intersect.y + dyT * factor,
+          intersect.z + dzT * factor
+        );
+        if (controls.update) controls.update();
+      }, { passive: false });
+    }
+
+    // ---- Fit-to-view via bounding sphere over current node positions ----
+    function fitAll(durationMs){
+      if (!Graph) return;
+      if (mode === '2d') {
+        try { Graph.zoomToFit(durationMs || 600, 60); } catch (_) {}
+        return;
+      }
+      if (!THREE) {
+        try { Graph.zoomToFit(durationMs || 600, 60); } catch (_) {}
+        return;
+      }
+      var visible = payload.nodes.filter(function(n){
+        return isVisible(n) && typeof n.x === 'number' && typeof n.y === 'number';
+      });
+      if (!visible.length) return;
+      var box = new THREE.Box3();
+      visible.forEach(function(n){
+        box.expandByPoint(new THREE.Vector3(n.x || 0, n.y || 0, n.z || 0));
+      });
+      var sphere = new THREE.Sphere();
+      box.getBoundingSphere(sphere);
+      var camera = Graph.camera && Graph.camera();
+      if (!camera) {
+        try { Graph.zoomToFit(durationMs || 600, 60); } catch (_) {}
+        return;
+      }
+      var fov = (camera.fov || 50) * Math.PI / 180;
+      var distance = sphere.radius / Math.sin(fov / 2);
+      distance = Math.max(distance, 80);
+      var center = sphere.center;
+      try {
+        Graph.cameraPosition(
+          { x: center.x, y: center.y, z: center.z + distance },
+          { x: center.x, y: center.y, z: center.z },
+          reduceMotion ? 0 : (durationMs || 600)
+        );
+      } catch (_) {}
+    }
+
+    // ---- Build the renderer ---------------------------------------------
     function buildGraph(initialMode){
       mode = initialMode || '3d';
-      // Clear container
       while (container.firstChild) container.removeChild(container.firstChild);
-      const ctor = (mode === '2d') ? window.ForceGraph : window.ForceGraph3D;
+      var ctor = (mode === '2d') ? window.ForceGraph : window.ForceGraph3D;
       if (!ctor) { renderFallback('Renderer constructor missing.'); return; }
-      const inst = ctor()(container)
+
+      var inst = ctor()(container)
         .graphData({ nodes: payload.nodes, links: payload.links })
         .backgroundColor('rgba(0,0,0,0)')
         .nodeId('id')
-        .nodeLabel(function(n){ return ''; }) // we handle our own info panel
+        .nodeLabel(function(n){ return ''; })
         .nodeVal(function(n){ return Math.max(1, n.val || 1); })
         .nodeColor(function(n){
           if (highlightNodes.size && !highlightNodes.has(n)) return 'rgba(120,116,108,0.18)';
@@ -424,6 +831,7 @@ JS_GRAPH = r"""
           return highlightLinks.has(l) ? EDGE_COLOR_HOT : EDGE_COLOR_DIM;
         })
         .linkWidth(function(l){ return highlightLinks.has(l) ? 1.6 : 0.4; })
+        .linkHoverPrecision(8)
         .linkDirectionalParticles(function(l){ return highlightLinks.has(l) ? 2 : 0; })
         .linkDirectionalParticleWidth(1.8)
         .onNodeHover(function(node){
@@ -435,18 +843,18 @@ JS_GRAPH = r"""
           }
         })
         .onLinkHover(function(link){
+          hoverLink = link || null;
           if (!link) { hideTooltip(); return; }
-          const s = typeof link.source === 'object' ? link.source : byId.get(link.source);
-          const t = typeof link.target === 'object' ? link.target : byId.get(link.target);
-          const sName = (s && s.name) || '';
-          const tName = (t && t.name) || '';
-          const label = link.label || link.type || 'related';
+          var s = typeof link.source === 'object' ? link.source : byId.get(link.source);
+          var t = typeof link.target === 'object' ? link.target : byId.get(link.target);
+          var sName = (s && s.name) || '';
+          var tName = (t && t.name) || '';
+          var label = link.label || link.type || 'related';
           showTooltip(sName + ' → ' + label + ' → ' + tName, lastMouseX, lastMouseY);
         })
         .onNodeClick(function(node, evt){
           if (!node) return;
           if (evt && (evt.metaKey || evt.ctrlKey)) {
-            // Cmd/Ctrl-click: focus camera on node, lock selection.
             pinnedNode = node;
             applyHighlight(node);
             showInfoPanel(node);
@@ -461,41 +869,100 @@ JS_GRAPH = r"""
           showInfoPanel(null);
         });
 
-      // 3D-specific tuning
-      if (mode === '3d' && inst.nodeThreeObjectExtend) {
-        // (default sphere is fine — we keep it lightweight)
+      // Mode-specific labels.
+      if (mode === '3d' && THREE) {
+        try {
+          inst.nodeThreeObject(function(n){
+            var showAlways = (n.val || n.degree || 1) > medianVal;
+            var isHover = (hoverNode === n) || highlightNodes.has(n);
+            if (!showAlways && !isHover) return null;
+            var sprite = makeSpriteLabel(n.name || n.id || '', nodeAccent(n));
+            if (sprite) sprite.position.set(0, 6 + Math.sqrt(n.val || 1), 0);
+            return sprite;
+          });
+          if (inst.nodeThreeObjectExtend) inst.nodeThreeObjectExtend(true);
+          inst.linkThreeObject(function(l){
+            var label = l.label || l.type || '';
+            if (!label) return null;
+            var s = typeof l.source === 'object' ? l.source : byId.get(l.source);
+            var t = typeof l.target === 'object' ? l.target : byId.get(l.target);
+            var important = (hoverNode && (hoverNode === s || hoverNode === t)) || highlightLinks.has(l);
+            if (!important) return null;
+            return makeSpriteLabel(label, '#ece7dc');
+          });
+          if (inst.linkPositionUpdate) {
+            inst.linkPositionUpdate(function(sprite, coords){
+              if (!sprite || !coords) return false;
+              var s = coords.start; var t = coords.end;
+              if (!s || !t) return false;
+              sprite.position.set((s.x + t.x) / 2, (s.y + t.y) / 2, (s.z + t.z) / 2);
+              return true;
+            });
+          }
+        } catch (err) {
+          console.warn('graph: 3D labels failed', err);
+        }
       }
-      // Force tuning
+      if (mode === '2d') {
+        try {
+          inst.nodeCanvasObjectMode(function(){ return 'after'; });
+          inst.nodeCanvasObject(function(n, ctx, globalScale){
+            var showAlways = (n.val || n.degree || 1) > medianVal;
+            var isHover = (hoverNode === n);
+            if (!showAlways && !isHover) return;
+            var label = n.name || n.id || '';
+            var fontSize = 12 / globalScale;
+            ctx.font = fontSize + 'px Inter, system-ui, sans-serif';
+            ctx.fillStyle = nodeAccent(n);
+            ctx.textAlign = 'center';
+            ctx.textBaseline = 'top';
+            ctx.fillText(label, n.x, n.y + 6);
+          });
+          inst.linkCanvasObjectMode(function(){ return 'after'; });
+          inst.linkCanvasObject(function(l, ctx, globalScale){
+            var label = l.label || l.type || '';
+            if (!label) return;
+            var s = typeof l.source === 'object' ? l.source : byId.get(l.source);
+            var t = typeof l.target === 'object' ? l.target : byId.get(l.target);
+            if (!s || !t) return;
+            var important = (hoverNode && (hoverNode === s || hoverNode === t)) || highlightLinks.has(l);
+            if (!important) return;
+            var fontSize = 10 / globalScale;
+            ctx.font = fontSize + 'px Inter, system-ui, sans-serif';
+            ctx.fillStyle = '#5b574f';
+            ctx.textAlign = 'center';
+            ctx.textBaseline = 'middle';
+            ctx.fillText(label, (s.x + t.x) / 2, (s.y + t.y) / 2);
+          });
+        } catch (err) {
+          console.warn('graph: 2D labels failed', err);
+        }
+      }
+
       try {
         if (inst.d3Force) {
-          const charge = inst.d3Force('charge'); if (charge && charge.strength) charge.strength(-120);
-          const link = inst.d3Force('link'); if (link && link.distance) link.distance(40);
+          var charge = inst.d3Force('charge'); if (charge && charge.strength) charge.strength(-120);
+          var link = inst.d3Force('link'); if (link && link.distance) link.distance(40);
         }
-      } catch(_) {}
-      try { inst.cooldownTicks(120); } catch(_) {}
+      } catch (_) {}
+      try { inst.cooldownTicks(120); } catch (_) {}
 
-      // Auto-fit once the simulation cools.
-      let didFit = false;
       try {
         inst.onEngineStop(function(){
-          if (didFit) return;
-          didFit = true;
           if (reduceMotion) return;
-          setTimeout(function(){
-            try { inst.zoomToFit(600, 60); } catch(_) {}
-          }, 600);
+          setTimeout(function(){ fitAll(600); }, 50);
         });
-      } catch(_) {}
+      } catch (_) {}
 
       Graph = inst;
+      if (mode === '3d') installCursorZoom(inst);
       refreshVisibility();
       return inst;
     }
 
-    // Track mouse position for edge tooltip placement.
-    let lastMouseX = 0, lastMouseY = 0;
+    var lastMouseX = 0, lastMouseY = 0;
     container.addEventListener('mousemove', function(e){
-      const rect = container.getBoundingClientRect();
+      var rect = container.getBoundingClientRect();
       lastMouseX = e.clientX - rect.left;
       lastMouseY = e.clientY - rect.top;
       if (tooltip && tooltip.classList.contains('is-visible')) {
@@ -508,17 +975,17 @@ JS_GRAPH = r"""
     function focusOnNode(node){
       if (!Graph) return;
       if (mode === '3d' && Graph.cameraPosition && node && node.x !== undefined) {
-        const distance = 120;
-        const distRatio = 1 + distance / Math.hypot(node.x || 1, node.y || 1, node.z || 1);
+        var distance = 120;
+        var distRatio = 1 + distance / Math.hypot(node.x || 1, node.y || 1, node.z || 1);
         try {
           Graph.cameraPosition(
             { x: (node.x || 0) * distRatio, y: (node.y || 0) * distRatio, z: (node.z || 0) * distRatio },
             node,
             reduceMotion ? 0 : 600
           );
-        } catch(_) {}
+        } catch (_) {}
       } else if (mode === '2d' && Graph.centerAt && node) {
-        try { Graph.centerAt(node.x || 0, node.y || 0, reduceMotion ? 0 : 600); Graph.zoom(4, reduceMotion ? 0 : 600); } catch(_) {}
+        try { Graph.centerAt(node.x || 0, node.y || 0, reduceMotion ? 0 : 600); Graph.zoom(4, reduceMotion ? 0 : 600); } catch (_) {}
       }
     }
 
@@ -527,22 +994,21 @@ JS_GRAPH = r"""
       buildGraph(next);
       if (btn2D) btn2D.classList.toggle('is-active', next === '2d');
       if (btn3D) btn3D.classList.toggle('is-active', next === '3d');
+      if (btn2D) btn2D.setAttribute('aria-pressed', String(next === '2d'));
+      if (btn3D) btn3D.setAttribute('aria-pressed', String(next === '3d'));
     }
 
-    // ---- Toolbar wiring -----------------------------------------------
     if (btn2D) btn2D.addEventListener('click', function(){ setMode('2d'); });
     if (btn3D) btn3D.addEventListener('click', function(){ setMode('3d'); });
-    if (btnFit) btnFit.addEventListener('click', function(){
-      if (Graph && Graph.zoomToFit) try { Graph.zoomToFit(400, 60); } catch(_) {}
-    });
+    if (btnFit) btnFit.addEventListener('click', function(){ fitAll(400); });
     if (btnReset) btnReset.addEventListener('click', function(){
       pinnedNode = null;
       applyHighlight(null);
       showInfoPanel(null);
       if (Graph && Graph.cameraPosition && mode === '3d') {
-        try { Graph.cameraPosition({ x: 0, y: 0, z: 400 }, { x: 0, y: 0, z: 0 }, reduceMotion ? 0 : 600); } catch(_) {}
+        try { Graph.cameraPosition({ x: 0, y: 0, z: 400 }, { x: 0, y: 0, z: 0 }, reduceMotion ? 0 : 600); } catch (_) {}
       } else if (Graph && Graph.centerAt) {
-        try { Graph.centerAt(0, 0, reduceMotion ? 0 : 600); Graph.zoom(1, reduceMotion ? 0 : 600); } catch(_) {}
+        try { Graph.centerAt(0, 0, reduceMotion ? 0 : 600); Graph.zoom(1, reduceMotion ? 0 : 600); } catch (_) {}
       }
     });
     if (searchEl) {
@@ -553,7 +1019,7 @@ JS_GRAPH = r"""
       searchEl.addEventListener('keydown', function(e){
         if (e.key === 'Enter') {
           e.preventDefault();
-          const match = payload.nodes.find(function(n){
+          var match = payload.nodes.find(function(n){
             return (n.name || '').toLowerCase().includes(searchQuery);
           });
           if (match) {
@@ -566,13 +1032,24 @@ JS_GRAPH = r"""
       });
     }
 
-    // ---- Keyboard shortcuts -------------------------------------------
+    // Day filter from timeline cells (additive feature; only kicks in when
+    // a `[data-graph-filter-day]` button is present and clicked, or when
+    // any element with `data-day-click="YYYY-MM-DD"` fires a click).
+    document.addEventListener('click', function(e){
+      var trigger = e.target && e.target.closest && e.target.closest('[data-graph-filter-day], [data-day-click]');
+      if (!trigger) return;
+      var day = trigger.getAttribute('data-graph-filter-day') || trigger.getAttribute('data-day-click');
+      if (!day) return;
+      dayFilter = (dayFilter === day) ? null : day;
+      refreshVisibility();
+    });
+
     document.addEventListener('keydown', function(e){
-      const tag = (document.activeElement && document.activeElement.tagName) || '';
-      const inField = tag === 'INPUT' || tag === 'TEXTAREA';
+      var tag = (document.activeElement && document.activeElement.tagName) || '';
+      var inField = tag === 'INPUT' || tag === 'TEXTAREA';
       if (e.key === '/' && !inField) { e.preventDefault(); searchEl && searchEl.focus(); return; }
       if (inField) return;
-      if (e.key === 'f') { if (Graph && Graph.zoomToFit) try { Graph.zoomToFit(400, 60); } catch(_) {} }
+      if (e.key === 'f') { fitAll(400); }
       if (e.key === 'r') { if (btnReset) btnReset.click(); }
       if (e.key === '2') setMode('2d');
       if (e.key === '3') setMode('3d');
@@ -580,80 +1057,38 @@ JS_GRAPH = r"""
         pinnedNode = null;
         applyHighlight(null);
         showInfoPanel(null);
-        if (searchEl) { searchEl.value = ''; searchQuery = ''; refreshVisibility(); }
+        dayFilter = null;
+        if (searchEl) { searchEl.value = ''; searchQuery = ''; }
+        refreshVisibility();
       }
     });
 
-    // ---- CDN load detection. The <script type="module"> on the page
-    //      sets window.__graphLibsReady = true once 3d-force-graph and
-    //      ForceGraph (2D) have been attached to window. We poll briefly.
-    let waited = 0;
-    const interval = setInterval(function(){
+    // ---- CDN load detection. Wait for window.ForceGraph(3D) to attach,
+    //      then dynamically import three.js as a peer for sprites + raycast.
+    var waited = 0;
+    var interval = setInterval(function(){
       waited += 100;
       if (window.ForceGraph3D && window.ForceGraph) {
         clearInterval(interval);
-        try {
-          buildGraph('3d');
-          if (btn3D) btn3D.classList.add('is-active');
-        } catch (err) {
-          console.error('graph: init failed', err);
-          renderFallback('Graph init failed: ' + (err && err.message ? err.message : err));
-        }
+        import(THREE_URL).then(function(mod){
+          THREE = mod && (mod.default || mod);
+          if (THREE && !THREE.Sprite && THREE.default) THREE = THREE.default;
+        }).catch(function(err){
+          console.warn('graph: three import failed', err);
+        }).then(function(){
+          try {
+            buildGraph('3d');
+            if (btn3D) btn3D.classList.add('is-active');
+          } catch (err) {
+            console.error('graph: init failed', err);
+            renderFallback('Graph init failed: ' + (err && err.message ? err.message : err));
+          }
+        });
       } else if (waited > 6000) {
         clearInterval(interval);
         renderFallback('Could not load 3d-force-graph from the CDN. Showing static fallback.');
       }
     }, 100);
-  });
-})();
-"""
-
-
-JS_RAIL_DRAWER = r"""
-(function(){
-  var root = document.documentElement;
-  function setOpen(attr, btnSel, open){
-    if (open) root.setAttribute(attr, ''); else root.removeAttribute(attr);
-    var btns = document.querySelectorAll(btnSel);
-    for (var i = 0; i < btns.length; i++) btns[i].setAttribute('aria-expanded', open ? 'true' : 'false');
-  }
-  function toggle(attr, btnSel){
-    setOpen(attr, btnSel, !root.hasAttribute(attr));
-  }
-  document.addEventListener('click', function(e){
-    var rail = e.target.closest('[data-toggle-rail]');
-    if (rail) { e.preventDefault(); toggle('data-rail-open', '[data-toggle-rail]'); return; }
-    var toc = e.target.closest('[data-toggle-toc]');
-    if (toc) { e.preventDefault(); toggle('data-toc-open', '[data-toggle-toc]'); return; }
-    // Close drawers when tapping a link inside them.
-    if (root.hasAttribute('data-rail-open')) {
-      var inRail = e.target.closest('#rail a');
-      if (inRail) setOpen('data-rail-open', '[data-toggle-rail]', false);
-    }
-    if (root.hasAttribute('data-toc-open')) {
-      var inToc = e.target.closest('#toc a');
-      if (inToc) setOpen('data-toc-open', '[data-toggle-toc]', false);
-    }
-  });
-  // Tap-to-update for graph info panel on touch devices: forward pointerdown
-  // on graph nodes/links into the existing click handler so info-panel
-  // updates without requiring a hover.
-  var canvas = document.getElementById('graph-canvas');
-  if (canvas) {
-    canvas.addEventListener('pointerdown', function(e){
-      if (e.pointerType && e.pointerType !== 'mouse') {
-        // The 3d-force-graph library already routes click events; we just
-        // ensure the canvas can take focus so subsequent keyboard shortcuts
-        // (Esc to clear) work.
-        canvas.setAttribute('tabindex', '-1');
-      }
-    }, { passive: true });
-  }
-  // Esc closes any open drawer.
-  document.addEventListener('keydown', function(e){
-    if (e.key !== 'Escape') return;
-    if (root.hasAttribute('data-rail-open')) setOpen('data-rail-open', '[data-toggle-rail]', false);
-    if (root.hasAttribute('data-toc-open')) setOpen('data-toc-open', '[data-toggle-toc]', false);
   });
 })();
 """
