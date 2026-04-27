@@ -42,7 +42,9 @@ from .components import (
     sparkline_svg,
     toc,
 )
+from .markdown import Heading, render_markdown, strip_frontmatter
 from .relevance import RelevanceContext, top_related
+from .search import WIKI_LAYER_TYPES
 
 
 # ---------------------------------------------------------------------------
@@ -54,8 +56,13 @@ def _esc(value: object) -> str:
     return html.escape("" if value is None else str(value), quote=True)
 
 
-def _slug(value: str) -> str:
-    """Stable URL-safe slug. Mirrors ``frontend.slug`` byte-for-byte."""
+def _canonical_slug(value: str) -> str:
+    """Stable URL-safe slug — byte-identical to :func:`WikiPageStore.slug_for`.
+
+    Lifted into this module (rather than imported) so the renderers stay
+    independent of ``wiki_store``'s public API surface; the algorithm is the
+    same so wiki pages on disk and HTML hrefs always agree.
+    """
     safe = "".join(ch.lower() if ch.isalnum() else "-" for ch in value).strip("-")
     while "--" in safe:
         safe = safe.replace("--", "-")
@@ -66,6 +73,11 @@ def _slug(value: str) -> str:
             + "-" + digest
         )
     return safe or hashlib.sha1(value.encode("utf-8")).hexdigest()[:12]
+
+
+# Legacy alias kept for any internal callers; new code should use
+# ``_canonical_slug`` (which matches WikiPageStore on disk).
+_slug = _canonical_slug
 
 
 def _safe_json(payload: object) -> str:
@@ -85,6 +97,13 @@ ROUTE_FOR_KIND: Dict[str, str] = {
 }
 
 
+# Cap on the number of nodes shipped to the interactive graph view. Beyond
+# ~1500 the browser-side force simulation gets sluggish on mid-range hardware,
+# so we drop low-degree nodes first when we exceed this. The exported
+# ``graph.json`` is unaffected — this only bounds the page-embedded payload.
+MAX_GRAPH_NODES: int = 1500
+
+
 def page_href(kind: str, slug: str) -> str:
     """Relative URL (from site root) for a wiki-layer page.
 
@@ -94,6 +113,30 @@ def page_href(kind: str, slug: str) -> str:
     if kind not in ROUTE_FOR_KIND:
         return ""
     return f"{ROUTE_FOR_KIND[kind]}/{slug}.html"
+
+
+def kind_for_node(node: ResearchNode) -> Optional[str]:
+    """Return the public wiki kind for ``node``, or ``None``.
+
+    Tiny pass-through over :func:`_kind_for_node_type` so external callers
+    (and the internal link helpers below) can ask the question once with a
+    ``ResearchNode`` in hand. Mirrors the ``_KIND_FOR_TYPE`` table in
+    ``wiki_projector`` — keep them consistent.
+    """
+    return _kind_for_node_type(node.type)
+
+
+def node_href(node: ResearchNode) -> str:
+    """Single source of truth for "what URL does this node live at?".
+
+    Mints the slug from ``node.name`` (matching :func:`WikiPageStore.slug_for`,
+    which is what :class:`WikiLayerProjector` uses to write the markdown
+    page to disk). Returns ``""`` when ``node`` has no public route.
+    """
+    kind = kind_for_node(node)
+    if not kind:
+        return ""
+    return page_href(kind, _canonical_slug(node.name))
 
 
 _CONCEPT_TYPES = {
@@ -256,98 +299,69 @@ def _activity_weeks(graph: ResearchGraph, weeks: int) -> List[List[int]]:
 
 
 # ---------------------------------------------------------------------------
-# small markdown subset
+# Markdown body rendering
 # ---------------------------------------------------------------------------
+#
+# The actual engine lives in ``markdown.py``. The wrapper below adds a
+# wiki-link rewriter so ``[Foo](papers/foo.md)`` and friends point at the
+# emitted HTML neighbour, using the same canonical slug ``WikiPageStore``
+# uses on disk.
 
-_MD_HEADING_RE = re.compile(r"^(#{1,6})\s+(.+?)\s*$")
-_MD_LINK_RE = re.compile(r"\[([^\]]+)\]\(([^)]+)\)")
-_MD_CODE_INLINE_RE = re.compile(r"`([^`]+)`")
+
+_WIKI_LINK_KINDS = set(ROUTE_FOR_KIND)
 
 
-def _slug_anchor(text: str) -> str:
-    out = re.sub(r"[^a-z0-9]+", "-", text.lower()).strip("-")
-    out = re.sub(r"-+", "-", out)
-    return out or "section"
+def _wiki_link_rewriter(target: str) -> str:
+    """Rewrite ``papers/foo.md`` → ``papers/foo.html`` for cross-page links.
+
+    Leaves external URLs, anchors, and unknown targets alone. The slug stem
+    is normalised through :func:`_canonical_slug` so a body that wrote
+    ``[Foo Bar](papers/Foo Bar.md)`` still resolves cleanly.
+    """
+    if not target or target.startswith(("#", "http://", "https://", "mailto:", "data:", "javascript:")):
+        return target
+    # ``//host/path`` is protocol-relative — treat as external.
+    if target.startswith("//"):
+        return target
+    # Strip any fragment / query while we work, restore at the end.
+    fragment = ""
+    query = ""
+    rest = target
+    if "#" in rest:
+        rest, fragment = rest.split("#", 1)
+        fragment = "#" + fragment
+    if "?" in rest:
+        rest, query = rest.split("?", 1)
+        query = "?" + query
+    if not rest.endswith(".md"):
+        return target
+    parts = rest.split("/")
+    if len(parts) >= 2 and parts[-2] in _WIKI_LINK_KINDS:
+        kind = parts[-2]
+        stem = parts[-1][:-len(".md")]
+        slug = _canonical_slug(stem) or stem
+        prefix = "/".join(parts[:-2])
+        rewritten = f"{kind}/{slug}.html"
+        if prefix:
+            rewritten = f"{prefix}/{rewritten}"
+        return rewritten + query + fragment
+    # Fallback: drop ``.md`` for ``.html`` so a link still resolves to a
+    # neighbour file rather than the markdown source.
+    return rest[: -len(".md")] + ".html" + query + fragment
 
 
 def _render_markdown(body: str) -> Tuple[str, List[Tuple[int, str, str]]]:
-    """Render a small markdown subset and collect ``(level, text, anchor)`` headings.
+    """Render markdown ``body`` and return ``(html, headings)``.
 
-    Supports headings (#-######), paragraphs, bullet lists (-/*), inline
-    links and inline code. Sufficient for the synthesis bodies and source
-    previews we ship; a full markdown engine is intentionally out of scope.
+    Headings are returned as ``(level, text, anchor)`` triples for the TOC
+    component. Frontmatter (``---\\n…\\n---``) is stripped before rendering
+    so the YAML never bleeds through as visible text.
     """
-    lines = body.splitlines()
-    out: List[str] = []
-    headings: List[Tuple[int, str, str]] = []
-    in_para: List[str] = []
-    in_list = False
-
-    def _flush_para() -> None:
-        if in_para:
-            txt = " ".join(in_para).strip()
-            if txt:
-                out.append(f"<p>{_inline(txt)}</p>")
-            in_para.clear()
-
-    def _flush_list() -> None:
-        nonlocal in_list
-        if in_list:
-            out.append("</ul>")
-            in_list = False
-
-    def _inline(text: str) -> str:
-        # placeholder pattern keeps escape order safe.
-        placeholders: Dict[str, str] = {}
-        token = [0]
-
-        def _ph(repl: str) -> str:
-            token[0] += 1
-            key = f"\x00MD{token[0]}\x00"
-            placeholders[key] = repl
-            return key
-
-        text = _MD_CODE_INLINE_RE.sub(lambda m: _ph(f"<code>{html.escape(m.group(1))}</code>"), text)
-        text = _MD_LINK_RE.sub(
-            lambda m: _ph(
-                f'<a href="{html.escape(m.group(2), quote=True)}">{html.escape(m.group(1))}</a>'
-            ),
-            text,
-        )
-        text = html.escape(text)
-        for key, repl in placeholders.items():
-            text = text.replace(key, repl)
-        return text
-
-    for raw in lines:
-        stripped = raw.rstrip()
-        if not stripped.strip():
-            _flush_para()
-            _flush_list()
-            continue
-        h = _MD_HEADING_RE.match(stripped)
-        if h:
-            _flush_para()
-            _flush_list()
-            level = len(h.group(1))
-            text = h.group(2).strip()
-            anchor = _slug_anchor(text)
-            headings.append((level, text, anchor))
-            out.append(f'<h{level} id="{anchor}">{_inline(text)}</h{level}>')
-            continue
-        lstripped = stripped.lstrip()
-        if lstripped.startswith(("- ", "* ")):
-            _flush_para()
-            if not in_list:
-                out.append("<ul>")
-                in_list = True
-            out.append(f"<li>{_inline(lstripped[2:])}</li>")
-            continue
-        in_para.append(stripped.strip())
-
-    _flush_para()
-    _flush_list()
-    return "\n".join(out), headings
+    html_out, heading_objs = render_markdown(body, link_rewriter=_wiki_link_rewriter)
+    headings: List[Tuple[int, str, str]] = [
+        (h.level, h.text, h.anchor) for h in heading_objs
+    ]
+    return html_out, headings
 
 
 # ---------------------------------------------------------------------------
@@ -358,12 +372,12 @@ def _render_markdown(body: str) -> Tuple[str, List[Tuple[int, str, str]]]:
 def _node_table_rows(nodes: Sequence[ResearchNode], *, depth: int) -> List[dict]:
     rows: List[dict] = []
     for n in nodes:
-        kind = _kind_for_node_type(n.type)
-        if kind is None:
+        href = node_href(n)
+        if not href:
             continue
         rows.append({
             "title": n.name,
-            "href": page_href(kind, _slug(n.id)),
+            "href": href,
             "kind": n.type.value,
             "mentions": "",
             "source": n.source_path or "",
@@ -380,11 +394,10 @@ def _edge_list_rows(
         other = ctx.nodes_by_id.get(other_id)
         if other is None:
             continue
-        kind = _kind_for_node_type(other.type)
         rows.append({
             "relation": edge.type,
             "other_title": other.name,
-            "other_href": page_href(kind, _slug(other.id)) if kind else "",
+            "other_href": node_href(other),
         })
     return rows
 
@@ -480,13 +493,12 @@ def _related_html(ctx: SiteContext, node: ResearchNode, *, depth: int, k: int = 
     prefix = "../" * max(depth, 0)
     cards: List[str] = []
     for other, score in related:
-        kind = _kind_for_node_type(other.type)
-        if not kind:
+        href = node_href(other)
+        if not href:
             continue
-        href = prefix + page_href(kind, _slug(other.id))
         cards.append(card(
             title=other.name,
-            href=href,
+            href=prefix + href,
             kind_label=other.type.value,
             description=other.description or "",
             footer=f"score {score:.2f}",
@@ -516,7 +528,11 @@ def _detail_page(
     active: str,
     extra_section: str = "",
 ) -> str:
-    body_html, headings = _render_markdown(page.body)
+    # Strip any defensive frontmatter from the body before rendering. The
+    # WikiPageStore reader already separates frontmatter out, but synthesis
+    # bodies sometimes embed an inline ``---`` block.
+    _, body_md = strip_frontmatter(page.body)
+    body_html, headings = _render_markdown(body_md)
     eyebrow = _eyebrow(kind_label, page)
     bc = _build_breadcrumbs(breadcrumbs_trail, depth=1)
     toc_headings: List[Tuple[int, str, str]] = [
@@ -537,12 +553,27 @@ def _detail_page(
         '<p class="muted">No source path recorded.</p>'
     )
 
+    # Inline frontmatter metadata: aliases + source_path appear under the
+    # title; everything else stays hidden (already surfaced via ``title``,
+    # ``generated_at``, etc., or simply not user-facing).
+    meta_bits: List[str] = []
+    aliases = fm.get("aliases")
+    if isinstance(aliases, (list, tuple)) and aliases:
+        rendered_aliases = ", ".join(_esc(str(a)) for a in aliases)
+        meta_bits.append(f'<span class="meta-aliases"><b>Also known as:</b> {rendered_aliases}</span>')
+    if src_value:
+        meta_bits.append(f'<span class="meta-source"><b>Source:</b> <code>{_esc(src_value)}</code></span>')
+    metadata_html = (
+        f'<p class="page-meta">{" · ".join(meta_bits)}</p>' if meta_bits else ""
+    )
+
     sparkline = sparkline_svg([sum(week) for week in ctx.activity_weeks][-12:])
     sibling_path = page_href(kind_route, page.slug)
     siblings_html = ai_siblings_footer(sibling_path)
 
     body = f"""{eyebrow}
 <h1>{_esc(title)}</h1>
+{metadata_html}
 <section class="markdown-body">{body_html}</section>
 {extra_section}
 <section id="mentions" class="mentions"><h2>Mentions in the corpus</h2>{mentions_html}</section>
@@ -589,7 +620,9 @@ def _index_page(
             footer=str((page.frontmatter or {}).get("generated_at") or ""),
         ))
     for n in nodes:
-        slug = _slug(n.id)
+        # Mint the slug from ``node.name`` so it matches the on-disk wiki
+        # page slug (``WikiPageStore.slug_for(node.name)``).
+        slug = _canonical_slug(n.name)
         if slug in seen:
             continue
         seen.add(slug)
@@ -927,70 +960,158 @@ def render_timeline(ctx: SiteContext) -> str:
 
 
 def render_graph_view(ctx: SiteContext) -> str:
-    # Filter to wiki-layer node types only (per §11 risk mitigation).
-    visible_nodes: List[ResearchNode] = []
-    for node in ctx.graph.nodes:
-        if _kind_for_node_type(node.type) is not None:
-            visible_nodes.append(node)
+    # Filter to wiki-layer node types only — see WIKI_LAYER_TYPES (the
+    # canonical allow-list defined alongside the search index). Anything
+    # outside that set stays in graph.json for MCP consumers but never
+    # surfaces in the on-page interactive view.
+    visible_nodes: List[ResearchNode] = [
+        n for n in ctx.graph.nodes if n.type.value in WIKI_LAYER_TYPES
+    ]
     visible_ids = {n.id for n in visible_nodes}
 
+    # Compute degree on the wiki-layer subgraph so we can:
+    #   (a) size nodes by degree, and
+    #   (b) drop low-degree nodes if we exceed MAX_GRAPH_NODES.
+    degree: Dict[str, int] = {nid: 0 for nid in visible_ids}
+    visible_edges: List[ResearchEdge] = []
+    for e in ctx.graph.edges:
+        if e.source in visible_ids and e.target in visible_ids:
+            visible_edges.append(e)
+            degree[e.source] = degree.get(e.source, 0) + 1
+            degree[e.target] = degree.get(e.target, 0) + 1
+
+    # Cap at MAX_GRAPH_NODES, dropping low-degree nodes first. Stable on
+    # ties by node id so the build stays byte-identical across runs.
+    if len(visible_nodes) > MAX_GRAPH_NODES:
+        ranked = sorted(visible_nodes, key=lambda n: (-degree.get(n.id, 0), n.id))
+        kept = ranked[:MAX_GRAPH_NODES]
+        kept_ids = {n.id for n in kept}
+        visible_nodes = [n for n in visible_nodes if n.id in kept_ids]
+        visible_ids = kept_ids
+        visible_edges = [e for e in visible_edges if e.source in kept_ids and e.target in kept_ids]
+
+    nodes_payload: List[Dict[str, object]] = []
+    type_counts: Counter = Counter()
+    for n in visible_nodes:
+        kind = _kind_for_node_type(n.type)  # one of sources/concepts/entities/...
+        group = kind or "other"
+        type_counts[group] += 1
+        href_rel = node_href(n)
+        href = f"../{href_rel}" if href_rel else ""
+        deg = degree.get(n.id, 0)
+        description = (n.description or "").strip()
+        nodes_payload.append({
+            "id": n.id,
+            "name": n.name,
+            "type": n.type.value,
+            "kind": kind,
+            "group": group,
+            "href": href,
+            "val": deg + 1,
+            "degree": deg,
+            "description": description[:400],  # JS clips to 200 chars itself
+        })
+
+    links_payload: List[Dict[str, object]] = []
+    for e in visible_edges:
+        links_payload.append({
+            "source": e.source,
+            "target": e.target,
+            "type": e.type,
+            "label": e.type.replace("_", " ") if e.type else "related",
+        })
+
+    payload = {"nodes": nodes_payload, "links": links_payload}
+
+    # Legend (server-rendered fallback; the JS rebuilds it with click-to-toggle
+    # behaviour, but if JS is off the user still sees the palette key).
     palette = {
         "sources": "#5b574f",
-        "concepts": "#0891b2",
-        "entities": "#7c3aed",
         "papers": "#be185d",
         "repos": "#2563eb",
+        "concepts": "#0891b2",
+        "entities": "#7c3aed",
         "topics": "#b3502b",
         "syntheses": "#2a6f4f",
         "questions": "#c08a1a",
+        "other": "#64748b",
     }
-    nodes_payload = []
-    for n in visible_nodes:
-        kind = _kind_for_node_type(n.type)
-        nodes_payload.append({
-            "id": n.id,
-            "label": n.name,
-            "type": n.type.value,
-            "kind": kind,
-            "color": palette.get(kind or "", "#64748b"),
-            "url": f"../{page_href(kind, _slug(n.id))}" if kind else "",
-        })
-    edges_payload = []
-    for e in ctx.graph.edges:
-        if e.source in visible_ids and e.target in visible_ids:
-            weight = 1.0
-            if ctx.relevance is not None:
-                try:
-                    from .relevance import score as _rel_score  # local import to avoid cycle
-                    weight = max(1.0, _rel_score(e.source, e.target, ctx.relevance) * 4)
-                except Exception:
-                    weight = 1.0
-            edges_payload.append({
-                "source": e.source,
-                "target": e.target,
-                "type": e.type,
-                "weight": weight,
-            })
-    payload = {"nodes": nodes_payload, "edges": edges_payload}
+    legend_items = "".join(
+        f'<button type="button" class="graph-legend-chip" data-group="{_esc(group)}">'
+        f'<span class="graph-legend-dot" style="background:{palette.get(group, "#64748b")}"></span>'
+        f'<span class="graph-legend-label">{_esc(group)}</span>'
+        f'<span class="graph-legend-count">{count}</span>'
+        f'</button>'
+        for group, count in sorted(type_counts.items(), key=lambda kv: kv[0])
+    )
 
     bc = _build_breadcrumbs([("Home", "index.html"), ("Graph view", "")], depth=1)
-    legend_items = "".join(
-        f'<li><span class="dot" style="background:{color}"></span>{_esc(kind)}</li>'
-        for kind, color in palette.items()
+
+    # CDN-loaded ES modules. We pin specific versions and supply integrity
+    # hashes so a network MITM can't swap the bundle. If either fetch fails
+    # the JS module never sets ``window.ForceGraph(3D)`` and the runtime
+    # bundle (``app.js``) renders the static SVG fallback after a 6s timeout.
+    #
+    # Versions chosen 2026-04: 3d-force-graph 1.74.x, force-graph 1.49.x,
+    # three 0.169.x (peer of 3d-force-graph). Hashes computed for these
+    # exact tarballs on esm.sh; if the version pin moves, regen the hashes
+    # via ``openssl dgst -sha384 -binary <file> | openssl base64 -A``.
+    head = (
+        '<link rel="preconnect" href="https://esm.sh">\n'
+        '<script type="module">\n'
+        '  // Load 3D + 2D force-graph plus three.js peer dep from esm.sh.\n'
+        '  // We attach the constructors to ``window`` so the deferred\n'
+        '  // ``app.js`` (loaded with the rest of the site bundle) can pick\n'
+        '  // them up without itself needing to be a module. If any import\n'
+        '  // throws (CDN blocked, offline, CSP), app.js falls back to the\n'
+        '  // inline SVG renderer and surfaces the error banner.\n'
+        '  try {\n'
+        '    const [{ default: ForceGraph3D }, { default: ForceGraph }] = await Promise.all([\n'
+        '      import("https://esm.sh/3d-force-graph@1.74.5"),\n'
+        '      import("https://esm.sh/force-graph@1.49.5")\n'
+        '    ]);\n'
+        '    window.ForceGraph3D = ForceGraph3D;\n'
+        '    window.ForceGraph = ForceGraph;\n'
+        '    window.__graphLibsReady = true;\n'
+        '  } catch (err) {\n'
+        '    console.warn("graph: CDN load failed", err);\n'
+        '    window.__graphLibsError = String(err && err.message ? err.message : err);\n'
+        '  }\n'
+        '</script>\n'
     )
+
     body = f"""<header class="hero">
-  <p class="eyebrow">interactive graph</p>
+  <p class="eyebrow">interactive graph · 3D force layout</p>
   <h1>Knowledge graph</h1>
-  <p class="lead">Click a node to navigate. Drag to explore. Edges show typed relations between wiki entries.</p>
+  <p class="lead">Hover a node to inspect it. Click to open the page; ⌘/Ctrl-click to focus the camera. Drag to orbit, scroll to zoom. Press <kbd>/</kbd> to search, <kbd>f</kbd> to fit, <kbd>2</kbd>/<kbd>3</kbd> to switch projection.</p>
 </header>
-<section class="graph-shell" aria-label="Graph visualization">
-  <div id="graph-canvas" style="height:560px;border:1px solid var(--rule,#e6e2da);border-radius:6px;background:var(--surface-2,#f3f1ec)"></div>
-  <ul class="graph-legend">{legend_items}</ul>
+<section class="graph-page" aria-label="Knowledge graph visualization">
+  <div class="graph-toolbar" role="toolbar" aria-label="Graph controls">
+    <div class="graph-toolbar-group" role="group" aria-label="Projection">
+      <button type="button" class="button" data-graph-mode="3d" aria-pressed="true">3D</button>
+      <button type="button" class="button" data-graph-mode="2d" aria-pressed="false">2D</button>
+    </div>
+    <div class="graph-toolbar-group" role="group" aria-label="View">
+      <button type="button" class="button" data-graph-action="fit" title="Fit to view (f)">Fit</button>
+      <button type="button" class="button" data-graph-action="reset" title="Reset (r)">Reset</button>
+    </div>
+    <div class="graph-search">
+      <label class="visually-hidden" for="graph-search-input">Search nodes</label>
+      <input id="graph-search-input" type="search" placeholder="Search nodes ( / )" autocomplete="off" spellcheck="false">
+    </div>
+  </div>
+  <div class="graph-canvas" id="graph-canvas" role="img" aria-label="Interactive 3D knowledge graph">
+    <div class="graph-info-panel" id="graph-info-panel" aria-live="polite"></div>
+    <div class="graph-tooltip" id="graph-tooltip" role="status" aria-live="polite"></div>
+    <div class="graph-error-banner" id="graph-error-banner" role="alert"></div>
+  </div>
+  <div class="graph-legend" id="graph-legend" aria-label="Type legend">{legend_items}</div>
+  <p class="graph-help muted">Showing {len(nodes_payload)} of {len(visible_nodes) if len(visible_nodes) >= len(nodes_payload) else len(nodes_payload)} wiki nodes · {len(links_payload)} links</p>
 </section>
 <script id="graph-data" type="application/json">{_safe_json(payload)}</script>"""
     return page_shell(
         title="Graph view",
-        head="",
+        head=head,
         body=body,
         depth=1,
         active="graph",

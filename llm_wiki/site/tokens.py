@@ -567,6 +567,249 @@ hr {
   .shell { grid-template-columns: 1fr; padding: 0; }
   body { background: white; color: black; }
 }
+
+/* Graph view (§5.3 — interactive 3D force layout)
+   ------------------------------------------------------------ */
+.graph-page {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-4);
+  margin-top: var(--space-4);
+}
+.graph-page .graph-toolbar {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-3);
+  align-items: center;
+  justify-content: flex-start;
+}
+.graph-page .graph-toolbar-group {
+  display: inline-flex;
+  gap: var(--space-2);
+  padding: 2px;
+  border: 1px solid var(--rule);
+  border-radius: var(--radius);
+  background: var(--surface);
+}
+.graph-page .graph-toolbar .button {
+  display: inline-flex;
+  align-items: center;
+  padding: 6px 12px;
+  font-family: var(--type-mono);
+  font-size: 0.82rem;
+  letter-spacing: 0.02em;
+  border: 1px solid transparent;
+  border-radius: calc(var(--radius) - 2px);
+  background: transparent;
+  color: var(--ink-muted);
+  cursor: pointer;
+  transition: background 160ms ease, color 160ms ease, border-color 160ms ease;
+}
+.graph-page .graph-toolbar .button:hover {
+  color: var(--ink);
+  background: var(--surface-2);
+}
+.graph-page .graph-toolbar .button.is-active,
+.graph-page .graph-toolbar .button[aria-pressed="true"] {
+  background: var(--accent-soft);
+  color: var(--accent);
+  border-color: var(--accent);
+}
+.graph-page .graph-search {
+  flex: 1 1 240px;
+  display: flex;
+  justify-content: flex-end;
+}
+.graph-page .graph-search input {
+  width: 240px;
+  max-width: 100%;
+  padding: 6px 12px;
+  font-family: var(--type-mono);
+  font-size: 0.85rem;
+  border: 1px solid var(--rule);
+  border-radius: var(--radius);
+  background: var(--surface);
+  color: var(--ink);
+  transition: border-color 160ms ease, box-shadow 160ms ease;
+}
+.graph-page .graph-search input:focus {
+  outline: none;
+  border-color: var(--accent);
+  box-shadow: 0 0 0 3px var(--accent-soft);
+}
+.graph-page .graph-canvas {
+  position: relative;
+  height: calc(100vh - 200px);
+  min-height: 520px;
+  border-radius: var(--radius);
+  overflow: hidden;
+  background: var(--surface-2);
+  border: 1px solid var(--rule);
+}
+.graph-page .graph-canvas canvas { display: block; }
+.graph-page .graph-info-panel {
+  position: absolute;
+  top: var(--space-4);
+  right: var(--space-4);
+  max-width: 320px;
+  padding: var(--space-4);
+  border: 1px solid var(--rule);
+  border-radius: var(--radius);
+  background: rgba(255, 255, 255, 0.78);
+  -webkit-backdrop-filter: blur(12px);
+  backdrop-filter: blur(12px);
+  box-shadow: 0 8px 32px rgba(20, 18, 15, 0.12);
+  opacity: 0;
+  transform: translateY(-4px);
+  pointer-events: none;
+  transition: opacity 200ms ease, transform 200ms ease;
+  z-index: 5;
+}
+.graph-page .graph-info-panel.is-visible {
+  opacity: 1;
+  transform: translateY(0);
+  pointer-events: auto;
+}
+.graph-page .graph-info-title {
+  margin: 0 0 6px 0;
+  font-size: 1.05rem;
+  font-family: var(--type-serif);
+  line-height: 1.3;
+  color: var(--ink);
+}
+.graph-page .graph-info-meta {
+  margin: 0 0 8px 0;
+  font-family: var(--type-mono);
+  font-size: 0.78rem;
+  color: var(--ink-muted);
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 6px;
+}
+.graph-page .graph-info-badge {
+  display: inline-block;
+  padding: 1px 8px;
+  border-radius: 999px;
+  color: #fff;
+  font-size: 0.7rem;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+}
+.graph-page .graph-info-degree { color: var(--ink-muted); }
+.graph-page .graph-info-desc {
+  margin: 0 0 10px 0;
+  font-family: var(--type-serif);
+  font-size: 0.9rem;
+  line-height: 1.45;
+  color: var(--ink);
+}
+.graph-page .graph-info-link {
+  display: inline-block;
+  font-family: var(--type-mono);
+  font-size: 0.82rem;
+  color: var(--accent);
+  text-decoration: none;
+  border-bottom: 1px solid var(--accent-soft);
+  transition: border-color 160ms ease;
+}
+.graph-page .graph-info-link:hover { border-color: var(--accent); }
+.graph-page .graph-tooltip {
+  position: absolute;
+  pointer-events: none;
+  padding: 4px 10px;
+  font-family: var(--type-mono);
+  font-size: 0.78rem;
+  color: var(--ink);
+  background: var(--surface-2);
+  border: 1px solid var(--rule);
+  border-radius: 4px;
+  box-shadow: var(--shadow);
+  opacity: 0;
+  transition: opacity 140ms ease;
+  z-index: 6;
+  white-space: nowrap;
+  max-width: 320px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.graph-page .graph-tooltip.is-visible { opacity: 1; }
+.graph-page .graph-error-banner {
+  position: absolute;
+  top: var(--space-4);
+  left: var(--space-4);
+  right: var(--space-4);
+  padding: 10px 14px;
+  font-family: var(--type-mono);
+  font-size: 0.82rem;
+  color: var(--danger);
+  background: var(--surface);
+  border: 1px solid var(--danger);
+  border-radius: var(--radius);
+  display: none;
+  z-index: 7;
+}
+.graph-page .graph-error-banner.is-visible { display: block; }
+.graph-page .graph-legend {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-2);
+  align-items: center;
+}
+.graph-page .graph-legend-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 4px 10px;
+  font-family: var(--type-mono);
+  font-size: 0.78rem;
+  color: var(--ink);
+  background: var(--surface);
+  border: 1px solid var(--rule);
+  border-radius: 999px;
+  cursor: pointer;
+  transition: background 160ms ease, color 160ms ease, border-color 160ms ease, opacity 160ms ease;
+}
+.graph-page .graph-legend-chip:hover {
+  border-color: var(--accent);
+  color: var(--accent);
+}
+.graph-page .graph-legend-chip.is-off {
+  opacity: 0.4;
+  background: var(--surface-2);
+}
+.graph-page .graph-legend-dot {
+  width: 10px;
+  height: 10px;
+  border-radius: 999px;
+  display: inline-block;
+}
+.graph-page .graph-legend-label { letter-spacing: 0.02em; }
+.graph-page .graph-legend-count {
+  color: var(--ink-muted);
+  margin-left: 2px;
+}
+.graph-page .graph-help {
+  font-family: var(--type-mono);
+  font-size: 0.78rem;
+  margin: 0;
+}
+.graph-page .visually-hidden {
+  position: absolute;
+  width: 1px; height: 1px;
+  padding: 0; margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
+}
+[data-theme="dark"] .graph-page .graph-info-panel {
+  background: rgba(28, 27, 23, 0.78);
+  border-color: var(--rule);
+}
+[data-theme="dark"] .graph-page .graph-tooltip {
+  background: var(--surface-2);
+}
 """
 
 __all__ = ["CSS"]
