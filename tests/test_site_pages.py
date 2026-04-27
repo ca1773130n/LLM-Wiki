@@ -406,6 +406,15 @@ def test_render_home_has_hero_pulse_stats_and_heatmap(site_ctx: SiteContext) -> 
     assert "self-indexing knowledge base" in out
 
 
+def test_render_home_includes_mobile_chrome(site_ctx: SiteContext) -> None:
+    """Home must ship the mobile drawer toggle and bottom nav (visibility
+    controlled via CSS media queries — the markup is always present)."""
+    out = render_home(site_ctx)
+    assert "data-toggle-rail" in out, "home must include the rail toggle"
+    assert "data-toggle-toc" in out, "home must include the toc toggle"
+    assert '<nav class="mobile-bottom-nav"' in out, "home must include the bottom nav"
+
+
 def test_render_timeline_renders_full_doc(site_ctx: SiteContext) -> None:
     out = render_timeline(site_ctx)
     _assert_doc_shape(out)

@@ -315,7 +315,9 @@ def heatmap_svg(weeks: list[list[int]], *, weeks_back: int = 26) -> str:
     if not cols:
         return (
             f'<svg class="heatmap" viewBox="0 0 {width} {height}" '
-            f'width="{width}" height="{height}" role="img" '
+            f'preserveAspectRatio="xMidYMid meet" '
+            f'style="width:100%;height:auto" '
+            f'role="img" '
             f'aria-label="No activity yet"><title>No activity yet</title></svg>'
         )
 
@@ -351,7 +353,9 @@ def heatmap_svg(weeks: list[list[int]], *, weeks_back: int = 26) -> str:
 
     return (
         f'<svg class="heatmap" viewBox="0 0 {width} {height}" '
-        f'width="{width}" height="{height}" role="img" '
+        f'preserveAspectRatio="xMidYMid meet" '
+        f'style="width:100%;height:auto" '
+        f'role="img" '
         f'aria-label="Activity heatmap, last {len(cols)} weeks">'
         + "".join(cells)
         + "</svg>"
@@ -454,11 +458,45 @@ def _render_rail(
         )
 
     return (
-        '<aside class="rail" aria-label="Site sections">'
+        '<aside class="rail" id="rail" aria-label="Site sections">'
         + _section("Overview", _RAIL_TOP)
         + _section("Library", _RAIL_LIBRARY)
         + _section("Tools", _RAIL_TOOLS)
         + "</aside>"
+    )
+
+
+# ---------------------------------------------------------------------------
+# bottom nav (mobile-only chrome)
+# ---------------------------------------------------------------------------
+
+_BOTTOM_NAV: tuple[tuple[str, str, str, str], ...] = (
+    # (key, label, href, icon glyph)
+    ("home",      "Home",      "index.html",            "⌂"),  # ⌂
+    ("concepts",  "Concepts",  "concepts/index.html",   "◆"),  # ◆
+    ("papers",    "Papers",    "papers/index.html",     "¶"),  # ¶
+    ("syntheses", "Syntheses", "syntheses/index.html",  "✱"),  # ✱
+    ("graph",     "Graph",     "graph/index.html",      "⁂"),  # ⁂
+)
+
+
+def _render_bottom_nav(*, active: str, prefix: str) -> str:
+    items: list[str] = []
+    for key, label, href, icon in _BOTTOM_NAV:
+        cls = "active" if key == active else ""
+        items.append(
+            f'<li><a class="{cls}" href="{_esc(prefix + href)}" '
+            f'aria-label="{_esc(label)}"'
+            + (' aria-current="page"' if key == active else "")
+            + ">"
+            f'<span class="icon" aria-hidden="true">{_esc(icon)}</span>'
+            f'<span class="label">{_esc(label)}</span>'
+            "</a></li>"
+        )
+    return (
+        '<nav class="mobile-bottom-nav" aria-label="Quick">'
+        '<ul>' + "".join(items) + '</ul>'
+        '</nav>'
     )
 
 
@@ -493,8 +531,9 @@ def page_shell(
     counts = dict(counts or {})
     rail = _render_rail(active=active, counts=counts, prefix=prefix)
     toc_block = (
-        f'<aside class="toc-rail">{toc_html}</aside>' if toc_html else '<aside class="toc-rail" hidden></aside>'
+        f'<aside class="toc-rail" id="toc">{toc_html}</aside>' if toc_html else '<aside class="toc-rail" id="toc" hidden></aside>'
     )
+    bottom_nav = _render_bottom_nav(active=active, prefix=prefix)
 
     # Top-bar nav mirrors the rail's headline categories so the site is
     # navigable even when the rail is collapsed on mobile.
@@ -529,16 +568,21 @@ def page_shell(
         f"<nav aria-label=\"Primary\">{nav_html}</nav>\n"
         '<button class="search-button" data-open-search type="button">Search /</button>\n'
         '<button class="theme-toggle" data-toggle-theme type="button">Theme</button>\n'
+        '<button class="rail-toggle" aria-controls="rail" aria-expanded="false" '
+        'data-toggle-rail type="button">Menu</button>\n'
         "</header>\n"
         '<div class="shell">\n'
         f"{rail}\n"
         '<main class="main" id="main">\n'
         f"{breadcrumbs_html}\n"
+        '<button class="toc-toggle" aria-controls="toc" aria-expanded="false" '
+        'data-toggle-toc type="button">On this page</button>\n'
         f"<article>{body}</article>\n"
         f"{ai_siblings_html}\n"
         "</main>\n"
         f"{toc_block}\n"
         "</div>\n"
+        f"{bottom_nav}\n"
         '<div class="palette" id="palette" hidden>\n'
         '<div class="palette-box"><input id="search" type="search" '
         'placeholder="Search the wiki…" aria-label="Search"></div>\n'

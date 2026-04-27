@@ -812,4 +812,321 @@ hr {
 }
 """
 
-__all__ = ["CSS"]
+
+# ============================================================================
+# Mobile overrides (§5.2 mobile + touch hit area + drawer rail)
+# ----------------------------------------------------------------------------
+# Layered as ``@media`` overrides on top of the desktop-first rules above so
+# nothing existing has to change. Breakpoints:
+#   < 480px         phone (single column, drawer rail, 2-up stat row)
+#   480-767px       large phone (drawer rail, 4-up stats)
+#   768-1023px      tablet (rail static; TOC drawer)
+#   >= 1024px       desktop (existing layout, untouched)
+# ============================================================================
+
+MOBILE_CSS: str = r"""
+/* ============================================================
+   Mobile UX overrides — drawer rail, bottom nav, fluid type
+   ============================================================ */
+
+/* 1. Fluid body type — 17 px on phones, 16 px on tablets+. */
+body {
+  font-size: clamp(15px, 0.95rem + 0.3vw, 17px);
+}
+
+/* 2. Touch-safe minimum hit area for every clickable target.
+      iOS HIG = 44pt; we hit it via min-block-size on inline-flex items. */
+.topbar nav a,
+.topbar .search-button,
+.topbar .theme-toggle,
+.rail-toggle,
+.toc-toggle,
+.button,
+a.card,
+.card,
+.tag-chip,
+.badge,
+.node-table td a,
+.edge-list a,
+.ai-siblings a,
+.mobile-bottom-nav a {
+  min-block-size: 44px;
+  display: inline-flex;
+  align-items: center;
+}
+
+/* The card body needs a bit more breathing room so the entire surface
+   becomes one fat tap target. */
+.card { padding: var(--space-4); }
+.node-table td { padding: 12px 12px; line-height: 1.5; }
+.edge-list li { padding: 10px 0; }
+
+/* 3. Toggle buttons (mobile-only chrome) — hidden on desktop. */
+.toc-toggle {
+  display: none;
+  font-family: var(--type-sans);
+  font-size: .88rem;
+  padding: 6px 12px;
+  border: 1px solid var(--rule);
+  border-radius: 4px;
+  background: var(--surface);
+  color: var(--ink);
+  cursor: pointer;
+  margin: 0 0 var(--space-3);
+}
+.rail-toggle:focus-visible,
+.toc-toggle:focus-visible,
+.mobile-bottom-nav a:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
+}
+
+/* 4. Bottom nav — hidden by default; revealed under 768 px. */
+.mobile-bottom-nav {
+  display: none;
+  position: fixed;
+  left: 0; right: 0; bottom: 0;
+  z-index: 40;
+  background: color-mix(in srgb, var(--surface) 95%, transparent);
+  border-top: 1px solid var(--rule);
+  -webkit-backdrop-filter: blur(10px);
+  backdrop-filter: blur(10px);
+  padding: 6px 8px calc(6px + env(safe-area-inset-bottom));
+  font-family: var(--type-sans);
+}
+.mobile-bottom-nav ul {
+  list-style: none;
+  display: flex;
+  justify-content: space-around;
+  align-items: stretch;
+  padding: 0;
+  margin: 0;
+  gap: 4px;
+}
+.mobile-bottom-nav li { flex: 1 1 0; display: flex; }
+.mobile-bottom-nav a {
+  flex: 1 1 0;
+  flex-direction: column;
+  justify-content: center;
+  text-align: center;
+  text-decoration: none;
+  color: var(--ink-muted);
+  font-size: .68rem;
+  letter-spacing: .04em;
+  text-transform: uppercase;
+  padding: 4px 2px;
+  border-radius: 6px;
+  gap: 2px;
+}
+.mobile-bottom-nav a .icon { font-size: 1.25rem; line-height: 1; }
+.mobile-bottom-nav a.active { color: var(--accent); }
+.mobile-bottom-nav a:hover { color: var(--ink); background: var(--surface-2); }
+
+/* 5. Heatmap container — let it scroll horizontally if it overflows. */
+.activity { overflow-x: auto; }
+
+/* 6. Phone breakpoint (< 480 px) ----------------------------------------- */
+@media (max-width: 479px) {
+  .shell { padding: var(--space-4) var(--space-3); gap: var(--space-4); }
+
+  /* Topbar — brand + hamburger only; hide secondary nav, search, theme. */
+  .topbar { padding: var(--space-2) var(--space-3); gap: var(--space-2); }
+  .topbar nav { display: none; }
+  .topbar .search-button,
+  .topbar .theme-toggle { display: none; }
+
+  /* Rail becomes a fullscreen drawer triggered by [data-rail-open]. */
+  .rail-toggle { display: inline-flex; margin-left: auto; }
+  .rail {
+    display: block;
+    position: fixed;
+    inset: 0 30% 0 0;
+    z-index: 60;
+    background: var(--surface);
+    border-right: 1px solid var(--rule);
+    padding: var(--space-5) var(--space-4) calc(var(--space-5) + env(safe-area-inset-bottom));
+    overflow-y: auto;
+    transform: translateX(-100%);
+    transition: transform 220ms ease;
+    box-shadow: 4px 0 24px rgba(0,0,0,.18);
+  }
+  [data-rail-open] .rail { transform: translateX(0); }
+  [data-rail-open] body { overflow: hidden; }
+
+  /* TOC becomes a bottom sheet revealed by .toc-toggle. */
+  .toc-toggle { display: inline-flex; }
+  .toc-rail {
+    display: block;
+    position: fixed;
+    left: 0; right: 0; bottom: 0;
+    max-height: 70vh;
+    overflow-y: auto;
+    z-index: 55;
+    background: var(--surface);
+    border-top: 1px solid var(--rule);
+    border-radius: 12px 12px 0 0;
+    padding: var(--space-4) var(--space-4) calc(var(--space-5) + env(safe-area-inset-bottom));
+    transform: translateY(100%);
+    transition: transform 220ms ease;
+    box-shadow: 0 -8px 32px rgba(0,0,0,.18);
+  }
+  [data-toc-open] .toc-rail { transform: translateY(0); }
+
+  /* Bottom nav appears. Add bottom padding to the page so the last line
+     is not hidden under the bar. */
+  .mobile-bottom-nav { display: block; }
+  body { padding-bottom: calc(64px + env(safe-area-inset-bottom)); }
+
+  /* Hero pulse — single column; headline scales with viewport. */
+  .hero h1 { font-size: clamp(28px, 6vw, 48px); }
+  .hero .pulse,
+  .hero .pulse-cards,
+  .pulse-cards { grid-template-columns: 1fr !important; }
+
+  /* Stat row — 2-up; smaller text + tighter gap. */
+  .stats,
+  .stat-row,
+  .stat-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+    gap: var(--space-3) !important;
+  }
+  .stat { font-size: .9rem; }
+  .stat .stat-value,
+  .stat strong { font-size: 1.4rem; }
+
+  /* Cards stack one per row. */
+  .card-grid { grid-template-columns: 1fr; gap: var(--space-3); }
+
+  /* AI siblings — vertical stack, full-width tap targets. */
+  .ai-siblings { flex-direction: column; align-items: stretch; gap: var(--space-2); }
+  .ai-siblings a { justify-content: center; padding: 10px 12px; }
+
+  /* Graph view — fit phones, stacked toolbar, bottom info panel. */
+  .graph-page .graph-canvas {
+    height: clamp(420px, 70vh, 720px);
+    min-height: 0;
+  }
+  .graph-page .graph-toolbar { flex-direction: column; align-items: stretch; }
+  .graph-page .graph-toolbar-group { width: 100%; justify-content: stretch; }
+  .graph-page .graph-toolbar .button {
+    flex: 1 1 0;
+    justify-content: center;
+    font-size: 16px;
+    padding: 10px 12px;
+  }
+  .graph-page .graph-search { width: 100%; }
+  .graph-page .graph-search input { width: 100%; font-size: 16px; }
+  .graph-page .graph-info-panel {
+    top: auto;
+    right: var(--space-3);
+    left: var(--space-3);
+    bottom: calc(var(--space-3) + env(safe-area-inset-bottom));
+    max-width: none;
+  }
+  .graph-page .graph-tooltip { display: none; }
+}
+
+/* 7. Large phone / portrait tablet (480-767 px) ------------------------ */
+@media (min-width: 480px) and (max-width: 767px) {
+  .topbar nav { display: none; }
+  .topbar .search-button,
+  .topbar .theme-toggle { display: none; }
+  .rail-toggle { display: inline-flex; margin-left: auto; }
+  .rail {
+    display: block;
+    position: fixed;
+    inset: 0 25% 0 0;
+    z-index: 60;
+    background: var(--surface);
+    border-right: 1px solid var(--rule);
+    padding: var(--space-5) var(--space-4) calc(var(--space-5) + env(safe-area-inset-bottom));
+    overflow-y: auto;
+    transform: translateX(-100%);
+    transition: transform 220ms ease;
+    box-shadow: 4px 0 24px rgba(0,0,0,.18);
+  }
+  [data-rail-open] .rail { transform: translateX(0); }
+  [data-rail-open] body { overflow: hidden; }
+
+  .toc-toggle { display: inline-flex; }
+  .toc-rail {
+    display: block;
+    position: fixed;
+    left: 0; right: 0; bottom: 0;
+    max-height: 70vh;
+    overflow-y: auto;
+    z-index: 55;
+    background: var(--surface);
+    border-top: 1px solid var(--rule);
+    border-radius: 12px 12px 0 0;
+    padding: var(--space-4) var(--space-4) calc(var(--space-5) + env(safe-area-inset-bottom));
+    transform: translateY(100%);
+    transition: transform 220ms ease;
+    box-shadow: 0 -8px 32px rgba(0,0,0,.18);
+  }
+  [data-toc-open] .toc-rail { transform: translateY(0); }
+
+  .mobile-bottom-nav { display: block; }
+  body { padding-bottom: calc(64px + env(safe-area-inset-bottom)); }
+
+  .stats,
+  .stat-row,
+  .stat-grid { grid-template-columns: repeat(4, minmax(0, 1fr)) !important; gap: var(--space-3) !important; }
+  .hero .pulse-cards,
+  .pulse-cards { grid-template-columns: 1fr !important; }
+
+  .graph-page .graph-canvas { height: clamp(460px, 70vh, 720px); min-height: 0; }
+  .graph-page .graph-toolbar { flex-direction: column; align-items: stretch; }
+  .graph-page .graph-toolbar .button { font-size: 16px; padding: 10px 12px; }
+  .graph-page .graph-search input { width: 100%; font-size: 16px; }
+  .graph-page .graph-info-panel {
+    top: auto; right: var(--space-3); left: var(--space-3);
+    bottom: calc(var(--space-3) + env(safe-area-inset-bottom));
+    max-width: none;
+  }
+}
+
+/* 8. Tablet landscape (768-1023 px) ------------------------------------ */
+@media (max-width: 767px) {
+  /* No-op: covered above; this guard prevents bottom nav from leaking. */
+}
+@media (min-width: 768px) and (max-width: 1023px) {
+  /* Rail static at 200 px; TOC still drawer. */
+  .shell { grid-template-columns: 200px 1fr; }
+  .rail-toggle { display: none; }
+  .toc-toggle { display: inline-flex; }
+  .mobile-bottom-nav { display: none; }
+  .toc-rail {
+    display: block;
+    position: fixed;
+    left: 0; right: 0; bottom: 0;
+    max-height: 70vh;
+    overflow-y: auto;
+    z-index: 55;
+    background: var(--surface);
+    border-top: 1px solid var(--rule);
+    border-radius: 12px 12px 0 0;
+    padding: var(--space-4) var(--space-4) calc(var(--space-5) + env(safe-area-inset-bottom));
+    transform: translateY(100%);
+    transition: transform 220ms ease;
+    box-shadow: 0 -8px 32px rgba(0,0,0,.18);
+  }
+  [data-toc-open] .toc-rail { transform: translateY(0); }
+}
+
+/* 9. Desktop (>= 1024 px) — make sure mobile-only chrome stays hidden. */
+@media (min-width: 1024px) {
+  .rail-toggle, .toc-toggle, .mobile-bottom-nav { display: none !important; }
+}
+
+/* 10. Reduced motion — kill drawer slide animations. */
+@media (prefers-reduced-motion: reduce) {
+  .rail, .toc-rail { transition: none !important; }
+}
+"""
+
+
+CSS = CSS + MOBILE_CSS
+
+
+__all__ = ["CSS", "MOBILE_CSS"]

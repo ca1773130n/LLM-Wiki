@@ -340,3 +340,52 @@ def test_page_shell_renders_left_rail_with_section_headers():
     assert "Sources" in out and "Concepts" in out
     # Counts are rendered when non-zero.
     assert "<span class=\"count\">12</span>" in out
+
+
+# ---------------------------------------------------------------------------
+# mobile UX: drawer toggles, bottom nav, fluid heatmap, breakpoint CSS
+# ---------------------------------------------------------------------------
+
+
+def test_page_shell_emits_rail_and_toc_toggles():
+    out = _shell()
+    assert "data-toggle-rail" in out, "page_shell must include the rail toggle button"
+    assert "data-toggle-toc" in out, "page_shell must include the toc toggle button"
+    # The toggles target the wrappers with id="rail" and id="toc".
+    assert 'id="rail"' in out
+    assert 'id="toc"' in out
+    # The buttons must declare their initial expanded state for AT.
+    assert 'aria-expanded="false"' in out
+
+
+def test_page_shell_emits_mobile_bottom_nav():
+    out = _shell()
+    assert '<nav class="mobile-bottom-nav"' in out
+    # 5 quick-access links, screen-reader labels per icon-only entry.
+    for label in ("Home", "Concepts", "Papers", "Syntheses", "Graph"):
+        assert f'aria-label="{label}"' in out
+
+
+def test_heatmap_svg_is_fluid():
+    out = heatmap_svg([[1] * 7] * 4)
+    assert "preserveAspectRatio" in out
+    assert 'style="width:100%' in out
+
+
+def test_heatmap_empty_svg_is_also_fluid():
+    out = heatmap_svg([])
+    assert "preserveAspectRatio" in out
+    assert 'style="width:100%' in out
+
+
+def test_css_contains_required_mobile_breakpoints():
+    from llm_wiki.site.tokens import CSS
+
+    assert "@media (max-width: 479px)" in CSS
+    assert "@media (max-width: 767px)" in CSS
+    assert "@media (min-width: 1024px)" in CSS
+    # Drawer state hooks the JS toggle relies on.
+    assert "[data-rail-open]" in CSS
+    assert "[data-toc-open]" in CSS
+    # Bottom nav styles ship with the bundle.
+    assert ".mobile-bottom-nav" in CSS

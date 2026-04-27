@@ -609,7 +609,68 @@ JS_GRAPH = r"""
 """
 
 
-JS_BUNDLE = JS_THEME_TOGGLE + "\n" + JS_SEARCH_PALETTE + "\n" + JS_GRAPH
+JS_RAIL_DRAWER = r"""
+(function(){
+  var root = document.documentElement;
+  function setOpen(attr, btnSel, open){
+    if (open) root.setAttribute(attr, ''); else root.removeAttribute(attr);
+    var btns = document.querySelectorAll(btnSel);
+    for (var i = 0; i < btns.length; i++) btns[i].setAttribute('aria-expanded', open ? 'true' : 'false');
+  }
+  function toggle(attr, btnSel){
+    setOpen(attr, btnSel, !root.hasAttribute(attr));
+  }
+  document.addEventListener('click', function(e){
+    var rail = e.target.closest('[data-toggle-rail]');
+    if (rail) { e.preventDefault(); toggle('data-rail-open', '[data-toggle-rail]'); return; }
+    var toc = e.target.closest('[data-toggle-toc]');
+    if (toc) { e.preventDefault(); toggle('data-toc-open', '[data-toggle-toc]'); return; }
+    // Close drawers when tapping a link inside them.
+    if (root.hasAttribute('data-rail-open')) {
+      var inRail = e.target.closest('#rail a');
+      if (inRail) setOpen('data-rail-open', '[data-toggle-rail]', false);
+    }
+    if (root.hasAttribute('data-toc-open')) {
+      var inToc = e.target.closest('#toc a');
+      if (inToc) setOpen('data-toc-open', '[data-toggle-toc]', false);
+    }
+  });
+  // Tap-to-update for graph info panel on touch devices: forward pointerdown
+  // on graph nodes/links into the existing click handler so info-panel
+  // updates without requiring a hover.
+  var canvas = document.getElementById('graph-canvas');
+  if (canvas) {
+    canvas.addEventListener('pointerdown', function(e){
+      if (e.pointerType && e.pointerType !== 'mouse') {
+        // The 3d-force-graph library already routes click events; we just
+        // ensure the canvas can take focus so subsequent keyboard shortcuts
+        // (Esc to clear) work.
+        canvas.setAttribute('tabindex', '-1');
+      }
+    }, { passive: true });
+  }
+  // Esc closes any open drawer.
+  document.addEventListener('keydown', function(e){
+    if (e.key !== 'Escape') return;
+    if (root.hasAttribute('data-rail-open')) setOpen('data-rail-open', '[data-toggle-rail]', false);
+    if (root.hasAttribute('data-toc-open')) setOpen('data-toc-open', '[data-toggle-toc]', false);
+  });
+})();
+"""
 
 
-__all__ = ["JS_THEME_TOGGLE", "JS_SEARCH_PALETTE", "JS_GRAPH", "JS_BUNDLE"]
+JS_BUNDLE = (
+    JS_THEME_TOGGLE
+    + "\n" + JS_RAIL_DRAWER
+    + "\n" + JS_SEARCH_PALETTE
+    + "\n" + JS_GRAPH
+)
+
+
+__all__ = [
+    "JS_THEME_TOGGLE",
+    "JS_RAIL_DRAWER",
+    "JS_SEARCH_PALETTE",
+    "JS_GRAPH",
+    "JS_BUNDLE",
+]
