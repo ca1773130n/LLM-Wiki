@@ -366,23 +366,30 @@ def ai_siblings_footer(html_path_rel: str) -> str:
     """Render the per-page download footer for the .txt and .json siblings.
 
     ``html_path_rel`` is the page's path relative to the site root (e.g.
-    ``"papers/something.html"``). The footer links to siblings that share
-    the same stem with ``.txt`` and ``.json`` extensions and back to the
-    original ``.html`` for symmetry.
+    ``"papers/something.html"``). The footer is rendered *inside* the page
+    itself, so the sibling links must be page-relative (not site-relative):
+    ``papers/foo.html`` already lives in the ``papers/`` directory, so its
+    ``.txt`` and ``.json`` siblings live next to it as plain ``foo.txt`` /
+    ``foo.json`` — not ``papers/foo.txt``. We strip the directory prefix
+    here so the footer never doubles the kind segment.
     """
     base = html_path_rel
     if base.endswith(".html"):
         stem = base[: -len(".html")]
     else:
         stem = base.rsplit(".", 1)[0] if "." in base else base
-    txt_href = f"{stem}.txt"
-    json_href = f"{stem}.json"
+    # Take just the basename — the footer is rendered inside ``stem.html``
+    # itself, so siblings sit next to it.
+    file_stem = stem.rsplit("/", 1)[-1]
+    file_basename_html = file_stem + ".html"
+    txt_href = f"{file_stem}.txt"
+    json_href = f"{file_stem}.json"
     return (
         '<footer class="ai-siblings" aria-label="AI-readable siblings">'
         "<strong>For AI agents:</strong>"
         f'<a href="{_esc(txt_href)}" download>plain text (.txt)</a>'
         f'<a href="{_esc(json_href)}" download>structured (.json)</a>'
-        f'<a href="{_esc(html_path_rel)}">this page (.html)</a>'
+        f'<a href="{_esc(file_basename_html)}">this page (.html)</a>'
         "</footer>"
     )
 

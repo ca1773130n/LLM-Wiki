@@ -214,18 +214,23 @@ def test_heatmap_caps_to_weeks_back():
 # ---------------------------------------------------------------------------
 
 def test_ai_siblings_footer_links_txt_and_json_siblings():
+    # Footer is rendered *inside* ``papers/foo.html`` itself, so the sibling
+    # hrefs must be page-relative (``foo.txt``, not ``papers/foo.txt``).
     out = ai_siblings_footer("papers/foo.html")
     assert out.startswith("<footer")
     assert 'class="ai-siblings"' in out
-    assert 'href="papers/foo.txt"' in out
-    assert 'href="papers/foo.json"' in out
-    assert 'href="papers/foo.html"' in out
+    assert 'href="foo.txt"' in out
+    assert 'href="foo.json"' in out
+    assert 'href="foo.html"' in out
+    # And it should *not* double the kind segment.
+    assert 'href="papers/foo.txt"' not in out
+    assert 'href="papers/foo.html"' not in out
 
 
 def test_ai_siblings_footer_handles_paths_without_html_suffix():
     out = ai_siblings_footer("papers/foo")
-    assert 'href="papers/foo.txt"' in out
-    assert 'href="papers/foo.json"' in out
+    assert 'href="foo.txt"' in out
+    assert 'href="foo.json"' in out
 
 
 # ---------------------------------------------------------------------------

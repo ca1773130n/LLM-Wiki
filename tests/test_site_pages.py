@@ -274,6 +274,57 @@ def test_render_paper_detail(site_ctx: SiteContext) -> None:
     assert "Activity" in out
 
 
+def test_paper_detail_renders_markdown_body(site_ctx: SiteContext) -> None:
+    """Markdown bodies must be rendered to real HTML, not dumped as plain text."""
+    pages = site_ctx.wiki_pages_by_kind["papers"]
+    if not pages:
+        pytest.skip("fixture has no paper page")
+    # Override with a body that exercises every markdown feature we promise.
+    rich_page = WikiPage(
+        kind="papers",
+        slug=pages[0].slug,
+        title=pages[0].title,
+        body=(
+            "# Top heading\n\n"
+            "## Section heading\n\n"
+            "A short paragraph with **bold**, *italic*, and `inline code`.\n\n"
+            "- bullet one\n"
+            "- bullet two\n\n"
+            "```python\nprint('hi')\n```\n\n"
+            "A [wiki link](papers/foo.md) and an [external](https://example.com/x).\n"
+        ),
+        path=pages[0].path,
+        frontmatter=pages[0].frontmatter,
+    )
+    out = render_paper_detail(site_ctx, rich_page)
+    # ATX headings → real <h1> / <h2> tags.
+    assert "<h1" in out and ">Top heading</h1>" in out
+    assert "<h2" in out and ">Section heading</h2>" in out
+    # Emphasis runs.
+    assert "<strong>bold</strong>" in out
+    assert "<em>italic</em>" in out
+    # Inline code.
+    assert "<code>inline code</code>" in out
+    # Lists.
+    assert "<ul>" in out and "<li>bullet one</li>" in out
+    # Code fence renders to <pre><code>...</code></pre>.
+    assert "<pre><code" in out and "print(&#x27;hi&#x27;)" in out
+    # Wiki link rewriting: papers/foo.md → papers/foo.html.
+    assert '<a href="papers/foo.html"' in out
+    assert ">wiki link</a>" in out
+    # External link preserved.
+    assert '<a href="https://example.com/x"' in out
+    # No raw markdown leaks through.
+    body_section = re.search(
+        r'<section class="markdown-body">(.*?)</section>', out, flags=re.DOTALL
+    )
+    assert body_section, "rendered detail must wrap body in .markdown-body"
+    inner = body_section.group(1)
+    assert not re.search(r"^# ", inner, flags=re.MULTILINE), "literal '# heading' leaked"
+    assert "**bold**" not in inner
+    assert "[wiki link](papers/foo.md)" not in inner
+
+
 def test_render_repo_detail(site_ctx: SiteContext) -> None:
     pages = site_ctx.wiki_pages_by_kind["repos"]
     if not pages:
@@ -297,6 +348,37 @@ def test_render_synthesis_detail(site_ctx: SiteContext) -> None:
     out = render_synthesis_detail(site_ctx, pages[0])
     _assert_doc_shape(out)
     _assert_breadcrumb_contains(out, "Syntheses")
+
+
+def test_synthesis_detail_strips_frontmatter(site_ctx: SiteContext) -> None:
+    """A synthesis body with leading YAML frontmatter must not bleed ``---``
+    into the rendered HTML."""
+    page = WikiPage(
+        kind="syntheses",
+        slug="pulse",
+        title="Project pulse",
+        body=(
+            "---\n"
+            "title: Project pulse\n"
+            "synthesis_kind: pulse\n"
+            "generated_at: 2026-04-27\n"
+            "---\n"
+            "# Project pulse\n\n"
+            "- A new paper landed.\n"
+        ),
+        path=Path("wiki/syntheses/pulse.md"),
+        frontmatter={"synthesis_kind": "pulse", "generated_at": "2026-04-27"},
+    )
+    out = render_synthesis_detail(site_ctx, page)
+    body_section = re.search(
+        r'<section class="markdown-body">(.*?)</section>', out, flags=re.DOTALL
+    )
+    assert body_section, "detail must wrap body in .markdown-body"
+    inner = body_section.group(1)
+    # No raw frontmatter delimiters in rendered output.
+    assert "---" not in inner, f"raw frontmatter leaked: {inner!r}"
+    assert "synthesis_kind:" not in inner
+    assert "<h1" in inner
 
 
 def test_render_question_detail(site_ctx: SiteContext) -> None:

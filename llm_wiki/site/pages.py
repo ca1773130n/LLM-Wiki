@@ -42,7 +42,7 @@ from .components import (
     sparkline_svg,
     toc,
 )
-from .markdown import Heading, render_markdown, strip_frontmatter
+from .markdown import render_markdown, strip_frontmatter
 from .relevance import RelevanceContext, top_related
 from .search import WIKI_LAYER_TYPES
 
@@ -126,16 +126,22 @@ def kind_for_node(node: ResearchNode) -> Optional[str]:
     return _kind_for_node_type(node.type)
 
 
-def node_href(node: ResearchNode) -> str:
+def node_href(node: ResearchNode, ctx: "Optional[SiteContext]" = None) -> str:
     """Single source of truth for "what URL does this node live at?".
 
-    Mints the slug from ``node.name`` (matching :func:`WikiPageStore.slug_for`,
-    which is what :class:`WikiLayerProjector` uses to write the markdown
-    page to disk). Returns ``""`` when ``node`` has no public route.
+    Looks up the on-disk wiki page slug via ``ctx.page_slug_for_node`` first
+    (the authoritative mapping written by the projectors). Falls back to
+    ``slug_for(node.name)`` when no page exists yet — that is the slug
+    :class:`WikiLayerProjector` would mint for this node on the next
+    compile, so the link is still self-consistent.
     """
     kind = kind_for_node(node)
     if not kind:
         return ""
+    if ctx is not None:
+        slug = ctx.page_slug_for_node.get(node.id)
+        if slug:
+            return page_href(kind, slug)
     return page_href(kind, _canonical_slug(node.name))
 
 
@@ -223,6 +229,11 @@ class SiteContext:
     source_counts: Mapping[str, int] = field(default_factory=dict)
     activity_weeks: Sequence[Sequence[int]] = field(default_factory=tuple)
     relevance: Optional[RelevanceContext] = None
+    # node_id → on-disk wiki page slug. Lets the link helpers resolve a
+    # synthesis node ("Project pulse") to the slug its page actually lives at
+    # on disk (``pulse``) rather than minting ``project-pulse`` from the
+    # node name and 404'ing.
+    page_slug_for_node: Mapping[str, str] = field(default_factory=dict)
 
     @classmethod
     def build(
@@ -246,6 +257,32 @@ class SiteContext:
 
         nodes_by_name = {n.name.casefold(): n for n in graph.nodes}
 
+        # Build node_id → page-slug. Two passes:
+        #   1) frontmatter ``node_id`` (WikiLayerProjector emits this).
+        #   2) title match (SynthesisProjector does *not* emit ``node_id``;
+        #      its synthesis nodes share ``name == page.title``).
+        page_slug_for_node: Dict[str, str] = {}
+        title_to_slug_by_kind: Dict[str, Dict[str, str]] = {}
+        for kind, kind_pages in wiki_pages_by_kind.items():
+            kind_index: Dict[str, str] = {}
+            for page in kind_pages:
+                fm = page.frontmatter or {}
+                nid = fm.get("node_id") if isinstance(fm, dict) else None
+                if isinstance(nid, str) and nid and nid not in page_slug_for_node:
+                    page_slug_for_node[nid] = page.slug
+                if page.title:
+                    kind_index.setdefault(page.title.casefold(), page.slug)
+            title_to_slug_by_kind[kind] = kind_index
+        for node in graph.nodes:
+            if node.id in page_slug_for_node:
+                continue
+            kind = _kind_for_node_type(node.type)
+            if not kind:
+                continue
+            slug = title_to_slug_by_kind.get(kind, {}).get(node.name.casefold())
+            if slug:
+                page_slug_for_node[node.id] = slug
+
         try:
             relevance = RelevanceContext.from_graph(graph)
         except Exception:
@@ -264,6 +301,7 @@ class SiteContext:
             source_counts=Counter(n.source_path or "unknown" for n in graph.nodes),
             activity_weeks=_activity_weeks(graph, weeks=26),
             relevance=relevance,
+            page_slug_for_node=page_slug_for_node,
         )
 
 
@@ -369,10 +407,15 @@ def _render_markdown(body: str) -> Tuple[str, List[Tuple[int, str, str]]]:
 # ---------------------------------------------------------------------------
 
 
-def _node_table_rows(nodes: Sequence[ResearchNode], *, depth: int) -> List[dict]:
+def _node_table_rows(
+    nodes: Sequence[ResearchNode],
+    *,
+    depth: int,
+    ctx: Optional[SiteContext] = None,
+) -> List[dict]:
     rows: List[dict] = []
     for n in nodes:
-        href = node_href(n)
+        href = node_href(n, ctx)
         if not href:
             continue
         rows.append({
@@ -397,7 +440,7 @@ def _edge_list_rows(
         rows.append({
             "relation": edge.type,
             "other_title": other.name,
-            "other_href": node_href(other),
+            "other_href": node_href(other, ctx),
         })
     return rows
 
@@ -493,7 +536,7 @@ def _related_html(ctx: SiteContext, node: ResearchNode, *, depth: int, k: int = 
     prefix = "../" * max(depth, 0)
     cards: List[str] = []
     for other, score in related:
-        href = node_href(other)
+        href = node_href(other, ctx)
         if not href:
             continue
         cards.append(card(
@@ -620,9 +663,11 @@ def _index_page(
             footer=str((page.frontmatter or {}).get("generated_at") or ""),
         ))
     for n in nodes:
-        # Mint the slug from ``node.name`` so it matches the on-disk wiki
-        # page slug (``WikiPageStore.slug_for(node.name)``).
-        slug = _canonical_slug(n.name)
+        # Prefer the on-disk slug recorded in SiteContext (so synthesis
+        # nodes resolve to ``pulse.html``, not ``project-pulse.html``).
+        # Fall back to ``slug_for(node.name)`` for nodes without a
+        # materialised page yet.
+        slug = ctx.page_slug_for_node.get(n.id) or _canonical_slug(n.name)
         if slug in seen:
             continue
         seen.add(slug)
@@ -1166,6 +1211,8 @@ def render_about(ctx: SiteContext) -> str:
 __all__ = [
     "ROUTE_FOR_KIND",
     "SiteContext",
+    "kind_for_node",
+    "node_href",
     "page_href",
     "render_about",
     "render_concept_detail",

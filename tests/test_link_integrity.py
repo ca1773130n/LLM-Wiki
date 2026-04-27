@@ -60,47 +60,35 @@ def _toy_graph() -> ResearchGraph:
 
 
 def _seed_wiki(root: Path) -> None:
-    """Seed a wiki layer whose slugs match the graph node-id slugs.
+    """Seed a wiki layer whose slugs match :meth:`WikiPageStore.slug_for`.
 
-    The page renderers mint related/mentions card hrefs from
-    ``page_href(kind, _slug(node.id))`` — so the wiki pages **must** sit at
-    the same slug for those cards to resolve. ``_slug("Paper:demo")`` →
-    ``"paper-demo"``, etc., so the wiki pages here mirror that scheme.
+    The page renderers now mint related/mentions card hrefs from
+    ``slug_for(node.name)`` (matching what :class:`WikiLayerProjector`
+    writes to disk), so the seed slugs here must be derived from the node
+    *names*, not the node ids. ``slug_for("Demo Paper")`` → ``"demo-paper"``,
+    etc.
     """
     store = WikiPageStore(root)
-    pages = [
-        WikiPage(
-            kind="sources",
-            slug="demo-source",
-            title="Demo Source",
-            body="# Demo Source\n\nA short blurb.\n",
-            path=store.path_for("sources", "demo-source"),
-            frontmatter={"title": "Demo Source"},
-        ),
-        WikiPage(
-            kind="concepts",
-            slug="concept-gs",
-            title="Gaussian Splatting",
-            body="# Gaussian Splatting\n\nA 3D scene representation.\n",
-            path=store.path_for("concepts", "concept-gs"),
-            frontmatter={"title": "Gaussian Splatting"},
-        ),
-        WikiPage(
-            kind="papers",
-            slug="paper-demo",
-            title="Demo Paper",
-            body="# Demo Paper\n\nA paper page.\n",
-            path=store.path_for("papers", "paper-demo"),
-            frontmatter={"title": "Demo Paper"},
-        ),
-        WikiPage(
-            kind="repos",
-            slug="repository-demo",
-            title="demo-repo",
-            body="# demo-repo\n\nA demo repo page.\n",
-            path=store.path_for("repos", "repository-demo"),
-            frontmatter={"title": "demo-repo"},
-        ),
+    seeds = [
+        ("sources", "Demo Source", "# Demo Source\n\nA short blurb.\n"),
+        ("concepts", "Gaussian Splatting", "# Gaussian Splatting\n\nA 3D scene representation.\n"),
+        ("papers", "Demo Paper", "# Demo Paper\n\nA paper page.\n"),
+        ("repos", "demo-repo", "# demo-repo\n\nA demo repo page.\n"),
+    ]
+    pages: List[WikiPage] = []
+    for kind, name, body in seeds:
+        slug = store.slug_for(name)
+        pages.append(
+            WikiPage(
+                kind=kind,
+                slug=slug,
+                title=name,
+                body=body,
+                path=store.path_for(kind, slug),
+                frontmatter={"title": name},
+            )
+        )
+    pages.append(
         WikiPage(
             kind="syntheses",
             slug="pulse",
@@ -115,8 +103,8 @@ def _seed_wiki(root: Path) -> None:
                 "synthesis_kind": "pulse",
                 "generated_at": "2026-04-27T12:00:00Z",
             },
-        ),
-    ]
+        )
+    )
     for page in pages:
         store.write_page(page)
 
@@ -180,13 +168,8 @@ def _resolve(html_path: Path, href: str, site_root: Path) -> Path:
     return (base / href).resolve()
 
 
-def test_every_internal_href_resolves(tmp_path: Path) -> None:
-    out = tmp_path / "site"
-    wiki = tmp_path / "wiki"
-    wiki.mkdir()
-    _seed_wiki(wiki)
-    StaticSiteBuilder(site_title="Demo Wiki").write_site(_toy_graph(), wiki, out)
-
+def _walk_site_for_broken_links(out: Path) -> List[str]:
+    """Walk every emitted HTML file and return any internal hrefs that 404."""
     site_root = out.resolve()
     html_files = sorted(out.rglob("*.html"))
     assert html_files, "expected at least one HTML page"
@@ -198,13 +181,10 @@ def test_every_internal_href_resolves(tmp_path: Path) -> None:
             stripped = href.strip()
             if not stripped:
                 continue
-            # External links (http, https, mailto, data, javascript, …)
             if _is_external(stripped):
                 continue
-            # Pure in-page anchor.
             if stripped.startswith("#"):
                 continue
-            # Skip the AI siblings (.txt + .json) — they're tested elsewhere.
             target_only, _, _frag = stripped.partition("#")
             target_only = target_only.split("?", 1)[0]
             if target_only.endswith(".txt") or target_only.endswith(".json"):
@@ -222,5 +202,42 @@ def test_every_internal_href_resolves(tmp_path: Path) -> None:
                 broken.append(
                     f"{html_path.relative_to(out)} -> {stripped} (resolved {resolved.relative_to(site_root)}) missing"
                 )
+    return broken
 
+
+def test_every_internal_href_resolves(tmp_path: Path) -> None:
+    out = tmp_path / "site"
+    wiki = tmp_path / "wiki"
+    wiki.mkdir()
+    _seed_wiki(wiki)
+    StaticSiteBuilder(site_title="Demo Wiki").write_site(_toy_graph(), wiki, out)
+
+    broken = _walk_site_for_broken_links(out)
+    assert not broken, "broken internal links:\n" + "\n".join(broken)
+
+
+def test_wiki_corpus_site_has_no_broken_links(
+    tmp_path: Path, wiki_sample_graph
+) -> None:
+    """End-to-end link integrity over the production-style ``wiki_corpus`` fixture.
+
+    Builds the wiki layer with :class:`WikiLayerProjector` (the same projector
+    ``project compile`` runs in production), renders the full site, then walks
+    every emitted ``.html`` file and asserts every internal href resolves to a
+    real file. This catches the "graph nodes named X, wiki pages named Y"
+    bug class that motivated the redesign hot-fix.
+    """
+    from llm_wiki.wiki_projector import WikiLayerProjector
+
+    wiki = tmp_path / "wiki"
+    wiki.mkdir()
+    store = WikiPageStore(wiki)
+    WikiLayerProjector(store).project(wiki_sample_graph)
+
+    out = tmp_path / "site"
+    StaticSiteBuilder(site_title="Wiki Corpus").write_site(
+        wiki_sample_graph, wiki, out
+    )
+
+    broken = _walk_site_for_broken_links(out)
     assert not broken, "broken internal links:\n" + "\n".join(broken)
