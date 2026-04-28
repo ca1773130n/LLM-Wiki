@@ -248,7 +248,8 @@ def test_static_site_builder_emits_redesigned_ia(tmp_path: Path) -> None:
 
     # ---- manifest is a real inventory ----------------------------------------
     manifest = json.loads((out / "manifest.json").read_text(encoding="utf-8"))
-    assert manifest["generator"] == "llm_wiki.site.StaticSiteBuilder"
+    assert manifest["generator"] == "llm-wiki"
+    assert manifest["version"] == "1"
     paths = {entry["path"] for entry in manifest["files"]}
     assert "index.html" in paths
     assert "papers/demo-paper.html" in paths

@@ -224,6 +224,36 @@ def test_project_is_idempotent_when_graph_unchanged(tmp_path: Path):
     assert written_second == [], "second project() should produce zero rewrites"
 
 
+def test_project_produces_byte_identical_synthesis_pages(tmp_path: Path):
+    """Two consecutive ``project`` calls must leave on-disk markdown unchanged.
+
+    Goes one step further than the "no rewrites" check above: hashes every
+    synthesis markdown after the first call, runs the projector again, and
+    asserts the bytes on disk are identical. Catches regressions where a
+    volatile field (e.g. ``generated_at``) sneaks back into the on-disk
+    frontmatter.
+    """
+    graph = _build_fixture_graph()
+    # Use the production WikiPageStore (not the test stub) so we exercise the
+    # real on-disk format the redesign promises to keep stable.
+    store = WikiPageStore(tmp_path / "wiki")
+
+    projector = SynthesisProjector(store)
+    projector.project(graph)
+
+    syntheses_dir = tmp_path / "wiki" / "syntheses"
+    md_paths = sorted(p for p in syntheses_dir.glob("*.md"))
+    assert md_paths, "expected synthesis pages on disk after first project() call"
+    snapshot = {path: path.read_bytes() for path in md_paths}
+
+    projector.project(graph)
+
+    for path, original in snapshot.items():
+        assert path.read_bytes() == original, (
+            f"{path.name} bytes changed across consecutive project() calls"
+        )
+
+
 def test_pulse_rewrites_when_input_node_name_changes(tmp_path: Path):
     graph = _build_fixture_graph()
     store = _LocalWikiPageStore(tmp_path / "wiki")

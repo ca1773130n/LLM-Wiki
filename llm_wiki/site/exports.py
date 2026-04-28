@@ -38,12 +38,18 @@ class ExportContext:
     ``Subagent E`` defines an isomorphic ``SiteContext`` for its page
     renderers; the orchestrator (Subagent G) constructs both. Keep the field
     names in lockstep — do not import ``SiteContext`` here.
+
+    ``synthesis_history`` carries the parsed ``.history.jsonl`` ledger entries
+    so RSS / sitemap renderers can derive deterministic pubdates without
+    consulting the wall clock. Each entry is a mapping with at least
+    ``slug``, ``content_hash``, and ``generated_at`` keys.
     """
 
     site_title: str
     graph: ResearchGraph
     wiki_pages_by_kind: Mapping[str, Sequence[WikiPage]] = field(default_factory=dict)
     routes: Sequence[Tuple[str, Optional[datetime]]] = field(default_factory=tuple)
+    synthesis_history: Sequence[Mapping[str, str]] = field(default_factory=tuple)
 
 
 # --------------------------------------------------------------- helpers
@@ -302,48 +308,107 @@ def render_sitemap_xml(routes: Sequence[Tuple[str, Optional[datetime]]]) -> str:
 
 
 _RSS_RECENT_LIMIT = 30
+_EPOCH_ISO = "1970-01-01T00:00:00Z"
+
+
+def _parse_iso(value: object) -> Optional[datetime]:
+    if not isinstance(value, str) or not value.strip():
+        return None
+    try:
+        return datetime.fromisoformat(value.strip().replace("Z", "+00:00"))
+    except ValueError:
+        return None
 
 
 def _rss_pubdate(when: Optional[datetime]) -> str:
+    """Format ``when`` for RSS. ``None`` becomes the Unix epoch (stable bogus)."""
     if when is None:
-        when = datetime.now(timezone.utc)
+        when = _parse_iso(_EPOCH_ISO)
     if when.tzinfo is None:
         when = when.replace(tzinfo=timezone.utc)
     return when.astimezone(timezone.utc).strftime("%a, %d %b %Y %H:%M:%S +0000")
 
 
 def _synthesis_pubdate(page: WikiPage) -> Optional[datetime]:
+    """Best-effort pubdate from on-page frontmatter (legacy fallback only).
+
+    Production synthesis pages no longer carry ``generated_at`` on disk; the
+    authoritative source is the ``synthesis_history`` ledger threaded through
+    ``ExportContext``.
+    """
     fm = page.frontmatter or {}
     if not isinstance(fm, dict):
         return None
     for key in ("generated_at", "updated_at", "published_at", "date"):
-        value = fm.get(key)
-        if isinstance(value, str) and value.strip():
-            try:
-                cleaned = value.strip().replace("Z", "+00:00")
-                return datetime.fromisoformat(cleaned)
-            except ValueError:
-                continue
+        parsed = _parse_iso(fm.get(key))
+        if parsed is not None:
+            return parsed
     return None
 
 
-def render_rss_xml(site_title: str, recent_syntheses: Sequence[WikiPage]) -> str:
-    """RSS 2.0 feed of the latest 30 synthesis pages."""
+def _ledger_index(history: Sequence[Mapping[str, str]]) -> Dict[str, str]:
+    """Reduce the append-only ledger to ``slug -> latest generated_at``.
+
+    Multiple writes for the same slug collapse to the most recent ISO timestamp
+    (lexicographic sort works because we always emit ``YYYY-MM-DDTHH:MM:SSZ``).
+    """
+    out: Dict[str, str] = {}
+    for entry in history:
+        if not isinstance(entry, Mapping):
+            continue
+        slug = entry.get("slug")
+        when = entry.get("generated_at")
+        if not isinstance(slug, str) or not isinstance(when, str):
+            continue
+        prior = out.get(slug)
+        if prior is None or when > prior:
+            out[slug] = when
+    return out
+
+
+def _latest_history_iso(history: Sequence[Mapping[str, str]]) -> str:
+    """Most recent ``generated_at`` across the whole ledger, or epoch if empty."""
+    latest = ""
+    for entry in history:
+        if not isinstance(entry, Mapping):
+            continue
+        when = entry.get("generated_at")
+        if isinstance(when, str) and when > latest:
+            latest = when
+    return latest or _EPOCH_ISO
+
+
+def render_rss_xml(
+    site_title: str,
+    recent_syntheses: Sequence[WikiPage],
+    history: Sequence[Mapping[str, str]] = (),
+) -> str:
+    """RSS 2.0 feed of the latest 30 synthesis pages.
+
+    ``<lastBuildDate>`` and per-item ``<pubDate>`` are sourced from the
+    append-only synthesis history ledger so two consecutive recompiles produce
+    byte-identical output. When the ledger is empty (fresh clone), dates fall
+    back to the Unix epoch — stable and clearly bogus.
+    """
 
     items_to_render = list(recent_syntheses[:_RSS_RECENT_LIMIT])
+    by_slug = _ledger_index(history)
+    last_build_iso = _latest_history_iso(history)
     lines: List[str] = ['<?xml version="1.0" encoding="UTF-8"?>']
     lines.append('<rss version="2.0">')
     lines.append("  <channel>")
     lines.append(f"    <title>{xml_escape(site_title)}</title>")
     lines.append(f"    <description>{xml_escape('Recent syntheses from ' + site_title)}</description>")
     lines.append("    <link>/</link>")
-    lines.append(f"    <lastBuildDate>{_rss_pubdate(datetime.now(timezone.utc))}</lastBuildDate>")
+    lines.append(f"    <lastBuildDate>{_rss_pubdate(_parse_iso(last_build_iso))}</lastBuildDate>")
 
     for page in items_to_render:
         title = _page_title(page)
         href = _page_href(page)
         summary = _page_summary(page) or title
-        pubdate = _rss_pubdate(_synthesis_pubdate(page))
+        ledger_iso = by_slug.get(page.slug)
+        pub_dt = _parse_iso(ledger_iso) if ledger_iso else _synthesis_pubdate(page)
+        pubdate = _rss_pubdate(pub_dt)
         guid = f"synthesis:{page.slug}"
         lines.append("    <item>")
         lines.append(f"      <title>{xml_escape(title)}</title>")

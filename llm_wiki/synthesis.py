@@ -146,37 +146,55 @@ class SynthesisProjector:
         new_nodes: List[ResearchNode] = list(graph.nodes)
         new_edges: List[ResearchEdge] = list(graph.edges)
         written: List[WikiPage] = []
+        ledger_entries: List[Dict[str, str]] = []
 
         for plan in plans:
             content_hash = _hash_body(plan.body)
-            frontmatter = {
+            # On-disk frontmatter omits volatile timestamps so two consecutive
+            # compiles produce byte-identical files. The audit trail (when each
+            # body was first/last produced) lives in the append-only history
+            # ledger below. ``WikiPageStore._render`` is the single source of
+            # truth for on-disk frontmatter formatting — we hand it the
+            # timestamp-free dict and pass ``plan.body`` (no embedded
+            # frontmatter), avoiding the dual-frontmatter trap that otherwise
+            # leaks ``generated_at`` into the body hash.
+            disk_frontmatter = {
                 "synthesis_kind": plan.kind,
                 "slug": plan.slug,
                 "title": plan.title,
                 "sources": sorted(plan.sources),
                 "inputs": sorted(plan.input_ids),
-                "generated_at": generated_at,
                 "generator": GENERATOR,
                 "content_hash": content_hash,
             }
-            full_body = _format_frontmatter(frontmatter) + "\n\n" + plan.body
             page = WikiPage(
                 kind="syntheses",
                 slug=plan.slug,
                 title=plan.title,
-                body=full_body,
+                body=plan.body,
                 path=self.wiki_store.path_for("syntheses", plan.slug),
-                frontmatter=frontmatter,
+                frontmatter=dict(disk_frontmatter),
             )
             changed = self.wiki_store.write_page(page)
             if changed:
                 written.append(page)
+                ledger_entries.append(
+                    {
+                        "slug": plan.slug,
+                        "content_hash": content_hash,
+                        "generated_at": generated_at,
+                        "generator": GENERATOR,
+                    }
+                )
 
             node_id = stable_id(ResearchNodeType.SYNTHESIS.value, plan.slug)
+            # Keep ``generated_at`` out of the in-graph metadata too: it would
+            # otherwise leak into ``graph.json`` and break the byte-idempotence
+            # invariant. The append-only history ledger is the canonical audit
+            # trail for "when was this body produced".
             metadata = {
                 "synthesis_kind": plan.kind,
                 "content_hash": content_hash,
-                "generated_at": generated_at,
                 "input_ids": sorted(plan.input_ids),
             }
             new_nodes.append(
@@ -211,7 +229,29 @@ class SynthesisProjector:
                     )
                 )
 
+        # Append per-rewrite entries to the synthesis history ledger. The ledger
+        # is the audit trail that lets RSS / sitemap derive deterministic
+        # ``lastBuildDate`` / ``pubDate`` values without leaking ``datetime.now``
+        # into the rendered artifacts. One JSON object per line, keys sorted so
+        # diffs stay tight.
+        if ledger_entries:
+            self._append_history(ledger_entries)
+
         return ResearchGraph(nodes=new_nodes, edges=new_edges), written
+
+    # ------------------------------------------------------------------
+    # History ledger
+    # ------------------------------------------------------------------
+
+    def _history_path(self) -> Path:
+        return Path(self.wiki_store.root) / "syntheses" / ".history.jsonl"
+
+    def _append_history(self, entries: Sequence[Dict[str, str]]) -> None:
+        path = self._history_path()
+        path.parent.mkdir(parents=True, exist_ok=True)
+        with path.open("a", encoding="utf-8") as fh:
+            for entry in entries:
+                fh.write(json.dumps(entry, sort_keys=True, ensure_ascii=False) + "\n")
 
     # ------------------------------------------------------------------
     # Plans
