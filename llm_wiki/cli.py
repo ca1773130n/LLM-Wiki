@@ -146,6 +146,17 @@ def project_main(argv: List[str] | None = None) -> int:
     serve_parser.add_argument("--port", type=int, default=8765, help="Port to bind")
     serve_parser.add_argument("--dry-run", action="store_true", help="Print the site URL without starting a server")
 
+    watch_parser = subparsers.add_parser(
+        "watch",
+        help="Auto-recompile when files change. Pairs with python3 -m http.server in another terminal.",
+    )
+    watch_parser.add_argument("--project", default=".", help="Project root directory; defaults to current working directory")
+    watch_parser.add_argument("--interval", type=float, default=2.0, help="Polling interval in seconds (default: 2)")
+    watch_parser.add_argument("--debounce", type=float, default=1.0, help="Quiet window after a burst of edits before rebuilding (default: 1.0)")
+    watch_parser.add_argument("--once", action="store_true", help="Snapshot once, rebuild only if anything changed since the last run, exit")
+    watch_parser.add_argument("--paths", action="append", default=[], help="Additional directory to watch; repeat for multiple paths")
+    watch_parser.add_argument("--quiet", action="store_true", help="Suppress the banner and per-cycle progress output")
+
     args = parser.parse_args(argv)
     if args.command == "init":
         wiki = ProjectWiki.init(args.project, name=args.name, source_kind=args.source_kind, sources=args.source)
@@ -269,6 +280,19 @@ def project_main(argv: List[str] | None = None) -> int:
         except OSError as exc:
             print(f"Could not serve frontend site at {url}: {exc}", file=sys.stderr)
             return 2
+        return 0
+    if args.command == "watch":
+        from .watch import WatchLoop
+
+        watch_paths = args.paths or None
+        loop = WatchLoop(
+            Path(args.project).resolve(),
+            interval=args.interval,
+            debounce=args.debounce,
+            watch_paths=watch_paths,
+            quiet=args.quiet,
+        )
+        loop.run(once=args.once)
         return 0
     raise ValueError(f"Unknown project command: {args.command}")
 

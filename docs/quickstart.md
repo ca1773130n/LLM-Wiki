@@ -61,6 +61,22 @@ Open:
 http://127.0.0.1:8765/
 ```
 
+<!-- BEGIN: subagent-r-watch -->
+### Auto-rebuild on save
+
+Pair the dev server with a polling watcher so edits under `data/` and `docs/` trigger an incremental recompile:
+
+```bash
+# terminal 1
+python3 -m http.server 56821 --directory .llm-wiki/site
+
+# terminal 2
+llm_wiki project watch
+```
+
+`project watch` polls every 2 s, debounces 1 s, and runs `compile --changed-only`. Use `--once` for cron-style rebuilds (snapshots vs `.llm-wiki/.watch-cache.json`), `--paths <dir>` to add custom watch dirs, and `--interval` / `--debounce` to tune cadence.
+<!-- END: subagent-r-watch -->
+
 The frontend is dependency-light and writes:
 
 ```text
