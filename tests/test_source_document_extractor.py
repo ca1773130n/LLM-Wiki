@@ -6,6 +6,10 @@ def test_repository_document_extraction_uses_source_and_heading_nodes_not_resear
 
 This document mentions Gaussian Splatting as an example string, not as a paper claim.
 
+## Volumetric Rendering
+
+A concept-shaped heading that survives the filter.
+
 ## Frontend
 
 Static HTML site generation.
@@ -17,7 +21,11 @@ Static HTML site generation.
 
     assert ResearchNodeType.SOURCE_DOCUMENT in types
     assert "Feature Map" in names
-    assert "Frontend" in names
+    # Concept-shaped headings (whitelist match) survive as Concept nodes.
+    assert "Volumetric Rendering" in names
+    # Generic single-word section markers like "Frontend" are intentionally
+    # NOT promoted to Concept nodes after the heading-classifier fix.
+    assert "Frontend" not in names
     assert ResearchNodeType.CLAIM not in types
     assert ResearchNodeType.EVIDENCE_SPAN not in types
     assert ResearchNodeType.METHODOLOGICAL_CONCEPT not in types

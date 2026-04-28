@@ -178,9 +178,14 @@ class ResearchGraphBuilder:
         description: str = "",
         source_path: Optional[str] = None,
         metadata: Optional[Dict[str, object]] = None,
+        id_seed: Optional[str] = None,
     ) -> ResearchNode:
         canonical_name = normalize_display_name(name)
-        node_id = stable_id(node_type.value, canonical_name)
+        # ``id_seed`` lets callers (e.g. Paper extraction) decouple the stable
+        # node id from the human-readable display name. We use this so the
+        # arxiv id pins the node identity while the title can still be the
+        # nice title pulled from the paper file.
+        node_id = stable_id(node_type.value, id_seed or canonical_name)
         existing = self._nodes.get(node_id)
         if existing:
             merged_aliases = sorted(set(existing.aliases) | set(aliases or []))
@@ -286,11 +291,37 @@ class ResearchGraphExtractor:
         builder = ResearchGraphBuilder()
         title = extract_title(text, source_path)
         source_type = source_kind_to_node_type(source_kind, source_path)
-        paper_metadata = {"source_kind": source_kind, **extract_source_metadata(text, source_path)}
-        paper = builder.add_node(title, source_type, source_path=source_path, metadata=paper_metadata)
+        source_metadata = extract_source_metadata(text, source_path)
+        # Pre-compute heading-derived candidate paper titles so we can attach
+        # them to the source-document metadata up-front (ResearchNode is frozen).
+        candidate_paper_titles, surviving_concept_headings = self._classify_document_headings(text)
+        paper_metadata: Dict[str, object] = {"source_kind": source_kind, **source_metadata}
+
+        # When the path identifies a Paper subfolder we want all references
+        # (digest mentions, per-paper file ingest) to collapse onto the same
+        # node id. We achieve that by seeding stable_id with ``arXiv:<id>``
+        # while keeping the human-readable title as the display name, with
+        # the arxiv id captured as an alias for cross-reference search.
+        arxiv_id = str(source_metadata.get("arxiv_id", ""))
+        if source_type == ResearchNodeType.PAPER and arxiv_id:
+            display_name = title or f"arXiv:{arxiv_id}"
+            aliases: List[str] = [f"arXiv:{arxiv_id}"]
+            paper = builder.add_node(
+                display_name,
+                source_type,
+                aliases=aliases,
+                source_path=source_path,
+                metadata=paper_metadata,
+                id_seed=f"arXiv:{arxiv_id}",
+            )
+        else:
+            if candidate_paper_titles:
+                paper_metadata["candidate_paper_titles"] = candidate_paper_titles
+            paper = builder.add_node(title, source_type, source_path=source_path, metadata=paper_metadata)
 
         if source_type in {ResearchNodeType.SOURCE_DOCUMENT, ResearchNodeType.REPOSITORY, ResearchNodeType.PROJECT}:
-            self._add_document_structure(builder, paper, text, source_path)
+            self._add_document_structure(builder, paper, surviving_concept_headings, source_path)
+            self._extract_paper_references(builder, paper, text, source_path)
             return builder.build()
 
         field = builder.add_node(infer_research_field(text), ResearchNodeType.RESEARCH_FIELD)
@@ -326,8 +357,34 @@ class ResearchGraphExtractor:
         self._connect_related_terms(builder, matched_terms, text)
         return builder.build()
 
-    def _add_document_structure(self, builder: ResearchGraphBuilder, document: ResearchNode, text: str, source_path: Optional[str]) -> None:
-        for heading in extract_markdown_headings(text)[:24]:
+    def _classify_document_headings(self, text: str) -> Tuple[List[str], List[str]]:
+        """Sort markdown headings into (paper-title candidates, concept-shaped)."""
+        candidate_paper_titles: List[str] = []
+        concept_headings: List[str] = []
+        whitelist_terms = {rule.canonical_name.lower() for rule in self.term_rules}
+        whitelist_terms |= {alias.lower() for rule in self.term_rules for alias in rule.aliases}
+        for raw in extract_markdown_headings(text):
+            cleaned = _strip_heading_numbering(raw)
+            if not cleaned:
+                continue
+            if _is_generic_section_heading(cleaned):
+                continue
+            if _looks_like_paper_title_heading(raw, cleaned):
+                candidate_paper_titles.append(cleaned)
+                continue
+            if _is_concept_shaped_heading(cleaned, whitelist_terms):
+                concept_headings.append(cleaned)
+        # Cap heading-derived concepts at 6 per file to limit pollution.
+        return candidate_paper_titles, concept_headings[:6]
+
+    def _add_document_structure(
+        self,
+        builder: ResearchGraphBuilder,
+        document: ResearchNode,
+        concept_headings: Sequence[str],
+        source_path: Optional[str],
+    ) -> None:
+        for heading in concept_headings:
             if heading.lower() == document.name.lower():
                 continue
             concept = builder.add_node(
@@ -338,6 +395,42 @@ class ResearchGraphExtractor:
                 metadata={"source_kind": "document_heading"},
             )
             builder.add_edge(document, "documents", concept)
+
+    def _extract_paper_references(
+        self,
+        builder: ResearchGraphBuilder,
+        document: ResearchNode,
+        text: str,
+        source_path: Optional[str],
+    ) -> None:
+        """Promote arxiv links inside digest bodies to first-class Paper nodes."""
+        seen: Set[str] = set()
+        # arxiv URLs (http/https, abs|pdf), bare ``arXiv:NNNN.NNNNN``, and
+        # relative paths to ``papers/<id>/paper.md``.
+        patterns = (
+            re.compile(r"https?://arxiv\.org/(?:abs|pdf)/(\d{4}\.\d{4,6})", re.IGNORECASE),
+            re.compile(r"\barxiv\s*:\s*(\d{4}\.\d{4,6})", re.IGNORECASE),
+            re.compile(r"papers/(\d{4}\.\d{4,6})/(?:paper|main|abstract)\.md", re.IGNORECASE),
+        )
+        for pattern in patterns:
+            for match in pattern.finditer(text):
+                arxiv_id = match.group(1)
+                if arxiv_id in seen:
+                    continue
+                seen.add(arxiv_id)
+                paper = builder.add_node(
+                    f"arXiv:{arxiv_id}",
+                    ResearchNodeType.PAPER,
+                    aliases=[f"arXiv:{arxiv_id}"],
+                    source_path=source_path,
+                    metadata={
+                        "source_kind": "Paper",
+                        "arxiv_id": arxiv_id,
+                        "discovered_in": document.source_path or source_path,
+                    },
+                    id_seed=f"arXiv:{arxiv_id}",
+                )
+                builder.add_edge(document, "mentioned_in", paper)
 
     def _add_evidence(self, builder: ResearchGraphBuilder, paper: ResearchNode, evidence: str, source_path: Optional[str]) -> ResearchNode:
         name = "Evidence: " + truncate(evidence, 72)
@@ -489,14 +582,182 @@ def extract_markdown_headings(text: str) -> List[str]:
     return headings
 
 
+# Regexes for daily-digest path classification. They match anywhere inside a
+# normalised forward-slash path so `data/research/<anything>/papers/<id>/...`
+# windows-style or absolute prefixes both classify correctly.
+_PAPER_SUBFOLDER_RE = re.compile(
+    r"data/research/.+?/papers/(\d{4}\.\d{4,6})/(?:paper|main|abstract)\.md$",
+    re.IGNORECASE,
+)
+_PAPER_REPO_FILE_RE = re.compile(
+    r"data/research/.+?/papers/(\d{4}\.\d{4,6})/repo\.md$",
+    re.IGNORECASE,
+)
+_DAILY_REPOS_RE = re.compile(r"data/research/.+?/repos/.+?\.md$", re.IGNORECASE)
+_DAILY_FEEDS_RE = re.compile(r"data/research/.+?/feeds/.+?\.md$", re.IGNORECASE)
+
+
 def source_kind_to_node_type(source_kind: str, source_path: Optional[str]) -> ResearchNodeType:
     lowered = (source_kind or "").lower()
-    path = (source_path or "").lower()
-    if "paper" in lowered or "/papers/" in path or path.endswith("paper.md") or "arxiv" in path:
+    path = (source_path or "").replace("\\", "/")
+    path_lower = path.lower()
+    # Path-precise matches win over the looser keyword fallbacks below: a daily
+    # feed snippet must stay a SourceDocument even though the corpus root
+    # contains the substring "papers".
+    if _PAPER_SUBFOLDER_RE.search(path):
         return ResearchNodeType.PAPER
-    if "repo" in lowered or "repo" in path or "github" in path:
+    if _PAPER_REPO_FILE_RE.search(path) or _DAILY_REPOS_RE.search(path):
+        return ResearchNodeType.REPOSITORY
+    if _DAILY_FEEDS_RE.search(path):
+        return ResearchNodeType.SOURCE_DOCUMENT
+    if "paper" in lowered or "/papers/" in path_lower or path_lower.endswith("paper.md") or "arxiv" in path_lower:
+        return ResearchNodeType.PAPER
+    if "repo" in lowered or "repo" in path_lower or "github" in path_lower:
         return ResearchNodeType.REPOSITORY
     return ResearchNodeType.SOURCE_DOCUMENT
+
+
+def extract_arxiv_id_from_path(source_path: Optional[str]) -> Optional[str]:
+    """Return the arxiv id from a daily-digest paper subfolder path, if any."""
+    if not source_path:
+        return None
+    path = source_path.replace("\\", "/")
+    match = _PAPER_SUBFOLDER_RE.search(path) or _PAPER_REPO_FILE_RE.search(path)
+    if match:
+        return match.group(1)
+    return None
+
+
+# Heading-classification helpers ---------------------------------------------
+
+# Whitelist tokens that signal a heading is a real research concept rather
+# than a paper title or section marker. Keep this list short and additive.
+_CONCEPT_WHITELIST_TOKENS: Tuple[str, ...] = (
+    "model",
+    "diffusion",
+    "splatting",
+    "transformer",
+    "graph",
+    "rendering",
+    "encoder",
+    "decoder",
+    "embedding",
+    "attention",
+    "reconstruction",
+    "synthesis",
+    "segmentation",
+    "estimation",
+    "depth",
+    "slam",
+    "convolution",
+    "kernel",
+    "loss",
+    "regularization",
+    "tokenization",
+    "agent",
+    "policy",
+    "reward",
+    "alignment",
+)
+
+_GENERIC_SECTION_NAMES: Set[str] = {
+    "intro",
+    "introduction",
+    "summary",
+    "abstract",
+    "method",
+    "methods",
+    "results",
+    "discussion",
+    "conclusion",
+    "conclusions",
+    "references",
+    "background",
+    "related work",
+    "experiments",
+    "evaluation",
+    "limitations",
+    "appendix",
+    "overview",
+    "highlights",
+    "본문",
+    "개요",
+    "요약",
+    "결론",
+    "참고",
+    "실험",
+    "한계",
+    "방법",
+}
+
+
+def _strip_heading_numbering(heading: str) -> str:
+    """Strip leading numbering ("1. ", "1) ", "I. ") and trailing whitespace."""
+    text = re.sub(r"\s+", " ", heading.strip())
+    # 1. , 1) , 12. , 12) — Arabic numbering
+    text = re.sub(r"^\d{1,3}\s*[.)]\s+", "", text)
+    # I. , II) , IV. — Roman numbering (simple form)
+    text = re.sub(r"^[IVXLCM]{1,4}\s*[.)]\s+", "", text)
+    return text.strip()
+
+
+def _is_generic_section_heading(cleaned: str) -> bool:
+    return cleaned.strip().lower().rstrip(":") in _GENERIC_SECTION_NAMES
+
+
+def _looks_like_paper_title_heading(raw: str, cleaned: str) -> bool:
+    """True if the heading looks like a paper title / digest entry, not a concept.
+
+    Triggers on:
+      - explicit numeric section prefix in the raw heading (``### 1. …``)
+      - Korean sentence-ending punctuation (``다.``, ``.`` after Hangul)
+      - too many commas / em-dashes (>5) — classic Korean digest prose form
+    """
+    raw_stripped = raw.strip()
+    # Heading started with "### 1." style numbering — that is an enumerated
+    # digest entry, never a concept.
+    if re.match(r"^\d{1,3}\s*[.)]\s+", raw_stripped):
+        return True
+    # Korean conclusion clauses or trailing periods usually mark a sentence.
+    if re.search(r"[가-힣]\.\s*$", cleaned):
+        return True
+    if cleaned.endswith("다.") or cleaned.endswith("이다") or cleaned.endswith("했다"):
+        return True
+    # Comma / em-dash density implies prose, not a single concept.
+    punctuation = sum(cleaned.count(ch) for ch in (",", "—", "·"))
+    if punctuation > 5:
+        return True
+    return False
+
+
+def _is_concept_shaped_heading(cleaned: str, whitelist_terms: Set[str]) -> bool:
+    """True iff ``cleaned`` is short enough and looks like a concept noun phrase.
+
+    A heading qualifies as a Concept only if it is short (< 6 words),
+    free of sentence-style punctuation, and either contains a whitelisted
+    technical token or matches an existing TermRule canonical name/alias.
+    """
+    if not cleaned:
+        return False
+    if ":" in cleaned:
+        return False
+    # Reject anything with sentence-ending punctuation or too many commas.
+    if cleaned.count(",") > 0:
+        return False
+    if re.search(r"[!?。]", cleaned):
+        return False
+    word_count = len(cleaned.split())
+    if word_count == 0 or word_count > 5:
+        return False
+    lowered = cleaned.lower()
+    # Direct match against term-rule whitelist (e.g. "Volumetric Rendering").
+    if lowered in whitelist_terms:
+        return True
+    # Whitelist-token match — any concept-flavored noun.
+    for token in _CONCEPT_WHITELIST_TOKENS:
+        if re.search(rf"\b{re.escape(token)}\b", lowered):
+            return True
+    return False
 
 
 def relation_for_node_type(node_type: ResearchNodeType) -> str:
@@ -572,11 +833,15 @@ def looks_like_research_title(text: str) -> bool:
 
 def extract_source_metadata(text: str, source_path: Optional[str]) -> Dict[str, object]:
     metadata: Dict[str, object] = {}
-    arxiv_match = re.search(r"arxiv(?:\.org/abs/|:\s*)(\d{4}\.\d{4,5})", text, flags=re.IGNORECASE)
-    if not arxiv_match and source_path:
-        arxiv_match = re.search(r"(\d{4}\.\d{4,5})", source_path)
-    if arxiv_match:
-        metadata["arxiv_id"] = arxiv_match.group(1)
+    arxiv_id = extract_arxiv_id_from_path(source_path)
+    if not arxiv_id:
+        arxiv_match = re.search(r"arxiv(?:\.org/abs/|:\s*)(\d{4}\.\d{4,6})", text, flags=re.IGNORECASE)
+        if not arxiv_match and source_path:
+            arxiv_match = re.search(r"(\d{4}\.\d{4,6})", source_path)
+        if arxiv_match:
+            arxiv_id = arxiv_match.group(1)
+    if arxiv_id:
+        metadata["arxiv_id"] = arxiv_id
     date_match = re.search(r"분석일:\s*(\d{4}-\d{2}-\d{2})", text)
     if not date_match and source_path:
         date_match = re.search(r"daily/(\d{4}-\d{2}-\d{2})/", source_path)
