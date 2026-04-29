@@ -232,8 +232,23 @@ def test_static_site_builder_emits_redesigned_ia(tmp_path: Path) -> None:
         "robots.txt",
         "assets/style.css",
         "assets/app.js",
+        "assets/graph.js",
+        "graph/payload.json",
     ):
         assert (out / export_file).exists(), f"missing export: {export_file}"
+
+    # ---- graph route uses split payload and client fetches it -----------------
+    graph_html = (out / "graph" / "index.html").read_text(encoding="utf-8")
+    graph_js = (out / "assets" / "graph.js").read_text(encoding="utf-8")
+    graph_payload = json.loads((out / "graph" / "payload.json").read_text(encoding="utf-8"))
+    assert 'id="graph-canvas"' in graph_html
+    assert 'data-payload-url="payload.json"' in graph_html
+    assert '../assets/graph.js?v=payload-fetch' in graph_html
+    assert 'id="graph-data"' not in graph_html
+    assert "fetch(payloadUrl)" in graph_js
+    assert "if (!dataNode || !container) return" not in graph_js
+    assert any(node["name"] == "Demo Paper" for node in graph_payload["nodes"])
+    assert graph_payload["links"]
 
     # ---- search index excludes code-layer entries ----------------------------
     search_entries = json.loads((out / "search-index.json").read_text(encoding="utf-8"))

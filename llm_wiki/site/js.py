@@ -761,12 +761,12 @@ JS_GRAPH = r"""
   ready(function(){
     var dataNode  = document.getElementById('graph-data');
     var container = document.getElementById('graph-canvas');
-    if (!dataNode || !container) return;
+    if (!container) return;
 
-    var payload = { nodes: [], links: [] };
-    try { payload = JSON.parse(dataNode.textContent || '{}') || payload; } catch (_) {}
-    if (!Array.isArray(payload.nodes)) payload.nodes = [];
-    if (!Array.isArray(payload.links)) payload.links = (payload.edges || []);
+    function startGraph(rawPayload){
+      var payload = rawPayload || { nodes: [], links: [] };
+      if (!Array.isArray(payload.nodes)) payload.nodes = [];
+      if (!Array.isArray(payload.links)) payload.links = (payload.edges || []);
 
     var byId = new Map();
     payload.nodes.forEach(function(n){
@@ -1389,6 +1389,32 @@ JS_GRAPH = r"""
         renderFallback('Could not load 3d-force-graph from the CDN. Showing static fallback.');
       }
     }, 100);
+    }
+
+    if (dataNode) {
+      try {
+        startGraph(JSON.parse(dataNode.textContent || '{}') || {});
+      } catch (err) {
+        startGraph({ nodes: [], links: [] });
+      }
+      return;
+    }
+
+    var payloadUrl = container.getAttribute('data-payload-url') || 'payload.json';
+    fetch(payloadUrl)
+      .then(function(r){
+        if (!r.ok) throw new Error('HTTP ' + r.status + ' while loading ' + payloadUrl);
+        return r.json();
+      })
+      .then(startGraph)
+      .catch(function(err){
+        console.error('graph: payload load failed', err);
+        var banner = document.getElementById('graph-error-banner');
+        if (banner) {
+          banner.textContent = 'Graph payload failed to load: ' + (err && err.message ? err.message : err);
+          banner.classList.add('is-visible');
+        }
+      });
   });
 })();
 """
