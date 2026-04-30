@@ -22,13 +22,14 @@ import sys
 from collections import Counter, defaultdict
 from datetime import datetime, timezone
 from pathlib import Path
-from typing import Any, Dict, List, Optional, Sequence, Tuple
+from typing import Any, Dict, List, Optional, Sequence, Set, Tuple
 
 from .research_graph import (
     ResearchEdge,
     ResearchGraph,
     ResearchNode,
     ResearchNodeType,
+    is_public_research_node,
     stable_id,
 )
 from .wiki_store import WikiPage, WikiPageStore
@@ -79,6 +80,51 @@ def _slugify(value: str) -> str:
     if not safe:
         safe = hashlib.sha1(value.encode("utf-8")).hexdigest()[:12]
     return safe[:80]
+
+
+def _escape_markdown_link_label(value: str) -> str:
+    value = re.sub(r"!?\[([^\]]+)\]\([^\)]+\)", r"\1", value)
+    value = value.replace("|", "-")
+    return value.replace("\\", "\\\\").replace("[", "\\[").replace("]", "\\]")
+
+
+def _arxiv_id_for(node: ResearchNode) -> Optional[str]:
+    raw = node.metadata.get("arxiv_id")
+    if raw:
+        return str(raw)
+    for alias in node.aliases:
+        match = re.fullmatch(r"arXiv:(\d{4}\.\d{4,6})", alias, flags=re.IGNORECASE)
+        if match:
+            return match.group(1)
+    return None
+
+
+def _linked_node_label(node: ResearchNode, kind: str, slug: Optional[str] = None) -> str:
+    label = node.name
+    if node.type == ResearchNodeType.PAPER:
+        arxiv_id = _arxiv_id_for(node)
+        if arxiv_id:
+            label = f"{label} (arXiv:{arxiv_id})"
+    slug = slug or _slugify(node.name)
+    return f"[{_escape_markdown_link_label(label)}](../{kind}/{slug}.md)"
+
+
+def _linked_paper_label(paper: ResearchNode, slug: Optional[str] = None) -> str:
+    return _linked_node_label(paper, "papers", slug=slug)
+
+
+def _linked_repo_label(repo: ResearchNode, slug: Optional[str] = None) -> str:
+    return _linked_node_label(repo, "repos", slug=slug)
+
+
+def _linked_source_label(node: ResearchNode, slug: Optional[str] = None) -> str:
+    if node.type == ResearchNodeType.PAPER:
+        return _linked_paper_label(node, slug=slug)
+    if node.type in {ResearchNodeType.REPOSITORY, ResearchNodeType.PROJECT, ResearchNodeType.CODE_PROJECT}:
+        return _linked_repo_label(node, slug=slug)
+    if node.type == ResearchNodeType.SOURCE_DOCUMENT:
+        return _linked_node_label(node, "sources", slug=slug)
+    return node.name
 
 
 def _hash_body(body: str) -> str:
@@ -253,6 +299,7 @@ class SynthesisProjector:
         plans.extend(self._plan_topics(ctx))
         plans.extend(self._plan_comparisons(ctx))
         plans.extend(self._plan_fields(ctx))
+        self._remove_stale_synthesis_pages({plan.slug for plan in plans})
 
         # Reset memoized LLM state for this run, then evaluate it once.
         self._llm_state = None
@@ -387,6 +434,14 @@ class SynthesisProjector:
     def _history_path(self) -> Path:
         return Path(self.wiki_store.root) / "syntheses" / ".history.jsonl"
 
+    def _remove_stale_synthesis_pages(self, planned_slugs: Set[str]) -> None:
+        directory = Path(self.wiki_store.root) / "syntheses"
+        if not directory.exists():
+            return
+        for path in directory.glob("*.md"):
+            if path.stem not in planned_slugs:
+                path.unlink()
+
     def _append_history(self, entries: Sequence[Dict[str, str]]) -> None:
         path = self._history_path()
         path.parent.mkdir(parents=True, exist_ok=True)
@@ -468,7 +523,8 @@ class SynthesisProjector:
             lines.append("")
             lines.append("## Papers and repos")
             for source in source_nodes:
-                lines.append(f"- {source.name} ({source.type.value})")
+                node_slug = self.wiki_store.slug_for(source.name)
+                lines.append(f"- {_linked_source_label(source, slug=node_slug)} ({source.type.value})")
             lines.append("")
             lines.append("## Extracted concepts")
             if concepts:
@@ -512,7 +568,8 @@ class SynthesisProjector:
             lines.append("")
             lines.append("## Papers and repos")
             for source in source_nodes:
-                lines.append(f"- {source.name} ({source.type.value})")
+                node_slug = self.wiki_store.slug_for(source.name)
+                lines.append(f"- {_linked_source_label(source, slug=node_slug)} ({source.type.value})")
             lines.append("")
             lines.append("## Dominant approach families")
             if family_counts:
@@ -554,7 +611,8 @@ class SynthesisProjector:
             lines.append("")
             lines.append("## Contributing papers")
             for paper in papers:
-                lines.append(f"- {paper.name}")
+                node_slug = self.wiki_store.slug_for(paper.name)
+                lines.append(f"- {_linked_paper_label(paper, slug=node_slug)}")
             lines.append("")
             lines.append("## Related concepts")
             if related_concepts:
@@ -566,7 +624,8 @@ class SynthesisProjector:
             lines.append("## Related repos")
             if related_repos:
                 for repo in related_repos:
-                    lines.append(f"- {repo.name}")
+                    node_slug = self.wiki_store.slug_for(repo.name)
+                    lines.append(f"- {_linked_repo_label(repo, slug=node_slug)}")
             else:
                 lines.append("- (none)")
 
@@ -728,7 +787,7 @@ class _GraphContext:
 
     def _nodes_of(self, types) -> List[ResearchNode]:
         wanted = types if isinstance(types, set) else {types}
-        return [n for n in self.graph.nodes if n.type in wanted]
+        return [n for n in self.graph.nodes if n.type in wanted and is_public_research_node(n)]
 
     def fields(self) -> List[ResearchNode]:
         return sorted(
@@ -781,7 +840,7 @@ class _GraphContext:
     def daily_sources(self) -> Dict[str, List[ResearchNode]]:
         buckets: Dict[str, List[ResearchNode]] = defaultdict(list)
         for node in self.graph.nodes:
-            if node.type not in _SOURCE_TYPES or not node.source_path:
+            if node.type not in _SOURCE_TYPES or not node.source_path or not is_public_research_node(node):
                 continue
             match = _DAILY_RE.search(node.source_path)
             if match:
@@ -793,7 +852,7 @@ class _GraphContext:
     def weekly_sources(self) -> Dict[str, List[ResearchNode]]:
         buckets: Dict[str, List[ResearchNode]] = defaultdict(list)
         for node in self.graph.nodes:
-            if node.type not in _SOURCE_TYPES or not node.source_path:
+            if node.type not in _SOURCE_TYPES or not node.source_path or not is_public_research_node(node):
                 continue
             match = _WEEKLY_RE.search(node.source_path)
             if match:
@@ -840,6 +899,8 @@ class _GraphContext:
         for edge in self.in_edges.get(topic_id, []):
             source = self.nodes_by_id.get(edge.source)
             if source and source.type == ResearchNodeType.PAPER and source.id not in seen:
+                if source.metadata.get("title_quality") not in {"paper_file", "verified"}:
+                    continue
                 seen.add(source.id)
                 out.append(source)
         out.sort(key=lambda n: n.name)

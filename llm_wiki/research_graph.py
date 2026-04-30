@@ -8,6 +8,7 @@ used in tests and as a guardrail around future Claude/Cognee extraction.
 from __future__ import annotations
 
 import hashlib
+import html
 import json
 import re
 from dataclasses import asdict, dataclass, field
@@ -147,6 +148,45 @@ class ResearchEdge:
         return asdict(self)
 
 
+def is_arxiv_placeholder_name(name: str) -> bool:
+    return re.fullmatch(r"arXiv:\d{4}\.\d{4,6}", name.strip(), flags=re.IGNORECASE) is not None
+
+
+def prefer_research_node(existing: ResearchNode, incoming: ResearchNode) -> ResearchNode:
+    """Merge duplicate nodes while preferring verified paper titles.
+
+    Digest/source-document pages can discover papers as ``arXiv:<id>`` or weak
+    context titles. When the real per-paper raw document is also ingested, keep
+    the same stable node id but upgrade the display name to the paper title.
+    """
+    quality_rank = {"arxiv_only": 0, "reference_context": 1, "paper_file": 3, "verified": 4}
+    existing_quality = str(existing.metadata.get("title_quality") or "")
+    incoming_quality = str(incoming.metadata.get("title_quality") or "")
+    existing_placeholder = is_arxiv_placeholder_name(existing.name)
+    incoming_placeholder = is_arxiv_placeholder_name(incoming.name)
+    if quality_rank.get(incoming_quality, 2) > quality_rank.get(existing_quality, 2):
+        chosen = incoming
+    elif existing_placeholder and not incoming_placeholder:
+        chosen = incoming
+    else:
+        chosen = existing
+    other = existing if chosen is incoming else incoming
+    aliases = set(existing.aliases) | set(incoming.aliases)
+    if other.name != chosen.name:
+        aliases.add(other.name)
+    aliases.discard(chosen.name)
+    metadata = {**other.metadata, **chosen.metadata}
+    return ResearchNode(
+        id=chosen.id,
+        name=chosen.name,
+        type=chosen.type,
+        aliases=sorted(aliases),
+        description=chosen.description or other.description,
+        source_path=chosen.source_path or other.source_path,
+        metadata=metadata,
+    )
+
+
 @dataclass
 class ResearchGraph:
     nodes: List[ResearchNode] = field(default_factory=list)
@@ -188,18 +228,16 @@ class ResearchGraphBuilder:
         node_id = stable_id(node_type.value, id_seed or canonical_name)
         existing = self._nodes.get(node_id)
         if existing:
-            merged_aliases = sorted(set(existing.aliases) | set(aliases or []))
-            if merged_aliases == existing.aliases:
-                return existing
-            node = ResearchNode(
+            incoming = ResearchNode(
                 id=existing.id,
-                name=existing.name,
-                type=existing.type,
-                aliases=merged_aliases,
-                description=existing.description or description,
-                source_path=existing.source_path or source_path,
-                metadata={**existing.metadata, **(metadata or {})},
+                name=canonical_name,
+                type=node_type,
+                aliases=list(aliases or []),
+                description=description,
+                source_path=source_path,
+                metadata=metadata or {},
             )
+            node = prefer_research_node(existing, incoming)
             self._nodes[node_id] = node
             return node
         node = ResearchNode(
@@ -292,10 +330,14 @@ class ResearchGraphExtractor:
         title = extract_title(text, source_path)
         source_type = source_kind_to_node_type(source_kind, source_path)
         source_metadata = extract_source_metadata(text, source_path)
+        if source_type == ResearchNodeType.SOURCE_DOCUMENT and is_social_feed_source_path(source_path):
+            return builder.build()
         # Pre-compute heading-derived candidate paper titles so we can attach
         # them to the source-document metadata up-front (ResearchNode is frozen).
         candidate_paper_titles, surviving_concept_headings = self._classify_document_headings(text)
         paper_metadata: Dict[str, object] = {"source_kind": source_kind, **source_metadata}
+        if source_type == ResearchNodeType.PAPER:
+            paper_metadata["title_quality"] = "paper_file" if is_verified_paper_title(title, source_metadata) else "arxiv_only"
 
         # When the path identifies a Paper subfolder we want all references
         # (digest mentions, per-paper file ingest) to collapse onto the same
@@ -304,7 +346,7 @@ class ResearchGraphExtractor:
         # the arxiv id captured as an alias for cross-reference search.
         arxiv_id = str(source_metadata.get("arxiv_id", ""))
         if source_type == ResearchNodeType.PAPER and arxiv_id:
-            display_name = title or f"arXiv:{arxiv_id}"
+            display_name = title if is_verified_paper_title(title, source_metadata) else f"arXiv:{arxiv_id}"
             aliases: List[str] = [f"arXiv:{arxiv_id}"]
             paper = builder.add_node(
                 display_name,
@@ -326,10 +368,11 @@ class ResearchGraphExtractor:
 
         field = builder.add_node(infer_research_field(text), ResearchNodeType.RESEARCH_FIELD)
         builder.add_edge(paper, "part_of", field)
+        research_text = strip_non_research_scaffold(text)
 
         matched_terms: List[ResearchNode] = []
         for rule in self.term_rules:
-            evidence = find_evidence(text, rule.patterns())
+            evidence = find_evidence(research_text, rule.patterns())
             if not evidence:
                 continue
             node = builder.add_node(
@@ -353,8 +396,8 @@ class ResearchGraphExtractor:
                 if node.type != ResearchNodeType.APPROACH_FAMILY:
                     builder.add_edge(family, "uses", node, evidence=evidence)
 
-        self._add_comparative_claims(builder, paper, text, source_path)
-        self._connect_related_terms(builder, matched_terms, text)
+        self._add_comparative_claims(builder, paper, research_text, source_path)
+        self._connect_related_terms(builder, matched_terms, research_text)
         return builder.build()
 
     def _classify_document_headings(self, text: str) -> Tuple[List[str], List[str]]:
@@ -403,7 +446,10 @@ class ResearchGraphExtractor:
         text: str,
         source_path: Optional[str],
     ) -> None:
-        """Promote arxiv links inside digest bodies to first-class Paper nodes."""
+        """Promote arxiv links inside research-corpus digest/feed bodies to Paper refs."""
+        normalized_source_path = source_path.replace("\\", "/") if source_path else ""
+        if not normalized_source_path or "data/research/" not in normalized_source_path:
+            return
         seen: Set[str] = set()
         # arxiv URLs (http/https, abs|pdf), bare ``arXiv:NNNN.NNNNN``, and
         # relative paths to ``papers/<id>/paper.md``.
@@ -418,14 +464,17 @@ class ResearchGraphExtractor:
                 if arxiv_id in seen:
                     continue
                 seen.add(arxiv_id)
+                display_name = f"arXiv:{arxiv_id}"
+                title_quality = "arxiv_only"
                 paper = builder.add_node(
-                    f"arXiv:{arxiv_id}",
+                    display_name,
                     ResearchNodeType.PAPER,
                     aliases=[f"arXiv:{arxiv_id}"],
                     source_path=source_path,
                     metadata={
                         "source_kind": "Paper",
                         "arxiv_id": arxiv_id,
+                        "title_quality": title_quality,
                         "discovered_in": document.source_path or source_path,
                     },
                     id_seed=f"arXiv:{arxiv_id}",
@@ -595,6 +644,125 @@ _PAPER_REPO_FILE_RE = re.compile(
 )
 _DAILY_REPOS_RE = re.compile(r"data/research/.+?/repos/.+?\.md$", re.IGNORECASE)
 _DAILY_FEEDS_RE = re.compile(r"data/research/.+?/feeds/.+?\.md$", re.IGNORECASE)
+
+
+VERIFIED_PAPER_TITLE_QUALITIES = {"paper_file", "verified"}
+
+
+def is_social_feed_source_path(source_path: Optional[str]) -> bool:
+    if not source_path:
+        return False
+    return _DAILY_FEEDS_RE.search(source_path.replace("\\", "/")) is not None
+
+
+def is_public_research_node(node: ResearchNode) -> bool:
+    """Return whether a node should appear in the public wiki/site projection.
+
+    Social feed captures are noisy evidence inputs, not durable wiki entities.
+    Likewise, arXiv mentions that have not been resolved from a real paper file
+    must not become public paper pages.
+    """
+    if is_social_feed_source_path(node.source_path):
+        return False
+    if node.type == ResearchNodeType.PAPER:
+        quality = str(node.metadata.get("title_quality") or "")
+        if quality and quality not in VERIFIED_PAPER_TITLE_QUALITIES:
+            return False
+    return True
+
+
+def infer_arxiv_reference_title(text: str, arxiv_match_start: int) -> Optional[str]:
+    """Infer a paper title from local feed context before an arXiv URL.
+
+    Twitter/RSS feed captures often store entries as:
+    ``Title<br><br>Authors<br>https://arxiv.org/abs/...``. In that case the
+    arXiv id alone is a poor display name, and the nearby title is already in
+    the raw document.
+    """
+    window = text[max(0, arxiv_match_start - 800) : arxiv_match_start]
+    window = html.unescape(window)
+    window = window.replace("\\n", "\n")
+    window = re.sub(r"<br\s*/?>", "\n", window, flags=re.IGNORECASE)
+    window = re.sub(r"<[^>]+>", " ", window)
+    segments = [segment.strip(" \t#>-*") for segment in re.split(r"\n{2,}|\r\n{2,}", window)]
+    for segment in reversed([segment for segment in segments if segment.strip()]):
+        lines = [line.strip(" \t#>-*") for line in segment.splitlines() if line.strip()]
+        if not lines:
+            continue
+        candidate = lines[0]
+        candidate = re.sub(r"https?://\S+", "", candidate).strip()
+        candidate = strip_trailing_authors(candidate)
+        candidate = normalize_display_name(candidate)
+        if _is_plausible_arxiv_context_title(candidate):
+            return candidate
+    return None
+
+
+def strip_trailing_authors(candidate: str) -> str:
+    if "," not in candidate:
+        return candidate
+    prefix = candidate.split(",", 1)[0].strip()
+    match = re.match(r"^(?P<title>.+?)\s+[A-Z][A-Za-z'\-]+\s+[A-Z][A-Za-z'\-]+$", prefix)
+    if match and len(match.group("title")) >= 12:
+        return match.group("title").strip()
+    return candidate
+
+
+def _is_plausible_arxiv_context_title(candidate: str) -> bool:
+    if not candidate:
+        return False
+    lowered = candidate.lower()
+    if lowered in {"arxiv", "본문", "feed"} or "arxiv.org" in lowered:
+        return False
+    if lowered.startswith(("url", "date", "author", "작성자", "논문 분석", "rt ", "tl;dr", "extract ", "📄", "논문:")):
+        return False
+    if any(marker in lowered for marker in ("released #", "we just released", "join our discord", "goated things", "what's the right representation")):
+        return False
+    if re.fullmatch(r"\d{4}\.\d{4,6}", candidate):
+        return False
+    if len(candidate) < 8 or len(candidate) > 220:
+        return False
+    if "," in candidate and not re.search(r"\b(of|for|with|in|and|to|from|via|towards?|using|learning|neural|model|models|graph|image|video|3d|4d)\b", candidate, re.IGNORECASE):
+        return False
+    tokens = re.findall(r"[A-Za-z][A-Za-z'-]*", candidate)
+    if 1 <= len(tokens) <= 3 and all(token[:1].isupper() and token[1:].islower() for token in tokens):
+        return False
+    return True
+
+
+def strip_non_research_scaffold(text: str) -> str:
+    """Remove scraper/UI/provenance scaffolding before extracting claims.
+
+    The raw paper note remains immutable; this only affects graph claim/evidence
+    extraction so headings like ``# 논문 분석`` and papers.cool chrome do not
+    become claims or evidence spans.
+    """
+    cleaned: List[str] = []
+    skip_exact = {
+        "search", "filter", "highlight", "export", "save", "copy", "rel",
+        "include or:", "exclude:", "stared paper(s):", "magic token:",
+        "english", "中文", "desc language:", "kimi language:",
+    }
+    for raw_line in text.splitlines():
+        line = raw_line.strip()
+        if not line:
+            cleaned.append("")
+            continue
+        lowered = line.lower().strip(" -*_`#")
+        if line.startswith("# 논문 분석") or re.fullmatch(r"#{1,6}\s*\d{4}\.\d{4,6}", line):
+            continue
+        if line.startswith("> - arxiv:") or line.startswith("> - papers.cool:") or line.startswith("> - 분석일:"):
+            continue
+        if re.fullmatch(r"#{1,6}\s*#?\d+", line):
+            continue
+        if lowered in skip_exact:
+            continue
+        if lowered.startswith(("designed by", "powered by", "bug report", "github:", "publish:", "subject:", "authors:", "저자:", "주제:", "게시:")):
+            continue
+        if lowered.startswith(("제공하신", "제공된 원문", "의미 있는 내용을", "`paper_prompt.txt`", "paper_prompt.txt", "중국어 분석")):
+            continue
+        cleaned.append(raw_line)
+    return "\n".join(cleaned)
 
 
 def source_kind_to_node_type(source_kind: str, source_path: Optional[str]) -> ResearchNodeType:
@@ -807,8 +975,13 @@ def extract_title(text: str, source_path: Optional[str]) -> str:
             continue
         if re.fullmatch(r"\d+", stripped):
             continue
-        if stripped in {"총계: 1", "검색", "필터", "하이라이트", "내보내기", "저장"}:
+        if stripped in {"총계: 1", "Total: 1", "검색", "필터", "하이라이트", "내보내기", "저장"}:
             continue
+        # papers.cool can render result headings as ``### #1 Title``. Keep the
+        # title, not the rank marker. Do this before title validation so valid
+        # headings like ``# WorldCompass: ...`` and ``### #1 FullCircle: ...``
+        # both converge to the paper title.
+        stripped = re.sub(r"^(?:#?\d+|#\d+)\s+(?=\S)", "", stripped).strip()
         if " | Cool Papers" in stripped:
             stripped = stripped.split(" | Cool Papers", 1)[0].strip()
         if stripped.endswith("  "):
@@ -823,12 +996,44 @@ def extract_title(text: str, source_path: Optional[str]) -> str:
 
 
 def looks_like_research_title(text: str) -> bool:
-    if len(text) < 3:
+    if len(text) < 3 or len(text) > 220:
         return False
     lowered = text.lower()
     if any(skip in lowered for skip in ["designed by", "powered by", "github:", "disclaimer"]):
         return False
+    if lowered.startswith((
+        "extract ",
+        "rt ",
+        "tl;dr",
+        "📄",
+        "논문:",
+        "관련 링크:",
+        "본 연구",
+        "제공하신",
+        "제공된 원문",
+        "`paper_prompt.txt`",
+        "paper_prompt.txt",
+        "의미 있는 내용을",
+        "중국어 분석",
+        "희소 뷰",
+        "authors:",
+        "저자:",
+        "subject:",
+        "publish:",
+    )):
+        return False
+    if "[paper](" in lowered or "[논문 분석](" in lowered:
+        return False
     return bool(re.search(r"[A-Za-z가-힣]", text))
+
+
+def is_verified_paper_title(title: str, metadata: Dict[str, object]) -> bool:
+    if not looks_like_research_title(title):
+        return False
+    arxiv_id = str(metadata.get("arxiv_id") or "")
+    if title in {"paper", "main", "abstract"} or (arxiv_id and title == arxiv_id):
+        return False
+    return True
 
 
 def extract_source_metadata(text: str, source_path: Optional[str]) -> Dict[str, object]:

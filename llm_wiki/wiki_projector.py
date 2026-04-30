@@ -16,7 +16,7 @@ from dataclasses import dataclass, field
 from pathlib import Path
 from typing import Dict, Iterable, List, Mapping, Sequence, Tuple
 
-from .research_graph import ResearchEdge, ResearchGraph, ResearchNode, ResearchNodeType
+from .research_graph import ResearchEdge, ResearchGraph, ResearchNode, ResearchNodeType, is_public_research_node
 from .wiki_store import WikiPage, WikiPageStore
 
 
@@ -90,6 +90,8 @@ class WikiLayerProjector:
         nodes_by_id = {node.id: node for node in graph.nodes}
         written: List[WikiPage] = []
         for node in graph.nodes:
+            if not is_public_research_node(node):
+                continue
             kind = _KIND_FOR_TYPE.get(node.type)
             if kind is None:
                 continue
@@ -115,11 +117,15 @@ class WikiLayerProjector:
             (edge.type, nodes_by_id[edge.target].name, nodes_by_id[edge.target].type.value)
             for edge in adj.out.get(node.id, [])
             if edge.target in nodes_by_id
+            and is_public_research_node(nodes_by_id[edge.target])
+            and _KIND_FOR_TYPE.get(nodes_by_id[edge.target].type) is not None
         ]
         incoming = [
             (edge.type, nodes_by_id[edge.source].name, nodes_by_id[edge.source].type.value)
             for edge in adj.inn.get(node.id, [])
             if edge.source in nodes_by_id
+            and is_public_research_node(nodes_by_id[edge.source])
+            and _KIND_FOR_TYPE.get(nodes_by_id[edge.source].type) is not None
         ]
         outgoing.sort()
         incoming.sort()

@@ -8,6 +8,7 @@ markdown projection, Cognee export bundle, report, and MCP config snippet.
 from __future__ import annotations
 
 import json
+import shutil
 from dataclasses import dataclass
 from datetime import date
 from pathlib import Path
@@ -27,7 +28,7 @@ from .markdown_projection import GraphMarkdownProjector
 from .obsidian_adapter import ObsidianVaultAdapter
 from .persistence import SQLiteResearchGraphStore
 from .report import GraphReporter
-from .research_graph import ResearchCorpusAnalyzer, ResearchEdge, ResearchGraph, ResearchGraphExtractor, ResearchNode, ResearchNodeType
+from .research_graph import ResearchCorpusAnalyzer, ResearchEdge, ResearchGraph, ResearchGraphExtractor, ResearchNode, ResearchNodeType, prefer_research_node
 from .temporal import TemporalFactProjector, render_competitive_report
 
 
@@ -347,6 +348,13 @@ class ProjectWiki:
 
     def _write_artifacts(self, graph: ResearchGraph) -> None:
         self.root.mkdir(parents=True, exist_ok=True)
+        # The wiki/site layers are generated projections. Clean them before each
+        # compile so nodes that are newly filtered out (e.g. noisy social feed
+        # captures) do not survive as stale public pages.
+        if self.paths.wiki.exists():
+            shutil.rmtree(self.paths.wiki)
+        if self.paths.site.exists():
+            shutil.rmtree(self.paths.site)
         self.paths.wiki.mkdir(parents=True, exist_ok=True)
         wiki_store = WikiPageStore(self.paths.wiki)
         WikiLayerProjector(wiki_store).project(graph)
@@ -370,7 +378,8 @@ def merge_graphs(graphs: Iterable[ResearchGraph]) -> ResearchGraph:
     edges = {}
     for graph in graphs:
         for node in graph.nodes:
-            nodes.setdefault(node.id, node)
+            existing = nodes.get(node.id)
+            nodes[node.id] = prefer_research_node(existing, node) if existing else node
         for edge in graph.edges:
             edges[(edge.source, edge.type, edge.target)] = edge
     return ResearchGraph(nodes=list(nodes.values()), edges=list(edges.values()))

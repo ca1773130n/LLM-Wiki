@@ -43,7 +43,7 @@ import re
 from datetime import datetime, timezone
 from typing import Dict, Iterable, List, Mapping, Optional, Sequence
 
-from ..research_graph import ResearchGraph, ResearchNode, ResearchNodeType
+from ..research_graph import ResearchGraph, ResearchNode, ResearchNodeType, is_public_research_node
 from ..wiki_store import WikiPage
 
 
@@ -564,7 +564,7 @@ def _wiki_entry(page: WikiPage) -> Dict[str, object]:
 def is_wiki_layer(node: ResearchNode) -> bool:
     """Return True iff ``node`` belongs to a wiki-layer type."""
 
-    return node.type.value in WIKI_LAYER_TYPES
+    return node.type.value in WIKI_LAYER_TYPES and is_public_research_node(node)
 
 
 def average_doc_len(entries: Sequence[Mapping[str, object]]) -> float:

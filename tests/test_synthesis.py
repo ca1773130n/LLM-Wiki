@@ -106,24 +106,29 @@ def _build_fixture_graph() -> ResearchGraph:
         ResearchNodeType.PAPER,
         source_path="data/research/daily/2026-04-25/paper-a.md",
         analysis_date="2026-04-25",
+        arxiv_id="2601.17835",
+        title_quality="paper_file",
     )
     paper_b = _node(
         "Stochastic Solid Surfaces",
         ResearchNodeType.PAPER,
         source_path="data/research/daily/2026-04-25/paper-b.md",
         analysis_date="2026-04-25",
+        title_quality="paper_file",
     )
     paper_c = _node(
         "Volumetric Rendering Revisited",
         ResearchNodeType.PAPER,
         source_path="data/research/daily/2026-04-26/paper-c.md",
         analysis_date="2026-04-26",
+        title_quality="paper_file",
     )
     paper_w = _node(
         "Weekly Survey of Splatting Methods",
         ResearchNodeType.PAPER,
         source_path="data/research/weekly/2026-W17/survey.md",
         analysis_date="2026-04-27",
+        title_quality="paper_file",
     )
 
     family = _node("Geometry-Grounded Gaussian Splatting Family", ResearchNodeType.APPROACH_FAMILY)
@@ -211,6 +216,41 @@ def test_project_emits_pulse_field_overview_and_synthesis_edges(tmp_path: Path):
     # All synthesis pages were written on the first call.
     written_kinds = {p.frontmatter["synthesis_kind"] for p in written}
     assert {"pulse", "field_overview", "topic", "daily_digest", "weekly"} <= written_kinds
+
+
+def test_topic_synthesis_links_contributing_papers_with_arxiv_ids(tmp_path: Path):
+    graph = _build_fixture_graph()
+    store = _LocalWikiPageStore(tmp_path / "wiki")
+
+    SynthesisProjector(store).project(graph)
+
+    topic_page = tmp_path / "wiki" / "syntheses" / "topic-geometry-grounded-gaussian-splatting-family.md"
+    body = topic_page.read_text(encoding="utf-8")
+    assert "[Geometry-Grounded Gaussian Splatting (arXiv:2601.17835)](../papers/geometry-grounded-gaussian-splatting.md)" in body
+
+
+def test_topic_synthesis_excludes_unverified_arxiv_mentions(tmp_path: Path):
+    graph = _build_fixture_graph()
+    family = next(node for node in graph.nodes if node.name == "Geometry-Grounded Gaussian Splatting Family")
+    weak = ResearchNode(
+        id=stable_id(ResearchNodeType.PAPER.value, "arXiv:2602.09022"),
+        name="RT Tengfei Wang: It's time for their RLHF moment for World Models.",
+        type=ResearchNodeType.PAPER,
+        aliases=["arXiv:2602.09022"],
+        metadata={"arxiv_id": "2602.09022", "title_quality": "reference_context"},
+    )
+    graph = ResearchGraph(
+        nodes=[*graph.nodes, weak],
+        edges=[*graph.edges, ResearchEdge(source=weak.id, target=family.id, type="belongs_to_approach_family")],
+    )
+    store = _LocalWikiPageStore(tmp_path / "wiki")
+
+    SynthesisProjector(store).project(graph)
+
+    topic_page = tmp_path / "wiki" / "syntheses" / "topic-geometry-grounded-gaussian-splatting-family.md"
+    body = topic_page.read_text(encoding="utf-8")
+    assert "RT Tengfei" not in body
+    assert "2602.09022" not in body
 
 
 def test_project_is_idempotent_when_graph_unchanged(tmp_path: Path):

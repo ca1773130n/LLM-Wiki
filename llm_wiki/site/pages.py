@@ -28,7 +28,7 @@ from dataclasses import dataclass, field
 from pathlib import Path
 from typing import Dict, List, Mapping, Optional, Sequence, Tuple
 
-from ..research_graph import ResearchEdge, ResearchGraph, ResearchNode, ResearchNodeType
+from ..research_graph import ResearchEdge, ResearchGraph, ResearchNode, ResearchNodeType, is_public_research_node
 from ..wiki_store import WikiPage
 from .components import (
     ai_siblings_footer,
@@ -123,6 +123,8 @@ def kind_for_node(node: ResearchNode) -> Optional[str]:
     ``ResearchNode`` in hand. Mirrors the ``_KIND_FOR_TYPE`` table in
     ``wiki_projector`` — keep them consistent.
     """
+    if not is_public_research_node(node):
+        return None
     return _kind_for_node_type(node.type)
 
 
@@ -561,6 +563,9 @@ def _wiki_link_rewriter(target: str) -> str:
         query = "?" + query
     if not rest.endswith(".md"):
         return target
+    arxiv_paper_match = re.fullmatch(r"(?:\.\./)*papers/(\d{4}\.\d{4,6})/(?:paper|main|abstract)\.md", rest, flags=re.IGNORECASE)
+    if arxiv_paper_match:
+        return f"https://arxiv.org/abs/{arxiv_paper_match.group(1)}" + query + fragment
     parts = rest.split("/")
     if len(parts) >= 2 and parts[-2] in _WIKI_LINK_KINDS:
         kind = parts[-2]
