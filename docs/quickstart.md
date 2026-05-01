@@ -173,7 +173,7 @@ llm_wiki project sync-graphiti \
   --neo4j-password '<password>'
 ```
 
-## 9. Deploy to GitHub Pages
+## 10. Deploy to GitHub Pages
 
 Push the compiled site at `.llm-wiki/site/` to the `gh-pages` branch of the project's git origin:
 
