@@ -14,8 +14,9 @@ from __future__ import annotations
 from pathlib import Path
 
 from llm_wiki.graph_stores import SqliteGraphStore
+from llm_wiki.persistence import SQLiteResearchGraphStore
 from llm_wiki.ports import GraphStore
-from llm_wiki.research_graph import ResearchEdge, ResearchNode, ResearchNodeType
+from llm_wiki.research_graph import ResearchEdge, ResearchGraph, ResearchNode, ResearchNodeType
 
 
 def _make_node(
@@ -139,3 +140,57 @@ def test_sqlite_graph_store_is_runtime_checkable_graph_store(tmp_path: Path) -> 
     """The adapter must satisfy the ``GraphStore`` runtime-checkable protocol."""
     store = SqliteGraphStore(tmp_path / "graph.sqlite")
     assert isinstance(store, GraphStore)
+
+
+def test_upsert_edge_dedupes_on_source_target_type(tmp_path: Path) -> None:
+    """Two edges with same ``(source, target, type)`` must collapse to one row.
+
+    The deterministic edge id derived from the triple makes ``insert or
+    replace`` on ``id`` equivalent to deduping on ``(source, target, type)``.
+    Calling ``upsert_edge`` twice with different metadata must leave a single
+    edge in the resulting subgraph.
+    """
+    store = SqliteGraphStore(tmp_path / "g.db")
+    store.upsert_node(ResearchNode(id="A", name="A", type=ResearchNodeType.PAPER))
+    store.upsert_node(ResearchNode(id="B", name="B", type=ResearchNodeType.PAPER))
+    e1 = ResearchEdge(source="A", target="B", type="extends", metadata={"v": 1})
+    e2 = ResearchEdge(source="A", target="B", type="extends", metadata={"v": 2})
+    store.upsert_edge(e1)
+    store.upsert_edge(e2)
+
+    sub = store.query_subgraph(["A"], depth=1)
+    matches = [
+        e for e in sub.edges if (e.source, e.target, e.type) == ("A", "B", "extends")
+    ]
+    assert len(matches) == 1
+    # Latest write wins — metadata reflects the second upsert.
+    assert matches[0].metadata == {"v": 2}
+
+
+def test_sqlite_graph_store_shares_schema_with_legacy_store(tmp_path: Path) -> None:
+    """A graph written by :class:`SQLiteResearchGraphStore` is readable via the new adapter.
+
+    Pins the headline schema-compatibility claim: both classes operate on
+    the same on-disk file, so a node persisted by the legacy batch writer
+    must be retrievable through the new row-at-a-time adapter.
+    """
+    db = tmp_path / "shared.db"
+    legacy = SQLiteResearchGraphStore(db)
+    legacy.write_graph(
+        ResearchGraph(
+            nodes=[
+                ResearchNode(
+                    id="A",
+                    name="LegacyNode",
+                    type=ResearchNodeType.PAPER,
+                )
+            ],
+            edges=[],
+        )
+    )
+
+    store = SqliteGraphStore(db)
+    node = store.get_node("A")
+    assert node is not None
+    assert node.name == "LegacyNode"
+    assert node.type == ResearchNodeType.PAPER
