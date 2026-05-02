@@ -8,7 +8,7 @@ serves graph queries back to consumers. Implementations include
 
 from __future__ import annotations
 
-from typing import Iterator, Protocol, runtime_checkable
+from typing import Iterator, List, Optional, Protocol, Union, runtime_checkable
 from uuid import UUID
 
 from ..research_graph import ResearchEdge, ResearchGraph, ResearchNode
@@ -26,22 +26,22 @@ class GraphStore(Protocol):
         """Persist an edge, idempotent on (src, dst, type)."""
         ...
 
-    def get_node(self, node_id: str) -> ResearchNode | None:
+    def get_node(self, node_id: str) -> Optional[ResearchNode]:
         """Fetch a single node by id, or ``None`` if absent."""
         ...
 
     def iterate_nodes(
         self,
-        type: str | None = None,
-        owner_user_id: str | UUID | None = None,
+        node_type: Optional[str] = None,
+        owner_user_id: Optional[Union[str, UUID]] = None,
     ) -> Iterator[ResearchNode]:
         """Iterate nodes, optionally filtered by type and/or owner."""
         ...
 
-    def query_subgraph(self, seeds: list[str], depth: int = 1) -> ResearchGraph:
+    def query_subgraph(self, seeds: List[str], depth: int = 1) -> ResearchGraph:
         """Return the subgraph reachable from ``seeds`` within ``depth`` hops."""
         ...
 
-    def find_canonical(self, name: str, type: str) -> ResearchNode | None:
+    def find_canonical(self, name: str, node_type: str) -> Optional[ResearchNode]:
         """Look up a canonical node by display name and type, for canonicalization."""
         ...

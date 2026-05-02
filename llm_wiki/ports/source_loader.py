@@ -27,7 +27,7 @@ class Source(BaseModel):
     """
 
     id: str
-    path: Optional[str]
+    path: Optional[str] = None
     content: str
     metadata: Dict[str, Any] = Field(default_factory=dict)
 
