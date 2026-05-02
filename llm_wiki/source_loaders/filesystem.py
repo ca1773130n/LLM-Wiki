@@ -74,7 +74,7 @@ class FilesystemSourceLoader:
         self._discovered = {}
         seen: set = set()
         for root in self._paths:
-            for absolute in self._iter_files(root):
+            for absolute in self.iter_paths(root):
                 resolved = absolute.resolve()
                 if resolved in seen:
                     continue
@@ -86,17 +86,22 @@ class FilesystemSourceLoader:
     def fetch(self, source_id: str) -> Source:
         """Re-read a previously discovered :class:`Source` by id.
 
+        Always re-reads the file from disk, so callers see the current
+        on-disk content (not a snapshot from :meth:`discover`).
+
         Raises
         ------
+        KeyError
+            When ``source_id`` was never registered by :meth:`discover` —
+            i.e. an unknown/stale id (programmer or lookup error).
         FileNotFoundError
-            When the id was never discovered, or when the underlying file is
-            missing on disk at fetch time.
+            When the id is known but the underlying file has been deleted
+            from disk between :meth:`discover` and this call (environmental
+            error).
         """
         absolute = self._discovered.get(source_id)
         if absolute is None:
-            raise FileNotFoundError(
-                f"Unknown source id (not yet discovered): {source_id!r}"
-            )
+            raise KeyError(source_id)
         if not absolute.exists():
             raise FileNotFoundError(
                 f"Source file is gone: {absolute} (id={source_id!r})"
@@ -107,13 +112,31 @@ class FilesystemSourceLoader:
     # Internals
     # ------------------------------------------------------------------
 
-    def _iter_files(self, root: Path) -> Iterator[Path]:
-        """Yield matching files under ``root`` in deterministic order.
+    def iter_paths(self, root: Path) -> Iterator[Path]:
+        """Yield absolute :class:`Path` objects for files matching this loader's filter under ``root``.
 
-        Mirrors the legacy ``iter_markdown_files`` walker: file roots are
-        passed through if their suffix matches; directory roots are walked
-        recursively with ``rglob('*')`` and sorted; any path with a hidden
-        component (dot-prefix) is skipped.
+        Public helper that exposes the filesystem walk without the
+        :class:`Source` body-read overhead of :meth:`discover`. Use this when
+        a caller only needs path enumeration (e.g. ``iter_markdown_files``
+        delegating to the loader for discovery semantics).
+
+        Behavior:
+
+        * Single-file ``root``: yielded if its suffix is in ``extensions``,
+          otherwise skipped silently.
+        * Directory ``root``: walked recursively with ``rglob('*')`` and
+          sorted for deterministic order.
+        * Non-existent ``root``: yields nothing (forgiving — mirrors
+          :meth:`discover`).
+        * Hidden components (path parts starting with ``.``) are skipped.
+        * Non-matching suffixes are skipped.
+
+        Notes:
+            Unlike :meth:`discover`, this method does not populate the
+            discovery cache and does not read file contents. Callers using
+            it for path enumeration cannot subsequently call :meth:`fetch`
+            with the resulting paths — call :meth:`discover` first if you
+            need the cache populated.
         """
         if root.is_file():
             if root.suffix.lower() in self._extensions:
@@ -160,7 +183,7 @@ class FilesystemSourceLoader:
             content = absolute.read_text(encoding="latin-1")
         return Source(
             id=source_id,
-            path=f"file://{absolute.resolve().as_posix()}",
+            path=absolute.resolve().as_uri(),
             content=content,
             metadata={
                 "mtime": float(stat.st_mtime),

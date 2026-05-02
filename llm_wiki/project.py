@@ -660,7 +660,7 @@ def iter_markdown_files(path: Path) -> List[Path]:
     # internal iterator directly. ``discover()`` reads file bodies eagerly,
     # which would be wasteful here since downstream consumers re-read the
     # file via :class:`BatchIngestRunner`.
-    return list(loader._iter_files(path))
+    return list(loader.iter_paths(path))
 
 
 def sanitize_server_name(value: str) -> str:

@@ -86,13 +86,71 @@ def test_fetch_returns_source_by_id(tmp_path: Path) -> None:
     assert fetched.path == discovered.path
 
 
-def test_fetch_raises_filenotfound_for_unknown_id(tmp_path: Path) -> None:
-    """``fetch`` on an id that was never discovered should raise FileNotFoundError."""
+def test_fetch_raises_keyerror_for_unknown_id(tmp_path: Path) -> None:
+    """``fetch`` on an id that was never discovered should raise KeyError.
+
+    Unknown ids are a programmer/lookup error (the id was never registered
+    by ``discover``), distinct from the environmental case where the id is
+    known but the file has been deleted on disk.
+    """
     loader = FilesystemSourceLoader([tmp_path], extensions=(".md",))
     list(loader.discover())  # populate discovery cache (no files)
 
-    with pytest.raises(FileNotFoundError):
+    with pytest.raises(KeyError):
         loader.fetch("nonexistent.md")
+
+
+def test_fetch_raises_filenotfound_when_file_deleted_after_discover(
+    tmp_path: Path,
+) -> None:
+    """``fetch`` on a known id whose file was deleted on disk raises FileNotFoundError.
+
+    This separates the environmental error (file is gone) from the
+    programmer error (id was never registered) tested above.
+    """
+    target = tmp_path / "ephemeral.md"
+    target.write_text("here-and-gone", encoding="utf-8")
+
+    loader = FilesystemSourceLoader([tmp_path], extensions=(".md",))
+    [discovered] = list(loader.discover())
+
+    target.unlink()
+
+    with pytest.raises(FileNotFoundError):
+        loader.fetch(discovered.id)
+
+
+def test_discover_repopulates_cache_after_filesystem_change(tmp_path: Path) -> None:
+    """Re-running discover() after files change reflects the new state."""
+    (tmp_path / "a.md").write_text("alpha", encoding="utf-8")
+    (tmp_path / "b.md").write_text("beta", encoding="utf-8")
+    loader = FilesystemSourceLoader([tmp_path], extensions=(".md",))
+
+    sources = list(loader.discover())
+    assert {s.id for s in sources} == {"a.md", "b.md"}
+
+    (tmp_path / "a.md").unlink()
+    (tmp_path / "c.md").write_text("gamma", encoding="utf-8")
+
+    sources_v2 = list(loader.discover())
+    assert {s.id for s in sources_v2} == {"b.md", "c.md"}
+
+    # Cache for the dropped id should now miss with KeyError (unknown id).
+    with pytest.raises(KeyError):
+        loader.fetch("a.md")
+
+
+def test_fetch_rereads_file_after_discovery(tmp_path: Path) -> None:
+    """``fetch()`` returns current disk content, not a stale snapshot from discover()."""
+    f = tmp_path / "x.md"
+    f.write_text("v1", encoding="utf-8")
+    loader = FilesystemSourceLoader([tmp_path], extensions=(".md",))
+    list(loader.discover())  # populate cache
+
+    f.write_text("v2-updated", encoding="utf-8")
+    fetched = loader.fetch("x.md")
+
+    assert fetched.content == "v2-updated"
 
 
 def test_filesystem_source_loader_is_runtime_checkable_source_loader(
