@@ -1591,7 +1591,9 @@ JS_GRAPH = r"""
       // camera.position relative to controls.target) and the library
       // dolly should it ever take over.
       try { controls.maxDistance = 500; } catch (_) {}
-      try { controls.minDistance = 8; } catch (_) {}
+      // minDistance bumped from 8 → 35 — the user said zoom-in lets
+      // them get too close (clipping inside spheres feels claustrophobic).
+      try { controls.minDistance = 35; } catch (_) {}
       // ``dampingFactor = 0.08`` is preserved as a no-op (damping is off)
       // so the regression test that asserts the literal string still
       // passes; the actual factor is irrelevant when damping is disabled.
@@ -1704,30 +1706,14 @@ JS_GRAPH = r"""
         }, { passive: false, capture: true });
       }
 
-      // Belt-and-braces background-click → unfocus. The library's
-      // ``onBackgroundClick`` should already cover this, but if any
-      // overlay (info panel, toolbar, fullscreen chrome) intercepts the
-      // click first we fall back to a canvas-level listener that
-      // unconditionally clears focus when no node was hit. The library
-      // sets a ``__threeObj`` reference on hovered nodes; if the click
-      // happens while ``hoverNode`` is null, treat it as background.
-      canvas.addEventListener('pointerdown', function(){
-        // Defer to the next frame so the library's own pointerdown can
-        // resolve which node (if any) is under the cursor first.
-        window.requestAnimationFrame(function(){
-          if (!hoverNode && (focusedNode || pinnedNode)) {
-            try {
-              pinnedNode = null;
-              pinnedLink = null;
-              focusedNode = null;
-              if (typeof markFocused === 'function') markFocused(null);
-              autoOrbitEnabled = false;
-              if (typeof applyHighlight === 'function') applyHighlight(null);
-              if (typeof clearInfoPanel === 'function') clearInfoPanel();
-            } catch (_) {}
-          }
-        });
-      });
+      // Background-click → unfocus is handled by the library's native
+      // ``onBackgroundClick`` (wired in the .onBackgroundClick(...) call
+      // a few hundred lines below). The previous pointerdown fallback
+      // had a fatal interaction: with hover suppressed during focus
+      // mode, ``hoverNode`` is always ``null`` even when clicking on a
+      // node, so the rAF-deferred deselect fired AFTER the click
+      // handler and deselected the just-selected node. Using the
+      // library event alone keeps click-to-focus-different-node working.
     }
 
     // ---- Fit-to-view via bounding sphere over current node positions ----
@@ -2375,7 +2361,7 @@ JS_GRAPH = r"""
         // a wild zoom-out from the origin. The single-shot scheduleCenteredFit
         // will refine the framing once the simulation settles.
         try {
-          if (inst.cameraPosition) inst.cameraPosition({ x: 0, y: 0, z: 60 }, { x: 0, y: 0, z: 0 }, 0);
+          if (inst.cameraPosition) inst.cameraPosition({ x: 0, y: 0, z: 110 }, { x: 0, y: 0, z: 0 }, 0);
         } catch (_) {}
       } else if (mode === '2d') {
         // Issue 3 — 2D ``force-graph`` zooms toward the cursor by default
