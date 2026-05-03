@@ -471,7 +471,12 @@ class StaticSiteBuilder:
             wiki_pages_by_kind.get("syntheses", []), synthesis_history
         )
         (out / "rss.xml").write_text(
-            render_rss_xml(self.site_title, recent_syntheses, synthesis_history),
+            render_rss_xml(
+                self.site_title,
+                recent_syntheses,
+                synthesis_history,
+                ctx=export_ctx,
+            ),
             encoding="utf-8",
         )
         (out / "robots.txt").write_text(render_robots_txt(), encoding="utf-8")
