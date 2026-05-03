@@ -151,33 +151,21 @@ def test_bundle_zoom_uses_canonical_before_after_translate_algorithm():
     assert '"factor="' in JS_GRAPH
 
 
-def test_bundle_smooth_opacity_transitions_for_hover_dim():
-    """Issue 4 — when hover dims non-incident nodes/edges, the transition
-    is a smooth ~150ms ease (not a snap). Implemented via per-node
-    ``__opacity`` (current) and ``__opacityTarget`` (where it's heading)
-    plus a per-frame lerp inside ``onEngineTick``.
+def test_bundle_uses_scalar_node_and_link_opacity():
+    """3d-force-graph's ``nodeOpacity`` / ``linkOpacity`` accept ONLY a
+    scalar number — passing a function silently corrupts the material
+    opacity to NaN and renders every node invisible. Verified empirically.
+
+    A previous round attempted a smooth per-node opacity tween via the
+    accessor pattern; that broke node rendering completely. Forbid the
+    accessor form so we never regress. Selective dimming uses
+    ``nodeColor`` / ``linkColor`` accessors (which DO accept functions)
+    and ``nodeVisibility`` / ``linkVisibility`` for binary on/off.
     """
-    # Per-node and per-link state init on graph build.
-    assert "__opacity" in JS_GRAPH
-    assert "__opacityTarget" in JS_GRAPH
-    assert "n.__opacity = 1.0" in JS_GRAPH
-    assert "n.__opacityTarget = 1.0" in JS_GRAPH
-    assert "l.__opacity = 1.0" in JS_GRAPH
-    assert "l.__opacityTarget = 1.0" in JS_GRAPH
-    # Targets are reset by ``refreshOpacityTargets`` whenever hover or
-    # focus changes (called from ``applyHighlight`` / ``onNodeHover``).
-    assert "function refreshOpacityTargets" in JS_GRAPH
-    assert "refreshOpacityTargets()" in JS_GRAPH
-    # Hover dim opacity per spec: 0.18 for non-incident nodes, 0.05 for
-    # non-incident links; incident stays at 1.0.
-    assert "0.18" in JS_GRAPH
-    assert "0.05" in JS_GRAPH
-    # Per-frame lerp inside onEngineTick: __opacity += diff * 0.15.
-    assert "* 0.15" in JS_GRAPH
-    # Library accessors are switched to functions so the lerped value
-    # actually feeds the renderer.
-    assert "inst.nodeOpacity(function(n)" in JS_GRAPH
-    assert "inst.linkOpacity(function(l)" in JS_GRAPH
+    assert "inst.nodeOpacity(0.95)" in JS_GRAPH
+    assert "inst.linkOpacity(0.35)" in JS_GRAPH
+    assert "inst.nodeOpacity(function(n)" not in JS_GRAPH
+    assert "inst.linkOpacity(function(l)" not in JS_GRAPH
 
 
 def test_bundle_link_hover_wired():

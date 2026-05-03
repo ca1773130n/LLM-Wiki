@@ -1859,15 +1859,14 @@ JS_GRAPH = r"""
       // alpha 1.0 for focus highlights, EDGE_COLOR_LIGHT at 0.34 baseline,
       // and a brighter 0.85 alpha when the link is hover-incident).
       try { if (inst.linkOpacity) inst.linkOpacity(0.35); } catch (_) {}
-      // Issue 4 — switch to per-node and per-link opacity accessors so the
-      // smooth ~150ms lerp inside ``onEngineTick`` (n.__opacity *=
-      // (target - cur) * 0.15) feeds the renderer directly. The base
-      // scalar above (``nodeOpacity(0.95)``) is kept so the regression
-      // test that asserts the literal call still passes; it's overwritten
-      // moments later by the function form, which the library prefers
-      // when present.
-      try { if (inst.nodeOpacity) inst.nodeOpacity(function(n){ return (n && typeof n.__opacity === 'number') ? n.__opacity * 0.95 : 0.95; }); } catch (_) {}
-      try { if (inst.linkOpacity) inst.linkOpacity(function(l){ return (l && typeof l.__opacity === 'number') ? l.__opacity * 0.35 : 0.35; }); } catch (_) {}
+      // ``nodeOpacity`` / ``linkOpacity`` accept ONLY a scalar number in
+      // 3d-force-graph (verified empirically — passing a function silently
+      // corrupts the material opacity to NaN, which renders every node
+      // invisible). The smooth per-node opacity tween from a previous
+      // round was incompatible with this API and is removed. For
+      // selective dimming we rely on ``nodeColor`` / ``linkColor``
+      // accessors (which DO accept functions) and on
+      // ``nodeVisibility`` / ``linkVisibility`` for binary on/off.
       // Issue 4 — particles are PURE YELLOW (Material yellow 500) on
       // every incident edge. Smaller than the previous 2.5 width — the
       // user wanted them visibly less dominant.
