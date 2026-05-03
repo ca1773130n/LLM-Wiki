@@ -186,12 +186,25 @@ hr {
 
 /* Layout grid (§5.2)
    ------------------------------------------------------------ */
-html, body { overflow-x: clip; }
+/* CRITICAL: ``position: sticky`` (TOC + rail) breaks the moment any
+   ancestor declares ``overflow: hidden``, ``overflow: scroll``,
+   ``overflow: auto`` *or* ``overflow-x: clip``. We previously set
+   ``html, body { overflow-x: clip }`` which silently disabled sticky on
+   every long article. Don't do that — clip horizontal overflow on the
+   specific elements that actually need it (e.g. ``pre``, tables, the
+   table-scroll wrapper) instead.
+
+   Sticky also needs the parent (the grid row) to be taller than the
+   sticky element. ``align-items: start`` on the shell grid prevents
+   ``stretch`` from forcing every column to the same height — without
+   ``start`` the grid pulls the TOC column to span the full main column
+   and there's nothing for sticky to slide against. */
 .shell {
   max-width: var(--page-w);
   margin: 0 auto;
   display: grid;
   grid-template-columns: 1fr;
+  align-items: start;
   gap: var(--space-5);
   padding: var(--space-5) clamp(12px, 4vw, 24px);
   /* sticky position requires no overflow:hidden on ancestors. */
@@ -258,7 +271,14 @@ html, body { overflow-x: clip; }
     grid-template-columns: var(--rail-w) 1fr;
     padding: var(--space-6) var(--space-5);
   }
-  .rail { display: block; position: sticky; top: 64px; align-self: start; max-height: calc(100vh - 80px); overflow-y: auto; }
+  .rail {
+    display: block;
+    position: sticky;
+    top: calc(var(--topbar-height, 56px) + 16px);
+    align-self: start;
+    max-height: calc(100vh - var(--topbar-height, 56px) - 32px);
+    overflow-y: auto;
+  }
   .rail-toggle { display: none; }
 }
 
@@ -266,23 +286,27 @@ html, body { overflow-x: clip; }
   .shell {
     grid-template-columns: var(--rail-w) minmax(0, 1fr) var(--toc-w);
   }
+  /* The wrapper takes its own height (``align-self: start``) so its
+     child ``aside.toc`` has somewhere to slide against. We do NOT make
+     the wrapper itself sticky — the *inner* aside.toc is the sticky
+     element, which means a long TOC can scroll internally without
+     dragging the wrapper around. */
   .toc-rail {
     display: block;
-    position: sticky;
-    top: var(--topbar-height, 56px);
     align-self: start;
-    max-height: calc(100vh - 96px);
-    overflow: auto;
   }
-  /* The inner ``aside.toc`` (rendered by components.toc) sticks too so the
-     "On this page" rail follows long article scrolls. */
+  /* The inner ``aside.toc`` (rendered by ``components.toc`` and by the
+     graph control panel) sticks so the rail follows long article scrolls.
+     ``top`` clears the sticky topbar; ``max-height`` bounds the rail to
+     the visible viewport so an oversized TOC scrolls internally instead
+     of overflowing the page. */
   .toc-rail .toc,
   aside.toc {
     position: sticky;
-    top: var(--topbar-height, 56px);
+    top: calc(var(--topbar-height, 56px) + 16px);
     align-self: start;
-    max-height: calc(100vh - 96px);
-    overflow: auto;
+    max-height: calc(100vh - var(--topbar-height, 56px) - 32px);
+    overflow-y: auto;
   }
 }
 
@@ -813,12 +837,13 @@ html, body { overflow-x: clip; }
 }
 .graph-page .graph-canvas {
   position: relative;
-  /* On the dedicated graph route the canvas owns the viewport; outside
-     of that route (rare but possible if someone embeds .graph-page) we
-     keep the historical clamp so it doesn't blow the page. */
+  /* Canvas spans the wide-content column; never full-bleed. Height
+     scales with the viewport but stays bounded so the toolbar above
+     and the page below remain reachable without scrolling.
+     Desktop sizing: clamp(560px, 70vh, 880px). Mobile drops to a
+     smaller clamp via the ``@media (max-width: 1023px)`` block below. */
   width: 100%;
-  height: calc(100vh - var(--topbar-height, 56px));
-  min-height: 520px;
+  height: clamp(560px, 70vh, 880px);
   border-radius: var(--radius);
   overflow: hidden;
   background:
@@ -828,16 +853,10 @@ html, body { overflow-x: clip; }
   border: 1px solid rgba(148, 163, 184, 0.26);
   box-shadow: inset 0 0 0 1px rgba(255,255,255,0.035), 0 24px 70px rgba(2, 6, 23, 0.28);
 }
-.main--graph .graph-page {
-  margin-top: 0;
-  gap: var(--space-2);
-}
-.main--graph .graph-page .graph-canvas {
-  width: 100vw;
-  margin-left: calc(-1 * (100vw - 100%) / 2);
-  border-radius: 0;
-  border-left: 0;
-  border-right: 0;
+@media (max-width: 1023px) {
+  .graph-page .graph-canvas {
+    height: clamp(420px, 60vh, 640px);
+  }
 }
 .graph-page .graph-canvas canvas { display: block; width: 100% !important; height: 100% !important; }
 .graph-page .graph-info-panel {
@@ -986,6 +1005,67 @@ html, body { overflow-x: clip; }
   font-family: var(--type-mono);
   font-size: 0.78rem;
   margin: 0;
+}
+/* Toolbar size legend — explains the radius mapping. */
+.graph-page .graph-size-hint {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 4px 10px;
+  font-family: var(--type-mono);
+  font-size: 0.74rem;
+  color: var(--ink-muted);
+  background: var(--surface-2);
+  border: 1px solid var(--rule);
+  border-radius: 999px;
+  white-space: nowrap;
+}
+/* Right-rail graph control panel — reuses ``aside.toc`` sticky CSS but
+   stacks vertical legend chips for the graph route. */
+.toc.toc--graph .graph-control-list {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  list-style: none;
+  padding: 0;
+  margin: 0 0 var(--space-3);
+}
+.toc.toc--graph .graph-control-chip {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  width: 100%;
+  padding: 6px 10px;
+  font-family: var(--type-mono);
+  font-size: 0.82rem;
+  color: var(--ink);
+  background: var(--surface);
+  border: 1px solid var(--rule);
+  border-radius: var(--radius);
+  cursor: pointer;
+  text-align: left;
+  transition: border-color 160ms ease, opacity 160ms ease;
+}
+.toc.toc--graph .graph-control-chip:hover {
+  border-color: var(--accent);
+}
+.toc.toc--graph .graph-control-chip.is-off {
+  opacity: 0.4;
+  background: var(--surface-2);
+}
+.toc.toc--graph .graph-control-chip .swatch {
+  width: 10px;
+  height: 10px;
+  border-radius: 999px;
+  flex-shrink: 0;
+}
+.toc.toc--graph .graph-control-chip .label {
+  flex: 1;
+  text-align: left;
+}
+.toc.toc--graph .graph-control-chip .count {
+  color: var(--ink-muted);
+  font-variant-numeric: tabular-nums;
 }
 .graph-page .visually-hidden {
   position: absolute;
@@ -1558,23 +1638,11 @@ body {
        to consume the gap when there's no TOC content. */
     grid-template-columns: var(--rail-w) minmax(0, 1fr) var(--toc-w);
   }
-  /* Graph route owns the viewport: rail is collapsed by default,
-     TOC is hidden, the canvas spans full width. */
-  .main--graph {
-    max-width: none;
-    margin-inline: 0;
-    width: 100%;
-  }
-  .shell--graph {
-    max-width: none;
-    grid-template-columns: 1fr;
-    padding: 0;
-    gap: 0;
-  }
-  .shell--graph > .rail,
-  .shell--graph > .toc-rail {
-    display: none;
-  }
+  /* The graph route uses the same wide layout as index pages
+     (``main--wide``) — left rail visible, content column comfortably
+     wide but framed by the chrome, TOC slot reused for the graph
+     control panel. The previous bespoke graph layout (full-bleed
+     canvas, hidden rail) has been retired in favor of this layout. */
 }
 
 /* Ultra-wide (>= 1920 px): roomier rails, slightly wider content. */

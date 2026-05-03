@@ -141,7 +141,9 @@ def test_graph_static_fallback_is_explorable_not_anchor_navigation():
 def test_graph_selection_fades_and_deprioritizes_non_neighbors():
     assert "function isDimmedNode" in JS_GRAPH
     assert "function isDimmedLink" in JS_GRAPH
-    assert "rgba(120,116,108,0.035)" in JS_GRAPH
+    # Non-incident nodes drop to 25% opacity (per spec) — visibly faded,
+    # still legible if the user mouses over them.
+    assert "rgba(120,116,108,0.25)" in JS_GRAPH
     assert "EDGE_COLOR_DIM" in JS_GRAPH
     assert "if (isDimmedNode(node)) return" in JS_GRAPH
     assert "if (isDimmedLink(link)) return" in JS_GRAPH
@@ -151,7 +153,7 @@ def test_graph_selection_fades_and_deprioritizes_non_neighbors():
 def test_graph_edges_are_visible_lines_not_only_particles():
     assert "rgba(191,219,254,0.34)" in JS_GRAPH
     assert "if (inst.linkOpacity) inst.linkOpacity(0.8);" in JS_GRAPH
-    assert "linkWidth(function(l){ return isDimmedLink(l) ? 0.001 : (highlightLinks.has(l) ? 0.85 : 0.22); })" in JS_GRAPH
+    assert "linkWidth(function(l){ return isDimmedLink(l) ? 0.001 : (highlightLinks.has(l) ? 2.0 : 0.5); })" in JS_GRAPH
     assert "line.setAttribute('stroke-width', '0.24');" in JS_GRAPH
     assert "el.setAttribute('stroke-width', hot ? '0.85' : '0.28');" in JS_GRAPH
     assert "if (inst.linkThreeObjectExtend) inst.linkThreeObjectExtend(true);" in JS_GRAPH
@@ -316,6 +318,88 @@ def test_toc_scrollspy_targets_article_body_h2_h3():
 def test_bundle_graph_alias_matches_js_graph():
     """JS_BUNDLE_GRAPH (used by the graph route) is the JS_GRAPH module."""
     assert JS_BUNDLE_GRAPH is JS_GRAPH or JS_BUNDLE_GRAPH == JS_GRAPH
+
+
+# ---------------------------------------------------------------------------
+# Graph rebuild — Bugs 3-7 (size-by-degree, focused-label, orbit, dpr, etc.)
+# ---------------------------------------------------------------------------
+
+
+def test_graph_uses_node_rel_size_for_perceptible_radius_differences():
+    """Bug 3 — bump nodeRelSize from default 4 to 6 so the sqrt-scaled
+    sphere volume actually reads as different sizes in the canvas."""
+    assert "nodeRelSize" in JS_BUNDLE_GRAPH
+    assert "nodeRelSize(6)" in JS_BUNDLE_GRAPH
+
+
+def test_graph_focused_node_label_scales_up_with_outline():
+    """Bug 4 — selecting a node should swap in a larger label sprite
+    rendered above the scene with a white outline so it pops over any
+    background."""
+    # The dual-sprite group keys off node.__focused (a per-node flag).
+    assert "__focused" in JS_BUNDLE_GRAPH
+    assert "function makeFocusedSpriteLabel" in JS_BUNDLE_GRAPH
+    assert "function markFocused" in JS_BUNDLE_GRAPH
+    # Render order 1000 puts the focused label above the base label
+    # (renderOrder 999) and above all other scene objects.
+    assert "renderOrder = 1000" in JS_BUNDLE_GRAPH
+    # The focused-label sprite uses a strokeText pass with white outline.
+    assert "strokeStyle = 'rgba(255,255,255,0.95)'" in JS_BUNDLE_GRAPH
+    # nodeThreeObject builds a Group so the focused / base / glow sprites
+    # can be toggled individually per frame in nodePositionUpdate.
+    assert "new THREE.Group()" in JS_BUNDLE_GRAPH
+    assert "nodeThreeObject" in JS_BUNDLE_GRAPH
+
+
+def test_graph_camera_orbits_focused_node_via_engine_tick():
+    """Bug 5 — clicking a node animates the camera 200u away in +Z, sets
+    controls.target to the node, and starts an auto-orbit driven by
+    onEngineTick (no separate requestAnimationFrame loop)."""
+    # The orbit hook is wired through the library's per-frame callback.
+    assert "onEngineTick" in JS_BUNDLE_GRAPH
+    # The orbit state lives in module-scope vars.
+    assert "var autoOrbitEnabled" in JS_BUNDLE_GRAPH
+    assert "var orbitAngle" in JS_BUNDLE_GRAPH
+    assert "var orbitRadius" in JS_BUNDLE_GRAPH
+    assert "var focusedNode" in JS_BUNDLE_GRAPH
+    # Camera position is recomputed each tick using sin/cos of orbitAngle.
+    assert "Math.sin(orbitAngle)" in JS_BUNDLE_GRAPH
+    assert "Math.cos(orbitAngle)" in JS_BUNDLE_GRAPH
+    # focusOnNode sets controls.target so manual orbit pivots around the
+    # focused node (not the world origin).
+    assert "controls.target.set(nx, ny, nz)" in JS_BUNDLE_GRAPH
+    # ``cameraPosition(`` is the library's animation hook for the fly-in.
+    assert "cameraPosition(" in JS_BUNDLE_GRAPH
+
+
+def test_graph_orbit_disengages_on_user_drag():
+    """Bug 5 — once the user grabs the camera, auto-orbit must stop
+    fighting them. OrbitControls fires ``start`` on mouse-down."""
+    assert "_controls.addEventListener('start'" in JS_BUNDLE_GRAPH
+    assert "autoOrbitEnabled = false" in JS_BUNDLE_GRAPH
+
+
+def test_graph_keyboard_shortcuts_include_orbit_and_unfocus():
+    """Bug 5 — ``o`` toggles auto-orbit; ``Esc`` unfocuses + auto-fits."""
+    assert "if (e.key === 'o')" in JS_BUNDLE_GRAPH
+    # Esc resets focus state (focusedNode + markFocused(null)).
+    assert "focusedNode = null" in JS_BUNDLE_GRAPH
+    assert "markFocused(null)" in JS_BUNDLE_GRAPH
+
+
+def test_graph_pixel_ratio_capped_at_two_for_retina():
+    """Bug 7 — uncapped DPR (4x retina, 5x mobile) burns the GPU. Cap at 2."""
+    assert "Math.min(window.devicePixelRatio || 1, 2)" in JS_BUNDLE_GRAPH
+    assert "setPixelRatio" in JS_BUNDLE_GRAPH
+
+
+def test_graph_size_uses_sqrt_scaling_via_node_val():
+    """Bug 3 — node radius uses sqrt of the val accessor, which build_graph_payload
+    seeds with ``2 + sqrt(degree) * 1.6``. The JS uses Math.sqrt to size sprites
+    and compute orbit radii."""
+    assert "Math.sqrt" in JS_BUNDLE_GRAPH
+    # nodeVal accessor is wired through to the library so val drives volume.
+    assert "nodeVal(function(n)" in JS_BUNDLE_GRAPH
 
 
 # ---------------------------------------------------------------------------

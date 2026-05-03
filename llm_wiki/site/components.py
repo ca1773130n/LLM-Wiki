@@ -663,9 +663,10 @@ def page_shell(
     ``main_variant`` toggles modifier classes on the ``<main>`` element:
       - ``"wide"``: index/listing routes that want to fill the desktop
         viewport rather than getting squished into the prose-comfortable
-        reading column.
-      - ``"graph"``: the graph route — full viewport width, rail is
-        collapsible, no article wrapper. The canvas owns the viewport.
+        reading column. The graph route uses this variant too — it gets
+        the wide content column the index pages already use, the left
+        rail stays present, and the right TOC slot renders a graph
+        control panel instead of headings.
       - ``""`` (default): detail pages get the canonical
         ``<article class="article">`` shell with header/body/footer slots
         so every detail kind aligns identically.
@@ -680,9 +681,6 @@ def page_shell(
     if main_variant == "wide":
         main_class = "main main--wide"
         shell_class = "shell shell--wide"
-    elif main_variant == "graph":
-        main_class = "main main--graph"
-        shell_class = "shell shell--graph"
     else:
         main_class = "main"
         shell_class = "shell"
@@ -713,7 +711,7 @@ def page_shell(
         '<button class="toc-toggle" aria-controls="toc" aria-expanded="false" '
         'data-toggle-toc type="button">On this page</button>\n'
     )
-    if main_variant in ("wide", "graph"):
+    if main_variant == "wide":
         main_inner = (
             f"{breadcrumbs_html}\n"
             + toc_toggle_html

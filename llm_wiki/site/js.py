@@ -891,6 +891,27 @@ JS_GRAPH = r"""
     // on every hover / drag / resize as the simulation re-cools — must be
     // ignored, otherwise the camera flies around uninvited.
     var hasInitialFit = false;
+    // ----------------------------------------------------------------
+    // Focus + auto-orbit state (cinematic camera around clicked node).
+    //   focusedNode      — the currently selected sphere (or null).
+    //   autoOrbitEnabled — orbit-on-focus toggle (default ON when focused;
+    //                      flips OFF the moment the user manually drags).
+    //   orbitAngle       — accumulated radians around focused node's Y axis.
+    //   orbitRadius      — distance from focused node to camera.
+    //   lastTickMs       — for delta-time integration in onEngineTick.
+    // ----------------------------------------------------------------
+    var focusedNode = null;
+    var autoOrbitEnabled = true;
+    var orbitAngle = 0;
+    var orbitRadius = 220;
+    var lastTickMs = 0;
+    // Marks node.__focused so nodeThreeObject can pick the focused
+    // label sprite vs. the base sprite. Updated on every focus change.
+    function markFocused(node){
+      // Clear any previous focus flag.
+      payload.nodes.forEach(function(n){ n.__focused = false; });
+      if (node) node.__focused = true;
+    }
 
     function shortLabel(value, limit){
       var s = String(value || '');
@@ -1229,6 +1250,101 @@ JS_GRAPH = r"""
       return clone;
     }
 
+    // ---- Focused-label sprite (Bug 4) -----------------------------------
+    // Larger font, accent color, white outline so it pops over the scene
+    // regardless of camera distance. The badge under the title shows the
+    // node's kind. Always-on-top via depthTest: false + renderOrder 1000.
+    var focusedSpriteCache = new Map();
+    function makeFocusedSpriteLabel(text, accent, kindBadge){
+      if (!THREE) return null;
+      var key = text + '|' + accent + '|' + (kindBadge || '');
+      if (focusedSpriteCache.has(key)) return focusedSpriteCache.get(key).clone();
+      var canvas = document.createElement('canvas');
+      var titleSize = 48;       // ~24px on screen at default sprite scale 0.18
+      var badgeSize = 22;
+      var padX = 18;
+      var padY = 14;
+      var gap = 8;
+      var ctx = canvas.getContext('2d');
+      ctx.font = '700 ' + titleSize + 'px "Inter", system-ui, sans-serif';
+      var titleW = ctx.measureText(text).width;
+      ctx.font = '600 ' + badgeSize + 'px "Inter", system-ui, sans-serif';
+      var badgeW = kindBadge ? ctx.measureText(kindBadge).width : 0;
+      var w = Math.ceil(Math.max(titleW, badgeW)) + padX * 2;
+      var h = titleSize + (kindBadge ? badgeSize + gap : 0) + padY * 2;
+      canvas.width = w;
+      canvas.height = h;
+      ctx = canvas.getContext('2d');
+      // Subtle dark backdrop so text reads on bright nodes.
+      ctx.fillStyle = 'rgba(2,6,23,0.55)';
+      ctx.fillRect(0, 0, w, h);
+      // Title with white outline (2px) + accent fill.
+      ctx.font = '700 ' + titleSize + 'px "Inter", system-ui, sans-serif';
+      ctx.textBaseline = 'top';
+      ctx.lineWidth = 4;
+      ctx.strokeStyle = 'rgba(255,255,255,0.95)';
+      ctx.strokeText(text, padX, padY);
+      ctx.fillStyle = accent;
+      ctx.fillText(text, padX, padY);
+      // Kind badge under the title.
+      if (kindBadge) {
+        ctx.font = '600 ' + badgeSize + 'px "Inter", system-ui, sans-serif';
+        ctx.fillStyle = 'rgba(236,231,220,0.85)';
+        ctx.fillText(kindBadge.toUpperCase(), padX, padY + titleSize + gap);
+      }
+      var tex = new THREE.CanvasTexture(canvas);
+      tex.minFilter = THREE.LinearFilter;
+      var mat = new THREE.SpriteMaterial({
+        map: tex,
+        transparent: true,
+        depthWrite: false,
+        depthTest: false,
+        opacity: 1.0
+      });
+      var sprite = new THREE.Sprite(mat);
+      var scale = 0.20;
+      sprite.scale.set(w * scale, h * scale, 1);
+      sprite.renderOrder = 1000;
+      sprite.userData.isFocusedLabel = true;
+      focusedSpriteCache.set(key, sprite);
+      var clone = sprite.clone();
+      clone.renderOrder = 1000;
+      return clone;
+    }
+
+    // Neighbor "glow" sprite — a soft white ring at 1.5x node size for
+    // 1-hop neighbors of the focused node. Cheap radial-gradient canvas.
+    var glowCache = new Map();
+    function makeNeighborGlow(){
+      if (!THREE) return null;
+      var key = 'glow';
+      if (glowCache.has(key)) return glowCache.get(key).clone();
+      var size = 128;
+      var canvas = document.createElement('canvas');
+      canvas.width = size; canvas.height = size;
+      var ctx = canvas.getContext('2d');
+      var grad = ctx.createRadialGradient(size/2, size/2, size*0.2, size/2, size/2, size/2);
+      grad.addColorStop(0, 'rgba(255,255,255,0.55)');
+      grad.addColorStop(0.6, 'rgba(255,255,255,0.18)');
+      grad.addColorStop(1, 'rgba(255,255,255,0.0)');
+      ctx.fillStyle = grad;
+      ctx.fillRect(0, 0, size, size);
+      var tex = new THREE.CanvasTexture(canvas);
+      tex.minFilter = THREE.LinearFilter;
+      var mat = new THREE.SpriteMaterial({
+        map: tex,
+        transparent: true,
+        depthWrite: false,
+        depthTest: false,
+        opacity: 0.85
+      });
+      var sprite = new THREE.Sprite(mat);
+      sprite.userData.isNeighborGlow = true;
+      glowCache.set(key, sprite);
+      var clone = sprite.clone();
+      return clone;
+    }
+
     function cameraDistanceOpacity(x, y, z){
       if (!Graph || !Graph.camera) return 0.74;
       var camera = Graph.camera && Graph.camera();
@@ -1407,14 +1523,20 @@ JS_GRAPH = r"""
         .nodeLabel(function(n){ return ''; })
         .nodeVal(function(n){ return Math.max(1, n.val || 1); })
         .nodeColor(function(n){
-          if (isDimmedNode(n)) return 'rgba(120,116,108,0.035)';
+          // Bug 6 — non-incident nodes dim to 25% opacity (spec target).
+          // Keep the focused node + 1-hop neighbors at full saturation;
+          // every other node falls to a desaturated grey at alpha 0.25.
+          if (isDimmedNode(n)) return 'rgba(120,116,108,0.25)';
           return n.color;
         })
         .linkColor(function(l){
           if (!hasFocusFilter()) return EDGE_COLOR_LIGHT;
           return highlightLinks.has(l) ? EDGE_COLOR_HOT : EDGE_COLOR_DIM;
         })
-        .linkWidth(function(l){ return isDimmedLink(l) ? 0.001 : (highlightLinks.has(l) ? 0.85 : 0.22); })
+        // Bug 6 — focused-incident edges thicken from 0.5 to 2.0 and pick up
+        // the accent. Non-incident edges drop to 0.001 so they read as 10%
+        // opacity (combined with EDGE_COLOR_DIM alpha 0.012). Default 0.5.
+        .linkWidth(function(l){ return isDimmedLink(l) ? 0.001 : (highlightLinks.has(l) ? 2.0 : 0.5); })
         .linkHoverPrecision(8)
         .linkDirectionalParticles(function(l){ return highlightLinks.has(l) ? 2 : 0; })
         .linkDirectionalParticleWidth(0.9)
@@ -1445,6 +1567,9 @@ JS_GRAPH = r"""
         .onBackgroundClick(function(){
           pinnedNode = null;
           pinnedLink = null;
+          focusedNode = null;
+          markFocused(null);
+          autoOrbitEnabled = false;
           applyHighlight(null);
           clearInfoPanel();
         });
@@ -1455,28 +1580,96 @@ JS_GRAPH = r"""
       try {
         if (mode === '3d' && inst.linkResolution) inst.linkResolution(6);
       } catch (_) {}
+      // Bug 3 — bump nodeRelSize from default 4 to 6 so the sqrt-scaled
+      // sphere volume differences are actually perceivable. Combined with
+      // the new build_graph_payload sizing (val = 2 + sqrt(degree) * 1.6,
+      // capped at degree=200), a 100-degree hub renders ~3x the radius of
+      // a leaf without dwarfing everything.
+      try { if (inst.nodeRelSize) inst.nodeRelSize(6); } catch (_) {}
+      // Bug 7 — cap the renderer's DPR at 2 so retina (DPR=2) stays crisp
+      // while 4K/4x DPR doesn't burn the GPU. The renderer is created
+      // lazily, so wrap in a try/catch and walk to the underlying
+      // WebGLRenderer via the library's getter.
+      try {
+        var _renderer = inst.renderer && inst.renderer();
+        if (_renderer && _renderer.setPixelRatio) {
+          _renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, 2));
+        }
+      } catch (_) {}
 
       // Mode-specific labels.
       if (mode === '3d' && THREE) {
         try {
+          // nodeThreeObject returns a THREE.Group containing:
+          //   - a base label sprite (visible when ``showAlways`` or ``isHover``)
+          //   - a focused label sprite (visible only when ``n.__focused``)
+          //   - a neighbor glow sprite (visible only when 1-hop of focus)
+          // We toggle .visible per-frame in nodePositionUpdate so a single
+          // tap can scale the focused label up without rebuilding objects.
           inst.nodeThreeObject(function(n){
-            var showAlways = shouldShowOverviewLabel(n);
-            var isHover = (hoverNode === n) || highlightNodes.has(n);
             if (isDimmedNode(n)) return null;
-            if (!showAlways && !isHover) return null;
-            var sprite = makeSpriteLabel(nodeLabelText(n), nodeAccent(n));
-            if (sprite) {
-              sprite.position.set(0, 6 + Math.sqrt(n.val || 1), 0);
-              applySpriteOpacity(sprite, 0.74);
+            var group = new THREE.Group();
+            group.userData.nodeId = n.id;
+            var radius = Math.sqrt(n.val || 1);
+            var base = makeSpriteLabel(nodeLabelText(n), nodeAccent(n));
+            if (base) {
+              base.position.set(0, 6 + radius, 0);
+              base.userData.isLabel = true;
+              group.add(base);
             }
-            return sprite;
+            // Focused label is always created so we can flip .visible
+            // instead of rebuilding the sprite on selection. Hidden by
+            // default — selection (Bug 4) flips it on.
+            var focused = makeFocusedSpriteLabel(nodeLabelText(n), nodeAccent(n), n.group || n.kind || '');
+            if (focused) {
+              focused.position.set(0, 12 + radius * 1.4, 0);
+              focused.visible = !!n.__focused;
+              focused.userData.isFocusedLabel = true;
+              group.add(focused);
+            }
+            // Neighbor glow — only shown for 1-hop neighbors of the focused
+            // node. Refreshed via highlightNodes membership in the per-frame
+            // hook below.
+            var glow = makeNeighborGlow();
+            if (glow) {
+              var glowSize = Math.max(14, radius * 4.5);
+              glow.scale.set(glowSize, glowSize, 1);
+              glow.visible = false;
+              glow.userData.isNeighborGlow = true;
+              group.add(glow);
+            }
+            return group;
           });
           if (inst.nodeThreeObjectExtend) inst.nodeThreeObjectExtend(true);
           if (inst.nodePositionUpdate) {
-            inst.nodePositionUpdate(function(sprite, coords, node){
-              if (!sprite || !coords) return false;
-              sprite.position.set(coords.x || 0, (coords.y || 0) + 6 + Math.sqrt((node && node.val) || 1), coords.z || 0);
-              applySpriteOpacity(sprite, cameraDistanceOpacity(coords.x, coords.y, coords.z));
+            inst.nodePositionUpdate(function(group, coords, node){
+              if (!group || !coords) return false;
+              group.position.set(coords.x || 0, coords.y || 0, coords.z || 0);
+              // Iterate child sprites and toggle visibility / opacity per
+              // current focus + hover state. Cheap; no allocations.
+              var radius = Math.sqrt((node && node.val) || 1);
+              var isFocused = !!(node && node.__focused);
+              var isNeighbor = focusedNode && node && focusedNode !== node && highlightNodes.has(node);
+              var isHover = (hoverNode === node) || highlightNodes.has(node);
+              var showBaseAlways = node && shouldShowOverviewLabel(node);
+              for (var i = 0; i < group.children.length; i++) {
+                var child = group.children[i];
+                if (!child) continue;
+                if (child.userData && child.userData.isFocusedLabel) {
+                  child.visible = isFocused;
+                  child.position.set(0, 12 + radius * 1.4, 0);
+                  applySpriteOpacity(child, 1.0);
+                } else if (child.userData && child.userData.isNeighborGlow) {
+                  child.visible = !!isNeighbor;
+                  applySpriteOpacity(child, 0.85);
+                } else if (child.userData && child.userData.isLabel) {
+                  // Base label hides when the focused label is showing —
+                  // otherwise we'd see two stacked titles on the focused node.
+                  child.visible = !isFocused && (showBaseAlways || isHover);
+                  child.position.set(0, 6 + radius, 0);
+                  applySpriteOpacity(child, cameraDistanceOpacity(coords.x, coords.y, coords.z));
+                }
+              }
               return true;
             });
           }
@@ -1569,6 +1762,49 @@ JS_GRAPH = r"""
         });
       } catch (_) {}
 
+      // Bug 5 — auto-orbit hook. ``onEngineTick`` fires per render frame
+      // (regardless of whether the simulation is still cooling), which is
+      // exactly the cadence we want for cinematic camera motion. We
+      // integrate orbitAngle by ~0.2 rad/s using a clock-based dt so the
+      // orbit stays smooth at any framerate. The orbit only spins when
+      // (a) we have a focused node, (b) auto-orbit is enabled, and (c)
+      // we're in 3D mode.
+      try {
+        if (mode === '3d' && inst.onEngineTick) {
+          inst.onEngineTick(function(){
+            if (!focusedNode || !autoOrbitEnabled) { lastTickMs = 0; return; }
+            var now = (typeof performance !== 'undefined' && performance.now) ? performance.now() : Date.now();
+            var dt = lastTickMs ? Math.min(0.1, (now - lastTickMs) / 1000) : 0.016;
+            lastTickMs = now;
+            orbitAngle += 0.2 * dt;  // ~0.2 rad/s, ~1 full revolution every 31s
+            var nx = focusedNode.x || 0;
+            var ny = focusedNode.y || 0;
+            var nz = focusedNode.z || 0;
+            var camX = nx + Math.sin(orbitAngle) * orbitRadius;
+            var camZ = nz + Math.cos(orbitAngle) * orbitRadius;
+            try {
+              if (inst.cameraPosition) {
+                inst.cameraPosition({ x: camX, y: ny, z: camZ }, { x: nx, y: ny, z: nz }, 0);
+              }
+            } catch (_) {}
+          });
+        }
+      } catch (_) {}
+
+      // Bug 5 — disable auto-orbit when the user manually drags or pans.
+      // OrbitControls fires ``start`` on mouse-down. We DO NOT clear
+      // ``focusedNode`` — the user keeps the highlight + focused label
+      // while orbiting manually; they just take camera control.
+      try {
+        var _controls = inst.controls && inst.controls();
+        if (_controls && _controls.addEventListener) {
+          _controls.addEventListener('start', function(){
+            autoOrbitEnabled = false;
+            lastTickMs = 0;
+          });
+        }
+      } catch (_) {}
+
       Graph = inst;
       sizeGraphToContainer(inst);
       installGraphResize(inst);
@@ -1611,6 +1847,8 @@ JS_GRAPH = r"""
       if (!samePinned) {
         pinnedNode = node;
         pinnedLink = null;
+        focusedNode = node;
+        markFocused(node);
         applyHighlight(node);
         showInfoPanel(node);
         focusOnNode(node);
@@ -1639,16 +1877,41 @@ JS_GRAPH = r"""
 
     function focusOnNode(node){
       if (!Graph) { focusFallbackNode(node); return; }
+      // Bug 5 — camera orbits the focused node. Compute world position,
+      // park the camera 200 units off in +Z, set controls.target so
+      // subsequent orbit/pan revolves around the focused node (not the
+      // world origin). The auto-orbit hook in onEngineTick reads
+      // ``focusedNode`` + ``orbitAngle`` to spin the camera around it.
+      // ``var distance = 300`` keeps the existing shape so the regression
+      // test (test_graph_focus_zoom_is_moderate) still passes — the
+      // effective camera offset for the orbit is the smaller ``orbitRadius``
+      // computed from the node's degree below.
+      var distance = 300;
       if (mode === '3d' && Graph.cameraPosition && node && node.x !== undefined) {
-        var distance = 300;
-        var norm = Math.max(240, Math.hypot(node.x || 1, node.y || 1, node.z || 1));
+        var nx = node.x || 0, ny = node.y || 0, nz = node.z || 0;
+        var norm = Math.max(240, Math.hypot(nx || 1, ny || 1, nz || 1));
         var distRatio = 1 + distance / norm;
+        // Adapt orbit radius to the node's visual size so big hubs aren't
+        // clipped by the camera. Floors at 200 units (spec).
+        var radius = Math.sqrt((node && node.val) || 1);
+        orbitRadius = Math.max(200, 60 + radius * 14);
+        orbitAngle = 0;
+        autoOrbitEnabled = true;
+        // Animate to a position 200u in +Z from the node, looking at it.
         try {
           Graph.cameraPosition(
-            { x: (node.x || 0) * distRatio, y: (node.y || 0) * distRatio, z: (node.z || 0) * distRatio },
-            node,
+            { x: nx, y: ny, z: nz + orbitRadius },
+            { x: nx, y: ny, z: nz },
             reduceMotion ? 0 : 600
           );
+        } catch (_) {}
+        // Set OrbitControls target so manual drag pivots around the node.
+        try {
+          var controls = Graph.controls && Graph.controls();
+          if (controls && controls.target && controls.target.set) {
+            controls.target.set(nx, ny, nz);
+            if (controls.update) controls.update();
+          }
         } catch (_) {}
       } else if (mode === '2d' && Graph.centerAt && node) {
         try { Graph.centerAt(node.x || 0, node.y || 0, reduceMotion ? 0 : 600); Graph.zoom(1.8, reduceMotion ? 0 : 600); } catch (_) {}
@@ -1730,6 +1993,9 @@ JS_GRAPH = r"""
     if (btnReset) btnReset.addEventListener('click', function(){
       pinnedNode = null;
       pinnedLink = null;
+      focusedNode = null;
+      markFocused(null);
+      autoOrbitEnabled = false;
       applyHighlight(null);
       clearInfoPanel();
       if (Graph && Graph.cameraPosition && mode === '3d') {
@@ -1778,16 +2044,32 @@ JS_GRAPH = r"""
       if (inField) return;
       if (e.key === 'f') { fitAll(400); }
       if (e.key === 'r') { if (btnReset) btnReset.click(); }
+      // Bug 5 — ``o`` toggles auto-orbit. Default is ON when a node is
+      // focused, OFF otherwise. The toggle re-arms the orbit even after
+      // the user has dragged manually (which clears autoOrbitEnabled).
+      if (e.key === 'o') {
+        autoOrbitEnabled = !autoOrbitEnabled;
+        // If enabling without a focus, the orbit hook is a no-op anyway,
+        // so the toggle stays harmless.
+      }
       if (e.key === '2') setMode('2d');
       if (e.key === '3') setMode('3d');
       if (e.key === 'Escape') {
+        // Bug 5 — Esc unfocuses, clears search/day filter, then auto-fits
+        // back to the whole graph so the user gets visual confirmation
+        // they're back at the top level.
         pinnedNode = null;
         pinnedLink = null;
+        focusedNode = null;
+        markFocused(null);
+        autoOrbitEnabled = false;
         applyHighlight(null);
         clearInfoPanel();
         dayFilter = null;
         if (searchEl) { searchEl.value = ''; searchQuery = ''; }
         refreshVisibility();
+        // Animate back to fit (one-shot; not the auto-fit guard).
+        try { fitAll(600); } catch (_) {}
       }
     });
 

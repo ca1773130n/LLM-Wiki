@@ -111,3 +111,85 @@ def test_css_auto_link_styling_present():
     users can tell them from authored anchors."""
     assert ".auto-link" in CSS
     assert "border-bottom" in CSS
+
+
+# ---------------------------------------------------------------------------
+# Sticky TOC ancestor-overflow regression (Bug 1)
+# ---------------------------------------------------------------------------
+#
+# ``position: sticky`` silently breaks the moment any ancestor declares
+# ``overflow: hidden | scroll | auto`` (or ``overflow-x: clip``). The previous
+# polish round set ``html, body { overflow-x: clip }`` which killed the right
+# rail's stickiness on every long article. This test pins the fix so future
+# changes don't reintroduce a clipping ancestor.
+# ---------------------------------------------------------------------------
+
+
+def test_no_overflow_hidden_or_scroll_on_sticky_ancestors():
+    """``.shell``, ``.main``, ``body``, ``html`` must not declare an
+    *unconditional* ``overflow: hidden|scroll|auto`` (or ``overflow-x:
+    clip``). Those rules silently break ``position: sticky`` on every
+    descendant — that's exactly how the previous polish round broke
+    the right rail on long articles (it set ``html, body { overflow-x:
+    clip }`` to suppress horizontal overflow).
+
+    Conditional rules (``[data-rail-open] body { overflow: hidden }``
+    for the drawer-lock on mobile, etc.) are exempt — they only fire
+    when the drawer is open on a phone where the sticky desktop rail
+    isn't rendered anyway.
+    """
+    import re
+
+    forbidden_overflows = re.compile(
+        r"\boverflow(?:-x|-y)?\s*:\s*(?:hidden|scroll|auto|clip)\b"
+    )
+
+    # Walk every CSS rule. For each, check the selector list — if any
+    # selector in the list is exactly ``.shell``/``.main``/``body``/
+    # ``html`` (no descendant combinators, no attribute brackets), the
+    # body must not contain a forbidden overflow declaration.
+    bare_selectors = {".shell", ".main", "body", "html"}
+
+    # Strip /* ... */ comments before scanning so the spec text in the
+    # leading docstring (which mentions ``overflow-x: clip`` as a
+    # forbidden pattern) doesn't trigger a self-flagged false positive.
+    css_no_comments = re.sub(r"/\*.*?\*/", "", CSS, flags=re.DOTALL)
+
+    rule_re = re.compile(r"([^{}@]+?)\{([^{}]*)\}", re.DOTALL)
+    for match in rule_re.finditer(css_no_comments):
+        selector_list = match.group(1).strip()
+        body = match.group(2)
+        # Only inspect top-level selectors (skip ``@media`` / ``@keyframes``
+        # block headers — those are caught implicitly by the recursion).
+        for sel in selector_list.split(","):
+            sel = sel.strip()
+            if sel in bare_selectors and forbidden_overflows.search(body):
+                raise AssertionError(
+                    f"{sel!r} carries a sticky-breaking overflow: {body.strip()[:120]}"
+                )
+
+
+def test_sticky_toc_clears_topbar_with_token_offset():
+    """The sticky TOC's ``top`` offset must reference ``--topbar-height``
+    so the rail clears the topbar at any breakpoint, not a magic number."""
+    # The aside.toc rule sets top via the topbar-height token.
+    assert "top: calc(var(--topbar-height" in CSS
+    assert "aside.toc" in CSS
+
+
+def test_shell_grid_uses_align_items_start_for_sticky():
+    """The shell grid must use ``align-items: start`` so the TOC column
+    isn't stretched to the height of the main column — sticky needs the
+    parent row to be taller than the sticky element."""
+    assert "align-items: start" in CSS
+
+
+def test_no_main_graph_full_bleed_modifier():
+    """Bug 2 — the previous polish round added a ``main--graph`` modifier
+    that made the canvas ``width: 100vw`` full-bleed and hid the rail.
+    The graph route now uses ``main--wide`` so the rail stays visible
+    and the canvas lives inside the wide content column."""
+    assert "main--graph" not in CSS, (
+        "the graph-only modifier was retired — the route uses main--wide"
+    )
+    assert "shell--graph" not in CSS

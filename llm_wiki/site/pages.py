@@ -1908,6 +1908,13 @@ def build_graph_payload(ctx: SiteContext) -> Dict[str, object]:
         visible_ids = kept_ids
         visible_edges = [e for e in visible_edges if e.source in kept_ids and e.target in kept_ids]
 
+    # Node sphere volume in 3d-force-graph maps off ``val``. Linear scaling
+    # by raw degree creates pathological hubs (a 100-edge node 100x the
+    # volume of a leaf). We use ``2 + sqrt(min(degree, 200)) * 1.6`` so a
+    # 100-degree hub is roughly 18, a 4-degree node is roughly 5, and a
+    # leaf is 2 — readable size differences without one node eating the
+    # canvas. The cap at 200 keeps any pathological hub bounded.
+    import math as _math
     nodes_payload: List[Dict[str, object]] = []
     for n in visible_nodes:
         kind = _kind_for_node_type(n.type)  # one of sources/concepts/entities/...
@@ -1915,6 +1922,8 @@ def build_graph_payload(ctx: SiteContext) -> Dict[str, object]:
         href_rel = node_href(n, ctx)
         href = f"../{href_rel}" if href_rel else ""
         deg = degree.get(n.id, 0)
+        capped = min(deg, 200)
+        val = round(2 + _math.sqrt(capped) * 1.6, 2)
         description = (n.description or "").strip()
         nodes_payload.append({
             "id": n.id,
@@ -1923,7 +1932,7 @@ def build_graph_payload(ctx: SiteContext) -> Dict[str, object]:
             "kind": kind,
             "group": group,
             "href": href,
-            "val": deg + 1,
+            "val": val,
             "degree": deg,
             "description": description[:400],  # JS clips to 200 chars itself
         })
@@ -1968,6 +1977,29 @@ def render_graph_view(ctx: SiteContext) -> str:
         f'<span class="graph-legend-count">{count}</span>'
         f'</button>'
         for group, count in sorted(type_counts.items(), key=lambda kv: kv[0])
+    )
+
+    # Right-rail graph control panel — server-rendered so it survives
+    # JS being off. The JS bundle hooks the ``data-group`` chips to toggle
+    # node-type visibility (mirrors the in-canvas legend, but pinned to
+    # the right rail using the same sticky CSS as the article TOC).
+    control_chips = "".join(
+        f'<li><button type="button" class="graph-control-chip" data-graph-control-group="{_esc(group)}" data-group="{_esc(group)}" aria-pressed="true">'
+        f'<span class="swatch" style="background:{palette.get(group, "#64748b")}"></span>'
+        f'<span class="label">{_esc(group)}</span>'
+        f'<span class="count">{count}</span>'
+        f'</button></li>'
+        for group, count in sorted(type_counts.items(), key=lambda kv: kv[0])
+    )
+    graph_toc_html = (
+        '<aside class="toc toc--graph" role="doc-toc" aria-label="Graph controls">'
+        '<h2>Node types</h2>'
+        '<ul class="graph-control-list">' + control_chips + '</ul>'
+        '<h2>Shortcuts</h2>'
+        '<p class="muted small"><kbd>/</kbd> search · <kbd>f</kbd> fit · '
+        '<kbd>r</kbd> reset · <kbd>o</kbd> orbit · <kbd>2</kbd>/<kbd>3</kbd> mode · '
+        '<kbd>Esc</kbd> unfocus</p>'
+        '</aside>'
     )
 
     bc = _build_breadcrumbs([("Home", "index.html"), ("Graph view", "")], depth=1)
@@ -2021,7 +2053,7 @@ def render_graph_view(ctx: SiteContext) -> str:
     body = f"""<header class="hero">
   <p class="eyebrow">interactive graph · 3D force layout</p>
   <h1>Knowledge graph</h1>
-  <p class="lead">Tap or click a node to zoom into that entity and inspect its neighbors; tap the same node again to open its page. Tap an edge to focus the relationship first, then tap it again to open the target page. Drag to orbit, scroll/pinch to zoom. Press <kbd>/</kbd> to search, <kbd>f</kbd> to fit, <kbd>2</kbd>/<kbd>3</kbd> to switch projection.</p>
+  <p class="lead">Tap or click a node to focus it: the camera flies in and orbits, neighbors stay highlighted while non-incident nodes dim. Tap the same node again to open its page. Drag to orbit, scroll/pinch to zoom. Press <kbd>/</kbd> to search, <kbd>f</kbd> to fit, <kbd>o</kbd> to toggle auto-orbit, <kbd>2</kbd>/<kbd>3</kbd> to switch projection, <kbd>Esc</kbd> to unfocus.</p>
 </header>
 <section class="graph-page" aria-label="Knowledge graph visualization">
   <div class="graph-toolbar" role="toolbar" aria-label="Graph controls">
@@ -2037,6 +2069,7 @@ def render_graph_view(ctx: SiteContext) -> str:
       <label class="visually-hidden" for="graph-search-input">Search nodes</label>
       <input id="graph-search-input" type="search" placeholder="Search nodes ( / )" autocomplete="off" spellcheck="false">
     </div>
+    <span class="graph-size-hint" title="Node radius scales with sqrt of incident-edge count, capped at degree=200.">node size = √(connections)</span>
   </div>
   <div class="graph-canvas" id="graph-canvas" data-payload-url="payload.json" role="img" aria-label="Interactive 3D knowledge graph">
     {skeleton}
@@ -2056,7 +2089,8 @@ def render_graph_view(ctx: SiteContext) -> str:
         site_title=ctx.site_title,
         counts=_nav_counts(ctx),
         breadcrumbs_html=bc,
-        main_variant="graph",
+        toc_html=graph_toc_html,
+        main_variant="wide",
     )
 
 

@@ -962,19 +962,31 @@ def test_timeline_day_uses_canonical_article_shell(site_ctx: SiteContext) -> Non
     assert "main--wide" not in out
 
 
-def test_render_graph_view_uses_full_width_canvas_layout(
+def test_render_graph_view_uses_wide_layout_with_rail(
     site_ctx: SiteContext,
 ) -> None:
-    """Graph view gets its own ``main--graph`` modifier so the canvas
-    spans the viewport width and the rail/TOC are collapsed."""
+    """Graph view shares the wide content layout with index pages — left
+    rail visible, content column comfortably wide (not full-bleed). The
+    right TOC slot renders a graph control panel instead of headings.
+    """
     out = render_graph_view(site_ctx)
-    assert 'class="main main--graph"' in out, (
-        "graph route must opt into the graph layout modifier"
+    # Wide variant — same as the concepts index.
+    assert 'class="main main--wide"' in out, (
+        "graph route must use the wide content layout, not a bespoke graph variant"
     )
-    # Canvas wrapper carries the .graph-canvas class with viewport-sized
-    # dimensions (height comes from CSS using --topbar-height).
+    # NO main--graph modifier (the previous design's full-bleed branch).
+    assert "main--graph" not in out
+    # Left rail still rendered (the rail is part of page_shell, not opt-in).
+    assert '<aside class="rail"' in out
+    # Right rail is the graph control panel (toc--graph modifier).
+    assert "toc toc--graph" in out
+    assert "data-graph-control-group" in out
+    # Canvas wrapper carries the .graph-canvas class with CSS-controlled
+    # dimensions (clamp(560px, 70vh, 880px) on desktop).
     assert '<div class="graph-canvas"' in out
     assert 'id="graph-canvas"' in out
+    # Size hint is in the toolbar so users know what node radius means.
+    assert "node size = √(connections)" in out
 
 
 def test_index_pages_emit_canonical_main_wide_not_article_shell(
@@ -992,3 +1004,62 @@ def test_index_pages_emit_canonical_main_wide_not_article_shell(
         assert '<article class="article">' not in out, (
             "index pages keep the loose layout — no canonical article wrap"
         )
+
+
+def test_build_graph_payload_uses_sqrt_node_sizing(site_ctx: SiteContext) -> None:
+    """Bug 3 — node radius scales with sqrt of degree (capped at 200) so a
+    100-degree hub doesn't dwarf every leaf. Each node's ``val`` is
+    ``round(2 + sqrt(min(degree, 200)) * 1.6, 2)`` — verify against the
+    payload's own ``degree`` field."""
+    import math
+
+    from llm_wiki.site.pages import build_graph_payload
+
+    payload = build_graph_payload(site_ctx)
+    nodes = payload["nodes"]
+    assert nodes, "fixture must produce at least one node"
+    for node in nodes:
+        deg = node.get("degree", 0)
+        capped = min(deg, 200)
+        expected = round(2 + math.sqrt(capped) * 1.6, 2)
+        assert node["val"] == expected, (
+            f"node {node['id']!r} has val={node['val']!r} but expected {expected!r} "
+            f"(degree={deg})"
+        )
+        # Floor at 2.0 — leaves still need a visible sphere.
+        assert node["val"] >= 2.0
+        # Cap is 200, so val never exceeds round(2 + sqrt(200) * 1.6, 2) = ~24.63.
+        assert node["val"] <= round(2 + math.sqrt(200) * 1.6, 2) + 0.001
+
+
+def test_detail_page_keeps_sticky_toc_aside_for_long_articles(
+    site_ctx: SiteContext,
+) -> None:
+    """Bug 1 — every detail page that emits a TOC keeps the inner
+    ``aside.toc`` element so the CSS sticky rule can target it. Without
+    the inner aside the rail collapses to the wrapper which has no
+    sticky declaration of its own (the wrapper is just ``align-self:
+    start`` on the grid)."""
+    from llm_wiki.site.pages import render_concept_detail
+
+    # Pick the first concept node from the fixture.
+    concept = next(
+        (n for n in site_ctx.graph.nodes if n.type.value == "Concept"),
+        None,
+    )
+    if concept is None:
+        import pytest as _pytest
+        _pytest.skip("fixture has no concept nodes")
+    out = render_concept_detail(site_ctx, concept)
+    # The wrapper aside.toc-rail must contain the inner aside.toc — the
+    # latter is what the CSS sticky rule targets.
+    assert '<aside class="toc-rail"' in out
+    # Either the helper renders the inner aside, or the page emits an
+    # empty rail (no headings) — both are acceptable shapes.
+    if "On this page" in out:
+        assert '<aside class="toc"' in out
+    # The scrollspy hook (data-toc-target) survives.
+    if "On this page" in out and "<li" in out.split("On this page", 1)[1][:4000]:
+        # Headings -> data-toc-target survives so the scrollspy can pair them.
+        body_after_toc = out.split("On this page", 1)[1]
+        assert "data-toc-target" in body_after_toc
