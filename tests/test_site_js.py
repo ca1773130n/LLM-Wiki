@@ -342,7 +342,7 @@ def test_graph_resize_handler_does_not_auto_refit():
 def test_graph_initial_camera_position_is_known():
     """The first frame parks the camera at z=600 so we don't see a wild
     zoom-out from the origin before the simulation settles."""
-    assert "inst.cameraPosition({ x: 0, y: 0, z: 380 }, { x: 0, y: 0, z: 0 }, 0)" in JS_GRAPH
+    assert "inst.cameraPosition({ x: 0, y: 0, z: 1000 }, { x: 0, y: 0, z: 0 }, 0)" in JS_GRAPH
 
 
 def test_graph_labels_are_truncated():

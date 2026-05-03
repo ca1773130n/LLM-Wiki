@@ -1612,7 +1612,9 @@ JS_GRAPH = r"""
       // a node sphere. Apply to both manual wheel zoom (which mutates
       // camera.position relative to controls.target) and the library
       // dolly should it ever take over.
-      try { controls.maxDistance = 500; } catch (_) {}
+      // maxDistance bumped to 1200 so the new z=1000 init doesn't get
+      // force-clamped on the first frame.
+      try { controls.maxDistance = 1200; } catch (_) {}
       // minDistance bumped from 8 → 35 — the user said zoom-in lets
       // them get too close (clipping inside spheres feels claustrophobic).
       try { controls.minDistance = 35; } catch (_) {}
@@ -2410,11 +2412,12 @@ JS_GRAPH = r"""
       installGraphResize(inst);
       if (mode === '3d') {
         installLibraryZoom(inst);
-        // Start the camera at a known distance so the first frame isn't
-        // a wild zoom-out from the origin. The single-shot scheduleCenteredFit
-        // will refine the framing once the simulation settles.
+        // Prime the camera at z=1000 so the first frame isn't a wild
+        // zoom-in from the origin while the simulation is still hot.
+        // scheduleCenteredFit (below) AND the onEngineStop handler will
+        // both call zoomToFit, so this position is short-lived.
         try {
-          if (inst.cameraPosition) inst.cameraPosition({ x: 0, y: 0, z: 380 }, { x: 0, y: 0, z: 0 }, 0);
+          if (inst.cameraPosition) inst.cameraPosition({ x: 0, y: 0, z: 1000 }, { x: 0, y: 0, z: 0 }, 0);
         } catch (_) {}
       } else if (mode === '2d') {
         // Issue 3 — 2D ``force-graph`` zooms toward the cursor by default
@@ -2424,9 +2427,20 @@ JS_GRAPH = r"""
         try { if (inst.enableNodeDrag) inst.enableNodeDrag(true); } catch (_) {}
       }
       refreshVisibility();
-      // Fallback fit (if the engine never stops, e.g. on tiny graphs that
-      // skip the cool-down): scheduleCenteredFit is itself idempotent.
-      if (!pinnedNode && !pinnedLink) setTimeout(scheduleCenteredFit, 350);
+      // Zoom-to-fit on init — fire once early (so the user sees the
+      // fitted view by the second frame) AND let onEngineStop fire its
+      // own fit when the simulation settles. Both paths set
+      // ``hasInitialFit`` so a second fit isn't redundant; the early
+      // fire just makes the perceived first paint right.
+      if (!pinnedNode && !pinnedLink) {
+        // 50ms ≈ one frame of simulation cooldown so node positions are
+        // populated; then scheduleCenteredFit runs zoomToFit with a
+        // short tween so the user sees the camera settle into frame.
+        setTimeout(scheduleCenteredFit, 50);
+        // Belt-and-braces: also schedule at 350ms in case the first
+        // fire ran before the engine had positioned anything.
+        setTimeout(scheduleCenteredFit, 350);
+      }
       return inst;
     }
 
