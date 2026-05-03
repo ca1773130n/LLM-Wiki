@@ -301,7 +301,11 @@ hr {
   margin: 0 auto;
   display: grid;
   grid-template-columns: 1fr;
-  align-items: start;
+  /* NOTE: do NOT set ``align-items: start`` here — that collapses the
+     TOC column to its content height which leaves no space for sticky
+     positioning to slide against. The grid default (``stretch``) is
+     what makes the TOC column tall enough for the sticky inner aside
+     to follow long-article scrolls. */
   gap: var(--space-5);
   padding: var(--space-5) clamp(12px, 4vw, 24px);
   /* sticky position requires no overflow:hidden on ancestors. */
@@ -524,14 +528,12 @@ details[open] > .doc-tree-folder-summary::before { transform: rotate(90deg); }
   .shell--graph {
     grid-template-columns: var(--rail-w) minmax(0, 1fr);
   }
-  /* The wrapper takes its own height (``align-self: start``) so its
-     child ``aside.toc`` has somewhere to slide against. We do NOT make
-     the wrapper itself sticky — the *inner* aside.toc is the sticky
-     element, which means a long TOC can scroll internally without
-     dragging the wrapper around. */
+  /* The wrapper grid-stretches to match <main>'s height (no align-self
+     override) — that's what gives the inner sticky aside enough column
+     to slide against. With grid stretch the rail keeps full column
+     height even when its content is short. */
   .toc-rail {
     display: block;
-    align-self: start;
   }
   /* The inner ``aside.toc`` (rendered by ``components.toc`` and by the
      graph control panel) sticks so the rail follows long article scrolls.

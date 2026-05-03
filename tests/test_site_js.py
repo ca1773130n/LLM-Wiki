@@ -342,7 +342,7 @@ def test_graph_resize_handler_does_not_auto_refit():
 def test_graph_initial_camera_position_is_known():
     """The first frame parks the camera at z=600 so we don't see a wild
     zoom-out from the origin before the simulation settles."""
-    assert "inst.cameraPosition({ x: 0, y: 0, z: 220 }, { x: 0, y: 0, z: 0 }, 0)" in JS_GRAPH
+    assert "inst.cameraPosition({ x: 0, y: 0, z: 380 }, { x: 0, y: 0, z: 0 }, 0)" in JS_GRAPH
 
 
 def test_graph_labels_are_truncated():
@@ -610,7 +610,10 @@ def test_graph_camera_orbits_focused_node_via_engine_tick():
     assert "Math.cos(orbitAngle)" in JS_BUNDLE_GRAPH
     # focusOnNode sets controls.target so manual orbit pivots around the
     # focused node (not the world origin).
-    assert "controls.target.set(nx, ny, nz)" in JS_BUNDLE_GRAPH
+    # Orbit target now snaps to the cluster centroid (cx,cy,cz) — and is
+    # deferred via setTimeout so the cameraPosition tween is visible
+    # rather than instantly overridden by a sync controls.update().
+    assert "controls.target.set(cx, cy, cz)" in JS_BUNDLE_GRAPH
     # ``cameraPosition(`` is the library's animation hook for the fly-in.
     assert "cameraPosition(" in JS_BUNDLE_GRAPH
 

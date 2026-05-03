@@ -177,11 +177,18 @@ def test_sticky_toc_clears_topbar_with_token_offset():
     assert "aside.toc" in CSS
 
 
-def test_shell_grid_uses_align_items_start_for_sticky():
-    """The shell grid must use ``align-items: start`` so the TOC column
-    isn't stretched to the height of the main column — sticky needs the
-    parent row to be taller than the sticky element."""
-    assert "align-items: start" in CSS
+def test_shell_grid_does_not_force_align_items_start():
+    """The shell grid must NOT set ``align-items: start`` — that collapses
+    the TOC column to its content height which leaves no space for the
+    sticky inner aside to slide against. Default grid ``stretch`` is what
+    keeps the TOC column tall enough for sticky positioning."""
+    # Strip comments before checking so a /* ... */ explainer that
+    # mentions the forbidden rule doesn't trip the test.
+    import re as _re
+    css_no_comments = _re.sub(r"/\*.*?\*/", "", CSS, flags=_re.DOTALL)
+    shell_block_start = css_no_comments.index(".shell {")
+    shell_block_end = css_no_comments.index("}", shell_block_start)
+    assert "align-items: start" not in css_no_comments[shell_block_start:shell_block_end]
 
 
 def test_main_graph_modifier_keeps_left_rail_visible():

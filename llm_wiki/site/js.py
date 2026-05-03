@@ -2414,7 +2414,7 @@ JS_GRAPH = r"""
         // a wild zoom-out from the origin. The single-shot scheduleCenteredFit
         // will refine the framing once the simulation settles.
         try {
-          if (inst.cameraPosition) inst.cameraPosition({ x: 0, y: 0, z: 220 }, { x: 0, y: 0, z: 0 }, 0);
+          if (inst.cameraPosition) inst.cameraPosition({ x: 0, y: 0, z: 380 }, { x: 0, y: 0, z: 0 }, 0);
         } catch (_) {}
       } else if (mode === '2d') {
         // Issue 3 — 2D ``force-graph`` zooms toward the cursor by default
@@ -2551,21 +2551,32 @@ JS_GRAPH = r"""
         // centroid, looking at the centroid. ``flyMs`` defaults to 600
         // (snappy click-focus) but auto-browse passes a longer value
         // (1400ms) for a cinematic ease in/out between tour stops.
+        var animMs = reduceMotion ? 0 : (flyMs || 600);
         try {
           Graph.cameraPosition(
             { x: cx, y: cy, z: cz + orbitRadius },
             { x: cx, y: cy, z: cz },
-            reduceMotion ? 0 : (flyMs || 600)
+            animMs
           );
         } catch (_) {}
-        // Set OrbitControls target so manual drag pivots around the node.
-        try {
-          var controls = Graph.controls && Graph.controls();
-          if (controls && controls.target && controls.target.set) {
-            controls.target.set(nx, ny, nz);
-            if (controls.update) controls.update();
-          }
-        } catch (_) {}
+        // OrbitControls target snap MUST run AFTER the cameraPosition
+        // tween completes — calling controls.target.set + update()
+        // synchronously fights the tween and snaps the camera to its
+        // final state instantly (no visible animation). Defer.
+        var setOrbitTarget = function(){
+          try {
+            var controls = Graph.controls && Graph.controls();
+            if (controls && controls.target && controls.target.set) {
+              controls.target.set(cx, cy, cz);
+              if (controls.update) controls.update();
+            }
+          } catch (_) {}
+        };
+        if (animMs > 0) {
+          window.setTimeout(setOrbitTarget, animMs + 20);
+        } else {
+          setOrbitTarget();
+        }
       } else if (mode === '2d' && Graph.centerAt && node) {
         try { Graph.centerAt(node.x || 0, node.y || 0, reduceMotion ? 0 : 600); Graph.zoom(1.8, reduceMotion ? 0 : 600); } catch (_) {}
       }
