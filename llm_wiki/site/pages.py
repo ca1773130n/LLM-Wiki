@@ -2172,7 +2172,13 @@ def build_graph_payload(ctx: SiteContext) -> Dict[str, object]:
         href = f"../{href_rel}" if href_rel else ""
         deg = degree.get(n.id, 0)
         capped = min(deg, 200)
-        val = round(2 + _math.sqrt(capped) * 1.6, 2)
+        # Node size scaled to make hubs visually obvious. Previous
+        # ``2 + sqrt(degree) * 1.6`` made a 50-edge hub only ~2.5x the
+        # area of a 1-edge leaf — too subtle. ``capped ** 0.85`` keeps
+        # it sub-linear (so a 200-edge mega-hub doesn't dominate the
+        # canvas) but pulls high-connection nodes well clear of the
+        # leaf cloud. Floor at 2 so even degree-0 nodes are clickable.
+        val = round(2 + (capped ** 0.85) * 0.95, 2)
         description = (n.description or "").strip()
         nodes_payload.append({
             "id": n.id,

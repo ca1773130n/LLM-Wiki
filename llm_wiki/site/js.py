@@ -1015,10 +1015,7 @@ JS_GRAPH = r"""
         desc.textContent = clampDesc(node.description);
         tooltip.appendChild(desc);
       }
-      var hint = document.createElement('span');
-      hint.className = 'graph-tooltip-hint';
-      hint.textContent = 'click to focus';
-      tooltip.appendChild(hint);
+      // No "click to focus" hint — the user finds it noise.
       positionTooltip(x, y);
       tooltip.hidden = false;
     }
@@ -2048,14 +2045,16 @@ JS_GRAPH = r"""
               // to controls.target. At the default ~600u distance we keep
               // scale=1; zooming out grows labels, zooming in shrinks them.
               // This makes the focused/hover-incident label set readable
-              // at any zoom level.
+              // at any zoom level. Cap raised to 6× because the user
+              // explicitly wants the focus set readable when zoomed way
+              // out — they should be visibly larger than calm defaults.
               var camScale = 1.0;
               try {
                 var cam = Graph && Graph.camera && Graph.camera();
                 var ctrls = Graph && Graph.controls && Graph.controls();
                 if (cam && ctrls && ctrls.target) {
                   var dist = cam.position.distanceTo(ctrls.target);
-                  camScale = Math.max(1.0, Math.min(3.0, dist / 180));
+                  camScale = Math.max(1.0, Math.min(6.0, dist / 90));
                 }
               } catch (_) {}
               for (var i = 0; i < group.children.length; i++) {
@@ -2432,7 +2431,7 @@ JS_GRAPH = r"""
       if (target && target.href) window.location.href = target.href;
     }
 
-    function focusOnNode(node){
+    function focusOnNode(node, flyMs){
       if (!Graph) { focusFallbackNode(node); return; }
       // Bug 5 — camera orbits the focused node. Compute world position,
       // park the camera 200 units off in +Z, set controls.target so
@@ -2491,12 +2490,14 @@ JS_GRAPH = r"""
         var cy = (minY + maxY) / 2;
         var cz = (minZ + maxZ) / 2;
         // Animate to a position ``orbitRadius`` units in +Z from the
-        // centroid, looking at the centroid.
+        // centroid, looking at the centroid. ``flyMs`` defaults to 600
+        // (snappy click-focus) but auto-browse passes a longer value
+        // (1400ms) for a cinematic ease in/out between tour stops.
         try {
           Graph.cameraPosition(
             { x: cx, y: cy, z: cz + orbitRadius },
             { x: cx, y: cy, z: cz },
-            reduceMotion ? 0 : 600
+            reduceMotion ? 0 : (flyMs || 600)
           );
         } catch (_) {}
         // Set OrbitControls target so manual drag pivots around the node.
@@ -2654,7 +2655,15 @@ JS_GRAPH = r"""
     var autoBrowseTimer = null;
     var autoBrowseVisited = null;
     var autoBrowseHopCount = 0;
-    var AUTO_BROWSE_DWELL_MS = 5000;
+    // Dwell longer per node so the user has time to read the focused
+    // label and absorb the neighbours. The auto-orbit pipeline already
+    // gives a slow ~31s/revolution rotation; with a 9s dwell the camera
+    // sweeps ~100° around the focused node before flying to the next.
+    var AUTO_BROWSE_DWELL_MS = 9000;
+    // Camera fly-to between auto-browse stops uses this duration. The
+    // existing focusOnNode() animates with reduceMotion ? 0 : 600ms.
+    // Having the dwell at 9000 means a clear "settle → orbit → fly"
+    // cadence: ~600ms fly, then 8.4s of orbit at the new node.
     var AUTO_BROWSE_MAX_HOPS = 8;
 
     function setAutoBrowseUI(on){
@@ -2710,7 +2719,10 @@ JS_GRAPH = r"""
       }
       autoBrowseVisited.add(node.id);
       autoBrowseHopCount += 1;
-      try { focusOnNode(node); } catch (_) {}
+      // Cinematic fly-to: 1400ms ease in/out between stops (vs the
+      // 600ms snap used for click-focus). The library's tween easing
+      // is cubic in/out by default, which is what the user asked for.
+      try { focusOnNode(node, 1400); } catch (_) {}
       // Treat focus as a pin so re-builds don't drop the highlight.
       pinnedNode = node;
       focusedNode = node;

@@ -579,7 +579,9 @@ def test_graph_hover_uses_cursor_tooltip_not_overlay_panel():
     assert "function showLinkTooltip" in JS_BUNDLE_GRAPH
     assert "function clampDesc" in JS_BUNDLE_GRAPH
     assert "TOOLTIP_DESC_LIMIT = 120" in JS_BUNDLE_GRAPH
-    assert "'click to focus'" in JS_BUNDLE_GRAPH
+    # The "click to focus" hint string was removed — the user found it
+    # noise. Forbid it from regressing.
+    assert "'click to focus'" not in JS_BUNDLE_GRAPH
     # No display:none thrashing — the only DOM mutation per frame is the
     # ``hidden`` attribute toggle + style.left/top + textContent.
     assert "tooltip.hidden = false" in JS_BUNDLE_GRAPH
@@ -754,7 +756,9 @@ def test_graph_auto_browse_wired():
     assert "function autoBrowseStep" in JS_BUNDLE_GRAPH
     # Recursive setTimeout chain (5s dwell) so cancellation is clean.
     assert "setTimeout" in JS_BUNDLE_GRAPH
-    assert "AUTO_BROWSE_DWELL_MS = 5000" in JS_BUNDLE_GRAPH
+    # Per-node dwell bumped from 5s → 9s for a calmer cadence; the user
+    # said the previous 5s was too fast to absorb each focus stop.
+    assert "AUTO_BROWSE_DWELL_MS = 9000" in JS_BUNDLE_GRAPH
     assert "AUTO_BROWSE_MAX_HOPS = 8" in JS_BUNDLE_GRAPH
     # Highest-degree picker + most-connected unvisited neighbor picker.
     assert "function pickStartNode" in JS_BUNDLE_GRAPH
