@@ -49,7 +49,7 @@ CSS: str = r"""
   --space-6: 32px;
   --space-7: 48px;
   --space-8: 64px;
-  --rail-w: 240px;
+  --rail-w: 280px;
   --toc-w: 260px;
   --read-w: min(1100px, 75ch);
   --page-w: min(100vw - 32px, 1640px);
@@ -160,16 +160,44 @@ hr {
   font-family: var(--type-serif);
   font-size: 1.1rem;
 }
-.topbar nav { display: flex; gap: var(--space-3); flex: 1; flex-wrap: wrap; }
+/* Primary nav (Issue 3): horizontal list of every public route, left-
+   aligned next to the brand. The active route picks up the accent color
+   plus a 2 px bottom border. Counts render in brackets next to the
+   label. The mobile drawer takes over below 768 px (handled in MOBILE_CSS). */
+.topbar nav {
+  display: flex;
+  gap: 2px;
+  flex: 1;
+  flex-wrap: wrap;
+  align-items: stretch;
+  margin-inline-start: var(--space-3);
+}
 .topbar nav a {
   color: var(--ink-muted);
   text-decoration: none;
-  font-size: .92rem;
-  padding: 4px 8px;
-  border-radius: 4px;
+  font-size: .9rem;
+  padding: 6px 10px;
+  border-bottom: 2px solid transparent;
+  border-radius: 0;
+  white-space: nowrap;
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  transition: color 140ms ease, border-color 140ms ease, background 140ms ease;
 }
-.topbar nav a.active { color: var(--accent); }
+.topbar nav a .topnav-count {
+  color: var(--ink-muted);
+  font-variant-numeric: tabular-nums;
+  font-size: .78rem;
+  opacity: .75;
+}
+.topbar nav a.active {
+  color: var(--accent);
+  border-bottom-color: var(--accent);
+}
+.topbar nav a.active .topnav-count { color: var(--accent); opacity: .85; }
 .topbar nav a:hover { color: var(--ink); background: var(--surface-2); }
+.topbar nav a:hover.active { color: var(--accent); }
 .topbar .search-button,
 .topbar .theme-toggle {
   font-family: var(--type-sans);
@@ -210,35 +238,168 @@ hr {
   /* sticky position requires no overflow:hidden on ancestors. */
   overflow: visible;
 }
+/* Left rail (Issue 3): the rail is now an Obsidian-style file explorer
+   wrapped around ``.doc-tree``. It still rides at the same DOM ID
+   (``rail``) so the mobile drawer toggle keeps working. Padding is
+   trimmed because the doc tree owns its own internal density. */
 .rail {
   display: none; /* mobile: hidden by default */
   font-family: var(--type-sans);
   font-size: .92rem;
 }
-.rail h2 {
-  font-family: var(--type-sans);
-  font-size: .72rem;
-  font-weight: 600;
-  text-transform: uppercase;
-  letter-spacing: .1em;
-  color: var(--ink-muted);
-  margin: var(--space-5) 0 var(--space-2);
+
+/* ---- Doc-tree explorer (Issue 3) ---------------------------------------- */
+.doc-tree-search-row { padding: 0 var(--space-2) var(--space-3); }
+.doc-tree-search {
+  width: 100%;
+  padding: 6px 10px;
+  font-family: var(--type-mono);
+  font-size: 12px;
+  border: 1px solid var(--rule);
+  border-radius: 4px;
+  background: var(--surface);
+  color: var(--ink);
+  transition: border-color 140ms ease, box-shadow 140ms ease;
 }
-.rail h2:first-child { margin-top: 0; }
-.rail ul { list-style: none; padding: 0; margin: 0; }
-.rail li { margin: 0; }
-.rail a {
+.doc-tree-search:focus {
+  outline: none;
+  border-color: var(--accent);
+  box-shadow: 0 0 0 3px var(--accent-soft);
+}
+.doc-tree {
+  display: block;
+  font-family: var(--type-mono);
+  font-size: 12px;
+  line-height: 1.5;
+  color: var(--ink);
+}
+.doc-tree-list {
+  list-style: none;
+  margin: 0;
+  padding-inline-start: 12px;
+}
+.doc-tree-folder {
+  margin: 0;
+}
+.doc-tree-folder-summary {
+  cursor: pointer;
+  list-style: none;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 3px 6px;
+  border-radius: 3px;
+  user-select: none;
+  color: var(--ink-muted);
+}
+.doc-tree-folder-summary::-webkit-details-marker { display: none; }
+.doc-tree-folder-summary::before {
+  content: "▸";
+  font-size: 10px;
+  width: 10px;
+  display: inline-block;
+  color: var(--ink-muted);
+  transition: transform 120ms ease;
+}
+details[open] > .doc-tree-folder-summary::before { transform: rotate(90deg); }
+.doc-tree-folder-summary:hover { background: var(--surface-2); color: var(--ink); }
+.doc-tree-folder-summary .doc-tree-name { color: var(--ink); }
+.doc-tree-count {
+  color: var(--ink-muted);
+  font-size: 11px;
+  font-variant-numeric: tabular-nums;
+}
+.doc-tree-folder-item { margin: 0; }
+.doc-tree-leaf {
+  margin: 0;
+  list-style: none;
+  position: relative;
+}
+.doc-tree-leaf > a,
+.doc-tree-leaf > .doc-tree-name {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 3px 6px 3px 16px;
+  border-left: 2px solid transparent;
+  text-decoration: none;
+  color: var(--ink);
+  border-radius: 0 3px 3px 0;
+  word-break: break-all;
+}
+.doc-tree-leaf > a:hover { background: var(--surface-2); color: var(--ink); }
+.doc-tree-leaf.is-active > a {
+  background: var(--accent-soft);
+  color: var(--accent);
+  border-left-color: var(--accent);
+}
+.doc-tree-leaf[hidden] { display: none; }
+.doc-tree-pill {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 14px;
+  height: 14px;
+  font-size: 9px;
+  font-weight: 700;
+  font-family: var(--type-sans);
+  color: var(--ink-muted);
+  background: var(--surface-2);
+  border: 1px solid var(--rule);
+  border-radius: 2px;
+  flex-shrink: 0;
+  letter-spacing: 0;
+}
+.doc-tree-disabled { color: var(--ink-muted); opacity: .65; }
+.doc-tree-truncated { padding: 3px 6px 3px 16px; font-style: italic; }
+.doc-tree-folder.doc-tree-root > .doc-tree-folder-summary {
+  font-weight: 600;
+  color: var(--ink);
+  text-transform: none;
+  letter-spacing: 0;
+}
+.rail-section-label {
+  font-family: var(--type-sans);
+  font-size: .68rem;
+  font-weight: 700;
+  letter-spacing: .12em;
+  text-transform: uppercase;
+  color: var(--ink-muted);
+  margin: var(--space-4) var(--space-2) var(--space-2);
+}
+.rail-section-label:first-child { margin-top: 0; }
+.rail-drawer-nav {
+  display: none; /* hidden on desktop; topbar covers this */
+}
+.rail-drawer-nav-list {
+  list-style: none;
+  padding: 0;
+  margin: 0 0 var(--space-3);
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  font-family: var(--type-sans);
+  font-size: .92rem;
+}
+.rail-drawer-nav-list a {
   display: flex;
   justify-content: space-between;
   align-items: center;
   text-decoration: none;
   color: var(--ink);
-  padding: 4px 8px;
+  padding: 8px 10px;
   border-radius: 4px;
 }
-.rail a .count { color: var(--ink-muted); font-size: .82rem; font-variant-numeric: tabular-nums; }
-.rail a.active { background: var(--accent-soft); color: var(--accent); }
-.rail a:hover { background: var(--surface-2); }
+.rail-drawer-nav-list a.active {
+  background: var(--accent-soft);
+  color: var(--accent);
+}
+.rail-drawer-nav-list a:hover { background: var(--surface-2); }
+.rail-drawer-nav-list .rail-nav-count {
+  color: var(--ink-muted);
+  font-variant-numeric: tabular-nums;
+  font-size: .8rem;
+}
 
 .main {
   min-width: 0;
@@ -285,6 +446,14 @@ hr {
 @media (min-width: 1024px) {
   .shell {
     grid-template-columns: var(--rail-w) minmax(0, 1fr) var(--toc-w);
+  }
+  /* Issue 1 — the graph route drops the right rail entirely so the
+     canvas can extend the full content column width. ``page_shell``
+     emits ``shell--graph`` + ``main--graph`` for that route; the right
+     TOC ``aside`` is omitted from the markup so the grid simply has
+     two columns instead of three. */
+  .shell--graph {
+    grid-template-columns: var(--rail-w) minmax(0, 1fr);
   }
   /* The wrapper takes its own height (``align-self: start``) so its
      child ``aside.toc`` has somewhere to slide against. We do NOT make
@@ -859,53 +1028,79 @@ hr {
   }
 }
 .graph-page .graph-canvas canvas { display: block; width: 100% !important; height: 100% !important; }
-/* Right-rail focused-node info panel (Issue 1).
-   The panel lives inside ``aside.toc--graph`` and is server-rendered as
-   the empty state; the JS bundle (showInfoPanel) toggles content + the
-   neighbor list when a node is clicked. The previous in-canvas overlay
-   is gone — the rail is now the single source of truth for focused-node
-   metadata. */
-.toc.toc--graph .graph-info-panel {
+/* Floating focused-node info overlay (Issue 1).
+   Anchored at the bottom-right of the canvas wrapper. Empty state
+   collapses to a single "Selected node" pill via the muted small
+   typography and reduced padding so it doesn't dominate the canvas
+   when nothing is focused. JS toggles ``hidden`` on the empty/content/
+   neighbors children to swap states; ID contracts (graph-info-panel /
+   graph-info-empty / graph-info-content / graph-info-neighbors) are
+   preserved. */
+.graph-info-overlay {
+  position: absolute;
+  right: 16px;
+  bottom: 16px;
+  width: clamp(280px, 26vw, 360px);
+  max-height: 60vh;
+  overflow-y: auto;
+  z-index: 6;
+  background: color-mix(in srgb, var(--surface) 96%, transparent);
+  -webkit-backdrop-filter: blur(10px);
+  backdrop-filter: blur(10px);
+  border: 1px solid var(--accent-soft);
+  border-left: 3px solid var(--accent);
+  border-radius: var(--radius);
+  box-shadow: 0 12px 32px rgba(2, 6, 23, 0.18);
+  padding: 12px 14px;
+  font-family: var(--type-sans);
+  font-size: 0.86rem;
+  color: var(--ink);
+  pointer-events: auto;
+}
+.graph-info-overlay .graph-info-panel {
   display: flex;
   flex-direction: column;
   gap: var(--space-3);
-  margin-bottom: var(--space-4);
 }
-.toc.toc--graph .graph-info-panel .graph-info-empty p { margin: 0 0 6px 0; }
-.toc.toc--graph .graph-info-title {
+.graph-info-overlay .graph-info-empty p { margin: 0 0 6px 0; }
+.graph-info-overlay .graph-info-empty {
+  font-size: 0.82rem;
+}
+.graph-info-overlay .graph-info-empty strong { color: var(--accent); }
+.graph-info-overlay .graph-info-title {
   margin: 0 0 6px 0;
-  font-size: 1.15rem;
+  font-size: 1.05rem;
   font-family: var(--type-serif);
   line-height: 1.25;
   color: var(--accent);
   overflow-wrap: anywhere;
   word-break: break-word;
 }
-.toc.toc--graph .graph-info-meta {
+.graph-info-overlay .graph-info-meta {
   margin: 0 0 8px 0;
   font-family: var(--type-mono);
-  font-size: 0.78rem;
+  font-size: 0.74rem;
   color: var(--ink-muted);
   display: flex;
   flex-wrap: wrap;
   align-items: center;
   gap: 6px;
 }
-.toc.toc--graph .graph-info-badge {
+.graph-info-overlay .graph-info-badge {
   display: inline-block;
   padding: 1px 8px;
   border-radius: 999px;
   color: #fff;
-  font-size: 0.7rem;
+  font-size: 0.68rem;
   letter-spacing: 0.04em;
   text-transform: uppercase;
 }
-.toc.toc--graph .graph-info-degree { color: var(--ink-muted); }
-.toc.toc--graph .graph-info-desc {
+.graph-info-overlay .graph-info-degree { color: var(--ink-muted); }
+.graph-info-overlay .graph-info-desc {
   margin: 0 0 10px 0;
   font-family: var(--type-serif);
-  font-size: 0.9rem;
-  line-height: 1.45;
+  font-size: 0.86rem;
+  line-height: 1.4;
   color: var(--ink);
   display: -webkit-box;
   -webkit-line-clamp: 6;
@@ -913,96 +1108,99 @@ hr {
   overflow: hidden;
   overflow-wrap: anywhere;
 }
-.toc.toc--graph .graph-info-actions {
+.graph-info-overlay .graph-info-actions {
   display: flex;
   flex-wrap: wrap;
-  gap: 8px;
+  gap: 6px;
   margin-top: 8px;
 }
-.toc.toc--graph .graph-info-link,
-.toc.toc--graph .graph-info-button {
+.graph-info-overlay .graph-info-link,
+.graph-info-overlay .graph-info-button {
   display: inline-block;
   font-family: var(--type-mono);
-  font-size: 0.82rem;
+  font-size: 0.78rem;
   color: var(--accent);
   text-decoration: none;
   background: transparent;
   border: 1px solid var(--accent-soft);
   border-radius: var(--radius);
-  padding: 6px 12px;
+  padding: 4px 10px;
   cursor: pointer;
   transition: border-color 160ms ease, background 160ms ease;
 }
-.toc.toc--graph .graph-info-link:hover,
-.toc.toc--graph .graph-info-button:hover {
+.graph-info-overlay .graph-info-link:hover,
+.graph-info-overlay .graph-info-button:hover {
   border-color: var(--accent);
   background: var(--accent-soft);
 }
-.toc.toc--graph .graph-info-button--ghost {
+.graph-info-overlay .graph-info-button--ghost {
   color: var(--ink-muted);
   border-color: var(--rule);
 }
-.toc.toc--graph .graph-info-subhead {
-  margin: 12px 0 6px 0;
+.graph-info-overlay .graph-info-subhead {
+  margin: 10px 0 4px 0;
   font-family: var(--type-mono);
-  font-size: 0.78rem;
+  font-size: 0.72rem;
   letter-spacing: 0.04em;
   text-transform: uppercase;
   color: var(--ink-muted);
 }
-.toc.toc--graph .graph-neighbor-list {
+.graph-info-overlay .graph-neighbor-list {
   list-style: none;
   margin: 0;
   padding: 0;
   display: flex;
   flex-direction: column;
-  gap: 4px;
-  max-height: 320px;
+  gap: 3px;
+  max-height: 220px;
   overflow-y: auto;
 }
-.toc.toc--graph .graph-neighbor-row {
+.graph-info-overlay .graph-neighbor-row {
   display: flex;
   align-items: center;
-  gap: 8px;
+  gap: 6px;
   width: 100%;
-  padding: 6px 8px;
+  padding: 4px 6px;
   font-family: var(--type-mono);
-  font-size: 0.8rem;
+  font-size: 0.76rem;
   color: var(--ink);
   background: transparent;
   border: 1px solid transparent;
-  border-radius: var(--radius);
+  border-radius: 4px;
   text-align: left;
   cursor: pointer;
   transition: background 140ms ease, border-color 140ms ease;
 }
-.toc.toc--graph .graph-neighbor-row:hover,
-.toc.toc--graph .graph-neighbor-row:focus-visible {
+.graph-info-overlay .graph-neighbor-row:hover,
+.graph-info-overlay .graph-neighbor-row:focus-visible {
   background: var(--surface-2);
   border-color: var(--accent-soft);
   outline: none;
 }
-.toc.toc--graph .graph-neighbor-dot {
-  width: 9px;
-  height: 9px;
+.graph-info-overlay .graph-neighbor-dot {
+  width: 8px;
+  height: 8px;
   border-radius: 999px;
   flex-shrink: 0;
 }
-.toc.toc--graph .graph-neighbor-type {
+.graph-info-overlay .graph-neighbor-type {
   flex-shrink: 0;
-  font-size: 0.7rem;
+  font-size: 0.66rem;
   letter-spacing: 0.04em;
   text-transform: uppercase;
   color: var(--ink-muted);
-  padding: 1px 6px;
+  padding: 1px 5px;
   border-radius: 999px;
   background: var(--surface-2);
 }
-.toc.toc--graph .graph-neighbor-name {
+.graph-info-overlay .graph-neighbor-name {
   flex: 1;
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
+}
+[data-theme="dark"] .graph-info-overlay {
+  background: color-mix(in srgb, var(--surface) 92%, transparent);
 }
 /* Fullscreen mode (Issue 4). The wrapper covers the viewport; the
    toolbar sits on top, the legend bottom-left, the rail-style info panel
@@ -1048,75 +1246,9 @@ hr {
   border: 1px solid var(--rule);
   border-radius: var(--radius);
 }
-/* Legacy in-canvas overlay panel — retained selectors for completeness
-   but the empty box is no longer emitted in markup (the rail owns it). */
-.graph-page .graph-info-panel {
-  position: absolute;
-  top: var(--space-4);
-  right: var(--space-4);
-  max-width: 320px;
-  padding: var(--space-4);
-  border: 1px solid var(--rule);
-  border-radius: var(--radius);
-  background: rgba(255, 255, 255, 0.78);
-  -webkit-backdrop-filter: blur(12px);
-  backdrop-filter: blur(12px);
-  box-shadow: 0 8px 32px rgba(20, 18, 15, 0.12);
-  opacity: 0;
-  transform: translateY(-4px);
-  pointer-events: none;
-  transition: opacity 200ms ease, transform 200ms ease;
-  z-index: 5;
-}
-.graph-page .graph-info-panel.is-visible {
-  opacity: 1;
-  transform: translateY(0);
-  pointer-events: auto;
-}
-.graph-page .graph-info-title {
-  margin: 0 0 6px 0;
-  font-size: 1.05rem;
-  font-family: var(--type-serif);
-  line-height: 1.3;
-  color: var(--ink);
-}
-.graph-page .graph-info-meta {
-  margin: 0 0 8px 0;
-  font-family: var(--type-mono);
-  font-size: 0.78rem;
-  color: var(--ink-muted);
-  display: flex;
-  flex-wrap: wrap;
-  align-items: center;
-  gap: 6px;
-}
-.graph-page .graph-info-badge {
-  display: inline-block;
-  padding: 1px 8px;
-  border-radius: 999px;
-  color: #fff;
-  font-size: 0.7rem;
-  letter-spacing: 0.04em;
-  text-transform: uppercase;
-}
-.graph-page .graph-info-degree { color: var(--ink-muted); }
-.graph-page .graph-info-desc {
-  margin: 0 0 10px 0;
-  font-family: var(--type-serif);
-  font-size: 0.9rem;
-  line-height: 1.45;
-  color: var(--ink);
-}
-.graph-page .graph-info-link {
-  display: inline-block;
-  font-family: var(--type-mono);
-  font-size: 0.82rem;
-  color: var(--accent);
-  text-decoration: none;
-  border-bottom: 1px solid var(--accent-soft);
-  transition: border-color 160ms ease;
-}
-.graph-page .graph-info-link:hover { border-color: var(--accent); }
+/* (Removed) Legacy in-canvas overlay panel scoped under .graph-page. The
+   focused-node overlay now lives at top-level inside .graph-canvas-wrapper
+   (selector ``.graph-info-overlay`` above) and supersedes those rules. */
 .graph-page .graph-tooltip {
   position: absolute;
   pointer-events: none;
@@ -1211,53 +1343,9 @@ hr {
   border-radius: 999px;
   white-space: nowrap;
 }
-/* Right-rail graph control panel — reuses ``aside.toc`` sticky CSS but
-   stacks vertical legend chips for the graph route. */
-.toc.toc--graph .graph-control-list {
-  display: flex;
-  flex-direction: column;
-  gap: 6px;
-  list-style: none;
-  padding: 0;
-  margin: 0 0 var(--space-3);
-}
-.toc.toc--graph .graph-control-chip {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  width: 100%;
-  padding: 6px 10px;
-  font-family: var(--type-mono);
-  font-size: 0.82rem;
-  color: var(--ink);
-  background: var(--surface);
-  border: 1px solid var(--rule);
-  border-radius: var(--radius);
-  cursor: pointer;
-  text-align: left;
-  transition: border-color 160ms ease, opacity 160ms ease;
-}
-.toc.toc--graph .graph-control-chip:hover {
-  border-color: var(--accent);
-}
-.toc.toc--graph .graph-control-chip.is-off {
-  opacity: 0.4;
-  background: var(--surface-2);
-}
-.toc.toc--graph .graph-control-chip .swatch {
-  width: 10px;
-  height: 10px;
-  border-radius: 999px;
-  flex-shrink: 0;
-}
-.toc.toc--graph .graph-control-chip .label {
-  flex: 1;
-  text-align: left;
-}
-.toc.toc--graph .graph-control-chip .count {
-  color: var(--ink-muted);
-  font-variant-numeric: tabular-nums;
-}
+/* (Removed) Right-rail graph control panel — the graph route no longer
+   ships a right rail (Issue 1). The floating ``.graph-info-overlay``
+   above is the single source of focused-node UI. */
 .graph-page .visually-hidden {
   position: absolute;
   width: 1px; height: 1px;
@@ -1266,10 +1354,6 @@ hr {
   clip: rect(0, 0, 0, 0);
   white-space: nowrap;
   border: 0;
-}
-[data-theme="dark"] .graph-page .graph-info-panel {
-  background: rgba(28, 27, 23, 0.78);
-  border-color: var(--rule);
 }
 [data-theme="dark"] .graph-page .graph-tooltip {
   background: var(--surface-2);
@@ -1570,6 +1654,8 @@ body {
   }
   [data-rail-open] .rail { transform: translateX(0); }
   [data-rail-open] body { overflow: hidden; }
+  /* Reveal the primary-nav block inside the drawer (Issue 3 mobile). */
+  .rail .rail-drawer-nav { display: block; }
 
   /* TOC becomes a bottom sheet revealed by .toc-toggle. */
   .toc-toggle { display: inline-flex; }
@@ -1620,25 +1706,16 @@ body {
   .ai-siblings { flex-direction: column; align-items: stretch; gap: var(--space-2); }
   .ai-siblings a { justify-content: center; padding: 10px 12px; }
 
-  /* Graph view — fit phones, stacked toolbar, bottom info panel.
-     The right-rail focused-node panel collapses into a bottom sheet
-     that slides up when ``.graph-canvas-wrapper.has-focus`` is set
-     (i.e. the user has pinned a node). Empty state stays in the rail. */
-  .graph-canvas-wrapper.has-focus .toc.toc--graph .graph-info-panel {
-    position: fixed;
-    left: 12px;
-    right: 12px;
-    bottom: calc(12px + env(safe-area-inset-bottom));
-    max-height: 50vh;
-    overflow-y: auto;
-    z-index: 40;
-    background: var(--surface);
-    border: 1px solid var(--rule);
-    border-radius: var(--radius);
-    padding: 14px;
-    box-shadow: 0 -8px 32px rgba(2, 6, 23, 0.18);
-    transform: translateY(0);
-    animation: graphInfoSheet 200ms ease-out;
+  /* Graph view — fit phones, stacked toolbar, full-width bottom overlay
+     (Issue 1). On mobile the floating overlay pins to the bottom of the
+     canvas wrapper and stretches edge-to-edge. */
+  .graph-info-overlay {
+    position: absolute;
+    left: 8px;
+    right: 8px;
+    bottom: 8px;
+    width: auto;
+    max-height: 45vh;
   }
   @keyframes graphInfoSheet {
     from { transform: translateY(20px); opacity: 0; }
@@ -1658,13 +1735,6 @@ body {
   }
   .graph-page .graph-search { width: 100%; }
   .graph-page .graph-search input { width: 100%; font-size: 16px; }
-  .graph-page .graph-info-panel {
-    top: auto;
-    right: var(--space-3);
-    left: var(--space-3);
-    bottom: calc(var(--space-3) + env(safe-area-inset-bottom));
-    max-width: none;
-  }
   .graph-page .graph-tooltip { display: none; }
 }
 
@@ -1689,6 +1759,7 @@ body {
   }
   [data-rail-open] .rail { transform: translateX(0); }
   [data-rail-open] body { overflow: hidden; }
+  .rail .rail-drawer-nav { display: block; }
 
   .toc-toggle { display: inline-flex; }
   .toc-rail {
@@ -1721,10 +1792,10 @@ body {
   .graph-page .graph-toolbar { flex-direction: column; align-items: stretch; }
   .graph-page .graph-toolbar .button { font-size: 16px; padding: 10px 12px; }
   .graph-page .graph-search input { width: 100%; font-size: 16px; }
-  .graph-page .graph-info-panel {
-    top: auto; right: var(--space-3); left: var(--space-3);
-    bottom: calc(var(--space-3) + env(safe-area-inset-bottom));
-    max-width: none;
+  .graph-info-overlay {
+    left: 8px; right: 8px; bottom: 8px;
+    width: auto;
+    max-height: 45vh;
   }
 }
 
@@ -1852,11 +1923,20 @@ body {
        to consume the gap when there's no TOC content. */
     grid-template-columns: var(--rail-w) minmax(0, 1fr) var(--toc-w);
   }
-  /* The graph route uses the same wide layout as index pages
-     (``main--wide``) — left rail visible, content column comfortably
-     wide but framed by the chrome, TOC slot reused for the graph
-     control panel. The previous bespoke graph layout (full-bleed
-     canvas, hidden rail) has been retired in favor of this layout. */
+  /* Issue 1 — graph route drops the right rail entirely. The canvas
+     consumes the column the TOC used to occupy. Left rail (doc tree)
+     stays visible. */
+  .shell--graph {
+    grid-template-columns: var(--rail-w) minmax(0, 1fr);
+  }
+  .main--graph {
+    /* Canvas stretches to whatever width the column gives it. */
+    max-width: min(100vw - 320px, 1800px);
+  }
+}
+
+@media (min-width: 1024px) and (max-width: 1279px) {
+  .main--graph { max-width: none; }
 }
 
 /* Ultra-wide (>= 1920 px): roomier rails, slightly wider content. */
@@ -1870,6 +1950,9 @@ body {
   }
   .main--wide {
     max-width: min(100vw - 360px, 1800px);
+  }
+  .main--graph {
+    max-width: min(100vw - 360px, 1900px);
   }
 }
 """

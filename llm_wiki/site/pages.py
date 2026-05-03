@@ -275,6 +275,11 @@ class SiteContext:
     # is constructed directly (tests / older callers); callers should use
     # :meth:`get_auto_linker` to materialise it lazily.
     auto_linker: Optional[AutoLinker] = None
+    # Obsidian-style folder tree of every project-relative source path the
+    # graph touches. Recursive nested-dict shape — see
+    # :func:`_build_doc_tree` for the layout. Consumed by
+    # :func:`components.doc_tree` from the left rail.
+    doc_tree: Mapping[str, object] = field(default_factory=dict)
 
     def get_auto_linker(self) -> AutoLinker:
         """Return the cached :class:`AutoLinker`, building it lazily.
@@ -383,6 +388,10 @@ class SiteContext:
         # simply don't appear on any timeline day page.
         activity_by_day, sources_by_day = _activity_by_day(graph)
 
+        # Obsidian-style folder tree of every source path the graph
+        # touches. Built once here and shared by every page render.
+        doc_tree = _build_doc_tree(graph, project_root)
+
         ctx = cls(
             site_title=site_title,
             graph=graph,
@@ -403,6 +412,7 @@ class SiteContext:
             activity_by_day=activity_by_day,
             sources_by_day=sources_by_day,
             project_root=project_root,
+            doc_tree=doc_tree,
         )
         # Build the auto-link table eagerly — it's a one-time scan over
         # the graph and amortises over every detail-page render. Stash via
@@ -567,6 +577,189 @@ def _activity_weeks(graph: ResearchGraph, weeks: int) -> List[List[int]]:
 
 
 # ---------------------------------------------------------------------------
+# Doc-tree builder (Issue 3)
+# ---------------------------------------------------------------------------
+
+
+_DAILY_DATE_RE = re.compile(r"^\d{4}-\d{2}-\d{2}$")
+
+
+def _build_doc_tree(
+    graph: ResearchGraph,
+    project_root: Optional[Path],
+) -> Dict[str, object]:
+    """Walk every node's ``source_path`` and assemble an Obsidian-style tree.
+
+    Returns a dict keyed by top-level folder name (``data``, ``docs``, …)
+    where each value is a folder dict. Folder dicts hold:
+
+      ``name``           — the directory's display name
+      ``children``       — ``{child_name: child_dict}``
+      ``count``          — total number of leaves under the folder
+      ``initially_open`` — ``True`` for the chain that contains the most
+                           recent ``data/research/daily/<latest>/`` so the
+                           default page-load reveals what's new
+
+    Leaves carry ``leaf=True``, ``name``, ``path`` (project-relative,
+    forward-slash-separated), and ``href`` (the ``raw/<safe>.html`` link
+    when the file exists on disk, else empty string).
+
+    The tree is deterministic — children are sorted alphabetically by
+    :func:`components._doc_tree_child_sort_key` (date-folder names sort
+    descending) — so two consecutive compiles emit byte-identical HTML.
+    """
+    root: Dict[str, object] = {}
+
+    seen_paths: set[str] = set()
+    for node in graph.nodes:
+        sp = node.source_path or ""
+        if not sp or sp in seen_paths:
+            continue
+        seen_paths.add(sp)
+
+    # Build the tree from the deduplicated set so the order of insertion
+    # doesn't matter (the per-folder children dict is sorted at render
+    # time, so insertion order is irrelevant for byte-idempotence).
+    for sp in seen_paths:
+        rel = relativize_source_path(sp, project_root) or sp
+        if not rel:
+            continue
+        # Defensive: ignore paths that are still absolute after
+        # relativisation (a stale graph entry from outside the project
+        # root). They have no raw view to link to.
+        if rel.startswith("/") or (len(rel) > 1 and rel[1] == ":"):
+            continue
+        rel = rel.replace("\\", "/").lstrip("./")
+        parts = [p for p in rel.split("/") if p]
+        if not parts:
+            continue
+        # Build raw href when the file exists on disk; otherwise leave the
+        # leaf as a plain label (no link). Depth=0 here — callers re-prefix
+        # at render time via ``doc_tree(prefix=...)``.
+        href = raw_href(project_root, sp, depth=0) or ""
+
+        cursor = root
+        for idx, part in enumerate(parts):
+            is_leaf = idx == len(parts) - 1
+            if is_leaf:
+                cursor[part] = {
+                    "leaf": True,
+                    "name": part,
+                    "path": rel,
+                    "href": href,
+                }
+            else:
+                folder = cursor.get(part)
+                if not isinstance(folder, dict) or folder.get("leaf"):
+                    folder = {
+                        "name": part,
+                        "children": {},
+                        "count": 0,
+                    }
+                    cursor[part] = folder
+                children = folder.get("children")
+                if not isinstance(children, dict):
+                    children = {}
+                    folder["children"] = children
+                cursor = children
+
+    # Compute aggregate leaf counts per folder.
+    def _count(folder: Dict[str, object]) -> int:
+        if folder.get("leaf"):
+            return 1
+        total = 0
+        children = folder.get("children") or {}
+        if isinstance(children, dict):
+            for child in children.values():
+                if isinstance(child, dict):
+                    total += _count(child)
+        folder["count"] = total
+        return total
+
+    for top in root.values():
+        if isinstance(top, dict):
+            _count(top)
+
+    # Open the chain leading to the most recent ``data/research/daily/<latest>``
+    # folder so the user lands on something useful instead of a blank rail.
+    _open_latest_daily(root)
+
+    return root
+
+
+def _open_latest_daily(root: Dict[str, object]) -> None:
+    """Mark the chain ``data/research/daily/<latest>`` as ``initially_open``.
+
+    The "latest" daily folder is the largest ``YYYY-MM-DD``-style child of
+    ``data/research/daily``. If the chain doesn't exist (synthetic graph,
+    test fixture) we no-op silently — the rail just renders fully collapsed.
+    """
+    cursor: object = root
+    for segment in ("data", "research", "daily"):
+        if not isinstance(cursor, dict):
+            return
+        nxt = cursor.get(segment)
+        if not isinstance(nxt, dict) or nxt.get("leaf"):
+            # ``data`` is a top-level folder dict; intermediate folders are
+            # also dicts. Any deviation means the chain doesn't exist.
+            if segment == "data":
+                return
+            return
+        nxt["initially_open"] = True
+        children = nxt.get("children")
+        if not isinstance(children, dict):
+            return
+        cursor = children
+
+    if not isinstance(cursor, dict):
+        return
+    # Pick the alphabetically-largest YYYY-MM-DD child (= most recent).
+    candidates = [k for k in cursor.keys() if _DAILY_DATE_RE.match(k)]
+    if not candidates:
+        return
+    latest = max(candidates)
+    folder = cursor.get(latest)
+    if isinstance(folder, dict):
+        folder["initially_open"] = True
+
+
+def _render_doc_tree_html(
+    ctx: "SiteContext",
+    *,
+    depth: int,
+    current_source_path: str = "",
+) -> str:
+    """Render the doc tree to HTML for the page-shell rail.
+
+    Wraps :func:`components.doc_tree` over each top-level folder so the
+    rail looks like
+        data/   docs/   …
+    rather than a single super-root. The renderer handles the ``../``
+    prefixing for raw-view links via ``prefix``.
+    """
+    from .components import doc_tree as _doc_tree_render
+
+    tree = ctx.doc_tree or {}
+    if not tree:
+        return ""
+    prefix = ("../" * max(depth, 0))
+    parts: list[str] = []
+    for top_name in sorted(tree.keys()):
+        folder = tree[top_name]
+        if not isinstance(folder, dict):
+            continue
+        parts.append(
+            _doc_tree_render(
+                folder,
+                depth=0,
+                current_source_path=current_source_path,
+                prefix=prefix,
+            )
+        )
+    return "".join(parts)
+
+
+# ---------------------------------------------------------------------------
 # Markdown body rendering
 # ---------------------------------------------------------------------------
 #
@@ -701,6 +894,25 @@ def _nav_counts(ctx: SiteContext) -> Dict[str, int]:
         )
         for kind in ROUTE_FOR_KIND
     }
+
+
+def _doc_tree_for(
+    ctx: SiteContext,
+    *,
+    depth: int,
+    current_source_path: str = "",
+) -> str:
+    """Convenience helper — render the left-rail doc tree for this page.
+
+    Forwards through to :func:`_render_doc_tree_html`. Detail page
+    renderers pass the page's own ``source_path`` so the matching leaf
+    picks up ``is-active``; index/listing routes leave it empty.
+    """
+    return _render_doc_tree_html(
+        ctx,
+        depth=depth,
+        current_source_path=current_source_path or "",
+    )
 
 
 def _reading_time_minutes(body: str) -> int:
@@ -1041,6 +1253,11 @@ def _detail_page(
 <section id="provenance" class="provenance"><h2>Source provenance</h2>{provenance}</section>
 <section id="activity" class="activity"><h2>Activity</h2>{sparkline}</section>
 """
+    current_source_path = (
+        relativize_source_path(str(src_value), ctx.project_root)
+        if src_value
+        else ""
+    ) or str(src_value or "")
     return page_shell(
         title=title,
         head="",
@@ -1052,6 +1269,7 @@ def _detail_page(
         toc_html=toc_html,
         breadcrumbs_html=bc,
         ai_siblings_html=siblings_html,
+        doc_tree_html=_doc_tree_for(ctx, depth=1, current_source_path=current_source_path),
     )
 
 
@@ -1223,6 +1441,7 @@ def _index_page(
         counts=_nav_counts(ctx),
         breadcrumbs_html=bc,
         main_variant="wide",
+        doc_tree_html=_doc_tree_for(ctx, depth=1),
     )
 
 
@@ -1278,7 +1497,7 @@ def render_home(ctx: SiteContext) -> str:
         card(title="Topics", href="topics/index.html", kind_label="library", description="Research fields and approach families.", footer=f"{counts.get('topics', 0)} pages"),
         card(title="Syntheses", href="syntheses/index.html", kind_label="library", description="Higher-order synthesis pages.", footer=f"{counts.get('syntheses', 0)} pages"),
         card(title="Open questions", href="questions/index.html", kind_label="library", description="Open research questions.", footer=f"{counts.get('questions', 0)} pages"),
-        card(title="Graph view", href="graph/index.html", kind_label="tools", description="Interactive sigma.js graph."),
+        card(title="Graph", href="graph/index.html", kind_label="tools", description="Interactive 3D knowledge graph."),
     ]) + "</section>"
 
     # Home heatmap: anchor cells to ``timeline/<YYYY-MM-DD>.html`` (no
@@ -1323,6 +1542,7 @@ def render_home(ctx: SiteContext) -> str:
         site_title=ctx.site_title,
         counts=counts,
         main_variant="wide",
+        doc_tree_html=_doc_tree_for(ctx, depth=0),
     )
 
 
@@ -1646,6 +1866,7 @@ def render_timeline(ctx: SiteContext) -> str:
         counts=_nav_counts(ctx),
         breadcrumbs_html=bc,
         main_variant="wide",
+        doc_tree_html=_doc_tree_for(ctx, depth=1),
     )
 
 
@@ -1756,6 +1977,7 @@ def render_timeline_day(ctx: SiteContext, date_str: str) -> str:
             site_title=ctx.site_title,
             counts=_nav_counts(ctx),
             breadcrumbs_html=bc,
+            doc_tree_html=_doc_tree_for(ctx, depth=1),
         )
 
     nodes_today = [
@@ -1865,6 +2087,7 @@ def render_timeline_day(ctx: SiteContext, date_str: str) -> str:
         site_title=ctx.site_title,
         counts=_nav_counts(ctx),
         breadcrumbs_html=bc,
+        doc_tree_html=_doc_tree_for(ctx, depth=1),
     )
 
 
@@ -1979,29 +2202,27 @@ def render_graph_view(ctx: SiteContext) -> str:
         for group, count in sorted(type_counts.items(), key=lambda kv: kv[0])
     )
 
-    # Right-rail focused-node info panel — server-renders only the empty
-    # state. The JS bundle (showInfoPanel) populates ``#graph-info-content``
-    # + ``#graph-info-neighbors`` when the user clicks a node and toggles
-    # the visibility of ``#graph-info-empty`` accordingly. Stable IDs are
-    # part of the JS contract; do not rename without updating ``js.py``.
-    graph_toc_html = (
-        '<aside class="toc toc--graph" role="doc-toc" aria-label="Focused node">'
+    # Floating overlay anchored inside the canvas wrapper (Issue 1). The
+    # right rail is gone on the graph route — the canvas now spans the
+    # full content column width. Empty state collapses to a single
+    # "Selected node" pill; the JS bundle expands it when the user clicks
+    # a node. Stable IDs (graph-info-panel / -empty / -content /
+    # -neighbors) are part of the JS contract.
+    graph_overlay_html = (
+        '<aside class="graph-info-overlay" aria-label="Focused node">'
         '<div class="graph-info-panel" id="graph-info-panel" aria-live="polite">'
         '<div class="graph-info-empty" id="graph-info-empty">'
-        '<p class="muted small">Click a node in the graph to inspect it.</p>'
-        '<p class="muted small">Hover a neighbor here to highlight it; click to focus.</p>'
+        '<p class="muted small"><strong>Selected node</strong></p>'
+        '<p class="muted small">Click a node in the graph to inspect it. '
+        'Hover a neighbor to highlight it; click to focus.</p>'
         '</div>'
         '<div class="graph-info-content" id="graph-info-content" hidden></div>'
         '<div class="graph-info-neighbors" id="graph-info-neighbors" hidden></div>'
         '</div>'
-        '<h2>Shortcuts</h2>'
-        '<p class="muted small"><kbd>/</kbd> search · <kbd>f</kbd> fit · '
-        '<kbd>r</kbd> reset · <kbd>o</kbd> orbit · <kbd>2</kbd>/<kbd>3</kbd> mode · '
-        '<kbd>Esc</kbd> unfocus</p>'
         '</aside>'
     )
 
-    bc = _build_breadcrumbs([("Home", "index.html"), ("Graph view", "")], depth=1)
+    bc = _build_breadcrumbs([("Home", "index.html"), ("Graph", "")], depth=1)
 
     # CDN-loaded ES modules. We pin specific versions and supply integrity
     # hashes so a network MITM can't swap the bundle. If either fetch fails
@@ -2077,12 +2298,13 @@ def render_graph_view(ctx: SiteContext) -> str:
       <div class="graph-tooltip" id="graph-tooltip" role="status" aria-live="polite"></div>
       <div class="graph-error-banner" id="graph-error-banner" role="alert"></div>
     </div>
+    {graph_overlay_html}
     <div class="graph-legend" id="graph-legend" aria-label="Type legend">{legend_items}</div>
   </div>
-  <p class="graph-help muted">Showing {len(nodes_payload)} of {len(nodes_payload)} wiki nodes · {len(links_payload)} links</p>
+  <p class="graph-help muted">Showing {len(nodes_payload)} of {len(nodes_payload)} wiki nodes · {len(links_payload)} links · <kbd>/</kbd> search · <kbd>f</kbd> fit · <kbd>r</kbd> reset · <kbd>o</kbd> orbit · <kbd>2</kbd>/<kbd>3</kbd> mode · <kbd>Esc</kbd> unfocus</p>
 </section>"""
     return page_shell(
-        title="Graph view",
+        title="Graph",
         head=head,
         body=body,
         depth=1,
@@ -2090,8 +2312,9 @@ def render_graph_view(ctx: SiteContext) -> str:
         site_title=ctx.site_title,
         counts=_nav_counts(ctx),
         breadcrumbs_html=bc,
-        toc_html=graph_toc_html,
-        main_variant="wide",
+        main_variant="graph",
+        omit_toc=True,
+        doc_tree_html=_doc_tree_for(ctx, depth=1),
     )
 
 
@@ -2134,6 +2357,7 @@ def render_about(ctx: SiteContext) -> str:
         site_title=ctx.site_title,
         counts=_nav_counts(ctx),
         breadcrumbs_html=bc,
+        doc_tree_html=_doc_tree_for(ctx, depth=0),
     )
 
 

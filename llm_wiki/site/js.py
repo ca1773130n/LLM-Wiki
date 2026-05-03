@@ -17,7 +17,9 @@ Module-level string constants compose into the bundle that gets written to
   click-outside closes. Recents persisted to ``localStorage``.
 - :data:`JS_GRAPH` — interactive 3D force-directed graph view powered by
   ``3d-force-graph`` (with ``three`` dynamically imported from esm.sh as a
-  peer dep). Cursor-anchored wheel zoom (raycast through cursor → world).
+  peer dep). Library-default OrbitControls zoom (Issue 2 — three rounds
+  of bespoke cursor-anchored zoom were reverted because every variant
+  stuttered or inverted direction; the library zoom feels right).
   Per-node ``THREE.Sprite`` labels for high-degree nodes; canvas labels in
   2D. Edge labels via ``linkThreeObject`` / ``linkCanvasObject``. Edge
   hover via ``linkHoverPrecision`` + ``onLinkHover`` populates the
@@ -1503,91 +1505,22 @@ JS_GRAPH = r"""
       sprite.material.transparent = true;
     }
 
-    // ---- Cursor-anchored wheel zoom (Issue 3) ---------------------------
-    // We OWN the wheel event exclusively: ``OrbitControls.enableZoom`` is
-    // disabled so the library never sees it, and our handler raycasts the
-    // cursor onto the plane through ``controls.target`` (perpendicular to
-    // the camera→target axis) to find the world point under the cursor.
-    // Camera + target both move toward that point by the same factor, so
-    // the cursor stays glued to the same world coord across the zoom.
-    function installCursorWheelZoom(inst){
+    // ---- Library-default zoom (Issue 2) ---------------------------------
+    // Three rounds of bespoke cursor-anchored zoom shipped, all stuttered
+    // or inverted direction. Reverted to plain OrbitControls zoom: the
+    // library's own wheel handler aims at ``controls.target`` and feels
+    // monotonic + smooth with damping enabled. The wheel listener +
+    // raycaster code is GONE — do not reintroduce it without a working
+    // physical UX trial.
+    function installLibraryZoom(inst){
       var controls = inst && inst.controls && inst.controls();
       if (!controls) return;
       try {
+        controls.enableZoom = true;
+        controls.zoomSpeed = 0.8;       // subtle; pairs well with damping
         controls.enableDamping = true;
         controls.dampingFactor = 0.08;
-        controls.enableZoom = false;     // we own the wheel now
       } catch (_) {}
-      try {
-        // Disable the library's zoom-interaction proxy too so the two
-        // don't try to handle the same wheel event.
-        if (inst.enableZoomInteraction) inst.enableZoomInteraction(false);
-      } catch (_) {}
-      if (!THREE) return;
-      var renderer = inst.renderer && inst.renderer();
-      var camera = inst.camera && inst.camera();
-      if (!renderer || !camera) return;
-      var dom = renderer.domElement;
-      if (!dom) return;
-      var raycaster = new THREE.Raycaster();
-      var mouseNDC = new THREE.Vector2();
-      var plane = new THREE.Plane();
-      var intersectionPoint = new THREE.Vector3();
-      var camDir = new THREE.Vector3();
-      dom.addEventListener('wheel', function(event){
-        if (mode !== '3d') return;
-        // Ctrl-wheel (macOS trackpad pinch) → fall back to library: do not
-        // intercept. We re-enable controls.zoom transiently and let the
-        // event propagate by NOT calling preventDefault.
-        if (event.ctrlKey) {
-          try { controls.enableZoom = true; if (controls.update) controls.update(); } catch (_) {}
-          return;
-        }
-        event.preventDefault();
-        event.stopPropagation();
-        var rect = dom.getBoundingClientRect();
-        mouseNDC.x = ((event.clientX - rect.left) / rect.width) * 2 - 1;
-        mouseNDC.y = -((event.clientY - rect.top) / rect.height) * 2 + 1;
-        camera.getWorldDirection(camDir);
-        plane.setFromNormalAndCoplanarPoint(camDir, controls.target);
-        raycaster.setFromCamera(mouseNDC, camera);
-        var hit = null;
-        try { hit = raycaster.ray.intersectPlane(plane, intersectionPoint); } catch (_) {}
-        if (!hit) return;
-        // Zoom factor: 1 - delta * 0.0015, clamped to [0.5, 1.5] per event
-        // so a single trackpad flick can't teleport the camera.
-        var factor = 1 - event.deltaY * 0.0015;
-        if (factor < 0.5) factor = 0.5;
-        if (factor > 1.5) factor = 1.5;
-        // Move camera and target toward the cursor by the same factor:
-        //   newPos = cursor + (camera.position - cursor) * f
-        //   newTarget = cursor + (target - cursor) * f
-        var cx = intersectionPoint.x, cy = intersectionPoint.y, cz = intersectionPoint.z;
-        camera.position.x = cx + (camera.position.x - cx) * factor;
-        camera.position.y = cy + (camera.position.y - cy) * factor;
-        camera.position.z = cz + (camera.position.z - cz) * factor;
-        controls.target.x = cx + (controls.target.x - cx) * factor;
-        controls.target.y = cy + (controls.target.y - cy) * factor;
-        controls.target.z = cz + (controls.target.z - cz) * factor;
-        try { if (controls.update) controls.update(); } catch (_) {}
-      }, { passive: false });
-      // Also listen to pointermove so future cursor-anchored hooks can
-      // read the intersection point cheaply via raycaster.setFromCamera.
-      var pending = null;
-      dom.addEventListener('pointermove', function(e){
-        if (mode !== '3d') return;
-        if (pending) return;
-        pending = window.requestAnimationFrame(function(){
-          pending = null;
-          var r = dom.getBoundingClientRect();
-          mouseNDC.x = ((e.clientX - r.left) / r.width) * 2 - 1;
-          mouseNDC.y = -((e.clientY - r.top) / r.height) * 2 + 1;
-          raycaster.setFromCamera(mouseNDC, camera);
-          if (raycaster.ray && raycaster.ray.intersectPlane) {
-            try { raycaster.ray.intersectPlane(plane, intersectionPoint); } catch (_) {}
-          }
-        });
-      }, { passive: true });
     }
 
     // ---- Fit-to-view via bounding sphere over current node positions ----
@@ -2020,7 +1953,7 @@ JS_GRAPH = r"""
       sizeGraphToContainer(inst);
       installGraphResize(inst);
       if (mode === '3d') {
-        installCursorWheelZoom(inst);
+        installLibraryZoom(inst);
         // Start the camera at a known distance so the first frame isn't
         // a wild zoom-out from the origin. The single-shot scheduleCenteredFit
         // will refine the framing once the simulation settles.
@@ -2522,17 +2455,88 @@ JS_SUBTYPE_FILTER = r"""
 """
 
 
+# ---------------------------------------------------------------------------
+# Doc-tree filter (Issue 3) — debounced search-input filter that hides
+# non-matching ``.doc-tree-leaf`` rows and auto-expands ``<details>``
+# folders that contain matches. Pure DOM mutations; safe with no JS too
+# (the user can still expand folders by clicking and the leaves stay
+# clickable links).
+# ---------------------------------------------------------------------------
+JS_DOC_TREE = r"""
+(function(){
+  function init(){
+    var input = document.querySelector('[data-doc-tree-search]');
+    if (!input) return;
+    var tree = document.querySelector('.doc-tree');
+    if (!tree) return;
+    var leaves = tree.querySelectorAll('.doc-tree-leaf');
+    var folders = tree.querySelectorAll('details.doc-tree-folder');
+    // Stash the original ``open`` state so we can restore on clear.
+    var initialOpen = [];
+    for (var i = 0; i < folders.length; i++) {
+      initialOpen.push(folders[i].open);
+    }
+    var t = null;
+    function apply(query){
+      query = (query || '').trim().toLowerCase();
+      // 1) Show every leaf when the query is empty; restore folder state.
+      if (!query){
+        for (var i = 0; i < leaves.length; i++) leaves[i].hidden = false;
+        for (var j = 0; j < folders.length; j++) folders[j].open = initialOpen[j];
+        return;
+      }
+      // 2) Mark each leaf as visible/hidden based on substring match
+      //    against its data-doc-path attribute (or visible name).
+      var matchedFolders = new Set();
+      for (var k = 0; k < leaves.length; k++) {
+        var leaf = leaves[k];
+        var path = (leaf.getAttribute('data-doc-path') || '').toLowerCase();
+        var name = (leaf.textContent || '').toLowerCase();
+        var hit = path.indexOf(query) !== -1 || name.indexOf(query) !== -1;
+        leaf.hidden = !hit;
+        if (hit) {
+          // Walk up to every <details> ancestor so we can force them open.
+          var parent = leaf.parentElement;
+          while (parent && parent !== tree) {
+            if (parent.tagName === 'DETAILS') matchedFolders.add(parent);
+            parent = parent.parentElement;
+          }
+        }
+      }
+      // 3) Open every folder that has a match; collapse the rest.
+      for (var f = 0; f < folders.length; f++) {
+        folders[f].open = matchedFolders.has(folders[f]);
+      }
+    }
+    input.addEventListener('input', function(){
+      if (t) window.clearTimeout(t);
+      t = window.setTimeout(function(){ apply(input.value); }, 80);
+    });
+    input.addEventListener('keydown', function(e){
+      if (e.key === 'Escape') { input.value = ''; apply(''); input.blur(); }
+    });
+  }
+  if (document.readyState === 'loading'){
+    document.addEventListener('DOMContentLoaded', init);
+  } else {
+    init();
+  }
+})();
+"""
+
+
 # ``JS_BUNDLE_BASE`` is what every page loads (theme toggle, rail/TOC drawer,
-# search palette, subtype chip filter). ``JS_BUNDLE_GRAPH`` is the heavier
-# graph renderer that we only ship on the graph route — see
-# ``llm_wiki.site.__init__`` (writes both ``assets/app.js`` and
-# ``assets/graph.js``) and ``render_graph_view`` in ``pages.py`` (injects the
-# second ``<script defer>`` only on the graph page).
+# search palette, subtype chip filter, doc-tree filter, TOC scrollspy).
+# ``JS_BUNDLE_GRAPH`` is the heavier graph renderer that we only ship on the
+# graph route — see ``llm_wiki.site.__init__`` (writes both ``assets/app.js``
+# and ``assets/graph.js``) and ``render_graph_view`` in ``pages.py`` (injects
+# the second ``<script defer>`` only on the graph page).
 JS_BUNDLE_BASE = (
     JS_THEME_TOGGLE
     + "\n" + JS_RAIL_DRAWER
     + "\n" + JS_SEARCH_PALETTE
     + "\n" + JS_SUBTYPE_FILTER
+    + "\n" + JS_DOC_TREE
     + "\n" + JS_TOC_SCROLLSPY
 )
 
@@ -2551,6 +2555,7 @@ __all__ = [
     "JS_RAIL_DRAWER",
     "JS_SEARCH_PALETTE",
     "JS_SUBTYPE_FILTER",
+    "JS_DOC_TREE",
     "JS_TOC_SCROLLSPY",
     "JS_GRAPH",
     "JS_BUNDLE",

@@ -427,7 +427,8 @@ def test_render_graph_view_includes_payload_script(site_ctx: SiteContext) -> Non
 
     out = render_graph_view(site_ctx)
     _assert_doc_shape(out)
-    _assert_breadcrumb_contains(out, "Graph view")
+    # Issue 4 — the user-visible label is "Graph", not "Graph view".
+    _assert_breadcrumb_contains(out, "Graph")
     # Graph payload now lives in graph/payload.json (fetched by graph.js) so
     # the HTML does NOT inline the payload — the perf budget caps the page at
     # 50 KB. The fetch hint still points at payload.json.
@@ -962,35 +963,35 @@ def test_timeline_day_uses_canonical_article_shell(site_ctx: SiteContext) -> Non
     assert "main--wide" not in out
 
 
-def test_render_graph_view_uses_wide_layout_with_rail(
+def test_render_graph_view_drops_right_rail_uses_floating_overlay(
     site_ctx: SiteContext,
 ) -> None:
-    """Graph view shares the wide content layout with index pages — left
-    rail visible, content column comfortably wide (not full-bleed). The
-    right TOC slot now renders a focused-node info panel (Issue 1) — the
-    redundant type-chip control list was removed because the legend below
-    the canvas already exposes the same information.
+    """Issue 1 — the graph route no longer ships a right rail. The
+    focused-node info panel folds into a floating overlay anchored at
+    the bottom-right of the canvas wrapper. The canvas spans the full
+    content column width via the new ``main--graph`` shell modifier.
     """
     out = render_graph_view(site_ctx)
-    # Wide variant — same as the concepts index.
-    assert 'class="main main--wide"' in out, (
-        "graph route must use the wide content layout, not a bespoke graph variant"
-    )
-    # NO main--graph modifier (the previous design's full-bleed branch).
-    assert "main--graph" not in out
-    # Left rail still rendered (the rail is part of page_shell, not opt-in).
+    # main--graph modifier replaces main--wide; right rail is gone.
+    assert 'class="main main--graph"' in out
+    assert 'class="shell shell--graph"' in out
+    # Right rail markup is suppressed entirely (no aside.toc, no
+    # aside.toc-rail). The overlay sits inside the canvas wrapper.
+    assert '<aside class="toc"' not in out
+    assert '<aside class="toc-rail"' not in out
+    assert "toc toc--graph" not in out
+    # Left rail (doc-tree explorer) stays — the rail is part of page_shell.
     assert '<aside class="rail"' in out
-    # Right rail is the focused-node info panel (toc--graph modifier).
-    assert "toc toc--graph" in out
-    # Issue 1 — the JS contract expects these stable IDs in the rail.
+    # Floating focused-node overlay carries the JS-contracted IDs.
+    assert 'class="graph-info-overlay"' in out
     assert 'id="graph-info-panel"' in out
     assert 'id="graph-info-empty"' in out
     assert 'id="graph-info-content"' in out
     assert 'id="graph-info-neighbors"' in out
-    # Empty state copy is server-rendered so a no-JS reader still sees it.
+    # Empty state collapses to a "Selected node" pill so it doesn't
+    # dominate the canvas when nothing's focused.
+    assert "Selected node" in out
     assert "Click a node" in out
-    # The redundant type-chip list is no longer in the rail.
-    assert "data-graph-control-group" not in out
     # Canvas wrapper carries the .graph-canvas class with CSS-controlled
     # dimensions (clamp(560px, 70vh, 880px) on desktop).
     assert '<div class="graph-canvas"' in out

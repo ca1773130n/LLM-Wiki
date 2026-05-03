@@ -184,32 +184,83 @@ def test_shell_grid_uses_align_items_start_for_sticky():
     assert "align-items: start" in CSS
 
 
-def test_no_main_graph_full_bleed_modifier():
-    """Bug 2 — the previous polish round added a ``main--graph`` modifier
-    that made the canvas ``width: 100vw`` full-bleed and hid the rail.
-    The graph route now uses ``main--wide`` so the rail stays visible
-    and the canvas lives inside the wide content column."""
-    assert "main--graph" not in CSS, (
-        "the graph-only modifier was retired — the route uses main--wide"
+def test_main_graph_modifier_keeps_left_rail_visible():
+    """Issue 1 — ``main--graph`` is back, but with new semantics: it
+    drops the right rail (giving the canvas more width) WITHOUT hiding
+    the left rail or going full-bleed. The canvas stays inside the
+    content column; the doc-tree rail stays visible."""
+    assert ".main--graph" in CSS, "graph route uses the main--graph modifier"
+    assert ".shell--graph" in CSS
+    # The new shell--graph grid drops the right TOC column but keeps
+    # the rail column.
+    import re as _re
+    block = _re.search(
+        r"\.shell--graph\s*\{([^}]*)\}", CSS,
     )
-    assert "shell--graph" not in CSS
+    assert block is not None, "shell--graph rule missing"
+    assert "var(--rail-w)" in block.group(1)
+    # Two columns, not three: rail + main, no toc.
+    assert "var(--toc-w)" not in block.group(1)
 
 
-def test_graph_info_panel_in_right_rail_clamps_description():
-    """Issue 1 — the right-rail focused-node panel is the canonical info
-    surface (not the in-canvas overlay). The description clamps to ~6 lines
-    and the title wraps with ``overflow-wrap: anywhere`` so a long node
-    name doesn't blow out the rail."""
-    assert ".toc.toc--graph .graph-info-panel" in CSS
-    assert ".toc.toc--graph .graph-info-title" in CSS
-    assert ".toc.toc--graph .graph-info-desc" in CSS
+def test_graph_info_overlay_floats_inside_canvas_wrapper():
+    """Issue 1 — the focused-node panel folds into a floating overlay
+    anchored at the bottom-right of the canvas wrapper. Accent border,
+    surface background, slight shadow, with a description clamp that
+    keeps the overlay from blowing out vertically."""
+    assert ".graph-info-overlay" in CSS
+    assert ".graph-info-overlay .graph-info-panel" in CSS
+    assert ".graph-info-overlay .graph-info-title" in CSS
+    assert ".graph-info-overlay .graph-info-desc" in CSS
     # 6-line clamp on the description block.
     assert "-webkit-line-clamp: 6" in CSS
     # Title wrapping for long node names.
     assert "overflow-wrap: anywhere" in CSS
     # Neighbor list rows for the JS-populated section.
-    assert ".graph-neighbor-row" in CSS
-    assert ".graph-neighbor-list" in CSS
+    assert ".graph-info-overlay .graph-neighbor-row" in CSS
+    assert ".graph-info-overlay .graph-neighbor-list" in CSS
+    # The bottom-right anchoring + size clamp comes from the desktop rule.
+    import re as _re
+    block = _re.search(
+        r"\.graph-info-overlay\s*\{([^}]*)\}", CSS,
+    )
+    assert block is not None
+    body = block.group(1)
+    assert "position: absolute" in body
+    assert "right: 16px" in body and "bottom: 16px" in body
+    assert "clamp(280px, 26vw, 360px)" in body
+    assert "max-height: 60vh" in body
+    # Accent border ties it to the focused-node visual language.
+    assert "border-left: 3px solid var(--accent)" in body
+
+
+def test_topbar_nav_active_uses_accent_with_bottom_border():
+    """Issue 3 — topbar primary nav active state uses the accent color
+    with a 2 px bottom border so it reads as a tab bar, not a chip."""
+    assert ".topbar nav a.active" in CSS
+    assert "border-bottom: 2px solid transparent" in CSS
+    # The active class swaps the bottom-border color.
+    assert "border-bottom-color: var(--accent)" in CSS
+    # Counts render in a small bracketed token next to the label.
+    assert ".topnav-count" in CSS
+
+
+def test_doc_tree_styles_present():
+    """Issue 3 — Obsidian-style file-explorer styles for the left rail."""
+    assert ".doc-tree" in CSS
+    assert ".doc-tree-folder" in CSS
+    assert ".doc-tree-leaf" in CSS
+    assert ".doc-tree-leaf.is-active" in CSS
+    assert ".doc-tree-search" in CSS
+    # Monospace 12 px font for the tree.
+    assert "font-size: 12px" in CSS
+    # The expand arrow rotates when <details> is open.
+    assert "details[open] > .doc-tree-folder-summary::before" in CSS
+
+
+def test_doc_tree_extension_pills_styled():
+    """Per-extension pills (M / J / P) render as a small badge."""
+    assert ".doc-tree-pill" in CSS
 
 
 def test_graph_fullscreen_class_styles_present():

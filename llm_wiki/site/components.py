@@ -49,8 +49,27 @@ _RAIL_LIBRARY: tuple[_RailEntry, ...] = (
 )
 
 _RAIL_TOOLS: tuple[_RailEntry, ...] = (
-    _RailEntry("graph", "Graph view", "graph/index.html"),
+    _RailEntry("graph", "Graph", "graph/index.html"),
     _RailEntry("about", "About / schema", "about.html"),
+)
+
+
+# Top-bar primary nav (Issue 3) — horizontal nav next to the brand. Order
+# matches the prior left-rail order: Home, then the library kinds, then
+# tools (Graph / About). Active route is highlighted with the accent +
+# 2 px bottom border via CSS.
+_TOPNAV: tuple[_RailEntry, ...] = (
+    _RailEntry("home", "Home", "index.html"),
+    _RailEntry("sources", "Sources", "sources/index.html"),
+    _RailEntry("concepts", "Concepts", "concepts/index.html"),
+    _RailEntry("entities", "Entities", "entities/index.html"),
+    _RailEntry("papers", "Papers", "papers/index.html"),
+    _RailEntry("repos", "Repos", "repos/index.html"),
+    _RailEntry("topics", "Topics", "topics/index.html"),
+    _RailEntry("syntheses", "Syntheses", "syntheses/index.html"),
+    _RailEntry("questions", "Questions", "questions/index.html"),
+    _RailEntry("graph", "Graph", "graph/index.html"),
+    _RailEntry("about", "About", "about.html"),
 )
 
 
@@ -564,37 +583,206 @@ def toc(headings: list[tuple[int, str, str]]) -> str:
 
 
 # ---------------------------------------------------------------------------
+# Doc tree (Issue 3) — Obsidian-style file explorer rendered into the left
+# rail. The renderer is recursive: ``node`` is one of two shapes:
+#
+#   {"name": "data", "children": {<name>: <child node>, ...}, "count": int}
+#   {"name": "digest.md", "leaf": True, "path": "data/.../digest.md",
+#    "href": "raw/<safe>.html"}
+#
+# ``current_source_path`` highlights the leaf whose ``path`` matches it.
+# Folders use ``<details>``; ``open`` is rendered when ``initially_open``
+# is set on the folder dict (``SiteContext.build`` opens the latest
+# ``data/research/daily/<latest>/`` chain).
+# ---------------------------------------------------------------------------
+
+
+_DOC_TREE_EXT_PILL: dict[str, str] = {
+    ".md": "M",
+    ".markdown": "M",
+    ".json": "J",
+    ".pdf": "P",
+}
+
+
+def _doc_tree_pill(name: str) -> str:
+    """Return the small extension pill (``M`` / ``J`` / ``P``) for a leaf.
+
+    Empty string for unknown extensions so the leaf renders without an
+    icon (a flush text label) rather than a placeholder.
+    """
+    lower = name.lower()
+    for ext, glyph in _DOC_TREE_EXT_PILL.items():
+        if lower.endswith(ext):
+            return f'<span class="doc-tree-pill" aria-hidden="true">{glyph}</span>'
+    return ""
+
+
+def doc_tree(
+    node: Mapping[str, object],
+    *,
+    depth: int = 0,
+    current_source_path: str = "",
+    prefix: str = "",
+) -> str:
+    """Recursively render a folder/leaf as a collapsible HTML tree.
+
+    ``prefix`` is the ``../`` chain that turns the leaf's site-relative
+    ``href`` (``raw/<safe>.html``) into a path relative to the page that
+    embeds the tree. Pass ``"../"`` from a depth-1 page, ``""`` from
+    site-root pages.
+
+    The renderer caps recursion at 6 levels (per spec) — anything deeper
+    gets flattened into a single muted "...more" leaf so a runaway nesting
+    can't blow the page up.
+    """
+    if depth > 6:
+        return '<li class="doc-tree-leaf doc-tree-truncated muted">…more</li>'
+
+    if node.get("leaf"):
+        name = str(node.get("name") or "")
+        path = str(node.get("path") or "")
+        href = str(node.get("href") or "")
+        is_active = bool(current_source_path) and path == current_source_path
+        cls = "doc-tree-leaf"
+        if is_active:
+            cls += " is-active"
+        pill = _doc_tree_pill(name)
+        if href:
+            link = f'<a href="{_esc(prefix + href.lstrip("/"))}">{pill}<span class="doc-tree-name">{_esc(name)}</span></a>'
+        else:
+            link = f'<span class="doc-tree-name doc-tree-disabled" title="No raw view available">{pill}{_esc(name)}</span>'
+        return f'<li class="{cls}" data-doc-path="{_esc(path)}">{link}</li>'
+
+    # Folder
+    name = str(node.get("name") or "")
+    children = node.get("children") or {}
+    if not isinstance(children, Mapping):
+        children = {}
+    count = int(node.get("count") or 0)
+    open_attr = " open" if node.get("initially_open") else ""
+    badge_html = (
+        f' <span class="doc-tree-count">[{count}]</span>' if count else ""
+    )
+    summary = (
+        f'<summary class="doc-tree-folder-summary">'
+        f'<span class="doc-tree-name">{_esc(name)}</span>'
+        f"{badge_html}"
+        f"</summary>"
+    )
+    inner: list[str] = []
+    for child_name in sorted(children.keys(), key=_doc_tree_child_sort_key):
+        child = children[child_name]
+        if isinstance(child, Mapping):
+            inner.append(
+                doc_tree(
+                    child,
+                    depth=depth + 1,
+                    current_source_path=current_source_path,
+                    prefix=prefix,
+                )
+            )
+    body = '<ul class="doc-tree-list">' + "".join(inner) + "</ul>"
+    if depth == 0:
+        # Root wrapper: no <li>, just a <details> directly under .doc-tree.
+        return (
+            f'<details class="doc-tree-folder doc-tree-root"{open_attr}>'
+            f"{summary}{body}</details>"
+        )
+    return (
+        f'<li class="doc-tree-folder-item">'
+        f'<details class="doc-tree-folder"{open_attr}>'
+        f"{summary}{body}</details></li>"
+    )
+
+
+_DATE_FOLDER_RE = __import__("re").compile(r"^\d{4}(?:-[A-Za-z0-9]+)+$")
+
+
+def _doc_tree_child_sort_key(name: str) -> tuple:
+    """Sort children alphabetically; sort date-stamped folders descending.
+
+    Date-style folder names (``2026-04-29``, ``2026-W17``) are common in
+    the research corpus and the user wants the most-recent week first.
+    Detect them with a loose regex and invert the sort order by negating
+    the codepoint sum (cheap, deterministic, no datetime parsing).
+    """
+    if _DATE_FOLDER_RE.match(name):
+        # Sort date-like folders before non-date folders, descending by name.
+        return (0, _NEG_STR(name))
+    return (1, name.lower())
+
+
+class _NEG_STR:
+    """Reverse-string sort key — wraps a string so ``a < b`` iff ``a > b``."""
+
+    __slots__ = ("_value",)
+
+    def __init__(self, value: str) -> None:
+        self._value = value
+
+    def __lt__(self, other: "_NEG_STR") -> bool:  # type: ignore[override]
+        return self._value > other._value
+
+    def __eq__(self, other: object) -> bool:  # type: ignore[override]
+        return isinstance(other, _NEG_STR) and self._value == other._value
+
+
+# ---------------------------------------------------------------------------
 # page shell — the outermost wrapper
 # ---------------------------------------------------------------------------
 
-def _render_rail(
+def _render_doc_tree_rail(
     *,
+    doc_tree_html: str,
     active: str,
     counts: Mapping[str, int],
     prefix: str,
 ) -> str:
-    def _section(title: str, entries: Sequence[_RailEntry]) -> str:
-        items: list[str] = []
-        for entry in entries:
-            count = counts.get(entry.key, 0)
-            cls = "active" if entry.key == active else ""
-            count_html = (
-                f'<span class="count">{_esc(count)}</span>' if count else ""
-            )
-            items.append(
-                f'<li><a class="{cls}" href="{_esc(prefix + entry.href)}">'
-                f"<span>{_esc(entry.label)}</span>{count_html}</a></li>"
-            )
-        return (
-            f"<h2>{_esc(title)}</h2><ul>" + "".join(items) + "</ul>"
-        )
+    """Render the left rail with the doc-tree explorer + a search box.
 
+    The rail also includes a "Primary nav" sub-block that is hidden on
+    desktop (the topbar already shows the same links) and revealed inside
+    the hamburger drawer on mobile so the drawer is self-contained — the
+    user can reach every public route without opening the topbar.
+
+    Falls back to an empty placeholder when no tree is supplied (e.g.
+    legacy callers that don't yet pass ``doc_tree_html`` from the
+    SiteContext). The rail still rides at the same DOM ID (``rail``) so
+    the mobile drawer toggle keeps working.
+    """
+    if not doc_tree_html:
+        # Server-rendered empty state so the rail isn't a blank column.
+        doc_tree_html = '<p class="muted small">No documents.</p>'
+    nav_items: list[str] = []
+    for entry in _TOPNAV:
+        cls = "active" if entry.key == active else ""
+        count = counts.get(entry.key, 0)
+        count_html = (
+            f' <span class="rail-nav-count">[{_esc(count)}]</span>' if count else ""
+        )
+        nav_items.append(
+            f'<li><a class="{cls}" href="{_esc(prefix + entry.href)}"'
+            + (' aria-current="page"' if entry.key == active else "")
+            + f"><span>{_esc(entry.label)}</span>{count_html}</a></li>"
+        )
+    drawer_nav = (
+        '<nav class="rail-drawer-nav" aria-label="Primary (mobile)">'
+        '<h2 class="rail-section-label">Browse</h2>'
+        '<ul class="rail-drawer-nav-list">' + "".join(nav_items) + "</ul>"
+        "</nav>"
+    )
     return (
-        '<aside class="rail" id="rail" aria-label="Site sections">'
-        + _section("Overview", _RAIL_TOP)
-        + _section("Library", _RAIL_LIBRARY)
-        + _section("Tools", _RAIL_TOOLS)
-        + "</aside>"
+        '<aside class="rail" id="rail" aria-label="Source documents">'
+        + drawer_nav
+        + '<div class="doc-tree-search-row">'
+        '<input class="doc-tree-search" type="search" '
+        'placeholder="Filter files…" aria-label="Filter source files" '
+        'data-doc-tree-search>'
+        "</div>"
+        '<h2 class="rail-section-label">Files</h2>'
+        f'<nav class="doc-tree" aria-label="Source explorer">{doc_tree_html}</nav>'
+        "</aside>"
     )
 
 
@@ -645,6 +833,8 @@ def page_shell(
     breadcrumbs_html: str = "",
     ai_siblings_html: str = "",
     main_variant: str = "",
+    doc_tree_html: str = "",
+    omit_toc: bool = False,
 ) -> str:
     """Render the top-level HTML document.
 
@@ -673,31 +863,47 @@ def page_shell(
     """
     prefix = _prefix(depth)
     counts = dict(counts or {})
-    rail = _render_rail(active=active, counts=counts, prefix=prefix)
-    toc_block = (
-        f'<aside class="toc-rail" id="toc">{toc_html}</aside>' if toc_html else '<aside class="toc-rail" id="toc" hidden></aside>'
+    rail = _render_doc_tree_rail(
+        doc_tree_html=doc_tree_html,
+        active=active,
+        counts=counts,
+        prefix=prefix,
     )
+    # ``omit_toc`` lets the graph route suppress the right rail entirely
+    # (Issue 1 — focused-node info now lives in a floating canvas overlay).
+    if omit_toc:
+        toc_block = ""
+    else:
+        toc_block = (
+            f'<aside class="toc-rail" id="toc">{toc_html}</aside>' if toc_html else '<aside class="toc-rail" id="toc" hidden></aside>'
+        )
     bottom_nav = _render_bottom_nav(active=active, prefix=prefix)
-    if main_variant == "wide":
+    if main_variant == "graph":
+        # No right rail; main consumes the canvas-friendly column width.
+        main_class = "main main--graph"
+        shell_class = "shell shell--graph"
+    elif main_variant == "wide":
         main_class = "main main--wide"
         shell_class = "shell shell--wide"
     else:
         main_class = "main"
         shell_class = "shell"
 
-    # Top-bar nav mirrors the rail's headline categories so the site is
-    # navigable even when the rail is collapsed on mobile.
+    # Topbar primary nav (Issue 3): the FULL list of routes — Home, every
+    # library kind, Graph, About — left-aligned next to the brand. Counts
+    # are stamped in brackets next to the label when non-zero. Active route
+    # picks up ``.active`` for the accent + bottom-border treatment.
     nav_links: list[str] = []
-    for entry in (
-        _RAIL_TOP[0],
-        _RAIL_LIBRARY[3],  # Papers
-        _RAIL_LIBRARY[1],  # Concepts
-        _RAIL_LIBRARY[6],  # Syntheses
-        _RAIL_TOOLS[0],    # Graph view
-    ):
+    for entry in _TOPNAV:
+        count = counts.get(entry.key, 0)
         cls = "active" if entry.key == active else ""
+        count_html = (
+            f' <span class="topnav-count">[{_esc(count)}]</span>' if count else ""
+        )
         nav_links.append(
-            f'<a class="{cls}" href="{_esc(prefix + entry.href)}">{_esc(entry.label)}</a>'
+            f'<a class="{cls}" href="{_esc(prefix + entry.href)}"'
+            + (' aria-current="page"' if entry.key == active else "")
+            + f"><span>{_esc(entry.label)}</span>{count_html}</a>"
         )
     nav_html = "".join(nav_links)
 
@@ -710,8 +916,8 @@ def page_shell(
     toc_toggle_html = (
         '<button class="toc-toggle" aria-controls="toc" aria-expanded="false" '
         'data-toggle-toc type="button">On this page</button>\n'
-    )
-    if main_variant == "wide":
+    ) if not omit_toc else ""
+    if main_variant in ("wide", "graph"):
         main_inner = (
             f"{breadcrumbs_html}\n"
             + toc_toggle_html
@@ -778,6 +984,7 @@ __all__ = [
     "badge",
     "breadcrumbs",
     "card",
+    "doc_tree",
     "edge_list",
     "heatmap_svg",
     "node_table",

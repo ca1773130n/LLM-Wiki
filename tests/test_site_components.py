@@ -15,6 +15,7 @@ from llm_wiki.site.components import (
     badge,
     breadcrumbs,
     card,
+    doc_tree,
     edge_list,
     heatmap_svg,
     node_table,
@@ -393,13 +394,40 @@ def test_page_shell_injects_head_breadcrumbs_toc_and_siblings():
     assert "siblings" in out
 
 
-def test_page_shell_renders_left_rail_with_section_headers():
+def test_page_shell_renders_left_rail_with_doc_tree_explorer():
+    """Issue 3 — the left rail is now an Obsidian-style doc explorer.
+
+    The primary nav moved to the topbar; the rail hosts a search input
+    plus the recursive doc tree (or a muted "No documents." placeholder
+    when no source paths exist, as in this minimal _shell fixture).
+    """
     out = _shell()
     assert '<aside class="rail"' in out
-    assert "Library" in out
+    # The search input riding above the tree.
+    assert 'data-doc-tree-search' in out
+    # The doc-tree container is always emitted.
+    assert 'class="doc-tree"' in out
+    # Topbar primary nav carries the moved labels (Sources / Concepts).
     assert "Sources" in out and "Concepts" in out
-    # Counts are rendered when non-zero.
-    assert "<span class=\"count\">12</span>" in out
+    # Topnav counts render in brackets next to the label when non-zero.
+    assert '[12]' in out
+
+
+def test_page_shell_topbar_nav_includes_every_route_with_active_marker():
+    """Issue 3 — topbar must show Home + every public library kind +
+    Graph + About, with the active route flagged via ``aria-current``."""
+    out = _shell(active="papers")
+    for label in (
+        "Home", "Sources", "Concepts", "Entities", "Papers", "Repos",
+        "Topics", "Syntheses", "Questions", "Graph", "About",
+    ):
+        assert f">{label}<" in out, f"topbar missing {label!r}"
+    # Active route picks up aria-current="page" so screen readers know.
+    import re as _re
+    assert _re.search(
+        r'<a class="active"[^>]*href="[^"]*papers/index.html"[^>]*aria-current="page"',
+        out,
+    ), "active topbar entry must carry aria-current"
 
 
 # ---------------------------------------------------------------------------
@@ -478,3 +506,144 @@ def test_node_table_wraps_in_table_scroll_div():
     out = node_table(rows)
     assert out.startswith('<div class="table-scroll">')
     assert out.endswith("</div>")
+
+
+# ---------------------------------------------------------------------------
+# doc_tree (Issue 3)
+# ---------------------------------------------------------------------------
+
+
+def _sample_doc_tree() -> dict:
+    return {
+        "name": "data",
+        "children": {
+            "research": {
+                "name": "research",
+                "children": {
+                    "daily": {
+                        "name": "daily",
+                        "children": {
+                            "2026-04-29": {
+                                "name": "2026-04-29",
+                                "children": {
+                                    "digest.md": {
+                                        "leaf": True,
+                                        "name": "digest.md",
+                                        "path": "data/research/daily/2026-04-29/digest.md",
+                                        "href": "raw/data-research-daily-2026-04-29-digest-md.html",
+                                    },
+                                },
+                                "count": 1,
+                            },
+                            "2026-04-28": {
+                                "name": "2026-04-28",
+                                "children": {
+                                    "digest.md": {
+                                        "leaf": True,
+                                        "name": "digest.md",
+                                        "path": "data/research/daily/2026-04-28/digest.md",
+                                        "href": "raw/data-research-daily-2026-04-28-digest-md.html",
+                                    },
+                                },
+                                "count": 1,
+                            },
+                        },
+                        "count": 2,
+                        "initially_open": True,
+                    },
+                },
+                "count": 2,
+            },
+        },
+        "count": 2,
+        "initially_open": True,
+    }
+
+
+def test_doc_tree_renders_folders_as_collapsible_details():
+    out = doc_tree(_sample_doc_tree())
+    assert out.startswith('<details class="doc-tree-folder doc-tree-root"')
+    # Initially_open opens the root + the daily chain.
+    assert " open>" in out
+    # Folder count badges show in [N] form.
+    assert '[2]' in out
+    # Both leaves render as <li> with data-doc-path.
+    assert 'data-doc-path="data/research/daily/2026-04-29/digest.md"' in out
+    assert 'data-doc-path="data/research/daily/2026-04-28/digest.md"' in out
+    # Markdown leaves get the M pill.
+    assert '<span class="doc-tree-pill" aria-hidden="true">M</span>' in out
+
+
+def test_doc_tree_active_leaf_picks_up_is_active_class():
+    target = "data/research/daily/2026-04-29/digest.md"
+    out = doc_tree(_sample_doc_tree(), current_source_path=target)
+    assert 'class="doc-tree-leaf is-active"' in out
+    # The other leaf stays plain.
+    assert (
+        'class="doc-tree-leaf" data-doc-path="data/research/daily/2026-04-28/digest.md"'
+        in out
+    )
+
+
+def test_doc_tree_dates_sort_descending():
+    """Issue 3 — date-style folder names sort newest-first."""
+    out = doc_tree(_sample_doc_tree())
+    idx_29 = out.find("2026-04-29")
+    idx_28 = out.find("2026-04-28")
+    assert 0 <= idx_29 < idx_28, "newer date must render first"
+
+
+def test_doc_tree_caps_recursion_depth():
+    """Defensive — anything deeper than 6 levels collapses to a stub leaf."""
+    out = doc_tree({"leaf": True, "name": "x", "path": "x", "href": ""}, depth=10)
+    assert "doc-tree-truncated" in out
+
+
+def test_doc_tree_prefix_rewrites_leaf_hrefs():
+    """A depth-1 page must reach raw/ via ``../raw/<safe>.html``."""
+    target = _sample_doc_tree()
+    out = doc_tree(target, prefix="../")
+    assert 'href="../raw/data-research-daily-2026-04-29-digest-md.html"' in out
+
+
+def test_doc_tree_pill_glyphs_per_extension():
+    """`.json` → J, `.pdf` → P, `.md` → M, others → no pill."""
+    json_leaf = {"leaf": True, "name": "data.json", "path": "x.json", "href": "raw/x-json.html"}
+    pdf_leaf = {"leaf": True, "name": "doc.pdf", "path": "x.pdf", "href": "raw/x-pdf.html"}
+    txt_leaf = {"leaf": True, "name": "log.txt", "path": "x.txt", "href": "raw/x-txt.html"}
+    assert ">J<" in doc_tree(json_leaf)
+    assert ">P<" in doc_tree(pdf_leaf)
+    assert "doc-tree-pill" not in doc_tree(txt_leaf)
+
+
+# ---------------------------------------------------------------------------
+# page_shell — graph variant suppresses the right rail (Issue 1)
+# ---------------------------------------------------------------------------
+
+
+def test_page_shell_omit_toc_drops_right_rail_aside():
+    """Issue 1 — graph route passes ``omit_toc=True`` to suppress the
+    right TOC slot entirely. The shell still renders normally otherwise."""
+    out = page_shell(
+        "Graph",
+        head="",
+        body="<p>x</p>",
+        omit_toc=True,
+        main_variant="graph",
+    )
+    assert '<aside class="toc-rail"' not in out
+    assert '<aside class="toc"' not in out
+    assert 'class="main main--graph"' in out
+    assert 'class="shell shell--graph"' in out
+
+
+def test_page_shell_doc_tree_html_renders_inside_left_rail():
+    """The new ``doc_tree_html`` slot lands inside the left ``aside.rail``."""
+    out = page_shell(
+        "Hello",
+        head="",
+        body="<p>x</p>",
+        doc_tree_html='<details class="doc-tree-folder doc-tree-root"><summary class="doc-tree-folder-summary">data</summary></details>',
+    )
+    assert '<aside class="rail"' in out
+    assert '<details class="doc-tree-folder doc-tree-root">' in out

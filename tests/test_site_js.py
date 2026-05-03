@@ -20,6 +20,7 @@ from llm_wiki.site.js import (
     JS_BUNDLE,
     JS_BUNDLE_BASE,
     JS_BUNDLE_GRAPH,
+    JS_DOC_TREE,
     JS_GRAPH,
     JS_SEARCH_PALETTE,
     JS_THEME_TOGGLE,
@@ -92,28 +93,21 @@ def test_bundle_palette_recents_storage():
 # 3D graph view
 # ---------------------------------------------------------------------------
 
-def test_bundle_cursor_anchored_zoom_uses_library_native_wheel():
-    # Issue 3 (polish round 3): we OWN the wheel event now. OrbitControls
-    # has its zoom disabled and our handler raycasts onto the plane through
-    # ``controls.target`` (perpendicular to camera→target axis) so the
-    # cursor stays glued to the same world point across the zoom.
-    assert "addEventListener('wheel'" in JS_GRAPH
-    assert "controls.enableZoom = false" in JS_GRAPH
-    assert "preventDefault()" in JS_GRAPH
-    assert "stopPropagation()" in JS_GRAPH
-    assert "{ passive: false }" in JS_GRAPH
-    # Cursor-anchored hooks: raycaster intersect on the controls.target plane.
-    assert "Raycaster" in JS_GRAPH
-    assert "setFromCamera" in JS_GRAPH
-    assert "intersectionPoint" in JS_GRAPH
-    assert "intersectPlane(plane, intersectionPoint)" in JS_GRAPH
-    assert "controls.target" in JS_GRAPH
-    assert "addEventListener('pointermove'" in JS_GRAPH
-    # OrbitControls damping makes pan/orbit feel smooth.
+def test_bundle_zoom_uses_library_default_orbitcontrols():
+    """Issue 2 — three rounds of bespoke cursor-anchored zoom shipped
+    and all stuttered or inverted direction. Reverted to plain
+    OrbitControls zoom: ``enableZoom = true``, ``zoomSpeed = 0.8``,
+    ``enableDamping = true`` for smooth, monotonic wheel-toward-target."""
+    assert "controls.enableZoom = true" in JS_GRAPH
+    assert "controls.zoomSpeed = 0.8" in JS_GRAPH
     assert "controls.enableDamping = true" in JS_GRAPH
     assert "controls.dampingFactor = 0.08" in JS_GRAPH
-    # Ctrl-wheel is the macOS trackpad pinch escape hatch.
-    assert "event.ctrlKey" in JS_GRAPH
+    # The custom wheel handler / raycaster zoom path is GONE — never
+    # reintroduce it without a working physical UX trial.
+    assert "addEventListener('wheel'" not in JS_GRAPH
+    assert "installCursorWheelZoom" not in JS_GRAPH
+    assert "controls.enableZoom = false" not in JS_GRAPH
+    assert "intersectPlane(plane, intersectionPoint)" not in JS_GRAPH
 
 
 def test_bundle_link_hover_wired():
@@ -334,6 +328,31 @@ def test_toc_scrollspy_targets_article_body_h2_h3():
 def test_bundle_graph_alias_matches_js_graph():
     """JS_BUNDLE_GRAPH (used by the graph route) is the JS_GRAPH module."""
     assert JS_BUNDLE_GRAPH is JS_GRAPH or JS_BUNDLE_GRAPH == JS_GRAPH
+
+
+# ---------------------------------------------------------------------------
+# Doc-tree filter (Issue 3)
+# ---------------------------------------------------------------------------
+
+
+def test_bundle_includes_doc_tree_search_filter():
+    """Every page ships the doc-tree filter as part of the base bundle."""
+    assert "data-doc-tree-search" in JS_BUNDLE_BASE
+    assert "data-doc-tree-search" in JS_DOC_TREE
+    # Filter targets the .doc-tree leaves and their <details> ancestors.
+    assert ".doc-tree" in JS_DOC_TREE
+    assert ".doc-tree-leaf" in JS_DOC_TREE
+    assert "details.doc-tree-folder" in JS_DOC_TREE
+    # Auto-expand <details> ancestors of every match so the tree reveals
+    # the matching leaves without the user clicking through folders.
+    assert "matchedFolders" in JS_DOC_TREE
+    # Substring match against data-doc-path (case-insensitive lower-case).
+    assert "data-doc-path" in JS_DOC_TREE
+    assert "toLowerCase" in JS_DOC_TREE
+    # Debounce so typing doesn't thrash the DOM.
+    assert "setTimeout" in JS_DOC_TREE
+    # Escape clears the filter — UX nicety.
+    assert "'Escape'" in JS_DOC_TREE
 
 
 # ---------------------------------------------------------------------------
