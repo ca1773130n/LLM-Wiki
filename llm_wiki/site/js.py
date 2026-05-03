@@ -88,6 +88,14 @@ JS_THEME_TOGGLE = r"""
     root.setAttribute('data-theme', next);
     writeSaved(next, !!explicit);
     syncButtons();
+    // Issue 1 — graph view registers ``window.__graphRefreshLabels`` so
+    // its label sprites can be re-tinted when the user toggles theme.
+    // Pure no-op on every other route.
+    try {
+      if (typeof window.__graphRefreshLabels === 'function') {
+        window.__graphRefreshLabels();
+      }
+    } catch (_) {}
   }
 
   function cycle(){
@@ -843,6 +851,7 @@ JS_GRAPH = r"""
     var btnFit       = document.querySelector('[data-graph-action="fit"]');
     var btnReset     = document.querySelector('[data-graph-action="reset"]');
     var btnFullscreen= document.querySelector('[data-graph-action="fullscreen"]');
+    var btnAutoBrowse= document.querySelector('[data-graph-action="auto-browse"]');
 
     var reduceMotion = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
 
@@ -1053,6 +1062,18 @@ JS_GRAPH = r"""
       return hasFocusFilter() && !highlightLinks.has(link);
     }
 
+    // Issue 2 — true when the link is incident to the currently-hovered
+    // node (and is not already a focus highlight). Used to thicken the
+    // edge to 1.5x without dimming non-incident edges (that's reserved
+    // for focus).
+    function isHoverIncidentLink(link){
+      if (!hoverNode || !link) return false;
+      var sId = (typeof link.source === 'object') ? (link.source && link.source.id) : link.source;
+      var tId = (typeof link.target === 'object') ? (link.target && link.target.id) : link.target;
+      var hId = hoverNode.id;
+      return sId === hId || tId === hId;
+    }
+
     function refreshHighlightStyles(){
       if (Graph && Graph.refresh) {
         try { Graph.refresh(); } catch (_) {}
@@ -1241,9 +1262,9 @@ JS_GRAPH = r"""
     //
     // Cached by ``text|variant|accent|theme|hint`` so identical labels reuse
     // their canvas/texture across nodes.
-    var VARIANT_FONT       = { default: 11, edge: 10, neighbor: 14, hover: 16, focused: 26 };
+    var VARIANT_FONT       = { default: 11, edge: 10, neighbor: 16, hover: 22, focused: 26 };
     var VARIANT_OPACITY    = { default: 0.55, edge: 0.7, neighbor: 0.95, hover: 1.0, focused: 1.0 };
-    var VARIANT_STROKE     = { default: 1, edge: 1, neighbor: 1, hover: 2, focused: 4 };
+    var VARIANT_STROKE     = { default: 1.5, edge: 1, neighbor: 1, hover: 2.5, focused: 4 };
     var VARIANT_RENDER_ORDER = { default: 1, edge: 1, neighbor: 998, hover: 999, focused: 999 };
     var labelSpriteCache = new Map();
     function makeLabel(text, opts){
@@ -1288,9 +1309,13 @@ JS_GRAPH = r"""
       ctx = canvas.getContext('2d');
       // Solid pill ONLY for the focused variant — every other variant
       // renders text-only on a transparent canvas (Issue 1 — no white pills
-      // on default labels).
+      // on default labels). Issue 3 — focused pill is a SUBTLE accent-tinted
+      // background in the same color family as the canvas (a slightly
+      // lighter blue on dark, a slightly darker tint on light) so the
+      // focus indication comes from font size + stroke, not a jarring
+      // pill that punches out of the theme.
       if (hasPill) {
-        var bg = (theme === 'light') ? 'rgba(255,255,255,0.95)' : 'rgba(0,0,0,0.85)';
+        var bg = (theme === 'light') ? 'rgba(241,245,249,0.92)' : 'rgba(40,55,90,0.55)';
         var radius = Math.min(h / 2, 18 * pxScale);
         ctx.fillStyle = bg;
         ctx.beginPath();
@@ -1312,33 +1337,30 @@ JS_GRAPH = r"""
       ctx.font = (variant === 'focused' ? '700 ' : '600 ') + fontPx + 'px "Inter", system-ui, sans-serif';
       ctx.textBaseline = 'middle';
       ctx.textAlign = 'center';
-      // Subtle text-stroke for legibility against busy edges. The default
-      // variant gets a 1px shadow-style stroke so the translucent text
-      // stays readable on any background.
+      // Issue 3 — text stroke colors. Hover/focused get a subtle
+      // accent-tinted stroke (the "indication" without resorting to a
+      // pill), while default/neighbor/edge get a theme-foreground stroke
+      // (light shadow on light theme, dark shadow on dark) so the text
+      // stays readable against busy edges.
       var strokePx = (VARIANT_STROKE[variant] || 1) * pxScale;
       ctx.lineWidth = strokePx;
-      ctx.strokeStyle = (theme === 'light') ? 'rgba(255,255,255,0.78)' : 'rgba(0,0,0,0.85)';
+      if (variant === 'hover' || variant === 'focused') {
+        ctx.strokeStyle = accent;
+      } else {
+        ctx.strokeStyle = (theme === 'light') ? 'rgba(255,255,255,0.78)' : 'rgba(0,0,0,0.85)';
+      }
       var textY = padY + lineH / 2;
       ctx.strokeText(text, w / 2, textY);
-      // Default + neighbor + edge use translucent white on dark theme so the
-      // hierarchy (default 0.55, neighbor 0.95, edge 0.7) is visible without
-      // a background. Hover + focused use full opacity (focused = accent on
-      // pill; hover = white text).
+      // Issue 1 + Issue 3 — every variant uses the THEME foreground for
+      // text color (white on dark, dark on light), NOT the node's own
+      // group color. The "indication" comes from font size, opacity, and
+      // the accent-tinted stroke (above) — never from a label that looks
+      // out of theme.
       var textOpacity = VARIANT_OPACITY[variant] || 1.0;
-      if (variant === 'focused') {
-        ctx.fillStyle = accent;
-      } else if (variant === 'hover') {
-        ctx.fillStyle = (theme === 'light') ? '#0f172a' : '#ffffff';
+      if (theme === 'light') {
+        ctx.fillStyle = 'rgba(15,23,42,' + textOpacity + ')';
       } else {
-        // default / neighbor / edge — translucent white (or dark on light
-        // theme). Encode the per-variant opacity directly in the fillStyle
-        // so the SpriteMaterial can stay at opacity=1 (cleaner blending).
-        var op = textOpacity;
-        if (theme === 'light') {
-          ctx.fillStyle = 'rgba(15,23,42,' + op + ')';
-        } else {
-          ctx.fillStyle = 'rgba(255,255,255,' + op + ')';
-        }
+        ctx.fillStyle = 'rgba(255,255,255,' + textOpacity + ')';
       }
       ctx.fillText(text, w / 2, textY);
       // Optional small hint below the main text — used for the focused
@@ -1451,23 +1473,66 @@ JS_GRAPH = r"""
       sprite.material.transparent = true;
     }
 
-    // ---- Cursor-anchored zoom via the library option (Issue 3) ---------
-    // Three rounds of bespoke cursor-anchored zoom shipped and all
-    // stuttered or inverted direction. ``THREE.OrbitControls`` ships a
-    // built-in ``zoomToCursor`` flag (since r150+) — flipping it on is
-    // the entire fix. The library reads cursor position, raycasts from
-    // it, and zooms toward whatever's under the pointer. No custom
-    // ``wheel`` listener, no raycasting, no camera mutation.
+    // ---- Cursor-anchored zoom (Issue 4) --------------------------------
+    // Step A: try the built-in OrbitControls.zoomToCursor flag (r150+).
+    //   If it's available, flip it on and we're done — the library reads
+    //   cursor position and zooms toward it.
+    // Step B: if the loaded OrbitControls predates the flag, install our
+    //   own EXCLUSIVE wheel handler. The KEY trick that prior rounds got
+    //   wrong: scale BOTH camera.position AND controls.target by the SAME
+    //   factor relative to the SAME cursor anchor. That keeps the orbit
+    //   center consistent and the world point under the cursor stays put.
     function installLibraryZoom(inst){
       var controls = inst && inst.controls && inst.controls();
       if (!controls) return;
+      var supportsZoomToCursor = typeof controls.zoomToCursor !== 'undefined';
+      try { console.info('[graph] OrbitControls.zoomToCursor available:', supportsZoomToCursor); } catch (_) {}
       try {
-        controls.enableZoom = true;     // library owns the wheel
-        controls.zoomToCursor = true;   // <— THIS line is the whole fix
-        controls.zoomSpeed = 1.0;
         controls.enableDamping = true;
         controls.dampingFactor = 0.08;
       } catch (_) {}
+      if (supportsZoomToCursor) {
+        try {
+          controls.enableZoom = true;     // library owns the wheel
+          controls.zoomToCursor = true;   // built-in cursor-anchored zoom
+          controls.zoomSpeed = 1.0;
+        } catch (_) {}
+        return;
+      }
+      // ---- Fallback custom wheel handler ------------------------------
+      // The library option is unavailable; we own the wheel exclusively.
+      try { controls.enableZoom = false; } catch (_) {}
+      var canvas = container && container.querySelector && container.querySelector('canvas');
+      if (!canvas || !THREE) return;
+      var camera = inst.camera && inst.camera();
+      if (!camera) return;
+      canvas.addEventListener('wheel', function(event) {
+        event.preventDefault();
+        event.stopPropagation();
+        // 1. Cursor → world point on the plane through controls.target
+        //    perpendicular to the camera-target axis.
+        var rect = canvas.getBoundingClientRect();
+        var ndc = new THREE.Vector2(
+          ((event.clientX - rect.left) / rect.width) * 2 - 1,
+          -((event.clientY - rect.top) / rect.height) * 2 + 1
+        );
+        var raycaster = new THREE.Raycaster();
+        raycaster.setFromCamera(ndc, camera);
+        var dirToTarget = new THREE.Vector3().subVectors(controls.target, camera.position).normalize();
+        var plane = new THREE.Plane(dirToTarget, -dirToTarget.dot(controls.target));
+        var cursor = new THREE.Vector3();
+        if (!raycaster.ray.intersectPlane(plane, cursor)) return;
+        // 2. Exponential, monotonic, symmetric zoom factor.
+        //    deltaY < 0 (wheel up) → factor < 1 → camera moves toward cursor.
+        var factor = Math.exp(event.deltaY * 0.001);
+        // 3. Scale BOTH camera.position and controls.target relative to
+        //    the same cursor anchor by the SAME factor. This preserves
+        //    the camera-target distance ratio so the orbit center stays
+        //    consistent and the world point under the cursor sticks.
+        camera.position.lerpVectors(cursor, camera.position, factor);
+        controls.target.lerpVectors(cursor, controls.target, factor);
+        controls.update();
+      }, { passive: false });
     }
 
     // ---- Fit-to-view via bounding sphere over current node positions ----
@@ -1573,7 +1638,13 @@ JS_GRAPH = r"""
         .backgroundColor('rgba(0,0,0,0)')
         .nodeId('id')
         .nodeLabel(function(n){ return ''; })
-        .nodeVal(function(n){ return Math.max(1, n.val || 1); })
+        .nodeVal(function(n){
+          // Issue 2 — hovered node grows to 1.25x its normal val so the
+          // sphere itself becomes a visible cue independent of the label.
+          var base = Math.max(1, n.val || 1);
+          if (hoverNode === n) return base * 1.25;
+          return base;
+        })
         .nodeColor(function(n){
           // Bug 6 — non-incident nodes dim to 25% opacity (spec target).
           // Keep the focused node + 1-hop neighbors at full saturation;
@@ -1586,12 +1657,22 @@ JS_GRAPH = r"""
           return highlightLinks.has(l) ? EDGE_COLOR_HOT : EDGE_COLOR_DIM;
         })
         // Bug 6 — focused-incident edges thicken from 0.5 to 2.0 and pick up
-        // the accent. Non-incident edges drop to 0.001 so they read as 10%
-        // opacity (combined with EDGE_COLOR_DIM alpha 0.012). Default 0.5.
-        .linkWidth(function(l){ return isDimmedLink(l) ? 0.001 : (highlightLinks.has(l) ? 2.0 : 0.5); })
+        // the accent. Issue 2 — hover-incident edges thicken to 1.5x without
+        // dimming non-incident (that's reserved for focus). Non-incident
+        // edges drop to 0.001 so they read as 10% opacity (combined with
+        // EDGE_COLOR_DIM alpha 0.012). Default 0.5.
+        .linkWidth(function(l){
+          if (isDimmedLink(l)) return 0.001;
+          if (highlightLinks.has(l)) return 2.0;
+          if (isHoverIncidentLink(l)) return 0.75;  // 1.5x of 0.5 default
+          return 0.5;
+        })
         .linkHoverPrecision(8)
-        .linkDirectionalParticles(function(l){ return highlightLinks.has(l) ? 2 : 0; })
-        .linkDirectionalParticleWidth(0.9)
+        // Issue 5 — particles per-edge: 2 by default, 4 on focused-incident
+        // edges (more energetic, draws the eye toward neighbor flow).
+        .linkDirectionalParticles(function(l){ return highlightLinks.has(l) ? 4 : 2; })
+        .linkDirectionalParticleWidth(2.5)
+        .linkDirectionalParticleSpeed(function(l){ return highlightLinks.has(l) ? 0.008 : 0.005; })
         .onNodeHover(function(node){
           hoverNode = node || null;
           container.style.cursor = node && !isDimmedNode(node) ? 'pointer' : 'default';
@@ -1609,6 +1690,13 @@ JS_GRAPH = r"""
           if (!pinnedNode && !pinnedLink) {
             applyHighlight(node);
           }
+          // Issue 2 — re-poke node val + link width accessors so the
+          // hovered sphere visibly grows and incident edges thicken
+          // without waiting for the next simulation tick.
+          try {
+            if (Graph && Graph.nodeVal) Graph.nodeVal(Graph.nodeVal());
+            if (Graph && Graph.linkWidth) Graph.linkWidth(Graph.linkWidth());
+          } catch (_) {}
         })
         .onLinkHover(function(link){
           hoverLink = link || null;
@@ -1632,8 +1720,14 @@ JS_GRAPH = r"""
         });
 
       try { if (inst.nodeOpacity) inst.nodeOpacity(0.95); } catch (_) {}
-      try { if (inst.linkOpacity) inst.linkOpacity(0.8); } catch (_) {}
-      try { if (inst.linkDirectionalParticleColor) inst.linkDirectionalParticleColor(function(l){ return highlightLinks.has(l) ? EDGE_COLOR_HOT : EDGE_COLOR_LIGHT; }); } catch (_) {}
+      // Issue 5 — drop edge opacity to 0.35 so edges read as present-but-
+      // -not-dominating; the white particles below can pop against any
+      // edge color (yellow-on-yellow used to make particles invisible).
+      try { if (inst.linkOpacity) inst.linkOpacity(0.35); } catch (_) {}
+      // Issue 5 — particles render WHITE (not the edge color) so they're
+      // visible against every per-type edge tint. ``rgba(255,255,255,0.95)``
+      // pops on both dim and hot edges in dark + light themes alike.
+      try { if (inst.linkDirectionalParticleColor) inst.linkDirectionalParticleColor(function(l){ return 'rgba(255,255,255,0.95)'; }); } catch (_) {}
       try {
         if (mode === '3d' && inst.linkResolution) inst.linkResolution(6);
       } catch (_) {}
@@ -1975,6 +2069,8 @@ JS_GRAPH = r"""
           _controls.addEventListener('start', function(){
             autoOrbitEnabled = false;
             lastTickMs = 0;
+            // Issue 6 — manual mouse-drag (orbit/pan) interrupts auto-browse.
+            if (autoBrowseActive) stopAutoBrowse();
           });
         }
       } catch (_) {}
@@ -2022,6 +2118,9 @@ JS_GRAPH = r"""
     function activateNode(node, evt){
       if (!node) return;
       if (isDimmedNode(node)) return;
+      // Issue 6 — manual node click counts as user interruption: stop
+      // the auto-browse tour so the user is back in the driver's seat.
+      if (autoBrowseActive) stopAutoBrowse();
       var samePinned = pinnedNode && nodeIdOf(pinnedNode) === nodeIdOf(node);
       // Graph browsing comes first: first tap/click pins, highlights neighbors,
       // and zooms to the entity. A second activation on the same pinned node
@@ -2216,6 +2315,7 @@ JS_GRAPH = r"""
     if (btn3D) btn3D.addEventListener('click', function(){ setMode('3d'); });
     if (btnFit) btnFit.addEventListener('click', function(){ fitAll(400); });
     if (btnReset) btnReset.addEventListener('click', function(){
+      stopAutoBrowse();
       pinnedNode = null;
       pinnedLink = null;
       focusedNode = null;
@@ -2229,6 +2329,143 @@ JS_GRAPH = r"""
         try { Graph.centerAt(0, 0, reduceMotion ? 0 : 600); Graph.zoom(1, reduceMotion ? 0 : 600); } catch (_) {}
       }
     });
+
+    // ---- Issue 6 — Auto-browse mode -----------------------------------
+    // Click ``Auto-browse`` (or press ``b``) to enter a hands-free tour:
+    //   1. Pick the highest-degree node, focus it via focusOnNode (so all
+    //      the orbit + dim + label scaling kicks in), wait 5s.
+    //   2. Pick that node's most-connected unvisited neighbor, focus it,
+    //      wait 5s.
+    //   3. After 8 hops or when no unvisited neighbors are reachable,
+    //      jump to the next-highest-degree non-visited node and start
+    //      a new chain.
+    //   Stop on: click ``Stop browse``, Esc, manual node click, drag.
+    //   Cancellation via ``autoBrowseActive`` flag + setTimeout id.
+    var autoBrowseActive = false;
+    var autoBrowseTimer = null;
+    var autoBrowseVisited = null;
+    var autoBrowseHopCount = 0;
+    var AUTO_BROWSE_DWELL_MS = 5000;
+    var AUTO_BROWSE_MAX_HOPS = 8;
+
+    function setAutoBrowseUI(on){
+      if (btnAutoBrowse) {
+        btnAutoBrowse.textContent = on ? 'Stop browse' : 'Auto-browse';
+        btnAutoBrowse.setAttribute('aria-pressed', on ? 'true' : 'false');
+        btnAutoBrowse.classList.toggle('is-active', !!on);
+      }
+      if (wrapper && wrapper.classList) {
+        wrapper.classList.toggle('is-auto-browsing', !!on);
+      }
+    }
+    function pickStartNode(){
+      // Highest-degree non-visited node.
+      var best = null;
+      var bestDeg = -1;
+      for (var i = 0; i < payload.nodes.length; i++) {
+        var n = payload.nodes[i];
+        if (autoBrowseVisited && autoBrowseVisited.has(n.id)) continue;
+        if (isDimmedNode(n)) continue;
+        var d = n.degree || 0;
+        if (d > bestDeg) { bestDeg = d; best = n; }
+      }
+      return best;
+    }
+    function pickNextNeighbor(node){
+      if (!node || !node.neighbors) return null;
+      var best = null;
+      var bestDeg = -1;
+      // Iterate the Set without spreading — preserves Map/Set semantics
+      // and avoids allocating an array.
+      var arr = [];
+      node.neighbors.forEach(function(nb){ arr.push(nb); });
+      for (var i = 0; i < arr.length; i++) {
+        var nb = arr[i];
+        if (!nb) continue;
+        if (autoBrowseVisited && autoBrowseVisited.has(nb.id)) continue;
+        var d = nb.degree || 0;
+        if (d > bestDeg) { bestDeg = d; best = nb; }
+      }
+      return best;
+    }
+    function autoBrowseStep(node){
+      if (!autoBrowseActive) return;
+      if (!node) {
+        // Out of unvisited reachable nodes — start a fresh chain from
+        // the next-highest-degree unvisited node, or stop if none.
+        var fresh = pickStartNode();
+        if (!fresh) { stopAutoBrowse(); return; }
+        autoBrowseHopCount = 0;
+        autoBrowseStep(fresh);
+        return;
+      }
+      autoBrowseVisited.add(node.id);
+      autoBrowseHopCount += 1;
+      try { focusOnNode(node); } catch (_) {}
+      // Treat focus as a pin so re-builds don't drop the highlight.
+      pinnedNode = node;
+      focusedNode = node;
+      markFocused(node);
+      applyHighlight(node);
+      autoBrowseTimer = window.setTimeout(function(){
+        if (!autoBrowseActive) return;
+        var nextNode;
+        if (autoBrowseHopCount >= AUTO_BROWSE_MAX_HOPS) {
+          autoBrowseHopCount = 0;
+          nextNode = pickStartNode();
+        } else {
+          nextNode = pickNextNeighbor(node);
+          if (!nextNode) {
+            autoBrowseHopCount = 0;
+            nextNode = pickStartNode();
+          }
+        }
+        autoBrowseStep(nextNode);
+      }, AUTO_BROWSE_DWELL_MS);
+    }
+    function startAutoBrowse(){
+      if (autoBrowseActive) return;
+      autoBrowseActive = true;
+      autoBrowseVisited = new Set();
+      autoBrowseHopCount = 0;
+      setAutoBrowseUI(true);
+      var first = pickStartNode();
+      autoBrowseStep(first);
+    }
+    function stopAutoBrowse(){
+      if (!autoBrowseActive && !autoBrowseTimer) {
+        // Even when never started, make sure UI is clean (idempotent).
+        setAutoBrowseUI(false);
+        return;
+      }
+      autoBrowseActive = false;
+      if (autoBrowseTimer) { window.clearTimeout(autoBrowseTimer); autoBrowseTimer = null; }
+      autoBrowseVisited = null;
+      autoBrowseHopCount = 0;
+      setAutoBrowseUI(false);
+    }
+    function toggleAutoBrowse(){
+      if (autoBrowseActive) stopAutoBrowse();
+      else startAutoBrowse();
+    }
+    if (btnAutoBrowse) btnAutoBrowse.addEventListener('click', toggleAutoBrowse);
+
+    // Issue 1 — re-tint label sprites when the user toggles theme. Since
+    // sprites are cached by ``text|variant|accent|theme|hint`` and baked
+    // onto a canvas, a theme flip means we need to clear the cache and
+    // rebuild the per-node nodeThreeObject group. The cheapest route is
+    // to swap out the renderer (rebuild via setMode shim) — but that's
+    // expensive. Cheaper: invalidate the cache and re-poke the library's
+    // nodeThreeObject accessor so it re-runs the factory per node.
+    window.__graphRefreshLabels = function(){
+      try { labelSpriteCache.clear(); } catch (_) {}
+      if (!Graph) return;
+      try {
+        if (Graph.nodeThreeObject) Graph.nodeThreeObject(Graph.nodeThreeObject());
+        if (Graph.linkThreeObject) Graph.linkThreeObject(Graph.linkThreeObject());
+        if (Graph.refresh) Graph.refresh();
+      } catch (_) {}
+    };
     if (searchEl) {
       searchEl.addEventListener('input', function(){
         searchQuery = (searchEl.value || '').trim().toLowerCase();
@@ -2278,6 +2515,8 @@ JS_GRAPH = r"""
         // If enabling without a focus, the orbit hook is a no-op anyway,
         // so the toggle stays harmless.
       }
+      // Issue 6 — ``b`` toggles auto-browse mode.
+      if (e.key === 'b') { toggleAutoBrowse(); }
       if (e.key === '2') setMode('2d');
       if (e.key === '3') setMode('3d');
       // Issue 2 — Enter on the focused node opens its page (the focused
@@ -2289,7 +2528,9 @@ JS_GRAPH = r"""
       if (e.key === 'Escape') {
         // Bug 5 — Esc unfocuses, clears search/day filter, then auto-fits
         // back to the whole graph so the user gets visual confirmation
-        // they're back at the top level.
+        // they're back at the top level. Issue 6 — Esc also stops the
+        // auto-browse tour if one is running.
+        if (autoBrowseActive) stopAutoBrowse();
         pinnedNode = null;
         pinnedLink = null;
         focusedNode = null;

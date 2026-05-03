@@ -2249,7 +2249,7 @@ def render_graph_view(ctx: SiteContext) -> str:
     head = (
         '<link rel="preconnect" href="https://esm.sh">\n'
         '<link rel="preload" href="payload.json" as="fetch" type="application/json" crossorigin="anonymous">\n'
-        f'<script defer src="../assets/graph.js?v=graph-explore-v13"></script>\n'
+        f'<script defer src="../assets/graph.js?v=graph-explore-v14"></script>\n'
         '<script type="module">\n'
         '  // Load 3D + 2D force-graph plus three.js peer dep from esm.sh.\n'
         '  // We attach the constructors to ``window`` so the deferred\n'
@@ -2284,7 +2284,7 @@ def render_graph_view(ctx: SiteContext) -> str:
     body = f"""<header class="hero">
   <p class="eyebrow">interactive graph · 3D force layout</p>
   <h1>Knowledge graph</h1>
-  <p class="lead">Tap or click a node to focus it: the camera flies in and orbits, neighbors stay highlighted while non-incident nodes dim. Tap the same node again to open its page. Drag to orbit, scroll/pinch to zoom. Press <kbd>/</kbd> to search, <kbd>f</kbd> to fit, <kbd>o</kbd> to toggle auto-orbit, <kbd>2</kbd>/<kbd>3</kbd> to switch projection, <kbd>Esc</kbd> to unfocus.</p>
+  <p class="lead">Tap or click a node to focus it: the camera flies in and orbits, neighbors stay highlighted while non-incident nodes dim. Tap the same node again to open its page. Drag to orbit, scroll/pinch to zoom (cursor-anchored). Press <kbd>/</kbd> to search, <kbd>f</kbd> to fit, <kbd>o</kbd> to toggle auto-orbit, <kbd>b</kbd> to auto-browse, <kbd>2</kbd>/<kbd>3</kbd> to switch projection, <kbd>Esc</kbd> to unfocus.</p>
 </header>
 <section class="graph-page" aria-label="Knowledge graph visualization">
   <div class="graph-canvas-wrapper" id="graph-canvas-wrapper">
@@ -2295,8 +2295,9 @@ def render_graph_view(ctx: SiteContext) -> str:
       </div>
       <div class="graph-toolbar-group" role="group" aria-label="View">
         <button type="button" class="button" data-graph-action="fit" title="Fit to view (f)">Fit</button>
-        <button type="button" class="button" data-graph-action="fullscreen" title="Toggle fullscreen" aria-pressed="false">Fullscreen</button>
         <button type="button" class="button" data-graph-action="reset" title="Reset (r)">Reset</button>
+        <button type="button" class="button" data-graph-action="auto-browse" title="Auto-browse the graph (b)" aria-pressed="false">Auto-browse</button>
+        <button type="button" class="button" data-graph-action="fullscreen" title="Toggle fullscreen" aria-pressed="false">Fullscreen</button>
       </div>
       <div class="graph-search">
         <label class="visually-hidden" for="graph-search-input">Search nodes</label>
@@ -2311,7 +2312,7 @@ def render_graph_view(ctx: SiteContext) -> str:
     <div class="graph-tooltip" id="graph-tooltip" role="status" aria-live="polite" hidden></div>
     <div class="graph-legend" id="graph-legend" aria-label="Type legend">{legend_items}</div>
   </div>
-  <p class="graph-help muted">Showing {len(nodes_payload)} of {len(nodes_payload)} wiki nodes · {len(links_payload)} links · <kbd>/</kbd> search · <kbd>f</kbd> fit · <kbd>r</kbd> reset · <kbd>o</kbd> orbit · <kbd>2</kbd>/<kbd>3</kbd> mode · <kbd>Esc</kbd> unfocus</p>
+  <p class="graph-help muted">Showing {len(nodes_payload)} of {len(nodes_payload)} wiki nodes · {len(links_payload)} links · <kbd>/</kbd> search · <kbd>f</kbd> fit · <kbd>r</kbd> reset · <kbd>o</kbd> orbit · <kbd>b</kbd> auto-browse · <kbd>2</kbd>/<kbd>3</kbd> mode · <kbd>Esc</kbd> unfocus</p>
 </section>"""
     return page_shell(
         title="Graph",

@@ -1050,6 +1050,13 @@ details[open] > .doc-tree-folder-summary::before { transform: rotate(90deg); }
   padding: var(--space-3);
   gap: var(--space-2);
 }
+/* Issue 6 — Auto-browse mode cursor cue. The toolbar's Auto-browse
+   button toggles the ``is-auto-browsing`` class on the wrapper so the
+   user has an unmistakable visual indicator (the cursor) that the
+   graph is in tour mode and the camera is moving on its own. */
+.graph-canvas-wrapper.is-auto-browsing,
+.graph-canvas-wrapper.is-auto-browsing .graph-canvas,
+.graph-canvas-wrapper.is-auto-browsing canvas { cursor: progress; }
 .graph-canvas-wrapper.is-fullscreen .graph-toolbar {
   position: absolute;
   top: var(--space-3);

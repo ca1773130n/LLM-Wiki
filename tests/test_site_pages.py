@@ -436,7 +436,7 @@ def test_render_graph_view_includes_payload_script(site_ctx: SiteContext) -> Non
     assert "payload.json" in out
     # The graph.js bundle is loaded only on this route via the second script.
     assert "assets/graph.js" in out
-    assert "graph-explore-v13" in out
+    assert "graph-explore-v14" in out
     # And the payload itself is computable from the same context.
     payload = build_graph_payload(site_ctx)
     assert "nodes" in payload
@@ -1003,6 +1003,9 @@ def test_render_graph_view_drops_right_rail_uses_cursor_tooltip(
     # Issue 4 — wrapper + Fullscreen toolbar button.
     assert 'id="graph-canvas-wrapper"' in out
     assert 'data-graph-action="fullscreen"' in out
+    # Issue 6 — Auto-browse toolbar button between Reset and Fullscreen.
+    assert 'data-graph-action="auto-browse"' in out
+    assert ">Auto-browse</button>" in out
     # Size hint is in the toolbar so users know what node radius means.
     assert "node size = √(connections)" in out
 

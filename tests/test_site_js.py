@@ -94,28 +94,30 @@ def test_bundle_palette_recents_storage():
 # ---------------------------------------------------------------------------
 
 def test_bundle_zoom_uses_library_default_orbitcontrols():
-    """Issue 3 — three rounds of bespoke cursor-anchored zoom all
-    stuttered or inverted direction. ``THREE.OrbitControls`` ships a
-    built-in ``zoomToCursor`` flag — flipping it on (and letting the
-    library own the wheel handler) is the entire fix. Asserts the flag
-    is set exactly once, evaluates to ``true``, and that the custom
-    wheel handler / raycaster zoom path is still gone."""
-    assert "controls.enableZoom = true" in JS_GRAPH
-    # Issue 3 — the load-bearing line. Set exactly once on the controls
-    # object so the library reads cursor position and zooms toward it.
-    assert JS_GRAPH.count("controls.zoomToCursor") == 1, (
-        "controls.zoomToCursor must be assigned exactly once in the bundle"
-    )
+    """Issue 4 — cursor-anchored zoom. Step A uses the library's built-in
+    ``OrbitControls.zoomToCursor`` flag when available (r150+). Step B
+    falls back to a custom EXCLUSIVE wheel handler that scales BOTH
+    ``camera.position`` AND ``controls.target`` by the SAME factor relative
+    to the SAME cursor anchor — the trick prior rounds got wrong.
+    """
+    # Step A — runtime check + flip the built-in flag.
+    assert "controls.zoomToCursor" in JS_GRAPH
+    assert "supportsZoomToCursor" in JS_GRAPH
     assert "controls.zoomToCursor = true" in JS_GRAPH
     assert "controls.zoomSpeed = 1.0" in JS_GRAPH
     assert "controls.enableDamping = true" in JS_GRAPH
     assert "controls.dampingFactor = 0.08" in JS_GRAPH
-    # The custom wheel handler / raycaster zoom path is GONE — never
-    # reintroduce it without a working physical UX trial.
-    assert "addEventListener('wheel'" not in JS_GRAPH
-    assert "installCursorWheelZoom" not in JS_GRAPH
-    assert "controls.enableZoom = false" not in JS_GRAPH
-    assert "intersectPlane(plane, intersectionPoint)" not in JS_GRAPH
+    # Step B — fallback custom wheel handler (Issue 4 explicitly requires
+    # this when the library option is missing).
+    assert "addEventListener('wheel'" in JS_GRAPH
+    assert "controls.enableZoom = false" in JS_GRAPH
+    assert "Math.exp(event.deltaY * 0.001)" in JS_GRAPH
+    # The KEY trick: SAME factor, SAME anchor, applied to BOTH
+    # camera.position AND controls.target via lerpVectors.
+    assert "camera.position.lerpVectors(cursor, camera.position, factor)" in JS_GRAPH
+    assert "controls.target.lerpVectors(cursor, controls.target, factor)" in JS_GRAPH
+    # Plane raycast for the cursor → world point conversion.
+    assert "intersectPlane(plane, cursor)" in JS_GRAPH
 
 
 def test_bundle_link_hover_wired():
@@ -166,8 +168,14 @@ def test_graph_selection_fades_and_deprioritizes_non_neighbors():
 
 def test_graph_edges_are_visible_lines_not_only_particles():
     assert "rgba(191,219,254,0.34)" in JS_GRAPH
-    assert "if (inst.linkOpacity) inst.linkOpacity(0.8);" in JS_GRAPH
-    assert "linkWidth(function(l){ return isDimmedLink(l) ? 0.001 : (highlightLinks.has(l) ? 2.0 : 0.5); })" in JS_GRAPH
+    # Issue 5 — drop edge opacity to 0.35 so white particles can pop
+    # against translucent edges (yellow-on-yellow used to hide them).
+    assert "if (inst.linkOpacity) inst.linkOpacity(0.35);" in JS_GRAPH
+    # Link width still uses the focused/hover/default ladder; new
+    # branch widens hover-incident edges to 0.75 (1.5x of 0.5 default).
+    assert "function isHoverIncidentLink" in JS_GRAPH
+    assert "if (highlightLinks.has(l)) return 2.0;" in JS_GRAPH
+    assert "if (isHoverIncidentLink(l)) return 0.75;" in JS_GRAPH
     assert "line.setAttribute('stroke-width', '0.24');" in JS_GRAPH
     assert "el.setAttribute('stroke-width', hot ? '0.85' : '0.28');" in JS_GRAPH
     assert "if (inst.linkThreeObjectExtend) inst.linkThreeObjectExtend(true);" in JS_GRAPH
@@ -403,10 +411,13 @@ def test_graph_focused_node_label_scales_up_with_outline():
     assert "function makeLabel(" in JS_BUNDLE_GRAPH
     assert "variant: 'focused'" in JS_BUNDLE_GRAPH
     assert "isFocusedLabel" in JS_BUNDLE_GRAPH
-    # Spec font sizes: focused 26, hover 16, neighbor 14, default 11, edge 10.
-    assert "{ default: 11, edge: 10, neighbor: 14, hover: 16, focused: 26 }" in JS_BUNDLE_GRAPH
-    # 4-px stroke under the focused text fill.
-    assert "{ default: 1, edge: 1, neighbor: 1, hover: 2, focused: 4 }" in JS_BUNDLE_GRAPH
+    # Issue 2 — hover bumps to 22px (was 16) so the user can see it
+    # before they click; neighbor bumps to 16px to match the new
+    # mid-tier emphasis.
+    assert "{ default: 11, edge: 10, neighbor: 16, hover: 22, focused: 26 }" in JS_BUNDLE_GRAPH
+    # Issue 2 — hover stroke bumps to 2.5 (from 2); default keeps a
+    # 1.5px stroke for the dark-theme legibility shadow (Issue 1).
+    assert "{ default: 1.5, edge: 1, neighbor: 1, hover: 2.5, focused: 4 }" in JS_BUNDLE_GRAPH
     # The focused sprite anchors above the node (positive +y offset based
     # on node.val so it never overlaps the sphere itself).
     assert "n.val * 1.2 + 8" in JS_BUNDLE_GRAPH
@@ -421,17 +432,19 @@ def test_graph_focused_node_label_scales_up_with_outline():
 
 
 def test_graph_focused_label_has_solid_pill_default_does_not():
-    """Issue 1 — ONLY the focused variant paints a solid background pill
-    (white in light theme, near-black in dark theme) with a 2-px accent
-    border. Default / neighbor / hover / edge labels render translucent
-    text-only with NO pill (the user explicitly does not want white pills
-    on every label — the previous build painted one on every node)."""
+    """Issue 1 + Issue 3 — ONLY the focused variant paints a background
+    pill, and even that pill is now SUBTLE: a slightly-lighter accent-
+    tinted blue on dark theme (rgba(40,55,90,0.55)) rather than a jarring
+    near-black or white. Default / neighbor / hover / edge labels render
+    text-only with NO pill, theme-foreground colors, and an accent stroke
+    on hover/focused so the indication comes from font + stroke, not from
+    a pill that looks out of theme."""
     # The pill is gated on the focused variant only.
     assert "var hasPill = variant === 'focused'" in JS_BUNDLE_GRAPH
-    # Focused pill colors live in the bundle so the node's accent border
-    # can read against any backdrop.
-    assert "rgba(255,255,255,0.95)" in JS_BUNDLE_GRAPH  # light pill
-    assert "rgba(0,0,0,0.85)" in JS_BUNDLE_GRAPH         # dark pill
+    # Issue 3 — subtle accent-tinted background pills, same color family
+    # as the canvas (no jarring white-on-dark or black-on-light).
+    assert "rgba(40,55,90,0.55)" in JS_BUNDLE_GRAPH      # dark-theme subtle pill
+    assert "rgba(241,245,249,0.92)" in JS_BUNDLE_GRAPH   # light-theme subtle pill
     # The 2-px border picks up the node's accent color.
     assert "ctx.lineWidth = 2 * pxScale" in JS_BUNDLE_GRAPH
     assert "ctx.strokeStyle = accent" in JS_BUNDLE_GRAPH
@@ -572,6 +585,97 @@ def test_graph_size_uses_sqrt_scaling_via_node_val():
     assert "Math.sqrt" in JS_BUNDLE_GRAPH
     # nodeVal accessor is wired through to the library so val drives volume.
     assert "nodeVal(function(n)" in JS_BUNDLE_GRAPH
+
+
+# ---------------------------------------------------------------------------
+# Polish round — Issues 1-6
+# ---------------------------------------------------------------------------
+
+
+def test_graph_label_text_uses_theme_foreground_not_node_color():
+    """Issue 1 + Issue 3 — label text fill follows the THEME foreground
+    (white on dark, dark on light), NOT the node's group color. The
+    "indication" comes from font size + accent stroke + opacity, not
+    from a label that paints itself in a non-theme color."""
+    # Default / neighbor / hover / focused all use the theme white/dark
+    # rgba string; no variant pulls the node's accent color into the
+    # text fill any more.
+    assert "ctx.fillStyle = 'rgba(15,23,42,' + textOpacity + ')'" in JS_BUNDLE_GRAPH
+    assert "ctx.fillStyle = 'rgba(255,255,255,' + textOpacity + ')'" in JS_BUNDLE_GRAPH
+    # Stroke flips to accent on hover/focused (the "indicated" variants).
+    assert "if (variant === 'hover' || variant === 'focused')" in JS_BUNDLE_GRAPH
+    assert "ctx.strokeStyle = accent" in JS_BUNDLE_GRAPH
+
+
+def test_graph_theme_toggle_invalidates_label_cache():
+    """Issue 1 — the theme toggle exposes ``window.__graphRefreshLabels``
+    so the graph view can re-tint label sprites when the user switches
+    theme. The graph bundle defines the function (cache-clear + rebuild
+    nodeThreeObject), and the theme-toggle JS calls it."""
+    assert "window.__graphRefreshLabels" in JS_BUNDLE_GRAPH
+    assert "labelSpriteCache.clear()" in JS_BUNDLE_GRAPH
+    # The base bundle's theme toggle pokes the hook (no-op on every
+    # other route).
+    from llm_wiki.site.js import JS_THEME_TOGGLE
+    assert "__graphRefreshLabels" in JS_THEME_TOGGLE
+
+
+def test_graph_hover_grows_node_and_thickens_incident_edges():
+    """Issue 2 — hovered node sphere grows to ``val * 1.25`` and incident
+    edges thicken to 1.5x of the default 0.5 width. Both apply WITHOUT
+    dimming non-incident (which is reserved for focus)."""
+    # nodeVal accessor multiplies the base by 1.25 when hovered.
+    assert "if (hoverNode === n) return base * 1.25" in JS_BUNDLE_GRAPH
+    # Hover-incident link width = 0.75 = 1.5 * 0.5 default.
+    assert "if (isHoverIncidentLink(l)) return 0.75" in JS_BUNDLE_GRAPH
+    # Hover handler re-pokes the accessors so the change is visible
+    # immediately (without waiting for the next sim tick).
+    assert "Graph.nodeVal(Graph.nodeVal())" in JS_BUNDLE_GRAPH
+    assert "Graph.linkWidth(Graph.linkWidth())" in JS_BUNDLE_GRAPH
+
+
+def test_graph_particles_render_white_against_translucent_edges():
+    """Issue 5 — directional particles paint as near-opaque white so
+    they're visible against any per-type edge color (yellow particles
+    on yellow edges used to be invisible). Edge opacity drops to 0.35
+    so the particles can pop. Particles per edge: 2 default, 4 on focus.
+    Particle width 2.5; speed 0.005 default, 0.008 on focus."""
+    assert "'rgba(255,255,255,0.95)'" in JS_BUNDLE_GRAPH
+    assert "linkDirectionalParticleColor" in JS_BUNDLE_GRAPH
+    assert "linkDirectionalParticleWidth(2.5)" in JS_BUNDLE_GRAPH
+    assert "return highlightLinks.has(l) ? 4 : 2" in JS_BUNDLE_GRAPH
+    assert "return highlightLinks.has(l) ? 0.008 : 0.005" in JS_BUNDLE_GRAPH
+
+
+def test_graph_auto_browse_wired():
+    """Issue 6 — Auto-browse toolbar button cycles the graph through
+    high-degree nodes hands-free. Toggleable via the toolbar button or
+    the ``b`` keyboard shortcut. Stops on Esc, manual node click, or
+    manual mouse-drag."""
+    # Toolbar button query selector + click handler.
+    assert "[data-graph-action=\"auto-browse\"]" in JS_BUNDLE_GRAPH
+    assert "btnAutoBrowse" in JS_BUNDLE_GRAPH
+    # State machine.
+    assert "autoBrowseActive" in JS_BUNDLE_GRAPH
+    assert "function startAutoBrowse" in JS_BUNDLE_GRAPH
+    assert "function stopAutoBrowse" in JS_BUNDLE_GRAPH
+    assert "function toggleAutoBrowse" in JS_BUNDLE_GRAPH
+    assert "function autoBrowseStep" in JS_BUNDLE_GRAPH
+    # Recursive setTimeout chain (5s dwell) so cancellation is clean.
+    assert "setTimeout" in JS_BUNDLE_GRAPH
+    assert "AUTO_BROWSE_DWELL_MS = 5000" in JS_BUNDLE_GRAPH
+    assert "AUTO_BROWSE_MAX_HOPS = 8" in JS_BUNDLE_GRAPH
+    # Highest-degree picker + most-connected unvisited neighbor picker.
+    assert "function pickStartNode" in JS_BUNDLE_GRAPH
+    assert "function pickNextNeighbor" in JS_BUNDLE_GRAPH
+    # Button label flip + aria.
+    assert "'Stop browse'" in JS_BUNDLE_GRAPH
+    assert "'Auto-browse'" in JS_BUNDLE_GRAPH
+    # Cursor cue on the wrapper while a tour is running.
+    assert "is-auto-browsing" in JS_BUNDLE_GRAPH
+    # Keyboard shortcut + Esc cancellation.
+    assert "if (e.key === 'b')" in JS_BUNDLE_GRAPH
+    assert "if (autoBrowseActive) stopAutoBrowse()" in JS_BUNDLE_GRAPH
 
 
 # ---------------------------------------------------------------------------

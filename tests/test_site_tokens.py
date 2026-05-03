@@ -279,3 +279,11 @@ def test_graph_fullscreen_class_styles_present():
     assert ".graph-canvas-wrapper.is-fullscreen .graph-toolbar" in CSS
     # Legend pinned bottom-left.
     assert ".graph-canvas-wrapper.is-fullscreen .graph-legend" in CSS
+
+
+def test_graph_auto_browse_cursor_cue_present():
+    """Issue 6 — ``.graph-canvas-wrapper.is-auto-browsing`` swaps the
+    cursor to ``progress`` so the user has an unmistakable signal that
+    the graph is in tour mode (camera moving on its own)."""
+    assert ".graph-canvas-wrapper.is-auto-browsing" in CSS
+    assert "cursor: progress" in CSS
