@@ -967,7 +967,9 @@ def test_render_graph_view_uses_wide_layout_with_rail(
 ) -> None:
     """Graph view shares the wide content layout with index pages — left
     rail visible, content column comfortably wide (not full-bleed). The
-    right TOC slot renders a graph control panel instead of headings.
+    right TOC slot now renders a focused-node info panel (Issue 1) — the
+    redundant type-chip control list was removed because the legend below
+    the canvas already exposes the same information.
     """
     out = render_graph_view(site_ctx)
     # Wide variant — same as the concepts index.
@@ -978,13 +980,24 @@ def test_render_graph_view_uses_wide_layout_with_rail(
     assert "main--graph" not in out
     # Left rail still rendered (the rail is part of page_shell, not opt-in).
     assert '<aside class="rail"' in out
-    # Right rail is the graph control panel (toc--graph modifier).
+    # Right rail is the focused-node info panel (toc--graph modifier).
     assert "toc toc--graph" in out
-    assert "data-graph-control-group" in out
+    # Issue 1 — the JS contract expects these stable IDs in the rail.
+    assert 'id="graph-info-panel"' in out
+    assert 'id="graph-info-empty"' in out
+    assert 'id="graph-info-content"' in out
+    assert 'id="graph-info-neighbors"' in out
+    # Empty state copy is server-rendered so a no-JS reader still sees it.
+    assert "Click a node" in out
+    # The redundant type-chip list is no longer in the rail.
+    assert "data-graph-control-group" not in out
     # Canvas wrapper carries the .graph-canvas class with CSS-controlled
     # dimensions (clamp(560px, 70vh, 880px) on desktop).
     assert '<div class="graph-canvas"' in out
     assert 'id="graph-canvas"' in out
+    # Issue 4 — wrapper + Fullscreen toolbar button.
+    assert 'id="graph-canvas-wrapper"' in out
+    assert 'data-graph-action="fullscreen"' in out
     # Size hint is in the toolbar so users know what node radius means.
     assert "node size = √(connections)" in out
 

@@ -193,3 +193,36 @@ def test_no_main_graph_full_bleed_modifier():
         "the graph-only modifier was retired — the route uses main--wide"
     )
     assert "shell--graph" not in CSS
+
+
+def test_graph_info_panel_in_right_rail_clamps_description():
+    """Issue 1 — the right-rail focused-node panel is the canonical info
+    surface (not the in-canvas overlay). The description clamps to ~6 lines
+    and the title wraps with ``overflow-wrap: anywhere`` so a long node
+    name doesn't blow out the rail."""
+    assert ".toc.toc--graph .graph-info-panel" in CSS
+    assert ".toc.toc--graph .graph-info-title" in CSS
+    assert ".toc.toc--graph .graph-info-desc" in CSS
+    # 6-line clamp on the description block.
+    assert "-webkit-line-clamp: 6" in CSS
+    # Title wrapping for long node names.
+    assert "overflow-wrap: anywhere" in CSS
+    # Neighbor list rows for the JS-populated section.
+    assert ".graph-neighbor-row" in CSS
+    assert ".graph-neighbor-list" in CSS
+
+
+def test_graph_fullscreen_class_styles_present():
+    """Issue 4 — ``.graph-canvas-wrapper.is-fullscreen`` repaints the
+    layout so the canvas covers the viewport while the toolbar pins to
+    the top, the legend to the bottom-left, and the info panel stays
+    on the right."""
+    assert ".graph-canvas-wrapper" in CSS
+    assert ".graph-canvas-wrapper.is-fullscreen" in CSS
+    # Canvas covers the viewport in fullscreen.
+    assert "100vw" in CSS
+    assert "100vh" in CSS
+    # Toolbar absolutely-positioned over the canvas in fullscreen.
+    assert ".graph-canvas-wrapper.is-fullscreen .graph-toolbar" in CSS
+    # Legend pinned bottom-left.
+    assert ".graph-canvas-wrapper.is-fullscreen .graph-legend" in CSS

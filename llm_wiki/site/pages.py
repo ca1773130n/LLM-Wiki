@@ -1979,22 +1979,21 @@ def render_graph_view(ctx: SiteContext) -> str:
         for group, count in sorted(type_counts.items(), key=lambda kv: kv[0])
     )
 
-    # Right-rail graph control panel — server-rendered so it survives
-    # JS being off. The JS bundle hooks the ``data-group`` chips to toggle
-    # node-type visibility (mirrors the in-canvas legend, but pinned to
-    # the right rail using the same sticky CSS as the article TOC).
-    control_chips = "".join(
-        f'<li><button type="button" class="graph-control-chip" data-graph-control-group="{_esc(group)}" data-group="{_esc(group)}" aria-pressed="true">'
-        f'<span class="swatch" style="background:{palette.get(group, "#64748b")}"></span>'
-        f'<span class="label">{_esc(group)}</span>'
-        f'<span class="count">{count}</span>'
-        f'</button></li>'
-        for group, count in sorted(type_counts.items(), key=lambda kv: kv[0])
-    )
+    # Right-rail focused-node info panel — server-renders only the empty
+    # state. The JS bundle (showInfoPanel) populates ``#graph-info-content``
+    # + ``#graph-info-neighbors`` when the user clicks a node and toggles
+    # the visibility of ``#graph-info-empty`` accordingly. Stable IDs are
+    # part of the JS contract; do not rename without updating ``js.py``.
     graph_toc_html = (
-        '<aside class="toc toc--graph" role="doc-toc" aria-label="Graph controls">'
-        '<h2>Node types</h2>'
-        '<ul class="graph-control-list">' + control_chips + '</ul>'
+        '<aside class="toc toc--graph" role="doc-toc" aria-label="Focused node">'
+        '<div class="graph-info-panel" id="graph-info-panel" aria-live="polite">'
+        '<div class="graph-info-empty" id="graph-info-empty">'
+        '<p class="muted small">Click a node in the graph to inspect it.</p>'
+        '<p class="muted small">Hover a neighbor here to highlight it; click to focus.</p>'
+        '</div>'
+        '<div class="graph-info-content" id="graph-info-content" hidden></div>'
+        '<div class="graph-info-neighbors" id="graph-info-neighbors" hidden></div>'
+        '</div>'
         '<h2>Shortcuts</h2>'
         '<p class="muted small"><kbd>/</kbd> search · <kbd>f</kbd> fit · '
         '<kbd>r</kbd> reset · <kbd>o</kbd> orbit · <kbd>2</kbd>/<kbd>3</kbd> mode · '
@@ -2056,28 +2055,30 @@ def render_graph_view(ctx: SiteContext) -> str:
   <p class="lead">Tap or click a node to focus it: the camera flies in and orbits, neighbors stay highlighted while non-incident nodes dim. Tap the same node again to open its page. Drag to orbit, scroll/pinch to zoom. Press <kbd>/</kbd> to search, <kbd>f</kbd> to fit, <kbd>o</kbd> to toggle auto-orbit, <kbd>2</kbd>/<kbd>3</kbd> to switch projection, <kbd>Esc</kbd> to unfocus.</p>
 </header>
 <section class="graph-page" aria-label="Knowledge graph visualization">
-  <div class="graph-toolbar" role="toolbar" aria-label="Graph controls">
-    <div class="graph-toolbar-group" role="group" aria-label="Projection">
-      <button type="button" class="button" data-graph-mode="3d" aria-pressed="true">3D</button>
-      <button type="button" class="button" data-graph-mode="2d" aria-pressed="false">2D</button>
+  <div class="graph-canvas-wrapper" id="graph-canvas-wrapper">
+    <div class="graph-toolbar" role="toolbar" aria-label="Graph controls">
+      <div class="graph-toolbar-group" role="group" aria-label="Projection">
+        <button type="button" class="button" data-graph-mode="3d" aria-pressed="true">3D</button>
+        <button type="button" class="button" data-graph-mode="2d" aria-pressed="false">2D</button>
+      </div>
+      <div class="graph-toolbar-group" role="group" aria-label="View">
+        <button type="button" class="button" data-graph-action="fit" title="Fit to view (f)">Fit</button>
+        <button type="button" class="button" data-graph-action="fullscreen" title="Toggle fullscreen" aria-pressed="false">Fullscreen</button>
+        <button type="button" class="button" data-graph-action="reset" title="Reset (r)">Reset</button>
+      </div>
+      <div class="graph-search">
+        <label class="visually-hidden" for="graph-search-input">Search nodes</label>
+        <input id="graph-search-input" type="search" placeholder="Search nodes ( / )" autocomplete="off" spellcheck="false">
+      </div>
+      <span class="graph-size-hint" title="Node radius scales with sqrt of incident-edge count, capped at degree=200.">node size = √(connections)</span>
     </div>
-    <div class="graph-toolbar-group" role="group" aria-label="View">
-      <button type="button" class="button" data-graph-action="fit" title="Fit to view (f)">Fit</button>
-      <button type="button" class="button" data-graph-action="reset" title="Reset (r)">Reset</button>
+    <div class="graph-canvas" id="graph-canvas" data-payload-url="payload.json" role="img" aria-label="Interactive 3D knowledge graph">
+      {skeleton}
+      <div class="graph-tooltip" id="graph-tooltip" role="status" aria-live="polite"></div>
+      <div class="graph-error-banner" id="graph-error-banner" role="alert"></div>
     </div>
-    <div class="graph-search">
-      <label class="visually-hidden" for="graph-search-input">Search nodes</label>
-      <input id="graph-search-input" type="search" placeholder="Search nodes ( / )" autocomplete="off" spellcheck="false">
-    </div>
-    <span class="graph-size-hint" title="Node radius scales with sqrt of incident-edge count, capped at degree=200.">node size = √(connections)</span>
+    <div class="graph-legend" id="graph-legend" aria-label="Type legend">{legend_items}</div>
   </div>
-  <div class="graph-canvas" id="graph-canvas" data-payload-url="payload.json" role="img" aria-label="Interactive 3D knowledge graph">
-    {skeleton}
-    <div class="graph-info-panel" id="graph-info-panel" aria-live="polite"></div>
-    <div class="graph-tooltip" id="graph-tooltip" role="status" aria-live="polite"></div>
-    <div class="graph-error-banner" id="graph-error-banner" role="alert"></div>
-  </div>
-  <div class="graph-legend" id="graph-legend" aria-label="Type legend">{legend_items}</div>
   <p class="graph-help muted">Showing {len(nodes_payload)} of {len(nodes_payload)} wiki nodes · {len(links_payload)} links</p>
 </section>"""
     return page_shell(

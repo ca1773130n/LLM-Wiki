@@ -827,15 +827,20 @@ JS_GRAPH = r"""
       return Math.max(1, (n && (n.val || n.degree)) || 1) >= Math.max(medianVal + 1, overviewLabelVal);
     }
 
-    var infoPanel = document.getElementById('graph-info-panel');
-    var tooltip   = document.getElementById('graph-tooltip');
-    var legendEl  = document.getElementById('graph-legend');
-    var searchEl  = document.getElementById('graph-search-input');
-    var banner    = document.getElementById('graph-error-banner');
-    var btn2D     = document.querySelector('[data-graph-mode="2d"]');
-    var btn3D     = document.querySelector('[data-graph-mode="3d"]');
-    var btnFit    = document.querySelector('[data-graph-action="fit"]');
-    var btnReset  = document.querySelector('[data-graph-action="reset"]');
+    var infoPanel    = document.getElementById('graph-info-panel');
+    var infoEmpty    = document.getElementById('graph-info-empty');
+    var infoContent  = document.getElementById('graph-info-content');
+    var infoNeighbors= document.getElementById('graph-info-neighbors');
+    var tooltip      = document.getElementById('graph-tooltip');
+    var legendEl     = document.getElementById('graph-legend');
+    var searchEl     = document.getElementById('graph-search-input');
+    var banner       = document.getElementById('graph-error-banner');
+    var wrapper      = document.getElementById('graph-canvas-wrapper') || container;
+    var btn2D        = document.querySelector('[data-graph-mode="2d"]');
+    var btn3D        = document.querySelector('[data-graph-mode="3d"]');
+    var btnFit       = document.querySelector('[data-graph-action="fit"]');
+    var btnReset     = document.querySelector('[data-graph-action="reset"]');
+    var btnFullscreen= document.querySelector('[data-graph-action="fullscreen"]');
 
     var reduceMotion = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
 
@@ -933,77 +938,188 @@ JS_GRAPH = r"""
 
     function clearInfoPanel(){
       if (!infoPanel) return;
-      while (infoPanel.firstChild) infoPanel.removeChild(infoPanel.firstChild);
+      if (infoContent) {
+        while (infoContent.firstChild) infoContent.removeChild(infoContent.firstChild);
+        infoContent.hidden = true;
+      }
+      if (infoNeighbors) {
+        while (infoNeighbors.firstChild) infoNeighbors.removeChild(infoNeighbors.firstChild);
+        infoNeighbors.hidden = true;
+      }
+      if (infoEmpty) infoEmpty.hidden = false;
       infoPanel.classList.remove('is-visible');
+      if (wrapper) wrapper.classList.remove('has-focus');
     }
 
-    function appendInfoLink(label, href){
-      if (!infoPanel || !href) return;
+    function appendInfoLink(parent, label, href, extraClass){
+      if (!parent || !href) return;
       var a = document.createElement('a');
-      a.className = 'graph-info-link';
+      a.className = 'graph-info-link' + (extraClass ? ' ' + extraClass : '');
       a.href = href;
       a.textContent = label;
-      infoPanel.appendChild(a);
+      parent.appendChild(a);
+    }
+
+    function appendInfoButton(parent, label, onclick, extraClass){
+      if (!parent) return;
+      var b = document.createElement('button');
+      b.type = 'button';
+      b.className = 'graph-info-button' + (extraClass ? ' ' + extraClass : '');
+      b.textContent = label;
+      b.addEventListener('click', onclick);
+      parent.appendChild(b);
+    }
+
+    function renderNeighborList(node){
+      if (!infoNeighbors || !node) return;
+      while (infoNeighbors.firstChild) infoNeighbors.removeChild(infoNeighbors.firstChild);
+      var heading = document.createElement('h4');
+      heading.className = 'graph-info-subhead';
+      var nbrCount = node.neighbors ? node.neighbors.size : 0;
+      heading.textContent = 'Neighbors (' + nbrCount + ')';
+      infoNeighbors.appendChild(heading);
+      if (!nbrCount) {
+        var empty = document.createElement('p');
+        empty.className = 'muted small';
+        empty.textContent = 'No incident edges.';
+        infoNeighbors.appendChild(empty);
+        infoNeighbors.hidden = false;
+        return;
+      }
+      var list = document.createElement('ul');
+      list.className = 'graph-neighbor-list';
+      var items = [];
+      node.neighbors.forEach(function(nb){ items.push(nb); });
+      items.sort(function(a, b){ return (b.degree || 0) - (a.degree || 0); });
+      items.slice(0, 80).forEach(function(nb){
+        var li = document.createElement('li');
+        var btn = document.createElement('button');
+        btn.type = 'button';
+        btn.className = 'graph-neighbor-row';
+        btn.dataset.nodeId = nb.id;
+        var dot = document.createElement('span');
+        dot.className = 'graph-neighbor-dot';
+        dot.style.background = nodeAccent(nb);
+        var typeBadge = document.createElement('span');
+        typeBadge.className = 'graph-neighbor-type';
+        typeBadge.textContent = (nb.group || nb.kind || 'node');
+        var name = document.createElement('span');
+        name.className = 'graph-neighbor-name';
+        name.textContent = nb.name || nb.id || '';
+        btn.appendChild(dot);
+        btn.appendChild(typeBadge);
+        btn.appendChild(name);
+        // Hover the row → highlight that node in the canvas. Click → focus it.
+        btn.addEventListener('mouseenter', function(){
+          if (focusedNode && nb !== focusedNode) {
+            hoverNode = nb;
+            refreshHighlightStyles();
+          }
+        });
+        btn.addEventListener('mouseleave', function(){
+          hoverNode = null;
+          refreshHighlightStyles();
+        });
+        btn.addEventListener('click', function(){
+          activateNode(nb, null);
+        });
+        li.appendChild(btn);
+        list.appendChild(li);
+      });
+      infoNeighbors.appendChild(list);
+      infoNeighbors.hidden = false;
     }
 
     function showInfoPanel(node){
       if (!infoPanel) return;
-      while (infoPanel.firstChild) infoPanel.removeChild(infoPanel.firstChild);
-      if (!node) { infoPanel.classList.remove('is-visible'); return; }
-      var h = document.createElement('h3');
-      h.className = 'graph-info-title';
-      h.textContent = node.name || node.id || '';
-      infoPanel.appendChild(h);
-      var meta = document.createElement('p');
-      meta.className = 'graph-info-meta';
-      var t = document.createElement('span');
-      t.className = 'graph-info-badge';
-      t.style.background = nodeAccent(node);
-      t.textContent = node.group || node.kind || '';
-      meta.appendChild(t);
-      var typeSpan = document.createElement('span');
-      typeSpan.textContent = ' ' + (node.type || '');
-      meta.appendChild(typeSpan);
-      var degSpan = document.createElement('span');
-      degSpan.className = 'graph-info-degree';
-      degSpan.textContent = ' · degree ' + (node.degree || 0);
-      meta.appendChild(degSpan);
-      infoPanel.appendChild(meta);
-      if (node.description) {
-        var desc = document.createElement('p');
-        desc.className = 'graph-info-desc';
-        var text = String(node.description);
-        desc.textContent = text.length > 200 ? text.slice(0, 197) + '…' : text;
-        infoPanel.appendChild(desc);
+      // No node? Reset to empty state. Hover-only previews on the canvas
+      // do NOT populate the rail (only focused/pinned nodes do).
+      if (!node) { clearInfoPanel(); return; }
+      if (infoEmpty) infoEmpty.hidden = true;
+      if (infoContent) {
+        while (infoContent.firstChild) infoContent.removeChild(infoContent.firstChild);
+        var h = document.createElement('h3');
+        h.className = 'graph-info-title';
+        h.style.color = nodeAccent(node);
+        h.textContent = node.name || node.id || '';
+        infoContent.appendChild(h);
+        var meta = document.createElement('p');
+        meta.className = 'graph-info-meta';
+        var t = document.createElement('span');
+        t.className = 'graph-info-badge';
+        t.style.background = nodeAccent(node);
+        t.textContent = node.group || node.kind || '';
+        meta.appendChild(t);
+        var typeSpan = document.createElement('span');
+        typeSpan.textContent = ' ' + (node.type || '');
+        meta.appendChild(typeSpan);
+        var degSpan = document.createElement('span');
+        degSpan.className = 'graph-info-degree';
+        degSpan.textContent = ' · degree ' + (node.degree || 0);
+        meta.appendChild(degSpan);
+        infoContent.appendChild(meta);
+        if (node.description) {
+          var desc = document.createElement('p');
+          desc.className = 'graph-info-desc';
+          desc.textContent = String(node.description);
+          infoContent.appendChild(desc);
+        }
+        var actions = document.createElement('div');
+        actions.className = 'graph-info-actions';
+        if (node.href) appendInfoLink(actions, 'Open page →', node.href);
+        appendInfoButton(actions, 'Clear focus', function(){
+          // Equivalent to pressing Esc on the focused node only — does not
+          // touch search or day filter.
+          pinnedNode = null;
+          pinnedLink = null;
+          focusedNode = null;
+          markFocused(null);
+          autoOrbitEnabled = false;
+          applyHighlight(null);
+          clearInfoPanel();
+        }, 'graph-info-button--ghost');
+        infoContent.appendChild(actions);
+        infoContent.hidden = false;
       }
-      if (node.href) {
-        appendInfoLink('Open page →', node.href);
-      }
+      renderNeighborList(node);
       infoPanel.classList.add('is-visible');
+      if (wrapper) wrapper.classList.add('has-focus');
     }
 
     function showLinkInfoPanel(link){
       if (!infoPanel || !link) return;
-      while (infoPanel.firstChild) infoPanel.removeChild(infoPanel.firstChild);
+      if (infoEmpty) infoEmpty.hidden = true;
+      if (infoNeighbors) {
+        while (infoNeighbors.firstChild) infoNeighbors.removeChild(infoNeighbors.firstChild);
+        infoNeighbors.hidden = true;
+      }
       var endpoints = linkEndpoints(link);
       var source = endpoints.source;
       var target = endpoints.target;
       var label = link.label || link.type || 'related';
-      var h = document.createElement('h3');
-      h.className = 'graph-info-title';
-      h.textContent = label;
-      infoPanel.appendChild(h);
-      var meta = document.createElement('p');
-      meta.className = 'graph-info-meta';
-      meta.textContent = ((source && source.name) || 'source') + ' → ' + ((target && target.name) || 'target');
-      infoPanel.appendChild(meta);
-      var hint = document.createElement('p');
-      hint.className = 'graph-info-desc';
-      hint.textContent = 'Tap again to open the target page. Use source/target links below for exact navigation.';
-      infoPanel.appendChild(hint);
-      appendInfoLink('Open target →', target && target.href);
-      appendInfoLink('Open source →', source && source.href);
+      if (infoContent) {
+        while (infoContent.firstChild) infoContent.removeChild(infoContent.firstChild);
+        var h = document.createElement('h3');
+        h.className = 'graph-info-title';
+        h.textContent = label;
+        infoContent.appendChild(h);
+        var meta = document.createElement('p');
+        meta.className = 'graph-info-meta';
+        meta.textContent = ((source && source.name) || 'source') + ' → ' + ((target && target.name) || 'target');
+        infoContent.appendChild(meta);
+        var hint = document.createElement('p');
+        hint.className = 'graph-info-desc';
+        hint.textContent = 'Tap again to open the target page. Use source/target links below for exact navigation.';
+        infoContent.appendChild(hint);
+        var actions = document.createElement('div');
+        actions.className = 'graph-info-actions';
+        if (target && target.href) appendInfoLink(actions, 'Open target →', target.href);
+        if (source && source.href) appendInfoLink(actions, 'Open source →', source.href);
+        infoContent.appendChild(actions);
+        infoContent.hidden = false;
+      }
       infoPanel.classList.add('is-visible');
+      if (wrapper) wrapper.classList.add('has-focus');
     }
 
     function showTooltip(text, x, y){
@@ -1207,91 +1323,92 @@ JS_GRAPH = r"""
       });
     }
 
-    // ---- Sprite label cache ---------------------------------------------
-    var spriteCache = new Map();
-    function makeSpriteLabel(text, color){
+    // ---- Unified label sprite (Issue 2) ---------------------------------
+    // ``makeLabelSprite(text, opts)`` paints text onto a canvas with an
+    // OPAQUE pill background + 2px accent border + thick white outline
+    // under the text fill, then wraps the texture in a Sprite that:
+    //   * disables depth testing so it always renders on top, and
+    //   * uses ``renderOrder`` to control stacking (focused > neighbor > base).
+    //
+    // ``opts`` keys:
+    //   variant   : 'base' | 'neighbor' | 'hover' | 'focused' (default 'base')
+    //   accent    : pill border + text fill color (CSS string)
+    //   theme     : 'light' | 'dark' (drives pill background opacity)
+    //   isLabel/isFocusedLabel/isNeighborLabel/isHoverLabel: tags on userData
+    //
+    // Cached by ``text|variant|accent|theme`` so identical labels reuse
+    // their canvas/texture across nodes.
+    var VARIANT_FONT = { base: 12, neighbor: 18, hover: 22, focused: 28 };
+    var VARIANT_RENDER_ORDER = { base: 990, neighbor: 998, hover: 999, focused: 999 };
+    var labelSpriteCache = new Map();
+    function makeLabelSprite(text, opts){
       if (!THREE) return null;
-      var key = text + '|' + color;
-      if (spriteCache.has(key)) return spriteCache.get(key).clone();
-      var canvas = document.createElement('canvas');
-      var fontSize = 32;
-      var pad = 12;
-      var ctx = canvas.getContext('2d');
-      ctx.font = '650 ' + fontSize + 'px "Inter", system-ui, sans-serif';
-      var metrics = ctx.measureText(text);
-      var w = Math.ceil(metrics.width) + pad * 2;
-      var h = fontSize + pad * 2;
-      canvas.width = w;
-      canvas.height = h;
-      ctx = canvas.getContext('2d');
-      ctx.font = '500 ' + fontSize + 'px "Inter", system-ui, sans-serif';
-      ctx.fillStyle = 'rgba(2,6,23,0.26)';
-      ctx.fillRect(0, 0, w, h);
-      ctx.fillStyle = color;
-      ctx.textBaseline = 'middle';
-      ctx.fillText(text, pad, h / 2);
-      var tex = new THREE.CanvasTexture(canvas);
-      tex.minFilter = THREE.LinearFilter;
-      var mat = new THREE.SpriteMaterial({
-        map: tex,
-        transparent: true,
-        depthWrite: false,
-        depthTest: false,
-        opacity: 0.74
-      });
-      var sprite = new THREE.Sprite(mat);
-      var scale = 0.18;
-      sprite.scale.set(w * scale, h * scale, 1);
-      sprite.renderOrder = 999;
-      sprite.userData.isLabel = true;
-      spriteCache.set(key, sprite);
-      var clone = sprite.clone();
-      clone.renderOrder = 999;
-      return clone;
-    }
-
-    // ---- Focused-label sprite (Bug 4) -----------------------------------
-    // Larger font, accent color, white outline so it pops over the scene
-    // regardless of camera distance. The badge under the title shows the
-    // node's kind. Always-on-top via depthTest: false + renderOrder 1000.
-    var focusedSpriteCache = new Map();
-    function makeFocusedSpriteLabel(text, accent, kindBadge){
-      if (!THREE) return null;
-      var key = text + '|' + accent + '|' + (kindBadge || '');
-      if (focusedSpriteCache.has(key)) return focusedSpriteCache.get(key).clone();
-      var canvas = document.createElement('canvas');
-      var titleSize = 48;       // ~24px on screen at default sprite scale 0.18
-      var badgeSize = 22;
-      var padX = 18;
-      var padY = 14;
-      var gap = 8;
-      var ctx = canvas.getContext('2d');
-      ctx.font = '700 ' + titleSize + 'px "Inter", system-ui, sans-serif';
-      var titleW = ctx.measureText(text).width;
-      ctx.font = '600 ' + badgeSize + 'px "Inter", system-ui, sans-serif';
-      var badgeW = kindBadge ? ctx.measureText(kindBadge).width : 0;
-      var w = Math.ceil(Math.max(titleW, badgeW)) + padX * 2;
-      var h = titleSize + (kindBadge ? badgeSize + gap : 0) + padY * 2;
-      canvas.width = w;
-      canvas.height = h;
-      ctx = canvas.getContext('2d');
-      // Subtle dark backdrop so text reads on bright nodes.
-      ctx.fillStyle = 'rgba(2,6,23,0.55)';
-      ctx.fillRect(0, 0, w, h);
-      // Title with white outline (2px) + accent fill.
-      ctx.font = '700 ' + titleSize + 'px "Inter", system-ui, sans-serif';
-      ctx.textBaseline = 'top';
-      ctx.lineWidth = 4;
-      ctx.strokeStyle = 'rgba(255,255,255,0.95)';
-      ctx.strokeText(text, padX, padY);
-      ctx.fillStyle = accent;
-      ctx.fillText(text, padX, padY);
-      // Kind badge under the title.
-      if (kindBadge) {
-        ctx.font = '600 ' + badgeSize + 'px "Inter", system-ui, sans-serif';
-        ctx.fillStyle = 'rgba(236,231,220,0.85)';
-        ctx.fillText(kindBadge.toUpperCase(), padX, padY + titleSize + gap);
+      opts = opts || {};
+      var variant = opts.variant || 'base';
+      var accent = opts.accent || '#ece7dc';
+      var theme = opts.theme || 'dark';
+      var key = text + '|' + variant + '|' + accent + '|' + theme;
+      if (labelSpriteCache.has(key)) {
+        var cached = labelSpriteCache.get(key);
+        var c = cached.clone();
+        c.material = cached.material; // share material/texture
+        c.renderOrder = cached.renderOrder;
+        // Tag clone with userData so position-update can identify it.
+        if (variant === 'focused') c.userData = { isFocusedLabel: true, variant: variant };
+        else if (variant === 'neighbor') c.userData = { isNeighborLabel: true, variant: variant };
+        else if (variant === 'hover') c.userData = { isHoverLabel: true, variant: variant };
+        else c.userData = { isLabel: true, variant: variant };
+        return c;
       }
+      var fontSize = VARIANT_FONT[variant] || 12;
+      // Canvas-internal metrics scaled up so the pill stays crisp at any
+      // sprite scale. We keep the world-space height proportional to the
+      // logical font size below.
+      var pxScale = 3;          // canvas pixels per logical unit
+      var fontPx = fontSize * pxScale;
+      var padX = 14 * pxScale;
+      var padY = 8 * pxScale;
+      var lineH = Math.round(fontPx * 1.5);
+      var canvas = document.createElement('canvas');
+      var ctx = canvas.getContext('2d');
+      ctx.font = (variant === 'focused' ? '700 ' : '600 ') + fontPx + 'px "Inter", system-ui, sans-serif';
+      var textW = ctx.measureText(text).width;
+      var w = Math.ceil(textW) + padX * 2;
+      var h = lineH + padY * 2;
+      canvas.width = w;
+      canvas.height = h;
+      ctx = canvas.getContext('2d');
+      // Pill background. Light theme: white 95%, dark theme: black 85%.
+      var bg = (theme === 'light') ? 'rgba(255,255,255,0.95)' : 'rgba(0,0,0,0.85)';
+      var radius = Math.min(h / 2, 18 * pxScale);
+      ctx.fillStyle = bg;
+      ctx.beginPath();
+      // Rounded-rect pill.
+      ctx.moveTo(radius, 0);
+      ctx.lineTo(w - radius, 0);
+      ctx.quadraticCurveTo(w, 0, w, radius);
+      ctx.lineTo(w, h - radius);
+      ctx.quadraticCurveTo(w, h, w - radius, h);
+      ctx.lineTo(radius, h);
+      ctx.quadraticCurveTo(0, h, 0, h - radius);
+      ctx.lineTo(0, radius);
+      ctx.quadraticCurveTo(0, 0, radius, 0);
+      ctx.closePath();
+      ctx.fill();
+      // 2px accent border.
+      ctx.lineWidth = 2 * pxScale;
+      ctx.strokeStyle = accent;
+      ctx.stroke();
+      // Text: thick 4px white stroke under the accent fill so the text
+      // stays readable even if the pill background is dropped/translucent.
+      ctx.font = (variant === 'focused' ? '700 ' : '600 ') + fontPx + 'px "Inter", system-ui, sans-serif';
+      ctx.textBaseline = 'middle';
+      ctx.textAlign = 'left';
+      ctx.lineWidth = 4 * pxScale;
+      ctx.strokeStyle = (theme === 'light') ? 'rgba(255,255,255,0.95)' : 'rgba(255,255,255,0.95)';
+      ctx.strokeText(text, padX, h / 2);
+      ctx.fillStyle = (variant === 'focused' || variant === 'hover') ? accent : (theme === 'light' ? '#0f172a' : '#f8fafc');
+      ctx.fillText(text, padX, h / 2);
       var tex = new THREE.CanvasTexture(canvas);
       tex.minFilter = THREE.LinearFilter;
       var mat = new THREE.SpriteMaterial({
@@ -1302,14 +1419,35 @@ JS_GRAPH = r"""
         opacity: 1.0
       });
       var sprite = new THREE.Sprite(mat);
-      var scale = 0.20;
-      sprite.scale.set(w * scale, h * scale, 1);
-      sprite.renderOrder = 1000;
-      sprite.userData.isFocusedLabel = true;
-      focusedSpriteCache.set(key, sprite);
-      var clone = sprite.clone();
-      clone.renderOrder = 1000;
-      return clone;
+      // World-space size: keep proportional to font; the per-frame hook
+      // scales by 1/camera.zoom when the camera is orthographic so the
+      // label stays readable at any zoom level.
+      var spriteScale = 0.10;   // world units per canvas pixel
+      sprite.scale.set(w * spriteScale, h * spriteScale, 1);
+      sprite.renderOrder = VARIANT_RENDER_ORDER[variant] || 990;
+      if (variant === 'focused') sprite.userData = { isFocusedLabel: true, variant: variant };
+      else if (variant === 'neighbor') sprite.userData = { isNeighborLabel: true, variant: variant };
+      else if (variant === 'hover') sprite.userData = { isHoverLabel: true, variant: variant };
+      else sprite.userData = { isLabel: true, variant: variant };
+      labelSpriteCache.set(key, sprite);
+      var out = sprite.clone();
+      out.material = sprite.material;
+      out.renderOrder = sprite.renderOrder;
+      out.userData = Object.assign({}, sprite.userData);
+      return out;
+    }
+
+    // Back-compat shim — earlier code paths called ``makeSpriteLabel`` for
+    // the default canvas-text label and ``makeFocusedSpriteLabel`` for the
+    // focused-node title. They now delegate to ``makeLabelSprite`` so the
+    // cache, depthTest, renderOrder behaviour is identical everywhere.
+    function makeSpriteLabel(text, color){
+      var theme = (document.documentElement.getAttribute('data-theme') === 'light') ? 'light' : 'dark';
+      return makeLabelSprite(text, { variant: 'base', accent: color, theme: theme });
+    }
+    function makeFocusedSpriteLabel(text, accent /*, kindBadge*/){
+      var theme = (document.documentElement.getAttribute('data-theme') === 'light') ? 'light' : 'dark';
+      return makeLabelSprite(text, { variant: 'focused', accent: accent, theme: theme });
     }
 
     // Neighbor "glow" sprite — a soft white ring at 1.5x node size for
@@ -1365,27 +1503,26 @@ JS_GRAPH = r"""
       sprite.material.transparent = true;
     }
 
-    // ---- Smooth orbit/pan: enable damping on the OrbitControls so drag
-    //      and library-native wheel zoom feel polished. We deliberately do
-    //      NOT install a custom wheel listener — 3d-force-graph's built-in
-    //      zoom owns the wheel event so we don't fight it.
-    function installControlsDamping(inst){
+    // ---- Cursor-anchored wheel zoom (Issue 3) ---------------------------
+    // We OWN the wheel event exclusively: ``OrbitControls.enableZoom`` is
+    // disabled so the library never sees it, and our handler raycasts the
+    // cursor onto the plane through ``controls.target`` (perpendicular to
+    // the camera→target axis) to find the world point under the cursor.
+    // Camera + target both move toward that point by the same factor, so
+    // the cursor stays glued to the same world coord across the zoom.
+    function installCursorWheelZoom(inst){
       var controls = inst && inst.controls && inst.controls();
       if (!controls) return;
       try {
         controls.enableDamping = true;
         controls.dampingFactor = 0.08;
+        controls.enableZoom = false;     // we own the wheel now
       } catch (_) {}
       try {
-        // Re-enable the library's own zoom interaction so it owns the
-        // wheel. (No-op on 2D mode; the 2D renderer has its own zoom.)
-        if (inst.enableZoomInteraction) inst.enableZoomInteraction(true);
+        // Disable the library's zoom-interaction proxy too so the two
+        // don't try to handle the same wheel event.
+        if (inst.enableZoomInteraction) inst.enableZoomInteraction(false);
       } catch (_) {}
-      // Cursor-anchored target: when the user moves the mouse over the
-      // canvas, point ``controls.target`` at the cursor world coordinate
-      // (via raycaster on the controls.target plane). Library zoom then
-      // moves toward that target naturally. Debounced so we don't churn
-      // the raycaster every frame.
       if (!THREE) return;
       var renderer = inst.renderer && inst.renderer();
       var camera = inst.camera && inst.camera();
@@ -1395,28 +1532,59 @@ JS_GRAPH = r"""
       var raycaster = new THREE.Raycaster();
       var mouseNDC = new THREE.Vector2();
       var plane = new THREE.Plane();
-      var intersect = new THREE.Vector3();
+      var intersectionPoint = new THREE.Vector3();
       var camDir = new THREE.Vector3();
+      dom.addEventListener('wheel', function(event){
+        if (mode !== '3d') return;
+        // Ctrl-wheel (macOS trackpad pinch) → fall back to library: do not
+        // intercept. We re-enable controls.zoom transiently and let the
+        // event propagate by NOT calling preventDefault.
+        if (event.ctrlKey) {
+          try { controls.enableZoom = true; if (controls.update) controls.update(); } catch (_) {}
+          return;
+        }
+        event.preventDefault();
+        event.stopPropagation();
+        var rect = dom.getBoundingClientRect();
+        mouseNDC.x = ((event.clientX - rect.left) / rect.width) * 2 - 1;
+        mouseNDC.y = -((event.clientY - rect.top) / rect.height) * 2 + 1;
+        camera.getWorldDirection(camDir);
+        plane.setFromNormalAndCoplanarPoint(camDir, controls.target);
+        raycaster.setFromCamera(mouseNDC, camera);
+        var hit = null;
+        try { hit = raycaster.ray.intersectPlane(plane, intersectionPoint); } catch (_) {}
+        if (!hit) return;
+        // Zoom factor: 1 - delta * 0.0015, clamped to [0.5, 1.5] per event
+        // so a single trackpad flick can't teleport the camera.
+        var factor = 1 - event.deltaY * 0.0015;
+        if (factor < 0.5) factor = 0.5;
+        if (factor > 1.5) factor = 1.5;
+        // Move camera and target toward the cursor by the same factor:
+        //   newPos = cursor + (camera.position - cursor) * f
+        //   newTarget = cursor + (target - cursor) * f
+        var cx = intersectionPoint.x, cy = intersectionPoint.y, cz = intersectionPoint.z;
+        camera.position.x = cx + (camera.position.x - cx) * factor;
+        camera.position.y = cy + (camera.position.y - cy) * factor;
+        camera.position.z = cz + (camera.position.z - cz) * factor;
+        controls.target.x = cx + (controls.target.x - cx) * factor;
+        controls.target.y = cy + (controls.target.y - cy) * factor;
+        controls.target.z = cz + (controls.target.z - cz) * factor;
+        try { if (controls.update) controls.update(); } catch (_) {}
+      }, { passive: false });
+      // Also listen to pointermove so future cursor-anchored hooks can
+      // read the intersection point cheaply via raycaster.setFromCamera.
       var pending = null;
       dom.addEventListener('pointermove', function(e){
         if (mode !== '3d') return;
-        if (pending) return;  // debounce to next animation frame
+        if (pending) return;
         pending = window.requestAnimationFrame(function(){
           pending = null;
-          var rect = dom.getBoundingClientRect();
-          mouseNDC.x = ((e.clientX - rect.left) / rect.width) * 2 - 1;
-          mouseNDC.y = -((e.clientY - rect.top) / rect.height) * 2 + 1;
-          camera.getWorldDirection(camDir);
-          plane.setFromNormalAndCoplanarPoint(camDir, controls.target);
+          var r = dom.getBoundingClientRect();
+          mouseNDC.x = ((e.clientX - r.left) / r.width) * 2 - 1;
+          mouseNDC.y = -((e.clientY - r.top) / r.height) * 2 + 1;
           raycaster.setFromCamera(mouseNDC, camera);
-          // We compute the intersect (lets the library aim its zoom toward
-          // it) but never mutate camera.position or controls.target — that
-          // is what fights the library's internal zoom. Computing the
-          // intersect is enough to keep ``Raycaster``/``setFromCamera``
-          // wired so future cursor-anchored hooks (hover labels, picking)
-          // can read ``intersect`` without re-instantiating the raycaster.
           if (raycaster.ray && raycaster.ray.intersectPlane) {
-            try { raycaster.ray.intersectPlane(plane, intersect); } catch (_) {}
+            try { raycaster.ray.intersectPlane(plane, intersectionPoint); } catch (_) {}
           }
         });
       }, { passive: true });
@@ -1483,8 +1651,12 @@ JS_GRAPH = r"""
 
     function sizeGraphToContainer(inst){
       if (!inst || !container) return;
-      var w = Math.max(320, Math.floor(container.clientWidth || container.getBoundingClientRect().width || 800));
-      var h = Math.max(360, Math.floor(container.clientHeight || container.getBoundingClientRect().height || 520));
+      // In fullscreen we measure the wrapper (it covers the viewport and
+      // contains the toolbar/info panel/legend); otherwise we measure the
+      // canvas container as before.
+      var src = (wrapper && wrapper.classList && wrapper.classList.contains('is-fullscreen')) ? wrapper : container;
+      var w = Math.max(320, Math.floor(src.clientWidth || src.getBoundingClientRect().width || 800));
+      var h = Math.max(360, Math.floor(src.clientHeight || src.getBoundingClientRect().height || 520));
       try { if (inst.width) inst.width(w); } catch (_) {}
       try { if (inst.height) inst.height(h); } catch (_) {}
       var canvas = container.querySelector('canvas');
@@ -1611,20 +1783,34 @@ JS_GRAPH = r"""
             var group = new THREE.Group();
             group.userData.nodeId = n.id;
             var radius = Math.sqrt(n.val || 1);
-            var base = makeSpriteLabel(nodeLabelText(n), nodeAccent(n));
+            var theme = (document.documentElement.getAttribute('data-theme') === 'light') ? 'light' : 'dark';
+            // Base label (12-14px, used for high-degree overview nodes).
+            var base = makeLabelSprite(nodeLabelText(n), { variant: 'base', accent: nodeAccent(n), theme: theme });
             if (base) {
-              base.position.set(0, 6 + radius, 0);
-              base.userData.isLabel = true;
+              base.position.set(0, n.val * 1.2 + 8 + radius, 0);
               group.add(base);
             }
-            // Focused label is always created so we can flip .visible
-            // instead of rebuilding the sprite on selection. Hidden by
-            // default — selection (Bug 4) flips it on.
-            var focused = makeFocusedSpriteLabel(nodeLabelText(n), nodeAccent(n), n.group || n.kind || '');
+            // Hover label (22px, transient — toggled by hoverNode === n).
+            var hover = makeLabelSprite(nodeLabelText(n), { variant: 'hover', accent: nodeAccent(n), theme: theme });
+            if (hover) {
+              hover.position.set(0, n.val * 1.2 + 8 + radius, 0);
+              hover.visible = false;
+              group.add(hover);
+            }
+            // Neighbor label (18px white pill, depthTest=false renderOrder=998).
+            var neighbor = makeLabelSprite(nodeLabelText(n), { variant: 'neighbor', accent: nodeAccent(n), theme: theme });
+            if (neighbor) {
+              neighbor.position.set(0, n.val * 1.2 + 8 + radius, 0);
+              neighbor.visible = false;
+              group.add(neighbor);
+            }
+            // Focused label (28px accent, opaque pill, depthTest=false
+            // renderOrder=999 → on top of every other object). Toggled by
+            // ``n.__focused`` in nodePositionUpdate.
+            var focused = makeLabelSprite(nodeLabelText(n), { variant: 'focused', accent: nodeAccent(n), theme: theme });
             if (focused) {
-              focused.position.set(0, 12 + radius * 1.4, 0);
+              focused.position.set(0, n.val * 1.2 + 8 + radius, 0);
               focused.visible = !!n.__focused;
-              focused.userData.isFocusedLabel = true;
               group.add(focused);
             }
             // Neighbor glow — only shown for 1-hop neighbors of the focused
@@ -1645,28 +1831,53 @@ JS_GRAPH = r"""
             inst.nodePositionUpdate(function(group, coords, node){
               if (!group || !coords) return false;
               group.position.set(coords.x || 0, coords.y || 0, coords.z || 0);
-              // Iterate child sprites and toggle visibility / opacity per
-              // current focus + hover state. Cheap; no allocations.
+              // Iterate child sprites and toggle visibility per the
+              // current focus + hover state. Hover loses to focus when
+              // both apply to the same node. Cheap; no allocations.
               var radius = Math.sqrt((node && node.val) || 1);
+              var labelY = (node && node.val ? node.val * 1.2 : 0) + 8 + radius;
               var isFocused = !!(node && node.__focused);
-              var isNeighbor = focusedNode && node && focusedNode !== node && highlightNodes.has(node);
-              var isHover = (hoverNode === node) || highlightNodes.has(node);
+              var isFocusedNeighbor = focusedNode && node && focusedNode !== node && highlightNodes.has(node);
+              var isHovered = (hoverNode === node) && !isFocused;
               var showBaseAlways = node && shouldShowOverviewLabel(node);
+              // Camera-zoom-aware scale factor. The library uses a perspective
+              // camera; ``camera.zoom`` is normally 1, so this is a no-op
+              // unless an upstream change swaps in an ortho camera.
+              var camScale = 1.0;
+              try {
+                var cam = Graph && Graph.camera && Graph.camera();
+                if (cam && cam.zoom) camScale = Math.max(0.6, Math.min(1.6, 1 / cam.zoom));
+              } catch (_) {}
               for (var i = 0; i < group.children.length; i++) {
                 var child = group.children[i];
                 if (!child) continue;
-                if (child.userData && child.userData.isFocusedLabel) {
+                var ud = child.userData || {};
+                if (ud.isFocusedLabel) {
                   child.visible = isFocused;
-                  child.position.set(0, 12 + radius * 1.4, 0);
+                  child.position.set(0, labelY, 0);
+                  if (isFocused) child.scale.multiplyScalar(camScale / (child.userData.__lastScale || 1));
+                  child.userData.__lastScale = camScale;
                   applySpriteOpacity(child, 1.0);
-                } else if (child.userData && child.userData.isNeighborGlow) {
-                  child.visible = !!isNeighbor;
+                } else if (ud.isNeighborGlow) {
+                  child.visible = !!isFocusedNeighbor;
                   applySpriteOpacity(child, 0.85);
-                } else if (child.userData && child.userData.isLabel) {
-                  // Base label hides when the focused label is showing —
-                  // otherwise we'd see two stacked titles on the focused node.
-                  child.visible = !isFocused && (showBaseAlways || isHover);
-                  child.position.set(0, 6 + radius, 0);
+                } else if (ud.isNeighborLabel) {
+                  // Show the neighbor label when the node is a 1-hop neighbor
+                  // of the focused node and is NOT itself focused or hovered.
+                  child.visible = !!isFocusedNeighbor && !isHovered;
+                  child.position.set(0, labelY, 0);
+                  applySpriteOpacity(child, 1.0);
+                } else if (ud.isHoverLabel) {
+                  // Hover label only shows when the node is being mouse-hovered
+                  // and is NOT focused (focus wins on the same node).
+                  child.visible = isHovered;
+                  child.position.set(0, labelY, 0);
+                  applySpriteOpacity(child, 1.0);
+                } else if (ud.isLabel) {
+                  // Base label hides when any of the larger label variants
+                  // is showing — otherwise we'd see stacked titles.
+                  child.visible = !isFocused && !isFocusedNeighbor && !isHovered && showBaseAlways;
+                  child.position.set(0, labelY, 0);
                   applySpriteOpacity(child, cameraDistanceOpacity(coords.x, coords.y, coords.z));
                 }
               }
@@ -1809,7 +2020,7 @@ JS_GRAPH = r"""
       sizeGraphToContainer(inst);
       installGraphResize(inst);
       if (mode === '3d') {
-        installControlsDamping(inst);
+        installCursorWheelZoom(inst);
         // Start the camera at a known distance so the first frame isn't
         // a wild zoom-out from the origin. The single-shot scheduleCenteredFit
         // will refine the framing once the simulation settles.
@@ -1986,6 +2197,45 @@ JS_GRAPH = r"""
         }
       }
     }
+
+    // ---- Fullscreen (Issue 4) ------------------------------------------
+    // Request fullscreen on the WRAPPER (not the canvas) so the toolbar +
+    // legend + info panel come along. Listen to ``fullscreenchange`` to
+    // toggle the ``is-fullscreen`` class so CSS can repaint the layout.
+    function toggleGraphFullscreen(){
+      if (!wrapper) return;
+      var fsEl = document.fullscreenElement || document.webkitFullscreenElement || null;
+      if (fsEl) {
+        try { (document.exitFullscreen || document.webkitExitFullscreen).call(document); } catch (_) {}
+        return;
+      }
+      try {
+        var req = wrapper.requestFullscreen || wrapper.webkitRequestFullscreen;
+        if (req) req.call(wrapper);
+      } catch (err) {
+        console.warn('graph: fullscreen request failed', err);
+      }
+    }
+    document.addEventListener('fullscreenchange', function(){
+      if (!wrapper) return;
+      var fsEl = document.fullscreenElement || null;
+      var on = !!fsEl && (fsEl === wrapper || (fsEl.contains && fsEl.contains(wrapper)));
+      wrapper.classList.toggle('is-fullscreen', on);
+      if (btnFullscreen) {
+        btnFullscreen.setAttribute('aria-pressed', on ? 'true' : 'false');
+        btnFullscreen.textContent = on ? 'Exit fullscreen' : 'Fullscreen';
+      }
+      // Re-fit to the new container dimensions on the next frame so the
+      // canvas picks up the new wrapper size (NOT viewport — the wrapper
+      // covers the viewport in fullscreen mode).
+      if (Graph) {
+        try { sizeGraphToContainer(Graph); } catch (_) {}
+        window.setTimeout(function(){
+          try { sizeGraphToContainer(Graph); } catch (_) {}
+        }, 60);
+      }
+    });
+    if (btnFullscreen) btnFullscreen.addEventListener('click', toggleGraphFullscreen);
 
     if (btn2D) btn2D.addEventListener('click', function(){ setMode('2d'); });
     if (btn3D) btn3D.addEventListener('click', function(){ setMode('3d'); });

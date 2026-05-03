@@ -93,20 +93,27 @@ def test_bundle_palette_recents_storage():
 # ---------------------------------------------------------------------------
 
 def test_bundle_cursor_anchored_zoom_uses_library_native_wheel():
-    # Polish pass: we removed the custom wheel listener that fought
-    # ``3d-force-graph``'s built-in zoom. The library now owns the wheel
-    # event, which fixes the jittery / non-monotonic zoom we used to see.
-    assert "addEventListener('wheel'" not in JS_GRAPH
-    assert 'addEventListener("wheel"' not in JS_GRAPH
-    # Cursor-anchored hooks (raycaster + setFromCamera) still exist on
-    # ``pointermove`` so the library can aim its zoom toward the cursor
-    # world point — but we never touch ``camera.position`` ourselves.
+    # Issue 3 (polish round 3): we OWN the wheel event now. OrbitControls
+    # has its zoom disabled and our handler raycasts onto the plane through
+    # ``controls.target`` (perpendicular to camera→target axis) so the
+    # cursor stays glued to the same world point across the zoom.
+    assert "addEventListener('wheel'" in JS_GRAPH
+    assert "controls.enableZoom = false" in JS_GRAPH
+    assert "preventDefault()" in JS_GRAPH
+    assert "stopPropagation()" in JS_GRAPH
+    assert "{ passive: false }" in JS_GRAPH
+    # Cursor-anchored hooks: raycaster intersect on the controls.target plane.
     assert "Raycaster" in JS_GRAPH
     assert "setFromCamera" in JS_GRAPH
+    assert "intersectionPoint" in JS_GRAPH
+    assert "intersectPlane(plane, intersectionPoint)" in JS_GRAPH
+    assert "controls.target" in JS_GRAPH
     assert "addEventListener('pointermove'" in JS_GRAPH
     # OrbitControls damping makes pan/orbit feel smooth.
     assert "controls.enableDamping = true" in JS_GRAPH
     assert "controls.dampingFactor = 0.08" in JS_GRAPH
+    # Ctrl-wheel is the macOS trackpad pinch escape hatch.
+    assert "event.ctrlKey" in JS_GRAPH
 
 
 def test_bundle_link_hover_wired():
@@ -253,16 +260,25 @@ def test_graph_labels_are_truncated():
     assert "shortLabel(n && (n.name || n.id), 24)" in JS_GRAPH
     assert "function edgeLabelText" in JS_GRAPH
     assert "shortLabel(l && (l.label || l.type), 18)" in JS_GRAPH
-    assert "makeSpriteLabel(nodeLabelText(n)" in JS_GRAPH
-    assert "ctx.fillText(label" in JS_GRAPH
+    # Both the unified ``makeLabelSprite`` factory and the ``makeSpriteLabel``
+    # back-compat shim that delegates to it must remain wired so existing
+    # callsites (link sprites, focused/hover/neighbor variants) keep working.
+    assert "function makeLabelSprite" in JS_GRAPH
+    assert "function makeSpriteLabel" in JS_GRAPH
+    assert "makeSpriteLabel(nodeLabelText(n)" in JS_GRAPH or "makeLabelSprite(nodeLabelText(n)" in JS_GRAPH
+    assert "ctx.fillText(text" in JS_GRAPH
 
 
 def test_graph_3d_sprite_labels_render_above_nodes():
+    # Issue 2 — every label sprite (base/neighbor/hover/focused) renders
+    # with depth disabled so they always sit on top of nodes/edges.
     assert "depthWrite: false" in JS_GRAPH
     assert "depthTest: false" in JS_GRAPH
-    assert "opacity: 0.74" in JS_GRAPH
-    assert "sprite.renderOrder = 999" in JS_GRAPH
-    assert "clone.renderOrder = 999" in JS_GRAPH
+    # Render-order ladder: focused/hover (999) > neighbor (998) > base (990).
+    assert "sprite.renderOrder = VARIANT_RENDER_ORDER" in JS_GRAPH
+    assert "VARIANT_RENDER_ORDER" in JS_GRAPH
+    assert "focused: 999" in JS_GRAPH
+    assert "neighbor: 998" in JS_GRAPH
 
 
 def test_graph_3d_labels_use_camera_distance_opacity():
@@ -333,22 +349,75 @@ def test_graph_uses_node_rel_size_for_perceptible_radius_differences():
 
 
 def test_graph_focused_node_label_scales_up_with_outline():
-    """Bug 4 — selecting a node should swap in a larger label sprite
-    rendered above the scene with a white outline so it pops over any
-    background."""
+    """Issue 2 — selecting a node should swap in a larger label sprite
+    rendered above the scene with a thick white stroke so it pops over
+    any background, anchored above the node sphere."""
     # The dual-sprite group keys off node.__focused (a per-node flag).
     assert "__focused" in JS_BUNDLE_GRAPH
     assert "function makeFocusedSpriteLabel" in JS_BUNDLE_GRAPH
     assert "function markFocused" in JS_BUNDLE_GRAPH
-    # Render order 1000 puts the focused label above the base label
-    # (renderOrder 999) and above all other scene objects.
-    assert "renderOrder = 1000" in JS_BUNDLE_GRAPH
-    # The focused-label sprite uses a strokeText pass with white outline.
-    assert "strokeStyle = 'rgba(255,255,255,0.95)'" in JS_BUNDLE_GRAPH
-    # nodeThreeObject builds a Group so the focused / base / glow sprites
-    # can be toggled individually per frame in nodePositionUpdate.
+    # Focused label uses the unified factory with variant=focused; renderOrder
+    # 999 sits on top of every other object in the scene.
+    assert "function makeLabelSprite" in JS_BUNDLE_GRAPH
+    assert "variant: 'focused'" in JS_BUNDLE_GRAPH
+    assert "isFocusedLabel" in JS_BUNDLE_GRAPH
+    # Spec font sizes: focused 28, hover 22, neighbor 18, base 12.
+    assert "{ base: 12, neighbor: 18, hover: 22, focused: 28 }" in JS_BUNDLE_GRAPH
+    # Thick 4-px white outline under the text fill.
+    assert "ctx.lineWidth = 4 * pxScale" in JS_BUNDLE_GRAPH
+    assert "rgba(255,255,255,0.95)" in JS_BUNDLE_GRAPH
+    # The focused sprite anchors above the node (positive +y offset based
+    # on node.val so it never overlaps the sphere itself).
+    assert "n.val * 1.2 + 8" in JS_BUNDLE_GRAPH
+    # nodeThreeObject builds a Group so the focused / hover / neighbor /
+    # base / glow sprites can be toggled individually per frame.
     assert "new THREE.Group()" in JS_BUNDLE_GRAPH
     assert "nodeThreeObject" in JS_BUNDLE_GRAPH
+
+
+def test_graph_label_sprites_have_opaque_pill_background():
+    """Issue 2 — sprite labels paint a solid background pill (white in
+    light theme, near-black in dark theme) with a 2px accent border so
+    the text reads against any backdrop, not the previous translucent
+    rgba(2,6,23,0.26) wash that disappeared on light nodes."""
+    assert "rgba(255,255,255,0.95)" in JS_BUNDLE_GRAPH  # light pill
+    assert "rgba(0,0,0,0.85)" in JS_BUNDLE_GRAPH         # dark pill
+    # The 2-px border picks up the node's accent color.
+    assert "ctx.lineWidth = 2 * pxScale" in JS_BUNDLE_GRAPH
+    assert "ctx.strokeStyle = accent" in JS_BUNDLE_GRAPH
+    # Hover label is a separate variant — toggled on hover, removed when
+    # the user moves off. Hover loses to focus on the same node.
+    assert "isHoverLabel" in JS_BUNDLE_GRAPH
+    assert "isNeighborLabel" in JS_BUNDLE_GRAPH
+
+
+def test_graph_fullscreen_button_and_listener_present():
+    """Issue 4 — toolbar Fullscreen button toggles fullscreen on the
+    wrapper (not the canvas alone) and listens to ``fullscreenchange``
+    to apply the ``is-fullscreen`` class to the wrapper."""
+    assert "data-graph-action=\"fullscreen\"" in JS_BUNDLE_GRAPH or "btnFullscreen" in JS_BUNDLE_GRAPH
+    assert "function toggleGraphFullscreen" in JS_BUNDLE_GRAPH
+    assert "wrapper.requestFullscreen" in JS_BUNDLE_GRAPH
+    assert "fullscreenchange" in JS_BUNDLE_GRAPH
+    assert "is-fullscreen" in JS_BUNDLE_GRAPH
+    # Resize on fullscreen toggle re-fits the canvas to the WRAPPER, not viewport.
+    assert "sizeGraphToContainer" in JS_BUNDLE_GRAPH
+
+
+def test_graph_focused_node_info_panel_in_right_rail():
+    """Issue 1 — the right rail's ``#graph-info-panel`` is the canonical
+    info panel; the JS contract expects ``graph-info-empty / graph-info-content
+    / graph-info-neighbors`` IDs to populate."""
+    assert "getElementById('graph-info-panel')" in JS_BUNDLE_GRAPH
+    assert "getElementById('graph-info-empty')" in JS_BUNDLE_GRAPH
+    assert "getElementById('graph-info-content')" in JS_BUNDLE_GRAPH
+    assert "getElementById('graph-info-neighbors')" in JS_BUNDLE_GRAPH
+    # Neighbor row hover wires up hoverNode + refresh so the corresponding
+    # canvas node lights up.
+    assert "graph-neighbor-row" in JS_BUNDLE_GRAPH
+    assert "function renderNeighborList" in JS_BUNDLE_GRAPH
+    assert "Open page →" in JS_BUNDLE_GRAPH
+    assert "Clear focus" in JS_BUNDLE_GRAPH
 
 
 def test_graph_camera_orbits_focused_node_via_engine_tick():

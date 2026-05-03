@@ -859,6 +859,197 @@ hr {
   }
 }
 .graph-page .graph-canvas canvas { display: block; width: 100% !important; height: 100% !important; }
+/* Right-rail focused-node info panel (Issue 1).
+   The panel lives inside ``aside.toc--graph`` and is server-rendered as
+   the empty state; the JS bundle (showInfoPanel) toggles content + the
+   neighbor list when a node is clicked. The previous in-canvas overlay
+   is gone — the rail is now the single source of truth for focused-node
+   metadata. */
+.toc.toc--graph .graph-info-panel {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+  margin-bottom: var(--space-4);
+}
+.toc.toc--graph .graph-info-panel .graph-info-empty p { margin: 0 0 6px 0; }
+.toc.toc--graph .graph-info-title {
+  margin: 0 0 6px 0;
+  font-size: 1.15rem;
+  font-family: var(--type-serif);
+  line-height: 1.25;
+  color: var(--accent);
+  overflow-wrap: anywhere;
+  word-break: break-word;
+}
+.toc.toc--graph .graph-info-meta {
+  margin: 0 0 8px 0;
+  font-family: var(--type-mono);
+  font-size: 0.78rem;
+  color: var(--ink-muted);
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 6px;
+}
+.toc.toc--graph .graph-info-badge {
+  display: inline-block;
+  padding: 1px 8px;
+  border-radius: 999px;
+  color: #fff;
+  font-size: 0.7rem;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+}
+.toc.toc--graph .graph-info-degree { color: var(--ink-muted); }
+.toc.toc--graph .graph-info-desc {
+  margin: 0 0 10px 0;
+  font-family: var(--type-serif);
+  font-size: 0.9rem;
+  line-height: 1.45;
+  color: var(--ink);
+  display: -webkit-box;
+  -webkit-line-clamp: 6;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+  overflow-wrap: anywhere;
+}
+.toc.toc--graph .graph-info-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-top: 8px;
+}
+.toc.toc--graph .graph-info-link,
+.toc.toc--graph .graph-info-button {
+  display: inline-block;
+  font-family: var(--type-mono);
+  font-size: 0.82rem;
+  color: var(--accent);
+  text-decoration: none;
+  background: transparent;
+  border: 1px solid var(--accent-soft);
+  border-radius: var(--radius);
+  padding: 6px 12px;
+  cursor: pointer;
+  transition: border-color 160ms ease, background 160ms ease;
+}
+.toc.toc--graph .graph-info-link:hover,
+.toc.toc--graph .graph-info-button:hover {
+  border-color: var(--accent);
+  background: var(--accent-soft);
+}
+.toc.toc--graph .graph-info-button--ghost {
+  color: var(--ink-muted);
+  border-color: var(--rule);
+}
+.toc.toc--graph .graph-info-subhead {
+  margin: 12px 0 6px 0;
+  font-family: var(--type-mono);
+  font-size: 0.78rem;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: var(--ink-muted);
+}
+.toc.toc--graph .graph-neighbor-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  max-height: 320px;
+  overflow-y: auto;
+}
+.toc.toc--graph .graph-neighbor-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  width: 100%;
+  padding: 6px 8px;
+  font-family: var(--type-mono);
+  font-size: 0.8rem;
+  color: var(--ink);
+  background: transparent;
+  border: 1px solid transparent;
+  border-radius: var(--radius);
+  text-align: left;
+  cursor: pointer;
+  transition: background 140ms ease, border-color 140ms ease;
+}
+.toc.toc--graph .graph-neighbor-row:hover,
+.toc.toc--graph .graph-neighbor-row:focus-visible {
+  background: var(--surface-2);
+  border-color: var(--accent-soft);
+  outline: none;
+}
+.toc.toc--graph .graph-neighbor-dot {
+  width: 9px;
+  height: 9px;
+  border-radius: 999px;
+  flex-shrink: 0;
+}
+.toc.toc--graph .graph-neighbor-type {
+  flex-shrink: 0;
+  font-size: 0.7rem;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: var(--ink-muted);
+  padding: 1px 6px;
+  border-radius: 999px;
+  background: var(--surface-2);
+}
+.toc.toc--graph .graph-neighbor-name {
+  flex: 1;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+/* Fullscreen mode (Issue 4). The wrapper covers the viewport; the
+   toolbar sits on top, the legend bottom-left, the rail-style info panel
+   is repositioned to the right inside the fullscreen container. */
+.graph-canvas-wrapper {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+  position: relative;
+}
+.graph-canvas-wrapper.is-fullscreen {
+  width: 100vw;
+  height: 100vh;
+  background: var(--bg);
+  padding: var(--space-3);
+  gap: var(--space-2);
+}
+.graph-canvas-wrapper.is-fullscreen .graph-toolbar {
+  position: absolute;
+  top: var(--space-3);
+  left: var(--space-3);
+  right: var(--space-3);
+  z-index: 12;
+  background: var(--surface);
+  padding: 6px 10px;
+  border: 1px solid var(--rule);
+  border-radius: var(--radius);
+  box-shadow: var(--shadow);
+}
+.graph-canvas-wrapper.is-fullscreen .graph-canvas {
+  flex: 1 1 auto;
+  height: 100%;
+  width: 100%;
+  border-radius: 0;
+}
+.graph-canvas-wrapper.is-fullscreen .graph-legend {
+  position: absolute;
+  left: var(--space-3);
+  bottom: var(--space-3);
+  z-index: 12;
+  background: var(--surface);
+  padding: 6px 10px;
+  border: 1px solid var(--rule);
+  border-radius: var(--radius);
+}
+/* Legacy in-canvas overlay panel — retained selectors for completeness
+   but the empty box is no longer emitted in markup (the rail owns it). */
 .graph-page .graph-info-panel {
   position: absolute;
   top: var(--space-4);
@@ -1429,7 +1620,30 @@ body {
   .ai-siblings { flex-direction: column; align-items: stretch; gap: var(--space-2); }
   .ai-siblings a { justify-content: center; padding: 10px 12px; }
 
-  /* Graph view — fit phones, stacked toolbar, bottom info panel. */
+  /* Graph view — fit phones, stacked toolbar, bottom info panel.
+     The right-rail focused-node panel collapses into a bottom sheet
+     that slides up when ``.graph-canvas-wrapper.has-focus`` is set
+     (i.e. the user has pinned a node). Empty state stays in the rail. */
+  .graph-canvas-wrapper.has-focus .toc.toc--graph .graph-info-panel {
+    position: fixed;
+    left: 12px;
+    right: 12px;
+    bottom: calc(12px + env(safe-area-inset-bottom));
+    max-height: 50vh;
+    overflow-y: auto;
+    z-index: 40;
+    background: var(--surface);
+    border: 1px solid var(--rule);
+    border-radius: var(--radius);
+    padding: 14px;
+    box-shadow: 0 -8px 32px rgba(2, 6, 23, 0.18);
+    transform: translateY(0);
+    animation: graphInfoSheet 200ms ease-out;
+  }
+  @keyframes graphInfoSheet {
+    from { transform: translateY(20px); opacity: 0; }
+    to   { transform: translateY(0);    opacity: 1; }
+  }
   .graph-page .graph-canvas {
     height: clamp(420px, 70vh, 720px);
     min-height: 0;
