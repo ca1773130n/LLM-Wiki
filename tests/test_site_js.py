@@ -147,8 +147,9 @@ def test_bundle_zoom_uses_canonical_before_after_translate_algorithm():
     # Aggressive logging on the first wheel event so the user can
     # confirm in DevTools that the sign-only factor + before/after
     # anchor are firing as expected.
-    assert '"[graph] wheel: deltaY="' in JS_GRAPH
-    assert '"factor="' in JS_GRAPH
+    assert "[graph] wheel #" in JS_GRAPH
+    assert "deltaY=" in JS_GRAPH
+    assert "factor=" in JS_GRAPH
 
 
 def test_bundle_uses_scalar_node_and_link_opacity():
@@ -205,9 +206,13 @@ def test_graph_static_fallback_is_explorable_not_anchor_navigation():
 def test_graph_selection_fades_and_deprioritizes_non_neighbors():
     assert "function isDimmedNode" in JS_GRAPH
     assert "function isDimmedLink" in JS_GRAPH
-    # Non-incident nodes drop to 25% opacity (per spec) — visibly faded,
-    # still legible if the user mouses over them.
-    assert "rgba(120,116,108,0.25)" in JS_GRAPH
+    # Non-incident nodes fade to a desaturated grey via the smooth-dim
+    # ``nodeColor`` accessor: it lerps each node's rgb toward (120,116,108)
+    # by (1 - __opacity) and uses __opacity as the alpha. The constants
+    # below are the muted-grey end of the colour mix.
+    assert "120 * t" in JS_GRAPH
+    assert "116 * t" in JS_GRAPH
+    assert "108 * t" in JS_GRAPH
     assert "EDGE_COLOR_DIM" in JS_GRAPH
     assert "if (isDimmedNode(node)) return" in JS_GRAPH
     assert "if (isDimmedLink(link)) return" in JS_GRAPH
@@ -234,9 +239,13 @@ def test_graph_edges_are_visible_lines_not_only_particles():
     assert "line.setAttribute('stroke-width', '0.24');" in JS_GRAPH
     assert "el.setAttribute('stroke-width', hot ? '0.85' : '0.28');" in JS_GRAPH
     assert "if (inst.linkThreeObjectExtend) inst.linkThreeObjectExtend(true);" in JS_GRAPH
-    # The linkColor function now branches on hover-incident too.
-    assert "if (highlightLinks.has(l)) return EDGE_COLOR_HOT;" in JS_GRAPH
-    assert "if (isHoverIncidentLink(l)) return EDGE_COLOR_HOT;" in JS_GRAPH
+    # The linkColor function now branches on hover-incident too. After the
+    # smooth-dim refactor it picks a base from the focus/hover ladder, then
+    # multiplies the alpha by the per-link ``__opacity`` (lerp'd in
+    # onEngineTick) so the dim transition reads as a smooth fade.
+    assert "if (highlightLinks.has(l)) base = EDGE_COLOR_HOT;" in JS_GRAPH
+    assert "else if (isHoverIncidentLink(l)) base = EDGE_COLOR_HOT;" in JS_GRAPH
+    assert "l.__opacity" in JS_GRAPH
 
 
 def test_graph_dimmed_labels_are_hidden_with_dimmed_nodes_and_edges():
@@ -716,8 +725,8 @@ def test_graph_particles_only_on_incident_edges_pure_yellow_smaller():
     # Pure yellow particles (Material yellow 500). Not white.
     assert "'rgb(255, 235, 59)'" in JS_BUNDLE_GRAPH
     assert "linkDirectionalParticleColor" in JS_BUNDLE_GRAPH
-    # Smaller particle width.
-    assert "linkDirectionalParticleWidth(1.5)" in JS_BUNDLE_GRAPH
+    # Smaller particle width — dropped to 0.6 per user request.
+    assert "linkDirectionalParticleWidth(0.6)" in JS_BUNDLE_GRAPH
     # Speed is now a constant 0.005 (no per-link speed bump on focus).
     assert "linkDirectionalParticleSpeed(0.005)" in JS_BUNDLE_GRAPH
     # Particles are 2 on incident edges (focus or hover), 0 otherwise.

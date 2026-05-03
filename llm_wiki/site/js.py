@@ -1592,7 +1592,7 @@ JS_GRAPH = r"""
       var after = new THREE.Vector3();
       var offset = new THREE.Vector3();
       var delta = new THREE.Vector3();
-      var logged = false;
+      var wheelCount = 0;
 
       // Step 1 helper — cast the cursor ray and intersect the plane that
       // passes through ``controls.target`` perpendicular to the camera-
@@ -1641,13 +1641,32 @@ JS_GRAPH = r"""
         controls.target.add(delta);
         controls.update();
 
-        if (!logged) {
-          logged = true;
-          try {
-            console.info("[graph] wheel: deltaY=", event.deltaY, "factor=", factor, "before=", before.toArray(), "after=", after.toArray());
-          } catch (_) {}
-        }
+        // Always log every wheel event so we can verify the handler fires
+        // and the cursor anchor math is taking effect.
+        try {
+          console.info("[graph] wheel #" + (++wheelCount) + ": deltaY=", event.deltaY, "factor=", factor, "delta=", delta.toArray().map(function(v){ return Math.round(v*100)/100; }));
+        } catch (_) {}
       }, { passive: false, capture: true });
+      // Also attach to the wrapper as a fallback, in case the canvas
+      // itself isn't the wheel target (some browsers route trackpad
+      // gestures to the parent of a transformed canvas).
+      var wrapper = canvas.parentElement;
+      if (wrapper && wrapper !== canvas) {
+        wrapper.addEventListener('wheel', function(event){
+          if (event.target === canvas) return;  // canvas listener will handle it
+          // Re-dispatch through the canvas so the same handler runs.
+          event.preventDefault();
+          event.stopPropagation();
+          var fakeEvent = new WheelEvent('wheel', {
+            deltaY: event.deltaY,
+            clientX: event.clientX,
+            clientY: event.clientY,
+            bubbles: false,
+            cancelable: true,
+          });
+          canvas.dispatchEvent(fakeEvent);
+        }, { passive: false, capture: true });
+      }
     }
 
     // ---- Fit-to-view via bounding sphere over current node positions ----
@@ -1761,20 +1780,48 @@ JS_GRAPH = r"""
           return base;
         })
         .nodeColor(function(n){
-          // Bug 6 — non-incident nodes dim to 25% opacity (spec target).
-          // Keep the focused node + 1-hop neighbors at full saturation;
-          // every other node falls to a desaturated grey at alpha 0.25.
-          if (isDimmedNode(n)) return 'rgba(120,116,108,0.25)';
-          return n.color;
+          // Smooth dim: read the per-node ``__opacity`` value that the
+          // onEngineTick lerp animates between 1.0 (full) and 0.25 (dimmed).
+          // Mix the node's group color toward muted grey by (1 - alpha).
+          // Returning rgba with the lerp'd alpha plus a desaturated rgb
+          // gives a smooth visual fade even though the sphere material
+          // opacity itself is a scalar.
+          var alpha = (n && typeof n.__opacity === 'number') ? n.__opacity : 1.0;
+          if (alpha >= 0.999) return n.color;
+          // Parse n.color (hex or rgb) and lerp toward grey.
+          var base = n.color || '#cccccc';
+          // Quick rgb extractor — works for #rrggbb and rgb(r,g,b).
+          var r = 200, g = 200, b = 200;
+          var hex = base.charAt(0) === '#' ? base.slice(1) : null;
+          if (hex && hex.length === 6) {
+            r = parseInt(hex.slice(0,2), 16);
+            g = parseInt(hex.slice(2,4), 16);
+            b = parseInt(hex.slice(4,6), 16);
+          } else {
+            var m = /rgb[a]?\((\d+),\s*(\d+),\s*(\d+)/.exec(base);
+            if (m) { r = +m[1]; g = +m[2]; b = +m[3]; }
+          }
+          var t = 1 - alpha;
+          var mr = Math.round(r * (1 - t) + 120 * t);
+          var mg = Math.round(g * (1 - t) + 116 * t);
+          var mb = Math.round(b * (1 - t) + 108 * t);
+          return 'rgba(' + mr + ',' + mg + ',' + mb + ',' + alpha.toFixed(3) + ')';
         })
         .linkColor(function(l){
-          // Issue 4 — incident edges (focus highlight OR hover incident)
-          // light up at 0.85 alpha; everything else stays at the calm
-          // 0.34 baseline so the canvas reads as quiet by default.
-          if (highlightLinks.has(l)) return EDGE_COLOR_HOT;
-          if (isHoverIncidentLink(l)) return EDGE_COLOR_HOT;
-          if (hasFocusFilter()) return EDGE_COLOR_DIM;
-          return EDGE_COLOR_LIGHT;
+          // Smooth dim: pick a base colour from the focus/hover state
+          // ladder, then scale its alpha by the per-link ``__opacity``
+          // (lerp'd in onEngineTick) so the dim-in/out reads as smooth.
+          var base;
+          if (highlightLinks.has(l)) base = EDGE_COLOR_HOT;
+          else if (isHoverIncidentLink(l)) base = EDGE_COLOR_HOT;
+          else if (hasFocusFilter()) base = EDGE_COLOR_DIM;
+          else base = EDGE_COLOR_LIGHT;
+          var lOpacity = (l && typeof l.__opacity === 'number') ? l.__opacity : 1.0;
+          if (lOpacity >= 0.999) return base;
+          var m = /rgba?\((\d+),\s*(\d+),\s*(\d+)(?:,\s*([\d.]+))?\)/.exec(base);
+          if (!m) return base;
+          var baseAlpha = m[4] !== undefined ? parseFloat(m[4]) : 1.0;
+          return 'rgba(' + m[1] + ',' + m[2] + ',' + m[3] + ',' + (baseAlpha * lOpacity).toFixed(3) + ')';
         })
         // Issue 4 — edges are visibly THINNER everywhere. Default drops to
         // 0.25; incident edges (hover or focus) bump to 0.9. Non-incident
@@ -1798,7 +1845,7 @@ JS_GRAPH = r"""
           if (isHoverIncidentLink(l)) return 2;
           return 0;
         })
-        .linkDirectionalParticleWidth(1.5)
+        .linkDirectionalParticleWidth(0.6)
         .linkDirectionalParticleSpeed(0.005)
         .onNodeHover(function(node){
           hoverNode = node || null;
@@ -2239,8 +2286,13 @@ JS_GRAPH = r"""
             }
             if (anyMoving) {
               try {
-                if (inst.nodeOpacity) inst.nodeOpacity(inst.nodeOpacity());
-                if (inst.linkOpacity) inst.linkOpacity(inst.linkOpacity());
+                // ``nodeOpacity`` / ``linkOpacity`` accept ONLY scalars in
+                // 3d-force-graph — a function silently corrupts the
+                // material opacity to NaN. Re-poke the accessor-form
+                // colour functions instead; THOSE accept functions, and
+                // they read ``__opacity`` to modulate per-node alpha.
+                if (inst.nodeColor) inst.nodeColor(inst.nodeColor());
+                if (inst.linkColor) inst.linkColor(inst.linkColor());
               } catch (_) {}
             }
             // Auto-orbit (3D only) — runs after the opacity lerp so both
