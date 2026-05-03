@@ -479,7 +479,9 @@ def test_graph_focused_node_label_scales_up_with_outline():
     # Issue 2 — hover drops to 18px (down from 22) and focused drops to
     # 22px (down from 26) because the pill itself is the focus
     # indicator, so the font no longer has to do all the work.
-    assert "{ default: 11, edge: 10, neighbor: 14, hover: 18, focused: 22 }" in JS_BUNDLE_GRAPH
+    # Edge label font dropped from 10 to 7 per user request — much
+    # smaller, white, no pill behind.
+    assert "{ default: 11, edge: 7, neighbor: 14, hover: 18, focused: 22 }" in JS_BUNDLE_GRAPH
     # Issue 1 — explicit "NO text stroke. NO outline. NO border." on
     # every variant. The stroke widths are zeroed in the table.
     assert "{ default: 0, edge: 0, neighbor: 0, hover: 0, focused: 0 }" in JS_BUNDLE_GRAPH
@@ -508,7 +510,8 @@ def test_graph_label_pills_are_dark_with_no_accent_border():
     """
     # Per-variant pill alpha table (the source of truth).
     assert "VARIANT_PILL_ALPHA" in JS_BUNDLE_GRAPH
-    assert "{ default: 0.5, edge: 0.5, neighbor: 0.6, hover: 0.65, focused: 0.78 }" in JS_BUNDLE_GRAPH
+    # Edge labels render with NO background pill (alpha 0) — text only.
+    assert "{ default: 0.5, edge: 0, neighbor: 0.6, hover: 0.65, focused: 0.78 }" in JS_BUNDLE_GRAPH
     # Pill is rendered for EVERY variant (not gated on hasPill any more).
     assert "var hasPill = variant === 'focused'" not in JS_BUNDLE_GRAPH
     # Pill fill is theme-driven: black-on-dark with per-variant alpha,

@@ -1332,7 +1332,7 @@ JS_GRAPH = r"""
     // canvas/texture across nodes (the per-variant pill+text colors are
     // implied by the variant + theme so we don't need ``accent`` or
     // ``hint`` in the key any more).
-    var VARIANT_FONT       = { default: 11, edge: 10, neighbor: 14, hover: 18, focused: 22 };
+    var VARIANT_FONT       = { default: 11, edge: 7, neighbor: 14, hover: 18, focused: 22 };
     var VARIANT_OPACITY    = { default: 0.85, edge: 0.78, neighbor: 0.92, hover: 1.0, focused: 1.0 };
     // Stroke widths are kept in the table for back-compat but are NEVER
     // applied to label text (Issue 1 — explicit "NO text stroke. NO outline.
@@ -1343,7 +1343,8 @@ JS_GRAPH = r"""
     // Per-variant pill alpha (dark theme). Light theme inverts the base
     // color but reuses these alphas so the visual weight matches.
     // EXACT spec values per Issue 2: default/edge=0.5, neighbor=0.6, hover=0.65, focused=0.78.
-    var VARIANT_PILL_ALPHA = { default: 0.5, edge: 0.5, neighbor: 0.6, hover: 0.65, focused: 0.78 };
+    // ``edge: 0`` → no background pill on edge labels. White text only.
+    var VARIANT_PILL_ALPHA = { default: 0.5, edge: 0, neighbor: 0.6, hover: 0.65, focused: 0.78 };
     var labelSpriteCache = new Map();
     function makeLabel(text, opts){
       if (!THREE || !text) return null;
@@ -1382,27 +1383,31 @@ JS_GRAPH = r"""
       ctx = canvas.getContext('2d');
       // Pill: semi-transparent black on dark theme, semi-transparent white
       // on light theme. Slight 4px corner radius (Issue 1). NO border.
-      var pillAlpha = VARIANT_PILL_ALPHA[variant] || 0.5;
-      // Issue 1 + 2 — pill is pure black on dark theme (alpha varies per
-      // variant) and a light pill (rgba(255,255,255,0.85)) on light theme.
-      // NO color border. NO accent stroke.
-      var pillFill = (theme === 'light')
-        ? 'rgba(255,255,255,0.85)'
-        : 'rgba(0,0,0,' + pillAlpha + ')';
-      var radius = 4 * pxScale;
-      ctx.fillStyle = pillFill;
-      ctx.beginPath();
-      ctx.moveTo(radius, 0);
-      ctx.lineTo(w - radius, 0);
-      ctx.quadraticCurveTo(w, 0, w, radius);
-      ctx.lineTo(w, h - radius);
-      ctx.quadraticCurveTo(w, h, w - radius, h);
-      ctx.lineTo(radius, h);
-      ctx.quadraticCurveTo(0, h, 0, h - radius);
-      ctx.lineTo(0, radius);
-      ctx.quadraticCurveTo(0, 0, radius, 0);
-      ctx.closePath();
-      ctx.fill();
+      // ``pillAlpha === 0`` skips the pill entirely (edge labels — text
+      // only, transparent background).
+      var pillAlpha = (typeof VARIANT_PILL_ALPHA[variant] === 'number') ? VARIANT_PILL_ALPHA[variant] : 0.5;
+      if (pillAlpha > 0) {
+        // Issue 1 + 2 — pill is pure black on dark theme (alpha varies
+        // per variant) and a light pill (rgba(255,255,255,0.85)) on
+        // light theme. NO color border. NO accent stroke.
+        var pillFill = (theme === 'light')
+          ? 'rgba(255,255,255,0.85)'
+          : 'rgba(0,0,0,' + pillAlpha + ')';
+        var radius = 4 * pxScale;
+        ctx.fillStyle = pillFill;
+        ctx.beginPath();
+        ctx.moveTo(radius, 0);
+        ctx.lineTo(w - radius, 0);
+        ctx.quadraticCurveTo(w, 0, w, radius);
+        ctx.lineTo(w, h - radius);
+        ctx.quadraticCurveTo(w, h, w - radius, h);
+        ctx.lineTo(radius, h);
+        ctx.quadraticCurveTo(0, h, 0, h - radius);
+        ctx.lineTo(0, radius);
+        ctx.quadraticCurveTo(0, 0, radius, 0);
+        ctx.closePath();
+        ctx.fill();
+      }
       // No stroke: the user explicitly said NO text border, NO outline,
       // NO color border on any variant.
       ctx.font = (variant === 'focused' ? '700 ' : '600 ') + fontPx + 'px "Inter", system-ui, sans-serif';
@@ -1410,12 +1415,19 @@ JS_GRAPH = r"""
       ctx.textAlign = 'center';
       // Issue 1 + 2 — text is PURE WHITE rgb(255, 255, 255) on dark theme
       // for EVERY variant (default, edge, neighbor, hover, focused). On
-      // light theme it inverts to rgb(20, 20, 20). NO gray. NO color
-      // stroke. NO border. The pill alpha + font size are the only
-      // visual differentiators between variants.
-      var textFill = (theme === 'light')
-        ? 'rgb(20, 20, 20)'
-        : 'rgb(255, 255, 255)';
+      // light theme it inverts to rgb(20, 20, 20) — but only when there
+      // is a pill behind. Edge labels render with NO pill and stay white
+      // on both themes (the canvas has its own dark webgl background).
+      // NO gray. NO color stroke. NO border. The pill alpha + font size
+      // are the only visual differentiators between variants.
+      var textFill;
+      if (variant === 'edge') {
+        textFill = 'rgb(255, 255, 255)';
+      } else if (theme === 'light') {
+        textFill = 'rgb(20, 20, 20)';
+      } else {
+        textFill = 'rgb(255, 255, 255)';
+      }
       ctx.fillStyle = textFill;
       var textY = padY + lineH / 2;
       ctx.fillText(text, w / 2, textY);
