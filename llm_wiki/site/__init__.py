@@ -48,6 +48,7 @@ from .pages import (
     ROUTE_FOR_KIND,
     SiteContext,
     build_graph_payload,
+    build_graph_payload_split,
     page_href,
     render_about,
     render_concept_detail,
@@ -321,6 +322,26 @@ class StaticSiteBuilder:
             json.dumps(graph_view_payload, ensure_ascii=False, sort_keys=True, default=str) + "\n"
         )
         (out / "graph" / "payload.json").write_text(graph_payload_text, encoding="utf-8")
+        _write_gzip_sibling(out / "graph" / "payload.json", graph_payload_text.encode("utf-8"))
+
+        # Split payload — ``payload-core.json`` ships the top-degree subgraph
+        # (renders immediately on the graph route, keeps time-to-first-paint
+        # tiny), ``payload-rest.json`` ships everything else (loaded async
+        # after the canvas is up). The legacy ``payload.json`` stays put
+        # for backward compatibility — anything that read the combined
+        # payload before still does. Both new files are pre-gzipped with
+        # ``mtime=0`` for byte-idempotence (same discipline as graph.json).
+        split_payload = build_graph_payload_split(site_ctx)
+        core_text = (
+            json.dumps(split_payload["core"], ensure_ascii=False, sort_keys=True, default=str) + "\n"
+        )
+        rest_text = (
+            json.dumps(split_payload["rest"], ensure_ascii=False, sort_keys=True, default=str) + "\n"
+        )
+        (out / "graph" / "payload-core.json").write_text(core_text, encoding="utf-8")
+        _write_gzip_sibling(out / "graph" / "payload-core.json", core_text.encode("utf-8"))
+        (out / "graph" / "payload-rest.json").write_text(rest_text, encoding="utf-8")
+        _write_gzip_sibling(out / "graph" / "payload-rest.json", rest_text.encode("utf-8"))
         _track("graph/index.html")
 
         # --------------------------------------------------- index/detail kinds

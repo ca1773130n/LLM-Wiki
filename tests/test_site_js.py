@@ -784,6 +784,58 @@ def test_graph_auto_browse_wired():
 
 
 # ---------------------------------------------------------------------------
+# Split payload — graph route fetches core first, then rest
+# ---------------------------------------------------------------------------
+
+
+def test_graph_bundle_fetches_split_payload():
+    """The graph bundle fetches ``payload-core.json`` first and
+    ``payload-rest.json`` second. The literal filenames live in default
+    fallbacks for the ``data-payload-(core|rest)-url`` attributes, and the
+    fetch calls take the resolved variables — so we assert both the literal
+    fallback strings and the variable-based fetch shape."""
+    import re as _re
+    # Default URL fallbacks the JS reads off the canvas attrs.
+    assert "'payload-core.json'" in JS_BUNDLE_GRAPH
+    assert "'payload-rest.json'" in JS_BUNDLE_GRAPH
+    # Acceptance criterion: ``fetch(.*payload-core.json)`` /
+    # ``fetch(.*payload-rest.json)`` match across literal-string or
+    # variable-bound forms (``fetch(coreUrl)`` resolves to either at
+    # runtime).
+    assert _re.search(r"fetch\([^)]*\bcoreUrl\b", JS_BUNDLE_GRAPH) or _re.search(
+        r"fetch\([^)]*payload-core\.json", JS_BUNDLE_GRAPH
+    ), "graph bundle must fetch payload-core.json on first paint"
+    assert _re.search(r"fetch\([^)]*\brestUrl\b", JS_BUNDLE_GRAPH) or _re.search(
+        r"fetch\([^)]*payload-rest\.json", JS_BUNDLE_GRAPH
+    ), "graph bundle must fetch payload-rest.json after core renders"
+    # Promise.all wrapper around the rest fetch keeps the merge path
+    # symmetric for future sharding.
+    assert "Promise.all([fetch(restUrl)])" in JS_BUNDLE_GRAPH
+
+
+def test_graph_bundle_merges_rest_via_graph_data():
+    """Once ``payload-rest.json`` lands, the merge path calls
+    ``forceGraph.graphData(...)`` so the rest fade in without a re-init."""
+    assert "__graphMergeRestPayload" in JS_BUNDLE_GRAPH
+    assert "Graph.graphData({ nodes: payload.nodes, links: payload.links })" in JS_BUNDLE_GRAPH
+
+
+def test_graph_bundle_auto_browse_gated_on_rest_loaded():
+    """``startAutoBrowse`` must wait for ``__graphRestLoaded`` before seeding
+    the tour so the start node picker sees the real top-degree hubs (not
+    just the core's local maximum)."""
+    assert "if (!window.__graphRestLoaded)" in JS_BUNDLE_GRAPH
+    assert "function startAutoBrowse" in JS_BUNDLE_GRAPH
+
+
+def test_graph_bundle_has_loading_indicator_hooks():
+    """The graph wrapper hosts a ``#graph-loading-rest`` element while the
+    rest payload is in flight; the bundle toggles its ``.is-visible`` state."""
+    assert "getElementById('graph-loading-rest')" in JS_BUNDLE_GRAPH
+    assert "function setRestLoading" in JS_BUNDLE_GRAPH
+
+
+# ---------------------------------------------------------------------------
 # JS parses
 # ---------------------------------------------------------------------------
 

@@ -248,7 +248,13 @@ def test_static_site_builder_emits_redesigned_ia(tmp_path: Path) -> None:
     import re as _re
     assert _re.search(r'\.\./assets/graph-[0-9a-f]{10}\.js', graph_html) is not None
     assert 'id="graph-data"' not in graph_html
-    assert "fetch(payloadUrl)" in graph_js
+    # The route now does a two-stage fetch: ``payload-core.json`` first
+    # (top-degree subgraph; rendered immediately) then ``payload-rest.json``
+    # in the background. The legacy ``payload.json`` is still emitted for
+    # back-compat consumers but the route no longer fetches it on the
+    # happy path.
+    assert "fetch(coreUrl)" in graph_js
+    assert "Promise.all([fetch(restUrl)])" in graph_js
     assert "if (!dataNode || !container) return" not in graph_js
     assert any(node["name"] == "Demo Paper" for node in graph_payload["nodes"])
     assert graph_payload["links"]

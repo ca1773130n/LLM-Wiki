@@ -112,6 +112,17 @@ ROUTE_FOR_KIND: Dict[str, str] = {
 MAX_GRAPH_NODES: int = 1500
 
 
+# Cap on the size of the "core" subgraph that ships in
+# ``graph/payload-core.json``. The graph route fetches this first and renders
+# immediately so the user sees structure without waiting for the full
+# payload. Picked to keep the core payload under ~100 KB decompressed /
+# ~30 KB gzipped on the production graph: the top ``GRAPH_CORE_NODES``
+# highest-degree nodes plus every edge connecting two of them. 80 fits the
+# current corpus (~400 nodes total) comfortably; bump if/when the corpus
+# grows past ~1500 nodes and you want a denser first paint.
+GRAPH_CORE_NODES: int = 80
+
+
 def page_href(kind: str, slug: str) -> str:
     """Relative URL (from site root) for a wiki-layer page.
 
@@ -1305,6 +1316,13 @@ def _index_rows(
     Order: pages first (sorted by slug for stability), then any unseen graph
     nodes. The shared shape lets the chip strip + table renderer sort
     deterministically and stamp ``data-type`` on every row.
+
+    Only publishes graph nodes whose detail page actually exists on disk
+    (``page_slug_for_node``) or that pass :func:`is_public_research_node` —
+    otherwise the index would mint hrefs to pages the wiki projector
+    intentionally skipped (e.g. ``arxiv_only`` paper stubs, social-feed
+    sources), producing the dangling-link findings that ``project lint``
+    reports.
     """
     rows: List[dict] = []
     seen: set[str] = set()
@@ -1321,6 +1339,11 @@ def _index_rows(
             "source": "",
         })
     for n in sorted(nodes, key=lambda n: (n.type.value, n.name.lower())):
+        # Skip graph nodes whose page was never written — they'd produce
+        # hrefs to non-existent files. The projector decides which nodes
+        # become public; we mirror that gate here.
+        if n.id not in ctx.page_slug_for_node and not is_public_research_node(n):
+            continue
         slug = ctx.page_slug_for_node.get(n.id) or _canonical_slug(n.name)
         if slug in seen:
             continue
@@ -2204,6 +2227,65 @@ def build_graph_payload(ctx: SiteContext) -> Dict[str, object]:
     return {"nodes": nodes_payload, "links": links_payload}
 
 
+def build_graph_payload_split(
+    ctx: SiteContext, core_size: int = GRAPH_CORE_NODES
+) -> Dict[str, Dict[str, object]]:
+    """Split the graph payload into a small "core" + the "rest".
+
+    The graph route fetches ``payload-core.json`` first and renders the
+    canvas before the larger ``payload-rest.json`` arrives — this drops
+    time-to-first-paint on the live corpus from a single ~700 KB blocking
+    fetch to a ~25 KB blocking fetch + a background ~700 KB fetch.
+
+    The split is degree-based so the most "structural" nodes land in the
+    core (every node + edge that ships in core is one of the top
+    ``core_size`` nodes by degree). Edges with one core endpoint and one
+    non-core endpoint go in ``rest`` — they need the rest's nodes to be
+    present before they're meaningful.
+
+    Returns ``{"core": {nodes, links}, "rest": {nodes, links}}``. The
+    union of the two sides equals exactly what ``build_graph_payload``
+    returns, so callers and tests reading the combined ``payload.json``
+    see no change.
+    """
+
+    full = build_graph_payload(ctx)
+    nodes = list(full["nodes"])  # type: ignore[arg-type]
+    links = list(full["links"])  # type: ignore[arg-type]
+
+    # Rank by degree desc, ties broken by id ascending — same tie-breaker
+    # as the MAX_GRAPH_NODES cap above so the split is byte-deterministic.
+    ranked = sorted(
+        nodes,
+        key=lambda n: (-int(n.get("degree", 0) or 0), str(n.get("id", ""))),
+    )
+    core_nodes_list = ranked[:core_size]
+    core_ids = {str(n.get("id")) for n in core_nodes_list}
+
+    core_nodes: List[Dict[str, object]] = []
+    rest_nodes: List[Dict[str, object]] = []
+    for n in nodes:
+        if str(n.get("id")) in core_ids:
+            core_nodes.append(n)
+        else:
+            rest_nodes.append(n)
+
+    core_links: List[Dict[str, object]] = []
+    rest_links: List[Dict[str, object]] = []
+    for l in links:
+        s = str(l.get("source"))
+        t = str(l.get("target"))
+        if s in core_ids and t in core_ids:
+            core_links.append(l)
+        else:
+            rest_links.append(l)
+
+    return {
+        "core": {"nodes": core_nodes, "links": core_links},
+        "rest": {"nodes": rest_nodes, "links": rest_links},
+    }
+
+
 def render_graph_view(ctx: SiteContext) -> str:
     payload = build_graph_payload(ctx)
     nodes_payload = payload["nodes"]  # type: ignore[index]
@@ -2263,7 +2345,8 @@ def render_graph_view(ctx: SiteContext) -> str:
     _graph_js_filename = f"graph-{_graph_js_hash}.js"
     head = (
         '<link rel="preconnect" href="https://esm.sh">\n'
-        '<link rel="preload" href="payload.json" as="fetch" type="application/json" crossorigin="anonymous">\n'
+        '<link rel="preload" href="payload-core.json" as="fetch" type="application/json" crossorigin="anonymous">\n'
+        '<link rel="prefetch" href="payload-rest.json" as="fetch" type="application/json" crossorigin="anonymous">\n'
         f'<script defer src="../assets/{_graph_js_filename}"></script>\n'
         '<script type="module">\n'
         '  // Load 3D + 2D force-graph plus three.js peer dep from esm.sh.\n'
@@ -2320,9 +2403,10 @@ def render_graph_view(ctx: SiteContext) -> str:
       </div>
       <span class="graph-size-hint" title="Node radius scales with sqrt of incident-edge count, capped at degree=200.">node size = √(connections)</span>
     </div>
-    <div class="graph-canvas" id="graph-canvas" data-payload-url="payload.json" role="img" aria-label="Interactive 3D knowledge graph">
+    <div class="graph-canvas" id="graph-canvas" data-payload-url="payload.json" data-payload-core-url="payload-core.json" data-payload-rest-url="payload-rest.json" role="img" aria-label="Interactive 3D knowledge graph">
       {skeleton}
       <div class="graph-error-banner" id="graph-error-banner" role="alert"></div>
+      <div class="graph-loading-rest" id="graph-loading-rest" role="status" aria-live="polite" hidden>loading rest of graph&hellip;</div>
     </div>
     <div class="graph-tooltip" id="graph-tooltip" role="status" aria-live="polite" hidden></div>
     <div class="graph-legend" id="graph-legend" aria-label="Type legend">{legend_items}</div>
@@ -2391,6 +2475,7 @@ __all__ = [
     "ROUTE_FOR_KIND",
     "SiteContext",
     "build_graph_payload",
+    "build_graph_payload_split",
     "kind_for_node",
     "node_href",
     "page_href",

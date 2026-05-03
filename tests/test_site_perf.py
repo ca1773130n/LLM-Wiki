@@ -153,6 +153,74 @@ def test_graph_payload_json_exists_and_parses(built_site: Path) -> None:
     assert not leaked, f"graph payload leaked code-layer nodes: {leaked!r}"
 
 
+# ------------------------------------------- split payload (core + rest)
+#
+# The graph route fetches ``payload-core.json`` (top-degree subgraph) first
+# so the canvas paints almost immediately, then merges ``payload-rest.json``
+# in the background. The legacy combined ``payload.json`` is still emitted
+# so back-compat consumers (and any cached bookmarks) keep working.
+
+
+def test_graph_payload_core_under_size_budget(built_site: Path) -> None:
+    """``payload-core.json`` is the blocking fetch on first paint, so it
+    has tight size budgets: < 100 KB raw, < 30 KB gzipped."""
+    core_path = built_site / "graph" / "payload-core.json"
+    assert core_path.exists(), "graph/payload-core.json must be emitted"
+    raw_size = core_path.stat().st_size
+    assert raw_size < 100 * 1024, f"payload-core.json is {raw_size} bytes (budget: 100 KB)"
+
+    core_gz = built_site / "graph" / "payload-core.json.gz"
+    assert core_gz.exists(), "graph/payload-core.json.gz must be pre-emitted"
+    gz_size = core_gz.stat().st_size
+    assert gz_size < 30 * 1024, f"payload-core.json.gz is {gz_size} bytes (budget: 30 KB)"
+
+
+def test_graph_payload_rest_exists_and_compresses_well(built_site: Path) -> None:
+    rest_path = built_site / "graph" / "payload-rest.json"
+    assert rest_path.exists(), "graph/payload-rest.json must be emitted"
+    rest = json.loads(rest_path.read_text(encoding="utf-8"))
+    assert "nodes" in rest
+    assert "links" in rest
+    rest_gz = built_site / "graph" / "payload-rest.json.gz"
+    assert rest_gz.exists(), "graph/payload-rest.json.gz must be pre-emitted"
+    raw = rest_path.read_bytes()
+    if len(raw) > 200:
+        ratio = rest_gz.stat().st_size / max(1, len(raw))
+        # JSON gzips to ~0.3-0.5x; require at least 0.7x as a sanity floor
+        # to catch regressions where the file is mistakenly stored
+        # uncompressed or double-compressed. (On tiny payloads gzip
+        # overhead dominates so we skip the ratio check via the size guard
+        # above.)
+        assert ratio < 0.7, f"payload-rest.json gzip ratio {ratio:.2f} > 0.7"
+
+
+def test_graph_payload_split_union_matches_combined(built_site: Path) -> None:
+    """Core + rest must equal the combined ``payload.json`` — same node and
+    link counts, same id sets. This is the contract that keeps every
+    existing consumer of ``payload.json`` and every JS code path that walks
+    the union correct."""
+    full = json.loads((built_site / "graph" / "payload.json").read_text(encoding="utf-8"))
+    core = json.loads((built_site / "graph" / "payload-core.json").read_text(encoding="utf-8"))
+    rest = json.loads((built_site / "graph" / "payload-rest.json").read_text(encoding="utf-8"))
+
+    assert len(core["nodes"]) + len(rest["nodes"]) == len(full["nodes"]), (
+        f"node count mismatch: core={len(core['nodes'])} + rest={len(rest['nodes'])} "
+        f"!= full={len(full['nodes'])}"
+    )
+    assert len(core["links"]) + len(rest["links"]) == len(full["links"]), (
+        f"link count mismatch: core={len(core['links'])} + rest={len(rest['links'])} "
+        f"!= full={len(full['links'])}"
+    )
+    full_ids = {n["id"] for n in full["nodes"]}
+    split_ids = {n["id"] for n in core["nodes"]} | {n["id"] for n in rest["nodes"]}
+    assert full_ids == split_ids, "split node ids do not equal full node ids"
+
+
+def test_legacy_combined_payload_still_emitted(built_site: Path) -> None:
+    """The legacy combined ``payload.json`` must still exist for back-compat."""
+    assert (built_site / "graph" / "payload.json").exists()
+
+
 # ---------------------------------------------------------------- gzip siblings
 
 

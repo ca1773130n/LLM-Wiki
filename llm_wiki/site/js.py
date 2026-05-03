@@ -2834,6 +2834,27 @@ JS_GRAPH = r"""
     }
     function startAutoBrowse(){
       if (autoBrowseActive) return;
+      // Gate the tour on the rest payload so the start-node picker sees
+      // the union — without this we'd seed off the core's local maximum
+      // and the tour would never visit anything outside the top 150.
+      if (!window.__graphRestLoaded) {
+        var waited = 0;
+        var interval = setInterval(function(){
+          waited += 100;
+          if (window.__graphRestLoaded) {
+            clearInterval(interval);
+            startAutoBrowse();
+          } else if (waited > 15000) {
+            // Rest payload never arrived — fall back to a core-only tour
+            // so the button isn't permanently dead. Logged once.
+            clearInterval(interval);
+            console.warn('graph: starting auto-browse on core-only (rest payload timeout)');
+            window.__graphRestLoaded = true;
+            startAutoBrowse();
+          }
+        }, 100);
+        return;
+      }
       autoBrowseActive = true;
       autoBrowseVisited = new Set();
       autoBrowseHopCount = 0;
@@ -2956,6 +2977,43 @@ JS_GRAPH = r"""
       }
     });
 
+    // ---- Rest-payload merge. Called from outside the startGraph closure
+    //      once ``payload-rest.json`` lands. Folds new nodes/links into the
+    //      running graph via ``Graph.graphData(...)`` so the rest fade in
+    //      alongside the core. Defaults ``__opacity`` at 1.0 so the new
+    //      geometry just appears (the simulation re-settles naturally as
+    //      new edges enter).
+    window.__graphMergeRestPayload = function(rest){
+      if (!rest || (!rest.nodes && !rest.links)) return;
+      var newNodes = Array.isArray(rest.nodes) ? rest.nodes : [];
+      var newLinks = Array.isArray(rest.links) ? rest.links : (rest.edges || []);
+      newNodes.forEach(function(n){
+        if (byId.has(n.id)) return;
+        n.color = n.color || nodeColorVariant(n);
+        n.neighbors = new Set();
+        n.edges = [];
+        n.degree = 0;
+        n.__opacity = 1.0;
+        n.__opacityTarget = 1.0;
+        byId.set(n.id, n);
+        payload.nodes.push(n);
+      });
+      newLinks.forEach(function(l){
+        var a = byId.get(typeof l.source === 'object' ? l.source.id : l.source);
+        var b = byId.get(typeof l.target === 'object' ? l.target.id : l.target);
+        if (!a || !b) return;
+        a.neighbors.add(b); b.neighbors.add(a);
+        a.edges.push(l); b.edges.push(l);
+        a.degree += 1; b.degree += 1;
+        l.__opacity = 1.0;
+        l.__opacityTarget = 1.0;
+        payload.links.push(l);
+      });
+      if (Graph && Graph.graphData) {
+        try { Graph.graphData({ nodes: payload.nodes, links: payload.links }); } catch (_) {}
+      }
+    };
+
     // ---- CDN load detection. Wait for window.ForceGraph(3D) to attach,
     //      then dynamically import three.js as a peer for sprites + raycast.
     var waited = 0;
@@ -2971,6 +3029,7 @@ JS_GRAPH = r"""
         }).then(function(){
           try {
             buildGraph('3d');
+            window.__graphCoreLoaded = true;
             if (btn3D) btn3D.classList.add('is-active');
           } catch (err) {
             console.error('graph: init failed', err);
@@ -2993,19 +3052,74 @@ JS_GRAPH = r"""
       return;
     }
 
+    // Two-stage payload fetch. The graph route ships ``payload-core.json``
+    // (top-degree subgraph; ~25 KB gzipped) and ``payload-rest.json``
+    // (everything else). We render core first so the user sees a graph
+    // almost immediately, then merge the rest in via
+    // ``forceGraph.graphData`` once it lands. The legacy combined
+    // ``payload.json`` is still emitted for backward compatibility but the
+    // route no longer fetches it on the happy path.
     var payloadUrl = container.getAttribute('data-payload-url') || 'payload.json';
-    fetch(payloadUrl)
+    var coreUrl = container.getAttribute('data-payload-core-url') || 'payload-core.json';
+    var restUrl = container.getAttribute('data-payload-rest-url') || 'payload-rest.json';
+    var loadingNote = document.getElementById('graph-loading-rest');
+    function setRestLoading(on){
+      if (!loadingNote) return;
+      // Toggle ``hidden`` (works without any CSS) and ``is-visible`` (so a
+      // future stylesheet hook can fade/animate the chip in).
+      if (on) {
+        loadingNote.hidden = false;
+        loadingNote.classList.add('is-visible');
+      } else {
+        loadingNote.hidden = true;
+        loadingNote.classList.remove('is-visible');
+      }
+    }
+    // ``window.__graphRestLoaded`` gates the auto-browse start path so the
+    // tour visits actual top-degree nodes (not just core's local maximum).
+    window.__graphRestLoaded = false;
+    fetch(coreUrl)
       .then(function(r){
-        if (!r.ok) throw new Error('HTTP ' + r.status + ' while loading ' + payloadUrl);
+        if (!r.ok) throw new Error('HTTP ' + r.status + ' while loading ' + coreUrl);
         return r.json();
       })
-      .then(startGraph)
+      .then(function(corePayload){
+        startGraph(corePayload);
+        setRestLoading(true);
+        // ``Promise.all`` is structural here — only one URL today, but the
+        // shape keeps the merge path symmetric if we ever shard further.
+        return Promise.all([fetch(restUrl)]).then(function(rs){
+          var r = rs[0];
+          if (!r.ok) throw new Error('HTTP ' + r.status + ' while loading ' + restUrl);
+          return r.json();
+        });
+      })
+      .then(function(restPayload){
+        try {
+          if (typeof window.__graphMergeRestPayload === 'function') {
+            window.__graphMergeRestPayload(restPayload);
+          }
+        } catch (err) {
+          console.warn('graph: rest merge failed', err);
+        }
+        setRestLoading(false);
+        window.__graphRestLoaded = true;
+      })
       .catch(function(err){
         console.error('graph: payload load failed', err);
-        var banner = document.getElementById('graph-error-banner');
-        if (banner) {
-          banner.textContent = 'Graph payload failed to load: ' + (err && err.message ? err.message : err);
-          banner.classList.add('is-visible');
+        setRestLoading(false);
+        if (!window.__graphCoreLoaded) {
+          var banner = document.getElementById('graph-error-banner');
+          if (banner) {
+            banner.textContent = 'Graph payload failed to load: ' + (err && err.message ? err.message : err);
+            banner.classList.add('is-visible');
+          }
+        } else {
+          console.warn('graph: rest payload failed to load — keeping core-only view');
+          // Flip the gate so auto-browse can still run on the core subgraph
+          // rather than block forever waiting for a payload that never
+          // arrives.
+          window.__graphRestLoaded = true;
         }
       });
   });
