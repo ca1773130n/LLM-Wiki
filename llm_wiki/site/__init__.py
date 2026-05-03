@@ -254,7 +254,9 @@ class StaticSiteBuilder:
         (out / "graph.json").write_text(graph_json_text, encoding="utf-8")
         _write_gzip_sibling(out / "graph.json", graph_json_text.encode("utf-8"))
 
-        search_index = build_search_index(graph, wiki_pages_by_kind)
+        search_index = build_search_index(
+            graph, wiki_pages_by_kind, project_root=project_root
+        )
         search_index_text = json.dumps(search_index, ensure_ascii=False, indent=2) + "\n"
         (out / "search-index.json").write_text(search_index_text, encoding="utf-8")
         _write_gzip_sibling(out / "search-index.json", search_index_text.encode("utf-8"))

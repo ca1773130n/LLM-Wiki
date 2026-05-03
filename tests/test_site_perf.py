@@ -172,6 +172,33 @@ def test_search_index_json_gz_exists(built_site: Path) -> None:
     assert decompressed == raw.read_bytes()
 
 
+def test_search_index_gz_under_one_megabyte(built_site: Path) -> None:
+    """The gzipped search index must stay under 1 MB even with the body
+    content the synthesis + raw-markdown indexer pulls in. The fixture corpus
+    is small, but this guards against accidental token-cap regressions."""
+
+    gz = built_site / "search-index.json.gz"
+    assert gz.exists()
+    size = gz.stat().st_size
+    assert size < 1024 * 1024, f"search-index.json.gz is {size} bytes (budget: 1 MB)"
+    # Sanity: decompresses to valid JSON.
+    payload = json.loads(gzip.decompress(gz.read_bytes()).decode("utf-8"))
+    assert isinstance(payload, list)
+
+
+def test_search_index_indexes_synthesis_body(built_site: Path) -> None:
+    """The fixture seeds a synthesis whose body says "Three new papers landed".
+    A search-index entry should carry tokens like ``papers`` from the body."""
+
+    payload = json.loads((built_site / "search-index.json").read_text(encoding="utf-8"))
+    syntheses = [e for e in payload if e["kind"] == "syntheses"]
+    assert syntheses, "expected at least one synthesis entry in the index"
+    # ``Three new papers landed`` → tokens should include ``papers`` / ``landed``.
+    body_tokens = set(syntheses[0]["tokens"])
+    assert "papers" in body_tokens
+    assert "landed" in body_tokens
+
+
 def test_gz_siblings_are_deterministic(tmp_path: Path) -> None:
     """Two compiles with identical content must yield byte-identical .gz files
     (i.e. ``gzip.GzipFile(mtime=0)`` was used). This is what keeps ``git

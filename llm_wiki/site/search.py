@@ -41,6 +41,7 @@ from __future__ import annotations
 import math
 import re
 from datetime import datetime, timezone
+from pathlib import Path
 from typing import Dict, Iterable, List, Mapping, Optional, Sequence
 
 from ..research_graph import ResearchGraph, ResearchNode, ResearchNodeType, is_public_research_node
@@ -157,6 +158,32 @@ _KIND_BY_TYPE: Dict[str, str] = {
 
 
 _SUMMARY_LIMIT = 200
+# Synthesis summary uses the body (frontmatter-stripped) capped at this many
+# chars — gives the palette a much richer preview than the title alone while
+# still keeping the JSON entry small.
+_SYNTHESIS_SUMMARY_LIMIT = 800
+# Per-entry body slice we hand to the tokenizer when indexing raw markdown.
+# 4 KB of text → roughly 600-700 tokens after stop-word stripping, which
+# stays under the per-entry token cap on virtually every doc we've seen.
+_BODY_LIMIT = 4096
+# Hard cap on distinct tokens per entry. BM25 keeps repetitions for term-
+# frequency, but once an entry has 256 distinct tokens the marginal recall
+# benefit of adding more is dwarfed by the index-size cost.
+_TOKEN_CAP = 256
+
+
+_FRONTMATTER_RE = re.compile(r"\A---\r?\n.*?\r?\n---\r?\n", re.DOTALL)
+
+
+def _strip_frontmatter(body: str) -> str:
+    """Return ``body`` with any leading YAML frontmatter block removed."""
+
+    if not body:
+        return ""
+    match = _FRONTMATTER_RE.match(body)
+    if match:
+        return body[match.end():]
+    return body
 
 
 # --------------------------------------------------------------- tokenizer
@@ -485,6 +512,29 @@ def _node_created_ts(node: ResearchNode) -> Optional[float]:
     return None
 
 
+def _cap_tokens(tokens: List[str], distinct_cap: int = _TOKEN_CAP) -> List[str]:
+    """Cap an entry's token list at ``distinct_cap`` *distinct* terms.
+
+    Repetitions of an already-included term are preserved (BM25 still wants
+    the term-frequency signal). New distinct tokens encountered after the cap
+    is reached are dropped. This bounds index size without flattening tf.
+    """
+
+    if not tokens:
+        return tokens
+    seen: set[str] = set()
+    out: List[str] = []
+    for tok in tokens:
+        if tok in seen:
+            out.append(tok)
+            continue
+        if len(seen) >= distinct_cap:
+            continue
+        seen.add(tok)
+        out.append(tok)
+    return out
+
+
 def _enrich(entry: Dict[str, object], text: str, created_ts: Optional[float]) -> Dict[str, object]:
     """Attach BM25 fields (tokens / len / created_ts) to a search entry.
 
@@ -495,19 +545,79 @@ def _enrich(entry: Dict[str, object], text: str, created_ts: Optional[float]) ->
     and casing collapsed, but term counts are preserved (otherwise BM25
     becomes pure length normalization, which we verified ranks worse on the
     Vision-Banana smoke test).
+
+    Token bags are capped at :data:`_TOKEN_CAP` *distinct* terms so a single
+    long body can't blow up the index. Repetitions of already-included terms
+    pass through untouched.
     """
 
-    tokens = tokenize(text)
+    tokens = _cap_tokens(tokenize(text))
     entry["tokens"] = tokens
     entry["len"] = len(tokens)
     entry["created_ts"] = int(created_ts) if isinstance(created_ts, (int, float)) else None
     return entry
 
 
-def _node_entry(node: ResearchNode) -> Dict[str, object]:
+def _read_source_body(source_path: str, project_root: Optional[Path]) -> str:
+    """Return the frontmatter-stripped body of a markdown ``source_path``.
+
+    Returns an empty string when the path is not a ``.md``-family file, when
+    the file does not exist on disk, or when the read fails. The body is
+    truncated to :data:`_BODY_LIMIT` characters so a multi-megabyte digest
+    cannot blow up the index — token counts are then further bounded by
+    :data:`_TOKEN_CAP` in :func:`_enrich`.
+    """
+
+    if not source_path:
+        return ""
+    text = source_path.strip().replace("\\", "/")
+    if not text:
+        return ""
+    suffix_lower = Path(text).suffix.lower()
+    if suffix_lower not in {".md", ".markdown", ".mdx"}:
+        return ""
+
+    candidates: List[Path] = []
+    raw = Path(text)
+    if raw.is_absolute():
+        candidates.append(raw)
+    else:
+        if project_root is not None:
+            candidates.append(Path(project_root) / raw)
+        candidates.append(raw)
+
+    for candidate in candidates:
+        try:
+            if not candidate.is_file():
+                continue
+            body = candidate.read_text(encoding="utf-8", errors="replace")
+        except OSError:
+            continue
+        body = _strip_frontmatter(body)
+        if len(body) > _BODY_LIMIT:
+            body = body[:_BODY_LIMIT]
+        return body
+    return ""
+
+
+def _node_entry(
+    node: ResearchNode,
+    project_root: Optional[Path] = None,
+) -> Dict[str, object]:
     kind = _KIND_BY_TYPE[node.type.value]
     title = (node.name or node.id).strip() or node.id
     summary = _trim(node.description or node.name or "")
+
+    # Pull the raw markdown body in for sources/papers/repos so a search for
+    # any word in the digest text finds the entry. The summary on disk is
+    # often short ("Daily research note"); the body is what carries terms
+    # like "Vision Banana" that no node title contains.
+    body_text = _read_source_body(node.source_path or "", project_root)
+    if body_text and not (node.description or "").strip():
+        # Only override the description-derived summary when the node had no
+        # description of its own — otherwise the curated description wins.
+        summary = _trim(_first_paragraph(body_text)) or summary
+
     base: Dict[str, object] = {
         "id": node.id,
         "title": title,
@@ -516,7 +626,12 @@ def _node_entry(node: ResearchNode) -> Dict[str, object]:
         "summary": summary,
         "source_path": node.source_path or "",
     }
-    text = " ".join(filter(None, (title, summary, kind, _aliases_text(node))))
+    text = " ".join(
+        filter(
+            None,
+            (title, summary, kind, _aliases_text(node), body_text),
+        )
+    )
     return _enrich(base, text, _node_created_ts(node))
 
 
@@ -529,14 +644,30 @@ def _wiki_entry(page: WikiPage) -> Dict[str, object]:
     if not title:
         title = _first_h1(page.body) or page.title or page.slug
 
+    body_clean = _strip_frontmatter(page.body or "")
+
+    # Synthesis pages get the full body as their summary (capped at 800 chars,
+    # vs the 200-char default) so the palette can show a meaningful preview
+    # for the curated weekly / pulse digests. Tokens come from the same body
+    # so a search for any word in the synthesis prose finds the entry.
+    is_synthesis = page.kind == "syntheses"
+
     summary_raw = ""
     if isinstance(fm, dict):
         candidate = fm.get("summary") or fm.get("description")
         if isinstance(candidate, str):
             summary_raw = candidate
-    if not summary_raw:
-        summary_raw = _first_paragraph(page.body)
-    summary = _trim(summary_raw)
+    if is_synthesis:
+        # Body wins for syntheses regardless of frontmatter.summary — the
+        # frontmatter summary is usually one line; the body has the goods.
+        body_summary = _first_paragraph(body_clean) or body_clean
+        if body_summary.strip():
+            summary_raw = body_summary
+    elif not summary_raw:
+        summary_raw = _first_paragraph(body_clean)
+
+    summary_limit = _SYNTHESIS_SUMMARY_LIMIT if is_synthesis else _SUMMARY_LIMIT
+    summary = _trim(summary_raw, limit=summary_limit)
 
     source_path = ""
     if isinstance(fm, dict):
@@ -554,7 +685,15 @@ def _wiki_entry(page: WikiPage) -> Dict[str, object]:
         "summary": summary,
         "source_path": source_path,
     }
-    text = " ".join(filter(None, (title, summary, page.kind, _wiki_aliases_text(page))))
+    # Tokenize over title + summary + kind + aliases as before, plus the body
+    # for syntheses (the case the frontend redesign called out specifically).
+    body_for_tokens = body_clean[:_BODY_LIMIT] if is_synthesis else ""
+    text = " ".join(
+        filter(
+            None,
+            (title, summary, page.kind, _wiki_aliases_text(page), body_for_tokens),
+        )
+    )
     return _enrich(base, text, _wiki_created_ts(page))
 
 
@@ -585,6 +724,7 @@ def average_doc_len(entries: Sequence[Mapping[str, object]]) -> float:
 def build_search_index(
     graph: ResearchGraph,
     wiki_pages_by_kind: Mapping[str, Sequence[WikiPage]] | None = None,
+    project_root: Optional[Path] = None,
 ) -> List[Dict[str, object]]:
     """Build the wiki-layer search index.
 
@@ -596,11 +736,21 @@ def build_search_index(
     wiki_pages_by_kind:
         Source-document and synthesis pages prefer their wiki-layer markdown
         rendition (frontmatter title + first paragraph). Pass an empty mapping
-        if the wiki layer is not yet materialised.
+        if the wiki layer is not yet materialised. Synthesis pages additionally
+        get the body (frontmatter-stripped, capped at 800 chars) as their
+        summary, and the body is tokenized so a search for any word in the
+        digest prose finds the entry.
+    project_root:
+        When provided, ``SourceDocument`` / ``Paper`` / ``Repository`` nodes
+        whose ``source_path`` resolves to a markdown file under this root get
+        their body slurped (frontmatter-stripped, capped at 4 KB) and added to
+        the entry's tokens. This is what makes "Vision Banana" findable: the
+        digest body mentions it but no node title carries that exact term.
 
     Each returned dict has the keys ``id``, ``title``, ``kind``, ``href``,
-    ``summary`` (capped at 200 chars), and ``source_path``, plus the new
-    BM25-scoring fields ``tokens``, ``len``, and ``created_ts``.
+    ``summary`` (capped at 200 chars for non-synthesis kinds, 800 for
+    syntheses), and ``source_path``, plus the BM25-scoring fields ``tokens``,
+    ``len``, and ``created_ts``.
     """
 
     pages_by_kind: Dict[str, List[WikiPage]] = {}
@@ -627,7 +777,7 @@ def build_search_index(
     for node in graph.nodes:
         if not is_wiki_layer(node):
             continue
-        entry = _node_entry(node)
+        entry = _node_entry(node, project_root=project_root)
         if entry["href"] in seen_hrefs:
             continue
         seen_hrefs.add(str(entry["href"]))
