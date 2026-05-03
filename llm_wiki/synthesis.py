@@ -255,28 +255,57 @@ class SynthesisProjector:
         Only ids + names + types + light counts are sent. Source-document
         bodies are NOT shipped to the API; the privacy contract is "graph
         metadata only".
+
+        The ``heuristic_body`` field carries the deterministic projector's
+        output verbatim — the model uses it as the EDITORIAL ANGLE
+        (Rule 1 fallback) so it can rephrase the same facts without
+        introducing new ones.
         """
 
-        from .llm_synthesis import LlmSynthesisRequest
+        from .llm_synthesis import LlmSynthesisRequest, _MAX_INPUTS
 
+        # Cap inputs at 25; sample by degree descending so the page sees its
+        # highest-signal contributors when the plan has more than 25 nodes.
+        ranked_ids = self._rank_inputs_by_degree(plan, ctx)[:_MAX_INPUTS]
         inputs: List[Dict[str, Any]] = []
-        for node_id in plan.input_ids:
+        for node_id in ranked_ids:
             node = ctx.nodes_by_id.get(node_id)
             if not node:
                 continue
-            inputs.append(
-                {
-                    "id": node.id,
-                    "name": node.name,
-                    "type": node.type.value,
-                    "description": (node.description or "").strip()[:280] or None,
-                }
-            )
+            metadata: Dict[str, Any] = {}
+            arxiv_id = node.metadata.get("arxiv_id") if node.metadata else None
+            if arxiv_id:
+                metadata["arxiv_id"] = str(arxiv_id)
+            quality = node.metadata.get("title_quality") if node.metadata else None
+            if quality:
+                metadata["title_quality"] = str(quality)
+            entry: Dict[str, Any] = {
+                "id": node.id,
+                "name": node.name,
+                "type": node.type.value,
+                "description": (node.description or "").strip()[:280] or None,
+            }
+            if metadata:
+                entry["metadata"] = metadata
+            inputs.append(entry)
+
+        # Pull plan metadata (field name, days/weeks) out of the plan if it's
+        # been recorded; defaults are safe no-ops if the plan didn't set one.
+        plan_meta = getattr(plan, "metadata", {}) or {}
+        days_or_weeks = list(plan_meta.get("days") or plan_meta.get("weeks") or [])
+
         context: Dict[str, Any] = {
+            "site_title": "LLM-Wiki",
+            "total_nodes": len(ctx.graph.nodes),
+            "total_edges": len(ctx.graph.edges),
+            "field": plan_meta.get("field_name"),
+            "days": days_or_weeks,
             "kind": plan.kind,
             "summary": plan.summary,
             "source_paths": list(plan.sources),
             "summarize_targets": list(plan.summarize_targets),
+            # The deterministic body is the model's EDITORIAL ANGLE.
+            "heuristic_body": plan.body,
         }
         return LlmSynthesisRequest(
             kind=plan.kind,
@@ -284,6 +313,35 @@ class SynthesisProjector:
             inputs=tuple(inputs),
             context=context,
         )
+
+    def _rank_inputs_by_degree(
+        self, plan: "_PagePlan", ctx: "_GraphContext"
+    ) -> List[str]:
+        """Order ``plan.input_ids`` by graph degree (high first), then id.
+
+        The degree count uses the plan's own ``input_ids`` as the universe of
+        interest — we rank by *internal* connectivity within the page's
+        neighborhood, not global popularity, so a tightly-connected core
+        cluster ranks above a one-off outlier.
+        """
+
+        ids: List[str] = list(plan.input_ids)
+        if len(ids) <= 1:
+            return ids
+
+        in_set = set(ids)
+        degrees: Dict[str, int] = {nid: 0 for nid in ids}
+        for nid in ids:
+            for edge in ctx.out_edges.get(nid, []):
+                if edge.target in in_set:
+                    degrees[nid] = degrees.get(nid, 0) + 1
+            for edge in ctx.in_edges.get(nid, []):
+                if edge.source in in_set:
+                    degrees[nid] = degrees.get(nid, 0) + 1
+
+        # ``-degree`` for descending; secondary on id for stable order across
+        # runs (the input list itself is already sorted upstream).
+        return sorted(ids, key=lambda nid: (-degrees.get(nid, 0), nid))
 
     # ------------------------------------------------------------------
     # Entry point
@@ -561,6 +619,7 @@ class SynthesisProjector:
                     sources=sources,
                     input_ids=input_ids,
                     summarize_targets=sorted({n.id for n in source_nodes}),
+                    metadata={"days": [date]},
                 )
             )
         return plans
@@ -606,6 +665,7 @@ class SynthesisProjector:
                     sources=sources,
                     input_ids=input_ids,
                     summarize_targets=sorted({n.id for n in source_nodes}),
+                    metadata={"weeks": [week]},
                 )
             )
         return plans
@@ -657,6 +717,7 @@ class SynthesisProjector:
                     sources=sources,
                     input_ids=input_ids,
                     summarize_targets=sorted({n.id for n in papers}),
+                    metadata={"topic_name": topic.name, "topic_type": topic.type.value},
                 )
             )
         return plans
@@ -692,6 +753,11 @@ class SynthesisProjector:
                     sources=sources,
                     input_ids=input_ids,
                     summarize_targets=sorted({n.id for n in papers_a + papers_b}),
+                    metadata={
+                        "family_a": family_a.name,
+                        "family_b": family_b.name,
+                        "shared": shared.name,
+                    },
                 )
             )
         return plans
@@ -738,6 +804,7 @@ class SynthesisProjector:
                     sources=sources,
                     input_ids=input_ids,
                     summarize_targets=sorted({n.id for n in papers}),
+                    metadata={"field_name": field.name},
                 )
             )
         return plans
@@ -759,6 +826,7 @@ class _PagePlan:
         "input_ids",
         "summarize_targets",
         "llm_metadata",
+        "metadata",
     )
 
     def __init__(
@@ -771,6 +839,7 @@ class _PagePlan:
         sources: List[str],
         input_ids: List[str],
         summarize_targets: List[str],
+        metadata: Optional[Dict[str, Any]] = None,
     ) -> None:
         self.kind = kind
         self.slug = slug
@@ -784,6 +853,11 @@ class _PagePlan:
         # heuristic path leaves this as ``None`` and the on-disk frontmatter
         # uses ``GENERATOR`` ("heuristic-v1").
         self.llm_metadata: Optional[Dict[str, Any]] = None
+        # Plan-time metadata used to enrich the LLM prompt (field name for
+        # field overviews, contributing days for daily/weekly digests, etc.).
+        # Heuristic body generation does not consult this — it's prompt
+        # context only.
+        self.metadata: Dict[str, Any] = dict(metadata or {})
 
 
 class _GraphContext:

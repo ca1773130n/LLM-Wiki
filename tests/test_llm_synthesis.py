@@ -194,7 +194,11 @@ def test_empty_response_returns_none_and_logs_once():
 
 def test_missing_citations_rejected_with_log_and_returns_none():
     factory = _factory(
-        fixed_body="A perfectly nice paragraph that names no node ids.\n"
+        fixed_body=(
+            "A perfectly nice paragraph that names no node ids and is "
+            "intentionally written to exceed the minimum body length so the "
+            "validator rejects it specifically for the missing citations.\n"
+        )
     )
     set_client_factory(factory)
 
@@ -208,7 +212,13 @@ def test_missing_citations_rejected_with_log_and_returns_none():
 
 
 def test_two_calls_with_same_request_produce_same_body_and_cache_id():
-    factory = _factory(fixed_body="See [node-a] and [node-b].")
+    factory = _factory(
+        fixed_body=(
+            "See [node-a] and [node-b]. The wiki tracks both papers under "
+            "the same approach family and they share two contributing "
+            "concepts."
+        )
+    )
     set_client_factory(factory)
 
     synth = LlmSynthesizer()
@@ -246,11 +256,217 @@ def test_rate_limit_error_returns_none_and_logs():
     assert "_FakeRateLimitError" in buf.getvalue()
 
 
+def test_system_block_contains_canonical_rules_text():
+    """The cached preamble carries every Rule-N marker verbatim.
+
+    Any byte change to this block invalidates the prompt cache for every
+    subsequent page in the run, so the test is intentionally strict — it
+    fails loudly if someone edits the rule text without thinking about it.
+    """
+
+    factory = _factory(
+        fixed_body=(
+            "Cache-control sanity check [node-a]. The system block must "
+            "carry the exact canonical rules text."
+        )
+    )
+    set_client_factory(factory)
+
+    LlmSynthesizer().synthesize(_basic_request())
+
+    sysblock = factory.holder["client"].calls[0]["system"][0]
+    text = sysblock["text"]
+    for marker in (
+        "RULE 1 — DO NOT INVENT FACTS",
+        "RULE 2 — CITE EVERY CLAIM",
+        "RULE 3 — STAY ON TOPIC",
+        "RULE 4 — TONE",
+        "RULE 5 — FORMAT",
+        "RULE 6 — LANGUAGE",
+        "pulse        : project-wide weekly snapshot",
+        "daily_digest : one paragraph per noteworthy paper",
+        "Type:slug:hash",
+    ):
+        assert marker in text, f"missing canonical marker: {marker!r}"
+    assert sysblock["cache_control"] == {"type": "ephemeral"}
+
+
+def test_user_message_contains_kind_title_inputs_and_heuristic_body():
+    """User message carries the per-kind shape + INPUTS + EDITORIAL ANGLE."""
+
+    factory = _factory(fixed_body="Sanity body [node-a].")
+    set_client_factory(factory)
+
+    request = LlmSynthesisRequest(
+        kind="topic",
+        title="Topic — Gaussian Splatting",
+        inputs=(
+            {
+                "id": "Paper:gs:abc123def456",
+                "name": "Gaussian Splatting v2",
+                "type": "Paper",
+                "description": "Photometric splat refinement.",
+                "metadata": {"arxiv_id": "2604.20329"},
+            },
+            {
+                "id": "ApproachFamily:splatting:xyz789",
+                "name": "Splatting Family",
+                "type": "ApproachFamily",
+            },
+        ),
+        context={
+            "kind": "topic",
+            "site_title": "LLM-Wiki",
+            "total_nodes": 2859,
+            "total_edges": 4316,
+            "field": "3D Reconstruction",
+            "days": ["2026-04-25", "2026-04-26"],
+            "summary": "Topic synthesis for Gaussian Splatting.",
+            "heuristic_body": (
+                "# Topic — Gaussian Splatting\n\n"
+                "Two papers contribute to this topic this week.\n"
+            ),
+        },
+    )
+    LlmSynthesizer().synthesize(request)
+
+    user_msg = factory.holder["client"].calls[0]["messages"][0]["content"]
+    assert "SYNTHESIS_KIND: topic" in user_msg
+    assert "TITLE: Topic — Gaussian Splatting" in user_msg
+    assert "Paper:gs:abc123def456" in user_msg
+    assert "ApproachFamily:splatting:xyz789" in user_msg
+    assert "Gaussian Splatting v2" in user_msg
+    assert "field name: 3D Reconstruction" in user_msg
+    assert "total nodes in graph: 2859" in user_msg
+    assert "total edges: 4316" in user_msg
+    assert "2026-04-25" in user_msg and "2026-04-26" in user_msg
+    assert "EDITORIAL ANGLE" in user_msg
+    assert "Two papers contribute to this topic this week." in user_msg
+    # Per-kind shape descriptor anchors Rule 3 to "topic".
+    assert "narrative about" in user_msg
+
+
+def test_user_message_caps_inputs_at_25():
+    """More than 25 inputs are truncated; the user message stays bounded."""
+
+    factory = _factory(fixed_body="Body referencing [node-0] only.")
+    set_client_factory(factory)
+
+    big_inputs = tuple(
+        {"id": f"Paper:p{i}:{i:012x}", "name": f"Paper {i}", "type": "Paper"}
+        for i in range(40)
+    )
+    request = LlmSynthesisRequest(
+        kind="weekly",
+        title="Weekly",
+        inputs=big_inputs,
+        context={"kind": "weekly"},
+    )
+    LlmSynthesizer().synthesize(request)
+    user_msg = factory.holder["client"].calls[0]["messages"][0]["content"]
+    # The first 25 inputs are present; the 26th and beyond are not.
+    assert "Paper:p0:" in user_msg
+    assert "Paper:p24:" in user_msg
+    assert "Paper:p25:" not in user_msg
+    assert "Paper:p39:" not in user_msg
+
+
+def test_validate_response_rejects_short_body():
+    """``_validate_response`` enforces the 80-char minimum."""
+
+    from llm_wiki.llm_synthesis import _validate_response
+
+    short_with_citation = "Tiny [node-a].\n"
+    assert _validate_response(short_with_citation) is None
+
+
+def test_validate_response_rejects_zero_citations():
+    """A long body with no [id] markers fails validation."""
+
+    from llm_wiki.llm_synthesis import _validate_response
+
+    long_no_citation = (
+        "This paragraph is plenty long but it does not name any node by id "
+        "in square brackets, so the validator should reject it.\n"
+    )
+    assert _validate_response(long_no_citation) is None
+
+
+def test_validate_response_accepts_valid_body():
+    """A long body with at least one [id] marker is accepted."""
+
+    from llm_wiki.llm_synthesis import _validate_response
+
+    body = (
+        "The wiki tightened around 3D reconstruction this week, with three "
+        "new papers contributing to the geometry-grounded splatting family "
+        "[Paper:geometry-grounded:abcdef123456].\n"
+    )
+    citations = _validate_response(body)
+    assert citations == ["Paper:geometry-grounded:abcdef123456"]
+
+
+def test_korean_inputs_render_through_to_user_message_and_system_has_language_rule():
+    """When 80%+ of input names are Korean, the cached system rule still
+    instructs the model to match the dominant language. The user message
+    carries the Korean names verbatim so the model can detect the bias.
+
+    We assert via prompt content shape (Rule 6 present + Korean names land
+    in the user message) — there is no separate code-side language flag.
+    """
+
+    factory = _factory(fixed_body="국문 본문 [node-a]. 위키는 한국어 자료를 정리한다.")
+    set_client_factory(factory)
+
+    request = LlmSynthesisRequest(
+        kind="daily_digest",
+        title="일일 다이제스트 — 2026-04-25",
+        inputs=(
+            {"id": "node-a", "name": "한국어 논문 한 편", "type": "Paper"},
+            {"id": "node-b", "name": "두 번째 한국어 논문", "type": "Paper"},
+            {"id": "node-c", "name": "세 번째 한국어 논문", "type": "Paper"},
+            {"id": "node-d", "name": "네 번째 논문", "type": "Paper"},
+            {"id": "node-e", "name": "English Outlier", "type": "Paper"},
+        ),
+        context={"kind": "daily_digest", "summary": "한국어 자료의 일일 다이제스트"},
+    )
+    LlmSynthesizer().synthesize(request)
+
+    call = factory.holder["client"].calls[0]
+    sys_text = call["system"][0]["text"]
+    user_msg = call["messages"][0]["content"]
+
+    # System block carries the language rule verbatim — the model sees both
+    # the rule AND the Korean-dominant inputs and is responsible for picking
+    # the language.
+    assert "RULE 6 — LANGUAGE" in sys_text
+    assert "Korean" in sys_text
+    # Korean strings land in the user message intact.
+    assert "한국어 논문 한 편" in user_msg
+    assert "일일 다이제스트" in user_msg
+
+
+def test_short_response_logs_short_message_and_returns_none():
+    """A model that returns 'OK [node-a].' must be rejected on length."""
+
+    factory = _factory(fixed_body="OK [node-a].")
+    set_client_factory(factory)
+
+    buf = io.StringIO()
+    with redirect_stderr(buf):
+        out = LlmSynthesizer().synthesize(_basic_request())
+
+    assert out is None
+    log = buf.getvalue()
+    assert "shorter than" in log
+
+
 def test_response_frontmatter_and_h1_are_stripped():
     body = (
         "---\nfoo: bar\n---\n"
         "# Project Pulse\n\n"
-        "Lead paragraph naming [node-a].\n"
+        "Lead paragraph naming [node-a]. The wiki captured two recent "
+        "papers and both connect to the same approach family.\n"
     )
     factory = _factory(fixed_body=body)
     set_client_factory(factory)
@@ -348,16 +564,24 @@ def test_projector_uses_llm_when_enabled_with_fake_client(tmp_path: Path,
 
     def factory_body(kwargs):
         # Pull a node id off the user message so the body always cites
-        # something present in INPUTS.
+        # something present in INPUTS. The user message is YAML-shaped,
+        # with each input rendered as ``  - id: <node-id>`` on its own line.
         text = kwargs["messages"][0]["content"]
-        # The first id we emit in inputs has form ``ResearchField:...`` etc.
-        marker = "\"id\":\""
+        marker = "  - id: "
         idx = text.find(marker)
         if idx == -1:
-            return "no inputs"
-        end = text.find("\"", idx + len(marker))
-        node_id = text[idx + len(marker):end]
-        return f"LLM-generated digest referencing [{node_id}]."
+            return (
+                "no inputs found in the user message; this body is long "
+                "enough to pass the minimum-length gate but lacks any "
+                "citation, so the validator should reject it."
+            )
+        end = text.find("\n", idx + len(marker))
+        node_id = text[idx + len(marker):end].strip()
+        return (
+            f"LLM-generated digest referencing [{node_id}]. The wiki "
+            "tightened around this neighborhood, with multiple contributing "
+            "papers and one shared approach family."
+        )
 
     factory = _factory(body_factory=factory_body)
     set_client_factory(factory)

@@ -39,17 +39,112 @@ Reads like a database dump. Useful, deterministic, and shipped today.
 **LLM (`generator: llm-claude-sonnet-4-6`)**
 
 ```markdown
-The wiki tightened around 3D reconstruction this week. Three new papers
-landed under the Geometry-Grounded Gaussian Splatting family
-[Paper:geometry-grounded] [Paper:stochastic-solid] [Paper:volumetric].
-The dominant thread continues to be how to anchor splat geometry in
-photometric and depth supervision...
+## Recent activity
+
+The wiki tightened around 3D reconstruction this week. Two papers landed
+under the Splatting Family [ApproachFamily:splatting:a86ed11b9524], both
+foregrounding photometric and depth supervision for stable splat geometry
+[Paper:geometry-grounded-gaussian-splatting:f188522141a2]. The dominant
+through-line is volumetric rendering refinements
+[Concept:volumetric-rendering:b05846130d24].
 ```
 
 Reads like an editorial digest. The model is constrained to *restate* facts
 present in the inputs — every paragraph that names a node ends with a
-`[node_id]` citation, and bodies that omit citations are rejected and fall
-back to the heuristic.
+`[node_id]` citation, and bodies that omit citations (or are shorter than
+80 chars) are rejected and fall back to the heuristic.
+
+## Prompt shape
+
+Two blocks: a long, stable system block wrapped in
+`cache_control: ephemeral` and a per-page user message that varies by kind.
+
+### System block (cached, identical across pages)
+
+```
+You are an LLM-Wiki synthesis writer. Your job is to summarize a controlled
+knowledge graph into a single Markdown page. Rules you follow ABSOLUTELY:
+
+  RULE 1 — DO NOT INVENT FACTS. Restate or summarize ONLY material you find
+  in the inputs. ...
+
+  RULE 2 — CITE EVERY CLAIM. Every paragraph that names a node MUST end
+  with one or more citation markers in square brackets, where the bracket
+  body is the node's id (e.g. ``[Paper:arxiv-2604.20329:abcd1234]``).
+  ...
+
+  RULE 3 — STAY ON TOPIC. The synthesis kind decides the shape:
+    * pulse        : project-wide weekly snapshot. 5-9 sentences max.
+    * daily_digest : one paragraph per noteworthy paper that day.
+    * weekly       : 3 themes from the week, 1 paragraph each.
+    * topic        : narrative about a research topic / approach family.
+    * comparison   : one paragraph per family with shared task/benchmark.
+    * field_overview: 1-2 paragraphs per linked sub-topic.
+
+  RULE 4 — TONE. Direct, terse, technical. ...
+  RULE 5 — FORMAT. Output is pure Markdown. No frontmatter. ...
+  RULE 6 — LANGUAGE. Match the dominant language of the input materials.
+  If 80%+ of input titles/descriptions are in Korean, write in Korean.
+  Otherwise English.
+
+The current ontology is:
+  Paper, Repository, Concept, Algorithm, Model, Dataset, Benchmark, Metric,
+  Person, Organization, ResearchTopic, ApproachFamily, Synthesis, ...
+A node id has the shape ``Type:slug:hash``.
+```
+
+The full block is ~500 tokens. See
+[`llm_wiki/llm_synthesis.py`](../llm_wiki/llm_synthesis.py) for the
+canonical text. Any byte change there invalidates the prompt cache for
+every subsequent page in a run, so the rule text is intentionally frozen.
+
+### User message (per page, NOT cached)
+
+```
+SYNTHESIS_KIND: topic
+SHAPE: narrative about the named topic / approach family
+TITLE: Topic — Gaussian Splatting
+SOURCE_FILES: []
+
+INPUTS:
+  - id: Paper:geometry-grounded-gaussian-splatting:f188522141a2
+    name: Geometry-Grounded Gaussian Splatting
+    type: Paper
+    description: Photometric and depth supervision for stable splat geometry.
+    metadata: {"arxiv_id":"2604.20329","title_quality":"paper_file"}
+  - id: ApproachFamily:splatting:a86ed11b9524
+    name: Splatting Family
+    type: ApproachFamily
+  - id: Concept:volumetric-rendering:b05846130d24
+    name: Volumetric Rendering
+    type: Concept
+
+CONTEXT:
+  total nodes in graph: 2932
+  total edges: 4394
+  field name: 3D Reconstruction
+  contributing days/weeks: 2026-04-25, 2026-04-26
+  site title: LLM-Wiki
+  page summary: Topic synthesis for Gaussian Splatting.
+
+EDITORIAL ANGLE (HEURISTIC FALLBACK BODY for the model to consult):
+  | # Topic — Gaussian Splatting
+  | 
+  | ## Contributing papers
+  | - Geometry-Grounded Gaussian Splatting (arXiv:2604.20329)
+  |
+  | ## Related concepts
+  | - Volumetric Rendering (Concept)
+
+Write the synthesis page now. Remember Rule 2 — every claim must be
+cited with the relevant node id in square brackets at the end of the
+sentence or paragraph.
+```
+
+The EDITORIAL ANGLE block is the deterministic heuristic body — the model
+is told to rephrase / re-organize those exact facts rather than reach for
+new ones. INPUTS are capped at 25 nodes and ranked by intra-page degree so
+the highest-signal contributors land in the prompt when a plan has more.
 
 ## How to enable it
 
@@ -80,29 +175,37 @@ class per compile. The compile keeps running.
 ## Cost
 
 Each synthesis page makes one `messages.create` call. The system block
-(style rules + ontology recap, ~1.5K tokens) is wrapped in
-`cache_control: ephemeral`, so the first page in a compile pays the cache
-write and every subsequent page reads it. Per-page token costs are roughly:
+(style rules + ontology recap, ~500 tokens) is wrapped in
+`cache_control: ephemeral`, but on Sonnet 4.6 the minimum cacheable prefix
+is 2048 tokens — so at the current size the cache marker is set but does
+not actually engage. Plan for full input pricing on every page; expand the
+preamble or switch to a model with a lower cache floor (e.g. Sonnet 4.5 at
+1024 tokens) if cache reads matter.
 
-| | Cache read | Uncached input | Output |
-|---|---:|---:|---:|
-| First page in a run | 0 | ~1500 + ~600 | ~250 |
-| Every page after | ~1500 | ~600 | ~250 |
+Per-page token costs (typical, with a 25-input cap on inputs):
+
+| | System | User message | Output | Total in / out |
+|---|---:|---:|---:|---:|
+| pulse | ~500 | ~600 | ~250 | ~1100 / ~250 |
+| daily_digest | ~500 | ~700 | ~200 | ~1200 / ~200 |
+| weekly | ~500 | ~700 | ~250 | ~1200 / ~250 |
+| topic | ~500 | ~900 | ~300 | ~1400 / ~300 |
+| comparison | ~500 | ~900 | ~250 | ~1400 / ~250 |
+| field_overview | ~500 | ~900 | ~300 | ~1400 / ~300 |
 
 A typical compile of this repository today produces 5–10 synthesis pages
 (pulse + a handful of daily/weekly/topic/comparison/field overviews). At
-Sonnet 4.6 list pricing (`$3/M` input, `$15/M` output) that is roughly:
+Sonnet 4.6 list pricing (`$3/M` input, `$15/M` output, no cache hit at
+this preamble size):
 
 ```
-1 first-page  : (1500 * 1.25 + 600) * $3/1M + 250 * $15/1M ≈ $0.0107
-9 cached pages: (1500 * 0.10 + 600) * $3/1M + 250 * $15/1M ≈ $0.0060 each
-                                                     total ≈ $0.065
+per page (uncached): ~1300 * $3/1M + ~270 * $15/1M ≈ $0.0080
+                     × 10 pages              total ≈ $0.080
 ```
 
-Numbers are approximate — actual token counts vary with the size of your
-graph and how many input nodes each page references. Run with
-`LLM_WIKI_SYNTHESIS_DRY_RUN=1` first if you want to confirm prompt shape
-without spending tokens.
+If you switch to Haiku 4.5 (`$1/M` input, `$5/M` output) the same compile
+costs roughly `~$0.027`. Run with `LLM_WIKI_SYNTHESIS_DRY_RUN=1` first if
+you want to confirm prompt shape without spending tokens.
 
 ## Privacy
 

@@ -42,62 +42,72 @@ _NODE_CITATION_RE = re.compile(r"\[([a-zA-Z0-9_\-:./]{3,})\]")
 
 # A long, stable preamble. Keep this byte-stable across builds — changes here
 # invalidate the prompt cache for every page in this run.
+#
+# This is the canonical system prompt for every synthesis kind. The block is
+# wrapped in ``cache_control: ephemeral`` so every page after the first hits
+# the cache. Per-kind shape lives in the user message so the cached prefix
+# stays identical across pages.
 _SYSTEM_PREAMBLE = """\
-You are the editorial synthesis voice of LLM-Wiki, a self-evolving research
-notebook. Your job is to turn a structured set of graph facts into short,
-high-signal markdown prose that reads like a senior research editor's digest.
+You are an LLM-Wiki synthesis writer. Your job is to summarize a controlled
+knowledge graph into a single Markdown page. Rules you follow ABSOLUTELY:
 
-# Hard rules (do not violate)
+  RULE 1 — DO NOT INVENT FACTS. Restate or summarize ONLY material you find
+  in the inputs. If a fact would require knowledge outside the inputs, omit
+  it. No analogies to outside work. No author opinions. No predictions.
 
-1. RESTATE, DO NOT INVENT. You may only summarize, group, contrast, and
-   restate the facts present in the structured INPUTS section of the user
-   message. You must not introduce claims, numbers, names, papers, results,
-   organizations, or quotes that are not explicitly in INPUTS. If something
-   is not in INPUTS, it does not exist.
-2. CITATIONS REQUIRED. Every paragraph that names a node (a paper, repo,
-   concept, topic, family, field, task, benchmark) MUST end with at least
-   one bracket-citation pointing to that node's id, exactly as it appears in
-   INPUTS. Format: ``[<node_id>]``. Multiple citations are fine: ``[a] [b]``.
-   Lists/tables that simply enumerate node names do not each need a citation;
-   one citation per paragraph that mentions them is enough.
-3. STAY SHORT. The body should be 120-280 words for pulse, 80-200 for daily
-   and weekly digests, 150-300 for topic / comparison / field overviews. Use
-   2-4 paragraphs and at most one bulleted list when it adds clarity. Do not
-   pad.
-4. NO FRONTMATTER. Do not emit a YAML frontmatter block. Do not emit a
-   leading H1 with the page title — the title is already rendered by the
-   wiki shell.
-5. NEUTRAL, EDITORIAL VOICE. No marketing copy, no "exciting", no exclamation
-   marks, no first-person plural ("we") referring to the model.
+  RULE 2 — CITE EVERY CLAIM. Every paragraph that names a node MUST end
+  with one or more citation markers in square brackets, where the bracket
+  body is the node's id (e.g. ``[Paper:arxiv-2604.20329:abcd1234]``).
+  Multiple citations: ``[id1] [id2]``. A response with zero citations is
+  invalid and will be discarded — fall through to the heuristic body.
 
-# Output shape
+  RULE 3 — STAY ON TOPIC. The synthesis kind decides the shape:
+    * pulse        : project-wide weekly snapshot. 5-9 sentences max.
+    * daily_digest : one paragraph per noteworthy paper that day.
+    * weekly       : 3 themes from the week, 1 paragraph each.
+    * topic        : narrative about a research topic / approach family.
+    * comparison   : one paragraph per family with shared task/benchmark.
+    * field_overview: 1-2 paragraphs per linked sub-topic.
 
-Plain markdown body. Allowed: paragraphs, bold/italic for emphasis (sparing),
-bullet lists, simple two-column tables for comparisons. Disallowed: code
-fences, HTML, frontmatter, embedded JSON, footnotes.
+  RULE 4 — TONE. Direct, terse, technical. No marketing language. No
+  "this exciting development" / "groundbreaking" / "paradigm-shift". Use
+  past tense for what was claimed; present tense for what the wiki KNOWS.
 
-# Page kinds and what they emphasize
+  RULE 5 — FORMAT. Output is pure Markdown. No frontmatter. Start with
+  one ``## <Section>`` heading; subsequent sections under ``## Section``.
+  Inline code allowed. No HTML.
 
-- pulse: a global snapshot. Lead with what the wiki currently knows; then a
-  paragraph on what is most active right now; close with one sentence of
-  forward-looking observation drawn ONLY from INPUTS counts.
-- daily_digest: what landed on a single ingest day. Group by source type
-  (papers, repos, source documents). Mention the dominant concept threads
-  that emerged.
-- weekly: zoom out from the day-by-day. Surface the dominant approach
-  families and the through-line across the week.
-- topic: a research topic / approach family page. Lead with what the topic
-  IS (drawn from its name + linked concepts), then the contributing papers
-  and how they relate.
-- comparison: contrast two approach families against a shared task /
-  benchmark. Use a short two-column table OR two parallel paragraphs.
-- field_overview: highest-level. Name the topics that anchor the field, then
-  what concepts cut across them.
+  RULE 6 — LANGUAGE. Match the dominant language of the input materials.
+  If 80%+ of input titles/descriptions are in Korean, write in Korean.
+  Otherwise English.
 
-If INPUTS is sparse, write a shorter body — never invent material to fill
-space. If INPUTS is empty for a section, say "No contributing nodes yet for
-this section." and stop.
+The current ontology is:
+  Paper, Repository, Concept, Algorithm, Model, Dataset, Benchmark, Metric,
+  Person, Organization, ResearchTopic, ApproachFamily, Synthesis, ...
+A node id has the shape ``Type:slug:hash``.
 """
+
+
+# Per-kind cap on inputs sent to the model. Above this, sample by degree
+# descending so the page sees its highest-signal contributors and the prompt
+# stays cheap.
+_MAX_INPUTS = 25
+
+
+# Plain-language shape descriptors for each kind. Purely informational —
+# anchors the user message so the model knows which Rule-3 sub-bullet to
+# apply to this page. Kept short so it doesn't dilute the inputs.
+_KIND_SHAPE: Dict[str, str] = {
+    "pulse": "project-wide snapshot, 5-9 sentences",
+    "daily_digest": "one paragraph per noteworthy paper that day",
+    "weekly": "three themes from the week, one paragraph each",
+    "topic": "narrative about the named topic / approach family",
+    "comparison": (
+        "one paragraph per family with the shared task/benchmark, "
+        "or a short two-column table"
+    ),
+    "field_overview": "1-2 paragraphs per linked sub-topic",
+}
 
 
 @dataclass(frozen=True)
@@ -148,6 +158,141 @@ def _format_inputs_section(req: LlmSynthesisRequest) -> str:
     return "INPUTS\n```json\n" + _stable_json(payload) + "\n```"
 
 
+def _format_input_node_yaml(node: Dict[str, Any]) -> str:
+    """One ``- id: ... / name: ... / type: ...`` block for the user message.
+
+    Renders deterministically (keys in fixed order) so the user-message bytes
+    stay stable across runs for the same INPUTS — useful for spot-checking
+    diffs even though the user message is intentionally NOT prompt-cached.
+    """
+
+    lines: List[str] = []
+    lines.append(f"  - id: {node.get('id', '')}")
+    name = node.get("name")
+    if name:
+        lines.append(f"    name: {name}")
+    ntype = node.get("type")
+    if ntype:
+        lines.append(f"    type: {ntype}")
+    description = node.get("description")
+    if description:
+        lines.append(f"    description: {description}")
+    metadata = node.get("metadata")
+    if metadata:
+        # Stable JSON keeps key order deterministic. Inline so a single line
+        # fits per node and the YAML stays grep-friendly.
+        lines.append(f"    metadata: {_stable_json(metadata)}")
+    return "\n".join(lines)
+
+
+def _build_user_message(req: LlmSynthesisRequest) -> str:
+    """Per-kind, NOT cached. The model sees title, kind, inputs, and context.
+
+    The structure mirrors the spec verbatim: a labelled header, an INPUTS
+    block of YAML-ish entries, a CONTEXT block of graph-wide counts, and the
+    EDITORIAL ANGLE — the heuristic body the model can use as a starting
+    point so it never has to invent material to fill space. Then a closing
+    instruction reiterating Rule 2.
+    """
+
+    ctx = dict(req.context or {})
+    inputs_list = list(req.inputs or ())[:_MAX_INPUTS]
+
+    shape = _KIND_SHAPE.get(req.kind, "")
+    source_files = list(ctx.get("source_paths", []) or [])
+
+    lines: List[str] = []
+    lines.append(f"SYNTHESIS_KIND: {req.kind}")
+    if shape:
+        lines.append(f"SHAPE: {shape}")
+    lines.append(f"TITLE: {req.title}")
+    if source_files:
+        lines.append(f"SOURCE_FILES: {_stable_json(source_files)}")
+    else:
+        lines.append("SOURCE_FILES: []")
+
+    lines.append("")
+    lines.append("INPUTS:")
+    if inputs_list:
+        for node in inputs_list:
+            lines.append(_format_input_node_yaml(node))
+    else:
+        lines.append("  (no contributing nodes — produce a one-line "
+                     "placeholder and stop)")
+
+    lines.append("")
+    lines.append("CONTEXT:")
+    total_nodes = ctx.get("total_nodes")
+    if total_nodes is not None:
+        lines.append(f"  total nodes in graph: {total_nodes}")
+    total_edges = ctx.get("total_edges")
+    if total_edges is not None:
+        lines.append(f"  total edges: {total_edges}")
+    field_name = ctx.get("field")
+    if field_name:
+        lines.append(f"  field name: {field_name}")
+    days = ctx.get("days") or []
+    if days:
+        lines.append(f"  contributing days/weeks: {', '.join(str(d) for d in days)}")
+    site_title = ctx.get("site_title")
+    if site_title:
+        lines.append(f"  site title: {site_title}")
+    summary = ctx.get("summary")
+    if summary:
+        lines.append(f"  page summary: {summary}")
+
+    heuristic_body = ctx.get("heuristic_body")
+    lines.append("")
+    lines.append("EDITORIAL ANGLE (HEURISTIC FALLBACK BODY for the model to consult):")
+    if heuristic_body:
+        # Indent the heuristic body so it's clearly a quoted block in the
+        # prompt. The model sees the same facts the deterministic projector
+        # would have written — so it can rephrase / re-organize without
+        # introducing new facts.
+        body = str(heuristic_body).strip("\n")
+        for ln in body.splitlines() or [""]:
+            lines.append(f"  | {ln}")
+    else:
+        lines.append("  | (no heuristic body available)")
+
+    lines.append("")
+    lines.append(
+        "Write the synthesis page now. Remember Rule 2 — every claim must "
+        "be cited with the relevant node id in square brackets at the end "
+        "of the sentence or paragraph."
+    )
+    return "\n".join(lines) + "\n"
+
+
+def _build_prompt(req: LlmSynthesisRequest) -> Dict[str, Any]:
+    """Assemble the full prompt payload for ``messages.create``.
+
+    Returns a dict the call-site can hand straight to the SDK:
+
+    - ``system``: list with the cached preamble block.
+    - ``messages``: list with one user message carrying the per-kind shape.
+    - ``user_text``: the user-message string, exposed for hashing/tests.
+
+    Kept side-effect-free so tests can shape-check the prompt without
+    spinning up a fake client.
+    """
+
+    user_text = _build_user_message(req)
+    system_blocks = [
+        {
+            "type": "text",
+            "text": _SYSTEM_PREAMBLE,
+            "cache_control": {"type": "ephemeral"},
+        }
+    ]
+    messages = [{"role": "user", "content": user_text}]
+    return {
+        "system": system_blocks,
+        "messages": messages,
+        "user_text": user_text,
+    }
+
+
 def _strip_frontmatter(text: str) -> str:
     """Defence-in-depth: drop a leading ``---`` block if the model emits one."""
 
@@ -188,6 +333,33 @@ def _extract_citations(body: str) -> List[str]:
         seen.add(token)
         out.append(token)
     return out
+
+
+# Minimum body length below which we treat the response as malformed and
+# fall back to the heuristic. The smallest legitimate body is a short pulse
+# paragraph — well above this floor — so the threshold only catches
+# pathological output (a single sentence, an apology, a stray newline).
+_MIN_BODY_LENGTH = 80
+
+
+def _validate_response(body: str) -> Optional[List[str]]:
+    """Return parsed citations on success, ``None`` if the body is invalid.
+
+    A valid body must:
+    - be at least ``_MIN_BODY_LENGTH`` characters once stripped
+    - contain at least one ``[node_id]`` citation marker
+
+    On failure the caller logs once per kind/reason and falls back to the
+    heuristic body for that page.
+    """
+
+    stripped = (body or "").strip()
+    if len(stripped) < _MIN_BODY_LENGTH:
+        return None
+    citations = _extract_citations(body)
+    if not citations:
+        return None
+    return citations
 
 
 # Logged-failure dedupe: one line per (kind, kind-of-error) pair per process.
@@ -237,10 +409,13 @@ class LlmSynthesizer:
         api_key: Optional[str] = None,
         timeout: float = 20.0,
         dry_run: bool = False,
+        *,
+        max_tokens: int = 1200,
     ) -> None:
         self.model = model
         self.timeout = timeout
         self.dry_run = bool(dry_run)
+        self.max_tokens = int(max_tokens)
         self._client: Any = None
 
         if self.dry_run:
@@ -275,13 +450,18 @@ class LlmSynthesizer:
             )
             return None
 
-        inputs_block = _format_inputs_section(req)
-        cache_id = _hash_prompt(self.model, _SYSTEM_PREAMBLE, inputs_block)
+        # Build prompt up front so dry-run shape-checks match the real path.
+        prompt = _build_prompt(req)
+        cache_id = _hash_prompt(
+            self.model,
+            _SYSTEM_PREAMBLE,
+            prompt["user_text"],
+        )
 
         if self.dry_run:
             return self._dry_run_response(req, cache_id)
 
-        return self._call_api(req, inputs_block, cache_id)
+        return self._call_api(req, prompt, cache_id)
 
     # ------------------------------------------------------------------
     # Internals
@@ -311,33 +491,18 @@ class LlmSynthesizer:
     def _call_api(
         self,
         req: LlmSynthesisRequest,
-        inputs_block: str,
+        prompt: Dict[str, Any],
         cache_id: str,
     ) -> Optional[LlmSynthesisResponse]:
-        # Build the request. The system block carries the long preamble with
-        # ``cache_control: ephemeral`` — the second and subsequent pages in
-        # this run hit the cache. The user message contains the page-specific
-        # INPUTS block and is NOT cached (it changes every page).
-        system_blocks = [
-            {
-                "type": "text",
-                "text": _SYSTEM_PREAMBLE,
-                "cache_control": {"type": "ephemeral"},
-            }
-        ]
-        user_message = (
-            "Produce the markdown body for this synthesis page. Follow every "
-            "rule in the system prompt. End paragraphs that name nodes with "
-            "[<node_id>] citations exactly as they appear in INPUTS.\n\n"
-            f"{inputs_block}"
-        )
-
+        # ``_build_prompt`` already wrapped the system block with
+        # ``cache_control: ephemeral`` — second and subsequent pages in a
+        # run hit the cache. The user message is per-kind and NOT cached.
         try:
             response = self._client.messages.create(
                 model=self.model,
-                max_tokens=1024,
-                system=system_blocks,
-                messages=[{"role": "user", "content": user_message}],
+                max_tokens=self.max_tokens,
+                system=prompt["system"],
+                messages=prompt["messages"],
             )
         except Exception as exc:  # noqa: BLE001 — we want the safety net
             self._log_failure(req.kind, exc)
@@ -356,13 +521,22 @@ class LlmSynthesizer:
         body = _strip_leading_h1(body, req.title)
         body = body.rstrip() + "\n"
 
-        citations = _extract_citations(body)
-        if not citations:
-            _log_once(
-                f"no-citations:{req.kind}",
-                f"LLM synthesis produced no [node_id] citations for kind="
-                f"{req.kind}; falling back to heuristic.",
-            )
+        citations = _validate_response(body)
+        if citations is None:
+            stripped = body.strip()
+            if len(stripped) < _MIN_BODY_LENGTH:
+                _log_once(
+                    f"short-response:{req.kind}",
+                    f"LLM synthesis returned a body shorter than "
+                    f"{_MIN_BODY_LENGTH} chars for kind={req.kind}; "
+                    "falling back to heuristic.",
+                )
+            else:
+                _log_once(
+                    f"no-citations:{req.kind}",
+                    f"LLM synthesis produced no [node_id] citations for kind="
+                    f"{req.kind}; falling back to heuristic.",
+                )
             return None
 
         model_id = getattr(response, "model", None) or self.model
@@ -440,3 +614,9 @@ __all__ = [
     "reset_failure_log_for_tests",
     "set_client_factory",
 ]
+
+
+# Re-exported for tests; not part of the long-term API surface.
+_BUILD_PROMPT = _build_prompt
+_BUILD_USER_MESSAGE = _build_user_message
+_VALIDATE_RESPONSE = _validate_response
