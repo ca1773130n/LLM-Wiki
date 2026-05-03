@@ -218,15 +218,20 @@ def test_graph_js_contains_renderer(built_site: Path) -> None:
 
 def test_non_graph_pages_do_not_load_graph_js(built_site: Path) -> None:
     """Sample a non-graph page and confirm it doesn't preload graph.js."""
+    import re as _re
+    pat = _re.compile(r"assets/graph-[0-9a-f]{10}\.js|assets/graph\.js")
     home = (built_site / "index.html").read_text(encoding="utf-8")
-    assert "assets/graph.js" not in home
+    assert not pat.search(home)
     paper = (built_site / "papers" / "demo-paper.html").read_text(encoding="utf-8")
-    assert "assets/graph.js" not in paper
+    assert not pat.search(paper)
 
 
 def test_graph_route_loads_graph_js(built_site: Path) -> None:
     html = (built_site / "graph" / "index.html").read_text(encoding="utf-8")
-    assert "assets/graph.js" in html
+    # Content-hashed filename: ``graph-<10-hex>.js``. Match the shape;
+    # the literal hash changes with every JS edit which is the point.
+    import re as _re
+    assert _re.search(r"assets/graph-[0-9a-f]{10}\.js", html) is not None
 
 
 # ---------------------------------------------------------- nginx ops snippet

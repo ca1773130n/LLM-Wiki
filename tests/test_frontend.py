@@ -243,7 +243,10 @@ def test_static_site_builder_emits_redesigned_ia(tmp_path: Path) -> None:
     graph_payload = json.loads((out / "graph" / "payload.json").read_text(encoding="utf-8"))
     assert 'id="graph-canvas"' in graph_html
     assert 'data-payload-url="payload.json"' in graph_html
-    assert '../assets/graph.js?v=graph-explore-v23' in graph_html
+    # Content-hashed filename: ``graph-<10-hex>.js``. The hash changes
+    # with every JS edit so we match the shape, not a literal.
+    import re as _re
+    assert _re.search(r'\.\./assets/graph-[0-9a-f]{10}\.js', graph_html) is not None
     assert 'id="graph-data"' not in graph_html
     assert "fetch(payloadUrl)" in graph_js
     assert "if (!dataNode || !container) return" not in graph_js

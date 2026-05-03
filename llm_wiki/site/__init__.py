@@ -74,6 +74,7 @@ from .pages import (
 from .raw_view import (
     RAW_ASSETS_DIR,
     RAW_ROUTE_DIR,
+    build_wiki_link_resolver,
     copy_raw_asset,
     derive_project_root,
     is_binary_extension,
@@ -231,6 +232,18 @@ class StaticSiteBuilder:
         (out / "assets").mkdir(parents=True, exist_ok=True)
         (out / "assets" / "style.css").write_text(CSS, encoding="utf-8")
         (out / "assets" / "app.js").write_text(JS_BUNDLE_BASE, encoding="utf-8")
+        # Content-hashed filename for the graph bundle so aggressive caches
+        # (Cloudflare, service workers, mobile browsers) can never serve a
+        # stale version. ``?v=`` query strings were silently ignored on
+        # several layers — a different filename is the bulletproof way.
+        # ``pages.render_graph_view`` computes the same hash off the same
+        # ``JS_BUNDLE_GRAPH`` import, so the ``<script src>`` tag and the
+        # written file always match without explicit plumbing.
+        graph_js_hash = hashlib.sha256(JS_BUNDLE_GRAPH.encode("utf-8")).hexdigest()[:10]
+        graph_js_filename = f"graph-{graph_js_hash}.js"
+        (out / "assets" / graph_js_filename).write_text(JS_BUNDLE_GRAPH, encoding="utf-8")
+        # Keep ``graph.js`` writable too so old bookmarks and tests still
+        # resolve. The hashed filename is what the site actually loads.
         (out / "assets" / "graph.js").write_text(JS_BUNDLE_GRAPH, encoding="utf-8")
 
         # ------------------------------------------------- graph + search idx
@@ -385,6 +398,15 @@ class StaticSiteBuilder:
                 for kind in ROUTE_FOR_KIND
             }
             from .pages import _doc_tree_for  # local import: avoid public surface
+            # Curated digests embed cross-page references like
+            # ``papers/<arxiv>/repo.md`` and ``repos/<owner>_<repo>.md`` that
+            # don't exist on disk. Build a resolver that maps those tokens to
+            # the on-disk slug of the actual analysis page so the raw view
+            # rewrites them to canonical ``../repos/<slug>.html`` URLs.
+            wiki_link_resolver = build_wiki_link_resolver(
+                graph,
+                page_slug_for_node=site_ctx.page_slug_for_node,
+            )
             for rel_path, slug, absolute in sources_inventory:
                 asset_filename: Optional[str] = None
                 if is_binary_extension(absolute.suffix):
@@ -407,6 +429,7 @@ class StaticSiteBuilder:
                         asset_filename=asset_filename,
                         counts=raw_nav_counts,
                         doc_tree_html=doc_tree_html,
+                        wiki_link_resolver=wiki_link_resolver,
                     ),
                     encoding="utf-8",
                 )

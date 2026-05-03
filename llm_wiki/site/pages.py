@@ -2246,10 +2246,19 @@ def render_graph_view(ctx: SiteContext) -> str:
     # so non-graph pages never download the (~900 KB) graph data, and so this
     # page itself stays under 50 KB. The fetch happens inside the deferred
     # ``graph.js`` so the skeleton renders immediately.
+    # Content-hashed filename for the graph bundle so aggressive caches
+    # (Cloudflare / service workers / mobile browsers) cannot serve a
+    # stale version. The same hash is computed in
+    # :class:`StaticSiteBuilder.write_site` when the file is written, so
+    # the ``<script src>`` tag here always matches the file on disk
+    # without explicit plumbing through SiteContext.
+    from .js import JS_BUNDLE_GRAPH as _JS_GRAPH_FOR_HASH
+    _graph_js_hash = hashlib.sha256(_JS_GRAPH_FOR_HASH.encode("utf-8")).hexdigest()[:10]
+    _graph_js_filename = f"graph-{_graph_js_hash}.js"
     head = (
         '<link rel="preconnect" href="https://esm.sh">\n'
         '<link rel="preload" href="payload.json" as="fetch" type="application/json" crossorigin="anonymous">\n'
-        f'<script defer src="../assets/graph.js?v=graph-explore-v23"></script>\n'
+        f'<script defer src="../assets/{_graph_js_filename}"></script>\n'
         '<script type="module">\n'
         '  // Load 3D + 2D force-graph plus three.js peer dep from esm.sh.\n'
         '  // We attach the constructors to ``window`` so the deferred\n'

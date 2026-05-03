@@ -434,9 +434,11 @@ def test_render_graph_view_includes_payload_script(site_ctx: SiteContext) -> Non
     # 50 KB. The fetch hint still points at payload.json.
     assert 'data-payload-url="payload.json"' in out
     assert "payload.json" in out
-    # The graph.js bundle is loaded only on this route via the second script.
-    assert "assets/graph.js" in out
-    assert "graph-explore-v23" in out
+    # The graph.js bundle is loaded only on this route via the second
+    # script. Filename is content-hashed (``graph-<10-hex>.js``) so
+    # aggressive caches can't serve a stale version; the exact hash
+    # changes with every JS edit which is the whole point.
+    assert re.search(r'src="\.\./assets/graph-[0-9a-f]{10}\.js"', out) is not None
     # And the payload itself is computable from the same context.
     payload = build_graph_payload(site_ctx)
     assert "nodes" in payload
