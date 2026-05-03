@@ -1618,11 +1618,12 @@ JS_GRAPH = r"""
         // 1. Capture cursor world position BEFORE the dolly.
         if (!cursorWorldOnTargetPlane(before)) return;
 
-        // 2. Sign-only factor: 4% per click, identical on every device.
-        //    Wheel down (deltaY > 0) zooms OUT (factor 1.04 enlarges the
-        //    camera-target offset); wheel up zooms IN (factor 0.96). The
-        //    user said the previous 10% was too aggressive; halved-and-then-some.
-        var factor = event.deltaY > 0 ? 1.04 : 0.96;
+        // 2. Sign-only factor: 1.5% per click — slow and precise. The
+        //    user has called the zoom too fast multiple times; this is
+        //    well below the typical OrbitControls default and gives them
+        //    fine control on a trackpad. Holding the wheel multiplies it
+        //    naturally because each tick fires its own event.
+        var factor = event.deltaY > 0 ? 1.015 : 0.985;
 
         // 3. Apply pure dolly: scale (camera - target) by ``factor`` and
         //    place the camera at ``target + offset``.
@@ -1676,6 +1677,31 @@ JS_GRAPH = r"""
           canvas.dispatchEvent(fakeEvent);
         }, { passive: false, capture: true });
       }
+
+      // Belt-and-braces background-click → unfocus. The library's
+      // ``onBackgroundClick`` should already cover this, but if any
+      // overlay (info panel, toolbar, fullscreen chrome) intercepts the
+      // click first we fall back to a canvas-level listener that
+      // unconditionally clears focus when no node was hit. The library
+      // sets a ``__threeObj`` reference on hovered nodes; if the click
+      // happens while ``hoverNode`` is null, treat it as background.
+      canvas.addEventListener('pointerdown', function(){
+        // Defer to the next frame so the library's own pointerdown can
+        // resolve which node (if any) is under the cursor first.
+        window.requestAnimationFrame(function(){
+          if (!hoverNode && (focusedNode || pinnedNode)) {
+            try {
+              pinnedNode = null;
+              pinnedLink = null;
+              focusedNode = null;
+              if (typeof markFocused === 'function') markFocused(null);
+              autoOrbitEnabled = false;
+              if (typeof applyHighlight === 'function') applyHighlight(null);
+              if (typeof clearInfoPanel === 'function') clearInfoPanel();
+            } catch (_) {}
+          }
+        });
+      });
     }
 
     // ---- Fit-to-view via bounding sphere over current node positions ----
@@ -1789,48 +1815,25 @@ JS_GRAPH = r"""
           return base;
         })
         .nodeColor(function(n){
-          // Smooth dim: read the per-node ``__opacity`` value that the
-          // onEngineTick lerp animates between 1.0 (full) and 0.25 (dimmed).
-          // Mix the node's group color toward muted grey by (1 - alpha).
-          // Returning rgba with the lerp'd alpha plus a desaturated rgb
-          // gives a smooth visual fade even though the sphere material
-          // opacity itself is a scalar.
-          var alpha = (n && typeof n.__opacity === 'number') ? n.__opacity : 1.0;
-          if (alpha >= 0.999) return n.color;
-          // Parse n.color (hex or rgb) and lerp toward grey.
-          var base = n.color || '#cccccc';
-          // Quick rgb extractor — works for #rrggbb and rgb(r,g,b).
-          var r = 200, g = 200, b = 200;
-          var hex = base.charAt(0) === '#' ? base.slice(1) : null;
-          if (hex && hex.length === 6) {
-            r = parseInt(hex.slice(0,2), 16);
-            g = parseInt(hex.slice(2,4), 16);
-            b = parseInt(hex.slice(4,6), 16);
-          } else {
-            var m = /rgb[a]?\((\d+),\s*(\d+),\s*(\d+)/.exec(base);
-            if (m) { r = +m[1]; g = +m[2]; b = +m[3]; }
-          }
-          var t = 1 - alpha;
-          var mr = Math.round(r * (1 - t) + 120 * t);
-          var mg = Math.round(g * (1 - t) + 116 * t);
-          var mb = Math.round(b * (1 - t) + 108 * t);
-          return 'rgba(' + mr + ',' + mg + ',' + mb + ',' + alpha.toFixed(3) + ')';
+          // Snap-dim: non-incident nodes drop to a desaturated grey at
+          // alpha 0.25 the moment focus/hover state changes. The smooth
+          // lerp variant was pulled because per-frame re-poking of this
+          // accessor forced the library to re-evaluate every one of N
+          // nodes every frame, causing visible hangs and intermittent
+          // render glitches on the 388-node corpus.
+          if (isDimmedNode(n)) return 'rgba(120,116,108,0.25)';
+          return n.color;
         })
         .linkColor(function(l){
-          // Smooth dim: pick a base colour from the focus/hover state
-          // ladder, then scale its alpha by the per-link ``__opacity``
-          // (lerp'd in onEngineTick) so the dim-in/out reads as smooth.
-          var base;
-          if (highlightLinks.has(l)) base = EDGE_COLOR_HOT;
-          else if (isHoverIncidentLink(l)) base = EDGE_COLOR_HOT;
-          else if (hasFocusFilter()) base = EDGE_COLOR_DIM;
-          else base = EDGE_COLOR_LIGHT;
-          var lOpacity = (l && typeof l.__opacity === 'number') ? l.__opacity : 1.0;
-          if (lOpacity >= 0.999) return base;
-          var m = /rgba?\((\d+),\s*(\d+),\s*(\d+)(?:,\s*([\d.]+))?\)/.exec(base);
-          if (!m) return base;
-          var baseAlpha = m[4] !== undefined ? parseFloat(m[4]) : 1.0;
-          return 'rgba(' + m[1] + ',' + m[2] + ',' + m[3] + ',' + (baseAlpha * lOpacity).toFixed(3) + ')';
+          // Snap-dim — same rationale as nodeColor: smooth alpha lerp via
+          // per-frame accessor re-poke caused render hangs on bigger
+          // corpora. The base colour ladder gives the same visual cue
+          // (yellow on incident, white default, near-invisible when
+          // focus is active and this link isn't incident).
+          if (highlightLinks.has(l)) return EDGE_COLOR_HOT;
+          if (isHoverIncidentLink(l)) return EDGE_COLOR_HOT;
+          if (hasFocusFilter()) return EDGE_COLOR_DIM;
+          return EDGE_COLOR_LIGHT;
         })
         // Issue 4 — edges are visibly THINNER everywhere. Default drops to
         // 0.25; incident edges (hover or focus) bump to 0.9. Non-incident
@@ -2290,46 +2293,12 @@ JS_GRAPH = r"""
       try {
         if (inst.onEngineTick) {
           inst.onEngineTick(function(){
-            // Per-frame opacity lerp (Issue 4). Runs in BOTH 2D and 3D so
-            // the smooth dim works regardless of mode. We only re-poke
-            // the library's nodeOpacity/linkOpacity accessors when at
-            // least one element is still in motion (epsilon = 0.005).
-            var anyMoving = false;
-            for (var i = 0; i < payload.nodes.length; i++) {
-              var nn = payload.nodes[i];
-              var diff = nn.__opacityTarget - nn.__opacity;
-              if (Math.abs(diff) > 0.005) {
-                nn.__opacity += diff * 0.15;
-                anyMoving = true;
-              } else if (nn.__opacity !== nn.__opacityTarget) {
-                nn.__opacity = nn.__opacityTarget;
-                anyMoving = true;
-              }
-            }
-            for (var j = 0; j < payload.links.length; j++) {
-              var ll = payload.links[j];
-              var ldiff = ll.__opacityTarget - ll.__opacity;
-              if (Math.abs(ldiff) > 0.005) {
-                ll.__opacity += ldiff * 0.15;
-                anyMoving = true;
-              } else if (ll.__opacity !== ll.__opacityTarget) {
-                ll.__opacity = ll.__opacityTarget;
-                anyMoving = true;
-              }
-            }
-            if (anyMoving) {
-              try {
-                // ``nodeOpacity`` / ``linkOpacity`` accept ONLY scalars in
-                // 3d-force-graph — a function silently corrupts the
-                // material opacity to NaN. Re-poke the accessor-form
-                // colour functions instead; THOSE accept functions, and
-                // they read ``__opacity`` to modulate per-node alpha.
-                if (inst.nodeColor) inst.nodeColor(inst.nodeColor());
-                if (inst.linkColor) inst.linkColor(inst.linkColor());
-              } catch (_) {}
-            }
-            // Auto-orbit (3D only) — runs after the opacity lerp so both
-            // updates land in the same render frame.
+            // Per-frame opacity lerp was REMOVED — re-poking nodeColor /
+            // linkColor accessors every frame caused 3d-force-graph to
+            // re-evaluate every node and every link per render, which
+            // hung the page on the 388-node corpus. The dim transition
+            // is now a snap (immediate). The render budget per tick is
+            // reserved for the auto-orbit hook below; nothing else.
             if (mode !== '3d') return;
             if (!focusedNode || !autoOrbitEnabled) { lastTickMs = 0; return; }
             var now = (typeof performance !== 'undefined' && performance.now) ? performance.now() : Date.now();
@@ -2375,7 +2344,7 @@ JS_GRAPH = r"""
         // a wild zoom-out from the origin. The single-shot scheduleCenteredFit
         // will refine the framing once the simulation settles.
         try {
-          if (inst.cameraPosition) inst.cameraPosition({ x: 0, y: 0, z: 600 }, { x: 0, y: 0, z: 0 }, 0);
+          if (inst.cameraPosition) inst.cameraPosition({ x: 0, y: 0, z: 320 }, { x: 0, y: 0, z: 0 }, 0);
         } catch (_) {}
       } else if (mode === '2d') {
         // Issue 3 — 2D ``force-graph`` zooms toward the cursor by default
@@ -2464,20 +2433,53 @@ JS_GRAPH = r"""
       // computed from the node's degree below.
       var distance = 300;
       if (mode === '3d' && Graph.cameraPosition && node && node.x !== undefined) {
+        // Frame the focused node AND its 1-hop neighbors. Compute a
+        // bounding sphere over the (focused + neighbors) set so the
+        // camera distance grows with the cluster size — a hub with
+        // 30 neighbors gets framed wider than a leaf with one. Falls
+        // back to the previous "200u offset on +Z" behavior when the
+        // node has no positioned neighbors yet.
         var nx = node.x || 0, ny = node.y || 0, nz = node.z || 0;
-        var norm = Math.max(240, Math.hypot(nx || 1, ny || 1, nz || 1));
-        var distRatio = 1 + distance / norm;
-        // Adapt orbit radius to the node's visual size so big hubs aren't
-        // clipped by the camera. Floors at 200 units (spec).
+        var minX = nx, minY = ny, minZ = nz;
+        var maxX = nx, maxY = ny, maxZ = nz;
+        var neighborCount = 0;
+        try {
+          // ``node.neighbors`` is a Set of neighbor refs built at graph
+          // load time (line ~840: ``a.neighbors.add(b); b.neighbors.add(a)``).
+          if (node.neighbors && node.neighbors.forEach) {
+            node.neighbors.forEach(function(nb){
+              if (!nb || nb.x === undefined) return;
+              if (nb.x < minX) minX = nb.x;
+              if (nb.x > maxX) maxX = nb.x;
+              if (nb.y < minY) minY = nb.y;
+              if (nb.y > maxY) maxY = nb.y;
+              if (nb.z < minZ) minZ = nb.z;
+              if (nb.z > maxZ) maxZ = nb.z;
+              neighborCount++;
+            });
+          }
+        } catch (_) {}
         var radius = Math.sqrt((node && node.val) || 1);
-        orbitRadius = Math.max(200, 60 + radius * 14);
+        // Bounding sphere radius from the cluster spread; floor at the
+        // node's own visual radius + a small comfort gap.
+        var spread = Math.max(
+          Math.hypot(maxX - minX, maxY - minY, maxZ - minZ) * 0.6,
+          Math.max(60 + radius * 14, 120)
+        );
+        orbitRadius = spread;
         orbitAngle = 0;
         autoOrbitEnabled = true;
-        // Animate to a position 200u in +Z from the node, looking at it.
+        // Camera target is the cluster centroid, not just the focused
+        // node — so the camera frames the whole neighborhood evenly.
+        var cx = (minX + maxX) / 2;
+        var cy = (minY + maxY) / 2;
+        var cz = (minZ + maxZ) / 2;
+        // Animate to a position ``orbitRadius`` units in +Z from the
+        // centroid, looking at the centroid.
         try {
           Graph.cameraPosition(
-            { x: nx, y: ny, z: nz + orbitRadius },
-            { x: nx, y: ny, z: nz },
+            { x: cx, y: cy, z: cz + orbitRadius },
+            { x: cx, y: cy, z: cz },
             reduceMotion ? 0 : 600
           );
         } catch (_) {}

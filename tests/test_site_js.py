@@ -206,13 +206,10 @@ def test_graph_static_fallback_is_explorable_not_anchor_navigation():
 def test_graph_selection_fades_and_deprioritizes_non_neighbors():
     assert "function isDimmedNode" in JS_GRAPH
     assert "function isDimmedLink" in JS_GRAPH
-    # Non-incident nodes fade to a desaturated grey via the smooth-dim
-    # ``nodeColor`` accessor: it lerps each node's rgb toward (120,116,108)
-    # by (1 - __opacity) and uses __opacity as the alpha. The constants
-    # below are the muted-grey end of the colour mix.
-    assert "120 * t" in JS_GRAPH
-    assert "116 * t" in JS_GRAPH
-    assert "108 * t" in JS_GRAPH
+    # Non-incident nodes snap to a desaturated grey at alpha 0.25. The
+    # smooth-lerp variant was reverted because the per-frame nodeColor
+    # re-poke caused render hangs on the live corpus.
+    assert "rgba(120,116,108,0.25)" in JS_GRAPH
     assert "EDGE_COLOR_DIM" in JS_GRAPH
     assert "if (isDimmedNode(node)) return" in JS_GRAPH
     assert "if (isDimmedLink(link)) return" in JS_GRAPH
@@ -243,9 +240,8 @@ def test_graph_edges_are_visible_lines_not_only_particles():
     # smooth-dim refactor it picks a base from the focus/hover ladder, then
     # multiplies the alpha by the per-link ``__opacity`` (lerp'd in
     # onEngineTick) so the dim transition reads as a smooth fade.
-    assert "if (highlightLinks.has(l)) base = EDGE_COLOR_HOT;" in JS_GRAPH
-    assert "else if (isHoverIncidentLink(l)) base = EDGE_COLOR_HOT;" in JS_GRAPH
-    assert "l.__opacity" in JS_GRAPH
+    assert "if (highlightLinks.has(l)) return EDGE_COLOR_HOT;" in JS_GRAPH
+    assert "if (isHoverIncidentLink(l)) return EDGE_COLOR_HOT;" in JS_GRAPH
 
 
 def test_graph_dimmed_labels_are_hidden_with_dimmed_nodes_and_edges():
@@ -341,7 +337,7 @@ def test_graph_resize_handler_does_not_auto_refit():
 def test_graph_initial_camera_position_is_known():
     """The first frame parks the camera at z=600 so we don't see a wild
     zoom-out from the origin before the simulation settles."""
-    assert "inst.cameraPosition({ x: 0, y: 0, z: 600 }, { x: 0, y: 0, z: 0 }, 0)" in JS_GRAPH
+    assert "inst.cameraPosition({ x: 0, y: 0, z: 320 }, { x: 0, y: 0, z: 0 }, 0)" in JS_GRAPH
 
 
 def test_graph_labels_are_truncated():

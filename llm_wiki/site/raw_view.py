@@ -29,6 +29,7 @@ from __future__ import annotations
 import html
 import json
 import os
+import re
 from pathlib import Path
 from typing import Iterable, List, Optional, Tuple
 
@@ -335,9 +336,61 @@ def _render_breadcrumb_long_path(rel_path: str) -> str:
     return breadcrumbs(items)
 
 
-def _render_markdown_body(absolute: Path) -> str:
+def _render_markdown_body(
+    absolute: Path,
+    project_root: Optional[Path] = None,
+    project_relative_path: Optional[str] = None,
+) -> str:
+    """Render the raw markdown body and rewrite neighbor ``.md`` links.
+
+    Relative links inside a raw paper file (e.g. ``[repo](repo.md)`` or
+    ``[paper](../2604.20329/paper.md)``) used to stay literal, which
+    produced 404s under ``/raw/`` since the raw viewer flattens every
+    source path into a single ``raw/<safe>.html`` slug. The rewriter
+    here resolves any relative ``.md`` link against the raw doc's own
+    directory, computes the project-relative path, and calls
+    ``raw_href(...)`` so the link lands on the corresponding raw page.
+    Cross-arxiv ``papers/<id>/(paper|main|abstract).md`` links still go
+    out to arxiv.org via the same ``arxiv_paper_match`` rule that
+    ``pages._wiki_link_rewriter`` uses.
+    """
     text = absolute.read_text(encoding="utf-8", errors="replace")
-    body, _ = render_markdown(text)
+
+    def _link_rewriter(target: str) -> str:
+        if not target or target.startswith(("http://", "https://", "mailto:", "#", "/")):
+            return target
+        # Split off fragment + query so the remainder is a clean path.
+        rest, fragment, query = target, "", ""
+        if "#" in rest:
+            rest, frag = rest.split("#", 1)
+            fragment = "#" + frag
+        if "?" in rest:
+            rest, q = rest.split("?", 1)
+            query = "?" + q
+        if not rest.endswith(".md"):
+            return target
+        # arxiv-paper shorthand: papers/<id>/paper|main|abstract.md → arxiv URL.
+        m = re.fullmatch(
+            r"(?:\.\./)*papers/(\d{4}\.\d{4,6})/(?:paper|main|abstract)\.md",
+            rest,
+            flags=re.IGNORECASE,
+        )
+        if m:
+            return f"https://arxiv.org/abs/{m.group(1)}{query}{fragment}"
+        if project_root is None:
+            return target
+        # Resolve the relative path against the raw doc's own directory.
+        try:
+            resolved = (absolute.parent / rest).resolve()
+            project_rel = resolved.relative_to(project_root)
+        except (ValueError, OSError):
+            return target
+        href = raw_href(project_root, str(project_rel), depth=1)
+        if not href:
+            return target
+        return f"{href}{query}{fragment}"
+
+    body, _ = render_markdown(text, link_rewriter=_link_rewriter)
     return f'<section class="markdown-body raw-markdown">{body}</section>'
 
 
@@ -440,8 +493,26 @@ def render_raw_view(
         f"../{RAW_ASSETS_DIR}/{asset_filename}" if asset_filename else ""
     )
 
+    # Recover project_root by stripping the project-relative path off the
+    # absolute path. We use this to resolve relative ``.md`` links inside
+    # raw markdown bodies into ``raw/<safe>.html`` URLs.
+    project_root: Optional[Path] = None
+    try:
+        rel_str = project_relative_path.replace("\\", "/")
+        abs_str = str(absolute_path).replace("\\", "/")
+        if abs_str.endswith(rel_str):
+            candidate = abs_str[: -len(rel_str)].rstrip("/")
+            if candidate:
+                project_root = Path(candidate)
+    except (TypeError, ValueError):
+        project_root = None
+
     if suffix in _MARKDOWN_EXTS:
-        body_html = _render_markdown_body(absolute_path)
+        body_html = _render_markdown_body(
+            absolute_path,
+            project_root=project_root,
+            project_relative_path=project_relative_path,
+        )
     elif suffix in _TEXT_EXTS and absolute_path.stat().st_size <= _TEXT_INLINE_LIMIT:
         body_html = _render_text_body(absolute_path)
     elif suffix in _DATA_EXTS and absolute_path.stat().st_size <= _DATA_INLINE_LIMIT:
