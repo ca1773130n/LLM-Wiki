@@ -18,6 +18,23 @@ Research and development code use different ontology slices, but they share the 
 raw sources → validated graph → reproducible projections → human/agent interfaces
 ```
 
+## Install
+
+```bash
+pip install llm-wiki
+```
+
+Then, from any project or vault directory:
+
+```bash
+llm_wiki project init --name my_wiki --source-kind Repository --source .
+llm_wiki project compile
+llm_wiki project build-site
+llm_wiki project serve --port 8765
+```
+
+Optional backends (`kuzu`, `cognee`, `graphiti-core`) install separately so the base wheel stays light. Full details in [`docs/installation.md`](docs/installation.md). For contributors who want an editable checkout, see [Install from source](docs/installation.md#install-from-source-for-contributors).
+
 ## Documentation
 
 - [Installation](docs/installation.md)
@@ -148,14 +165,15 @@ PYTEST_DISABLE_PLUGIN_AUTOLOAD=1 python3 -m pytest tests/ -q
 Install the CLI so shell commands work without `python3 -m`:
 
 ```bash
-# From GitHub (recommended for a fresh machine)
-curl -fsSL https://raw.githubusercontent.com/ca1773130n/LLM-Wiki/main/scripts/install.sh | bash
+# Recommended — released wheel
+pip install llm-wiki
 
-# Or from a local checkout
-./scripts/install.sh --dir /path/to/LLM-Wiki
+# Contributor checkout — editable install
+git clone https://github.com/ca1773130n/LLM-Wiki.git && cd LLM-Wiki
+pip install -e .
 ```
 
-The installer clones or updates the repo, creates `.venv` by default, runs `pip install -e`, and writes `llm_wiki` / `llm-wiki` wrappers into `~/.local/bin`. Use `--help` to see options such as `--branch`, `--dir`, `--no-venv`, and `--skip-shell-config`.
+A convenience installer (`scripts/install.sh`) is bundled for fresh machines that want a project-local `.venv` and `~/.local/bin` wrappers in one step — see [`docs/installation.md`](docs/installation.md#install-from-source-for-contributors).
 
 Initialize a self-contained LLM-Wiki inside any project directory:
 

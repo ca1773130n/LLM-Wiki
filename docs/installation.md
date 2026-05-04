@@ -1,48 +1,73 @@
 # Installation
 
-LLM-Wiki is installable as a Python package and exposes shell commands so users do not have to run `python3 -m llm_wiki.cli` manually.
+LLM-Wiki is published on PyPI and exposes shell commands so users do not have to run `python3 -m llm_wiki.cli` manually.
 
-## Quick install
+## Install from PyPI (recommended)
 
 ```bash
-curl -fsSL https://raw.githubusercontent.com/ca1773130n/LLM-Wiki/main/scripts/install.sh | bash
+pip install llm-wiki
 ```
 
-The installer is intentionally similar to modern CLI installers:
+That's it. `pip` registers three console scripts on your `PATH`:
 
-1. clone or update the repository;
-2. create a project-local `.venv` by default;
-3. run `pip install -e` so local source changes are reflected immediately;
-4. write `llm_wiki` and `llm-wiki` command wrappers into `~/.local/bin`;
-5. optionally append `~/.local/bin` to shell rc files.
+```bash
+llm_wiki --help
+llm-wiki --help
+llm_wiki_mcp --help
+```
 
-## Local checkout install
+The canonical command in docs is `llm_wiki`; `llm-wiki` (with a dash) is an alias. `llm_wiki_mcp` starts the MCP server.
+
+> **pipx is fine too.** If you prefer to keep CLI tools in their own isolated venvs:
+> ```bash
+> pipx install llm-wiki
+> ```
+
+## Upgrade
+
+```bash
+pip install --upgrade llm-wiki
+```
+
+## Optional integrations
+
+The default wheel is intentionally light. Pull in optional backends only when you need them:
+
+```bash
+pip install kuzu cognee graphiti-core
+```
+
+- `kuzu` — Kuzu graph persistence.
+- `cognee` — direct Cognee import / cognify workflows.
+- `graphiti-core` — live Graphiti/Neo4j sync. `export-graphiti` and `sync-graphiti --dry-run` work without it.
+
+The Anthropic-backed synthesis path uses an extras marker:
+
+```bash
+pip install "llm-wiki[synthesis-llm]"
+```
+
+## Install from source (for contributors)
+
+If you want to hack on the codebase, install the editable checkout instead:
 
 ```bash
 git clone https://github.com/ca1773130n/LLM-Wiki.git
 cd LLM-Wiki
+pip install -e .
+```
+
+A convenience installer is also bundled — it clones, creates a project-local `.venv`, runs `pip install -e .`, and drops the wrappers into `~/.local/bin`:
+
+```bash
+# Quick: clone + install in one shot
+curl -fsSL https://raw.githubusercontent.com/ca1773130n/LLM-Wiki/main/scripts/install.sh | bash
+
+# From an existing checkout
 ./scripts/install.sh --dir "$PWD"
 ```
 
-If you do not want the installer to edit shell startup files:
-
-```bash
-./scripts/install.sh --dir "$PWD" --skip-shell-config
-```
-
-Then either restart the shell or run:
-
-```bash
-export PATH="$HOME/.local/bin:$PATH"
-```
-
-## Installer options
-
-```bash
-./scripts/install.sh --help
-```
-
-Supported options:
+Useful flags (`./scripts/install.sh --help`):
 
 | Option | Purpose |
 | --- | --- |
@@ -53,27 +78,11 @@ Supported options:
 | `--no-venv` | Install into the current Python environment instead of creating `.venv`. |
 | `--skip-shell-config` | Avoid editing `.zshrc` / `.bashrc`. |
 
-## Commands installed
+If `--skip-shell-config` was used, either restart the shell or run:
 
 ```bash
-llm_wiki --help
-llm-wiki --help
-llm_wiki_mcp --help
+export PATH="$HOME/.local/bin:$PATH"
 ```
-
-The canonical command in docs is `llm_wiki`.
-
-## Optional dependencies
-
-The default package is intentionally light. Optional integrations require their own dependencies:
-
-```bash
-python3 -m pip install --user kuzu cognee graphiti-core
-```
-
-- `kuzu` enables Kuzu graph persistence.
-- `cognee` enables direct Cognee import/cognify workflows.
-- `graphiti-core` enables live Graphiti/Neo4j sync; `export-graphiti` and `sync-graphiti --dry-run` do not require it.
 
 ## Verify installation
 
