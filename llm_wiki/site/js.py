@@ -704,6 +704,8 @@ JS_SEARCH_PALETTE = r"""
   document.addEventListener('click', function(e){
     var opener = e.target && e.target.closest && e.target.closest('[data-open-search]');
     if (opener) { e.preventDefault(); openPalette(); return; }
+    var closer = e.target && e.target.closest && e.target.closest('[data-close-search]');
+    if (closer) { e.preventDefault(); closePalette(); return; }
     var resultLink = e.target && e.target.closest && e.target.closest('.palette-result-link');
     if (resultLink) {
       var li = resultLink.closest('.palette-result');
@@ -878,15 +880,25 @@ JS_GRAPH = r"""
     }
 
     // Default-label opacity = importance(degree) × camera-distance.
-    // Range clamped to [0.18, 1.0]. With nothing focused/hovered, this
+    // Range clamped to [0.06, 1.0]. With nothing focused/hovered, this
     // is the SOLE driver of "which labels do I read first" — the more
-    // connected a node, the more legible its label.
+    // connected a node, the more legible its label. Low-importance
+    // leaves fade aggressively so a zoomed-out 2D view doesn't read as
+    // a wall of overlapping pills.
     function degreeImportanceAlpha(n){
-      if (!n) return 0.18;
+      if (!n) return 0.06;
       var d = n.degree || 0;
       // sqrt curve so the top 20% pop without the leaf 80% disappearing.
       var t = Math.sqrt(Math.min(1.0, d / Math.max(1, maxDegree)));
-      return 0.18 + t * 0.82;
+      return 0.06 + t * 0.94;
+    }
+    // Normalised importance in [0, 1] used to scale BOTH font size and
+    // pill alpha for default-variant labels. Hubs (top connectivity)
+    // render at ~150% font size; leaves at ~60%.
+    function degreeImportanceScale(n){
+      if (!n) return 0;
+      var d = n.degree || 0;
+      return Math.sqrt(Math.min(1.0, d / Math.max(1, maxDegree)));
     }
 
     // F-5 — floating focus-detail panel: a small bottom-right overlay
@@ -2015,8 +2027,8 @@ JS_GRAPH = r"""
           if (hasFocusFilter()) return EDGE_COLOR_DIM;
           return EDGE_COLOR_LIGHT;
         })
-        // Issue 4 — edges are visibly THINNER everywhere. Default drops to
-        // 0.25; incident edges (hover or focus) bump to 0.9. Non-incident
+        // Edges are HALF as thick as the prior pass: default drops to
+        // 0.125; incident edges (hover or focus) bump to 0.45. Non-incident
         // dimmed edges drop to 0.001 so they read as ~no-line (combined
         // with EDGE_COLOR_DIM alpha 0.012). Single ladder: focus wins
         // first, then hover-incident, then default.
@@ -2034,9 +2046,9 @@ JS_GRAPH = r"""
               camScale = Math.max(1.0, Math.min(3.0, dist / 180));
             }
           } catch (_) {}
-          if (highlightLinks.has(l)) return 0.9 * camScale;
-          if (isHoverIncidentLink(l)) return 0.9 * camScale;
-          return 0.25 * camScale;
+          if (highlightLinks.has(l)) return 0.45 * camScale;
+          if (isHoverIncidentLink(l)) return 0.45 * camScale;
+          return 0.125 * camScale;
         })
         .linkHoverPrecision(8)
         // Issue 4 — particles ONLY on edges incident to the hovered or
@@ -2049,7 +2061,7 @@ JS_GRAPH = r"""
           if (isHoverIncidentLink(l)) return 2;
           return 0;
         })
-        .linkDirectionalParticleWidth(0.6)
+        .linkDirectionalParticleWidth(0.3)
         .linkDirectionalParticleSpeed(0.005)
         .onNodeHover(function(node){
           // F-4 — when a node is FOCUSED/pinned, hover-driven highlight
@@ -2378,7 +2390,22 @@ JS_GRAPH = r"""
               ? degreeImportanceAlpha(n)
               : 1.0;
             var label = nodeLabelText(n);
-            var fontSize = (VARIANT_FONT[variant] || 11) / globalScale;
+            // Default-variant labels scale font size by importance: hubs
+            // grow up to ~150% of base, leaves shrink to ~60%. Other
+            // variants (focused/hover/neighbor) keep their canonical size
+            // so they always pop above the importance-driven defaults.
+            var baseFont = VARIANT_FONT[variant] || 11;
+            var fontSize;
+            if (variant === 'default') {
+              var impScale = 0.6 + degreeImportanceScale(n) * 0.9;
+              fontSize = (baseFont * impScale) / globalScale;
+              // Skip labels that would render smaller than ~5 CSS px on
+              // screen: at far zoom, leaf labels become unreadable noise
+              // anyway and pile on top of the ones that matter.
+              if (fontSize * globalScale < 5) return;
+            } else {
+              fontSize = baseFont / globalScale;
+            }
             ctx.font = (variant === 'focused' ? '700 ' : '600 ') + fontSize + 'px Inter, system-ui, sans-serif';
             ctx.textAlign = 'center';
             ctx.textBaseline = 'middle';
@@ -2491,8 +2518,43 @@ JS_GRAPH = r"""
 
       try {
         if (inst.d3Force) {
-          var charge = inst.d3Force('charge'); if (charge && charge.strength) charge.strength(mode === '2d' ? -260 : -170);
-          var link = inst.d3Force('link'); if (link && link.distance) link.distance(mode === '2d' ? 68 : 48);
+          // 2D charge is stronger so hubs visibly repel their neighbours
+          // — clusters spread outward and the labels stop overlapping.
+          // Per-node charge scales with degree so high-degree hubs push
+          // harder than leaves; this is what gives obsidian-wiki-style
+          // arrangements their "important nodes get breathing room"
+          // feel without needing a separate clustering pass.
+          var charge = inst.d3Force('charge');
+          if (charge && charge.strength) {
+            if (mode === '2d') {
+              charge.strength(function(n){
+                var d = (n && n.degree) || 0;
+                var t = Math.sqrt(Math.min(1, d / Math.max(1, maxDegree)));
+                return -(380 + t * 520);
+              });
+            } else {
+              charge.strength(-170);
+            }
+          }
+          var link = inst.d3Force('link');
+          if (link && link.distance) {
+            if (mode === '2d') {
+              // Longer links between hubs spread the canvas out so the
+              // overall composition reads as connected clusters rather
+              // than a single hairball. Min ~70 px, max ~140 px.
+              link.distance(function(l){
+                var s = typeof l.source === 'object' ? l.source : byId.get(l.source);
+                var t = typeof l.target === 'object' ? l.target : byId.get(l.target);
+                var ds = (s && s.degree) || 0;
+                var dt = (t && t.degree) || 0;
+                var hub = Math.max(ds, dt);
+                var k = Math.sqrt(Math.min(1, hub / Math.max(1, maxDegree)));
+                return 70 + k * 70;
+              });
+            } else {
+              link.distance(48);
+            }
+          }
         }
       } catch (_) {}
       try { inst.cooldownTicks(120); } catch (_) {}

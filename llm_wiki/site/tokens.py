@@ -49,10 +49,10 @@ CSS: str = r"""
   --space-6: 32px;
   --space-7: 48px;
   --space-8: 64px;
-  --rail-w: 180px;
+  --rail-w: 200px;
   --toc-w: 200px;
-  --read-w: min(1100px, 75ch);
-  --page-w: min(100vw - 32px, 1640px);
+  --read-w: min(1280px, 88ch);
+  --page-w: min(100vw - 16px, 1720px);
   --topbar-height: 56px;
 }
 
@@ -156,14 +156,19 @@ summary:focus-visible,
 
 h1, h2, h3, h4, h5, h6 {
   font-family: var(--type-serif);
-  line-height: 1.2;
+  line-height: 1.25;
   margin: 1.6em 0 .6em;
   color: var(--ink);
 }
-h1 { font-size: clamp(1.9rem, 3.4vw, 2.7rem); margin-top: 0; }
-h2 { font-size: 1.55rem; }
-h3 { font-size: 1.25rem; }
-h4 { font-size: 1.05rem; }
+/* Unified heading scale across every page (home / index / detail / timeline /
+   about). Detail pages used to clamp at 32px while index pages popped at
+   ~43px — the inconsistency made hero pages feel disconnected from the rest
+   of the site. Now every <h1> rendered inside <main> sits at the same
+   ~30px size, with subtle responsive scaling for narrow viewports. */
+h1 { font-size: clamp(1.6rem, 2vw, 1.95rem); margin-top: 0; line-height: 1.18; }
+h2 { font-size: 1.35rem; }
+h3 { font-size: 1.15rem; }
+h4 { font-size: 1.02rem; }
 
 p { margin: 0 0 1em; }
 small, .small { font-size: .85rem; }
@@ -215,11 +220,12 @@ hr {
   z-index: 30;
   display: flex;
   align-items: center;
-  gap: var(--space-4);
-  padding: var(--space-3) var(--space-5);
-  background: color-mix(in srgb, var(--bg) 88%, transparent);
+  gap: var(--space-3);
+  padding: 10px clamp(12px, 2vw, 24px);
+  background: color-mix(in srgb, var(--bg) 86%, transparent);
   border-bottom: 1px solid var(--rule);
-  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: saturate(140%) blur(10px);
+  backdrop-filter: saturate(140%) blur(10px);
   font-family: var(--type-sans);
 }
 .topbar .brand {
@@ -267,19 +273,107 @@ hr {
 .topbar nav a.active .topnav-count { color: var(--accent); opacity: .85; }
 .topbar nav a:hover { color: var(--ink); background: var(--surface-2); }
 .topbar nav a:hover.active { color: var(--accent); }
-.topbar .search-button,
-.topbar .theme-toggle {
+.topbar .search-button {
   font-family: var(--type-sans);
-  font-size: .88rem;
+  font-size: .85rem;
+  padding: 6px 10px 6px 12px;
+  border: 1px solid var(--rule);
+  border-radius: 999px;
+  background: var(--surface);
+  color: var(--ink-muted);
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  min-width: 200px;
+  justify-content: flex-start;
+  transition: border-color 160ms ease, color 160ms ease, background 160ms ease;
+}
+.topbar .search-button .icon { flex-shrink: 0; opacity: .8; }
+.topbar .search-button .search-button-label { flex: 1; text-align: left; }
+.topbar .search-button .search-button-kbd {
+  font-family: var(--type-mono);
+  font-size: .72rem;
+  padding: 1px 6px;
+  border: 1px solid var(--rule);
+  border-bottom-width: 2px;
+  border-radius: 4px;
+  background: var(--surface-2);
+  color: var(--ink-muted);
+  line-height: 1.2;
+}
+.topbar .search-button:hover {
+  border-color: var(--accent);
+  color: var(--ink);
+  background: color-mix(in srgb, var(--accent-soft) 60%, var(--surface));
+}
+.topbar .search-button:hover .icon { opacity: 1; color: var(--accent); }
+
+/* Theme toggle — circular icon button. The two SVGs are stacked; the
+   ``data-theme`` attribute on <html> drives which one shows. Sun glows
+   when in dark mode (next click → light), moon when in light mode. */
+.topbar .theme-toggle {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 36px;
+  height: 36px;
+  padding: 0;
+  border: 1px solid var(--rule);
+  border-radius: 999px;
+  background: var(--surface);
+  color: var(--ink-muted);
+  cursor: pointer;
+  position: relative;
+  overflow: hidden;
+  transition: color 200ms ease, border-color 200ms ease, background 200ms ease, transform 200ms ease;
+}
+.topbar .theme-toggle:hover {
+  color: var(--accent);
+  border-color: var(--accent);
+  background: var(--accent-soft);
+}
+.topbar .theme-toggle:active { transform: scale(.94); }
+.topbar .theme-toggle .icon {
+  position: absolute;
+  inset: 0;
+  margin: auto;
+  width: 18px;
+  height: 18px;
+  transition: transform 320ms cubic-bezier(.4, .0, .2, 1), opacity 220ms ease;
+}
+.topbar .theme-toggle .icon-sun {
+  transform: rotate(-90deg) scale(.4);
+  opacity: 0;
+}
+.topbar .theme-toggle .icon-moon {
+  transform: rotate(0) scale(1);
+  opacity: 1;
+}
+[data-theme="dark"] .topbar .theme-toggle .icon-sun {
+  transform: rotate(0) scale(1);
+  opacity: 1;
+}
+[data-theme="dark"] .topbar .theme-toggle .icon-moon {
+  transform: rotate(90deg) scale(.4);
+  opacity: 0;
+}
+
+/* Rail toggle — proper icon button on mobile chrome. */
+.topbar .rail-toggle {
+  font-family: var(--type-sans);
+  font-size: .85rem;
   padding: 6px 10px;
   border: 1px solid var(--rule);
-  border-radius: 4px;
+  border-radius: var(--radius);
   background: var(--surface);
   color: var(--ink);
   cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
 }
-.topbar .search-button:hover,
-.topbar .theme-toggle:hover { border-color: var(--accent); color: var(--accent); }
+.topbar .rail-toggle:hover { border-color: var(--accent); color: var(--accent); }
 
 /* Layout grid (§5.2)
    ------------------------------------------------------------ */
@@ -307,11 +401,10 @@ hr {
      what makes the TOC column tall enough for the sticky inner aside
      to follow long-article scrolls. */
   gap: var(--space-3);
-  /* Tighter left/right padding — the previous ``clamp(12px, 4vw, 24px)``
-     burned ~96 px of viewport on a 2560 px monitor for no readable
-     reason. Cap at 16 px so the left rail starts close to the viewport
-     edge and the main column gets the freed space. */
-  padding: var(--space-5) clamp(8px, 1vw, 16px);
+  /* Trim horizontal padding — the doc tree should hug the viewport edge
+     so the file names aren't pushed inboard. Vertical padding stays
+     generous via ``--space-5``. */
+  padding: var(--space-5) clamp(2px, 0.4vw, 8px);
   /* sticky position requires no overflow:hidden on ancestors. */
   overflow: visible;
 }
@@ -326,7 +419,7 @@ hr {
 }
 
 /* ---- Doc-tree explorer (Issue 3) ---------------------------------------- */
-.doc-tree-search-row { padding: 0 var(--space-2) var(--space-3); }
+.doc-tree-search-row { padding: 0 4px var(--space-3); }
 .doc-tree-search {
   width: 100%;
   padding: 6px 10px;
@@ -353,8 +446,11 @@ hr {
 .doc-tree-list {
   list-style: none;
   margin: 0;
-  padding-inline-start: 12px;
+  padding-inline-start: 8px;
 }
+/* Top-level list hugs the rail edge; nested lists indent. */
+.doc-tree > details > .doc-tree-list,
+.doc-tree-root > .doc-tree-list { padding-inline-start: 2px; }
 .doc-tree-folder {
   margin: 0;
 }
@@ -442,7 +538,7 @@ details[open] > .doc-tree-folder-summary::before { transform: rotate(90deg); }
   letter-spacing: .12em;
   text-transform: uppercase;
   color: var(--ink-muted);
-  margin: var(--space-4) var(--space-2) var(--space-2);
+  margin: var(--space-4) 4px var(--space-2);
 }
 .rail-section-label:first-child { margin-top: 0; }
 .rail-drawer-nav {
@@ -510,7 +606,7 @@ details[open] > .doc-tree-folder-summary::before { transform: rotate(90deg); }
     /* Tight horizontal padding so the left rail starts ~8-16 px from the
        viewport edge regardless of screen width. Vertical padding stays
        generous via ``--space-6``. */
-    padding: var(--space-6) clamp(8px, 1vw, 16px);
+    padding: var(--space-6) clamp(2px, 0.4vw, 8px);
   }
   .rail {
     display: block;
@@ -589,7 +685,7 @@ details[open] > .doc-tree-folder-summary::before { transform: rotate(90deg); }
    ``.hero h1`` is fine for the home page hero, but a paper-detail page
    needs a more contained title. */
 .article-body h1 {
-  font-size: clamp(22px, 2.4vw, 32px);
+  font-size: clamp(1.6rem, 2vw, 1.95rem);
   line-height: 1.18;
   margin-block: 0 12px;
   overflow-wrap: anywhere;
@@ -616,11 +712,15 @@ details[open] > .doc-tree-folder-summary::before { transform: rotate(90deg); }
   text-decoration: none;
   color: var(--ink);
   box-shadow: var(--shadow);
-  transition: transform .12s ease, border-color .12s ease;
+  transition: transform 180ms ease, border-color 180ms ease, box-shadow 180ms ease;
 }
 .card:hover {
-  transform: translateY(-1px);
+  transform: translateY(-2px);
   border-color: var(--accent);
+  box-shadow: 0 6px 20px rgba(20, 18, 15, .08);
+}
+[data-theme="dark"] .card:hover {
+  box-shadow: 0 6px 24px rgba(0, 0, 0, .35);
 }
 .card .card-kind {
   font-family: var(--type-sans);
@@ -1022,35 +1122,303 @@ details[open] > .doc-tree-folder-summary::before { transform: rotate(90deg); }
 }
 .ai-siblings a:hover { border-color: var(--accent); }
 
-/* Command palette (carry-forward; finalised by Subagent E's js.py)
-   ------------------------------------------------------------ */
+/* Command palette
+   ------------------------------------------------------------
+   Spotlight-style search dialog. Triggered by ``/`` or ``cmd+k`` and the
+   topbar magnifier button. Layout: a fixed dim overlay, a centered card
+   with an icon + input row, optional type-filter tabs, a scrollable
+   result list, a status line and a keyboard-hint footer. */
 .palette {
   position: fixed;
   inset: 0;
-  background: rgba(0, 0, 0, .35);
+  background: rgba(8, 6, 4, .42);
+  -webkit-backdrop-filter: blur(6px);
+  backdrop-filter: blur(6px);
   z-index: 50;
-  padding: 10vh 16px;
+  padding: clamp(48px, 9vh, 96px) 16px 16px;
+  animation: palette-fade-in 140ms ease-out;
 }
 .palette[hidden] { display: none; }
+
+@keyframes palette-fade-in {
+  from { opacity: 0; }
+  to   { opacity: 1; }
+}
+@keyframes palette-pop-in {
+  from { opacity: 0; transform: translateY(-4px) scale(.98); }
+  to   { opacity: 1; transform: none; }
+}
+
 .palette-box {
-  max-width: 720px;
+  max-width: 640px;
+  width: 100%;
   margin: 0 auto;
   background: var(--surface);
   border: 1px solid var(--rule);
-  border-radius: var(--radius);
-  box-shadow: 0 14px 60px rgba(0, 0, 0, .25);
+  border-radius: 12px;
+  box-shadow: 0 24px 80px rgba(8, 6, 4, .35), 0 2px 8px rgba(8, 6, 4, .12);
   overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  max-height: min(72vh, 640px);
+  font-family: var(--type-sans);
+  animation: palette-pop-in 160ms cubic-bezier(.16, 1, .3, 1);
 }
-.palette-box input {
+
+/* --- Input row ---------------------------------------------------------- */
+.palette-input-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 12px 14px;
+  border-bottom: 1px solid var(--rule);
+  background: var(--surface);
+  flex: 0 0 auto;
+}
+.palette-input-icon {
+  flex-shrink: 0;
+  color: var(--ink-muted);
+}
+.palette-box input#search {
+  flex: 1;
   width: 100%;
   border: 0;
+  outline: none;
+  padding: 4px 0;
+  font-family: var(--type-sans);
+  font-size: 15px;
+  line-height: 1.4;
+  background: transparent;
+  color: var(--ink);
+  letter-spacing: 0;
+}
+.palette-box input#search::placeholder {
+  color: var(--ink-muted);
+  opacity: .85;
+}
+.palette-box input#search:focus { outline: none; }
+.palette-close {
+  flex-shrink: 0;
+  width: 24px;
+  height: 24px;
+  padding: 0;
+  border: 0;
+  background: transparent;
+  color: var(--ink-muted);
+  border-radius: 4px;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  transition: color 140ms ease, background 140ms ease;
+}
+.palette-close:hover { color: var(--ink); background: var(--surface-2); }
+
+/* --- Type filter tabs --------------------------------------------------- */
+.palette-tabs {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px;
+  padding: 8px 12px;
   border-bottom: 1px solid var(--rule);
-  padding: var(--space-4);
-  font-size: 1rem;
+  background: var(--surface-2);
+  flex: 0 0 auto;
+}
+.palette-tab {
+  font-family: var(--type-sans);
+  font-size: 12px;
+  font-weight: 500;
+  letter-spacing: .02em;
+  padding: 4px 10px;
+  border: 1px solid transparent;
+  border-radius: 999px;
+  background: transparent;
+  color: var(--ink-muted);
+  cursor: pointer;
+  line-height: 1.4;
+  transition: color 140ms ease, background 140ms ease, border-color 140ms ease;
+}
+.palette-tab:hover { color: var(--ink); background: var(--surface); }
+.palette-tab.is-active,
+.palette-tab[aria-selected="true"] {
+  background: var(--accent);
+  color: #fff;
+  border-color: var(--accent);
+}
+
+/* --- Status line -------------------------------------------------------- */
+.palette-status {
+  font-family: var(--type-sans);
+  font-size: 11px;
+  letter-spacing: .04em;
+  text-transform: uppercase;
+  color: var(--ink-muted);
+  padding: 8px 16px;
+  border-bottom: 1px solid var(--rule);
   background: var(--surface);
+  flex: 0 0 auto;
+}
+.palette-status:empty { display: none; }
+
+/* --- Result list -------------------------------------------------------- */
+.palette-results {
+  list-style: none;
+  margin: 0;
+  padding: 6px;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  flex: 1 1 auto;
+  font-family: var(--type-sans);
+}
+.palette-results:empty { display: none; }
+.palette-result {
+  margin: 0;
+  padding: 0;
+  border-radius: 8px;
+}
+.palette-result + .palette-result { margin-top: 1px; }
+.palette-result-link {
+  display: grid;
+  grid-template-columns: auto 1fr auto;
+  grid-template-rows: auto auto;
+  column-gap: 10px;
+  row-gap: 2px;
+  align-items: center;
+  padding: 9px 12px;
+  border-radius: 8px;
+  text-decoration: none;
+  color: var(--ink);
+  cursor: pointer;
+  transition: background 100ms ease;
+  min-block-size: 0;
+}
+.palette-result-link:hover {
+  background: var(--surface-2);
   color: var(--ink);
 }
-.palette-box input:focus { outline: 2px solid var(--accent); outline-offset: -2px; }
+.palette-result.is-active > .palette-result-link,
+.palette-result-link:focus-visible {
+  background: var(--accent-soft);
+  color: var(--ink);
+  outline: none;
+}
+.palette-result.is-active > .palette-result-link .palette-result-title {
+  color: var(--accent);
+}
+
+.palette-result-kind {
+  grid-column: 1;
+  grid-row: 1 / span 2;
+  align-self: center;
+  font-family: var(--type-sans);
+  font-size: 10px;
+  font-weight: 600;
+  letter-spacing: .06em;
+  text-transform: uppercase;
+  padding: 3px 7px;
+  border-radius: 999px;
+  background: var(--surface-2);
+  color: var(--ink-muted);
+  border: 1px solid var(--rule);
+  white-space: nowrap;
+  min-width: 56px;
+  text-align: center;
+}
+.palette-result.is-active > .palette-result-link .palette-result-kind {
+  background: var(--accent);
+  color: #fff;
+  border-color: var(--accent);
+}
+
+.palette-result-title {
+  grid-column: 2;
+  grid-row: 1;
+  font-family: var(--type-sans);
+  font-size: 13.5px;
+  font-weight: 600;
+  line-height: 1.35;
+  color: var(--ink);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.palette-result-title mark {
+  background: color-mix(in srgb, var(--accent) 22%, transparent);
+  color: inherit;
+  padding: 0 2px;
+  border-radius: 2px;
+}
+
+.palette-result-summary {
+  grid-column: 2;
+  grid-row: 2;
+  font-family: var(--type-sans);
+  font-size: 11.5px;
+  line-height: 1.4;
+  color: var(--ink-muted);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.palette-result-summary mark {
+  background: color-mix(in srgb, var(--accent) 16%, transparent);
+  color: inherit;
+  padding: 0 1px;
+  border-radius: 2px;
+}
+
+.palette-result-recency {
+  grid-column: 3;
+  grid-row: 1 / span 2;
+  align-self: center;
+  font-family: var(--type-mono);
+  font-size: 10.5px;
+  letter-spacing: .02em;
+  color: var(--ink-muted);
+  white-space: nowrap;
+  padding-inline-start: 6px;
+}
+
+/* --- Keyboard hint footer ---------------------------------------------- */
+.palette-hint {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 14px;
+  padding: 8px 14px;
+  border-top: 1px solid var(--rule);
+  background: var(--surface-2);
+  font-family: var(--type-sans);
+  font-size: 11px;
+  color: var(--ink-muted);
+  flex: 0 0 auto;
+}
+.palette-hint kbd {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-family: var(--type-mono);
+  font-size: 10px;
+  font-weight: 500;
+  min-width: 18px;
+  height: 18px;
+  padding: 0 5px;
+  margin-right: 4px;
+  border: 1px solid var(--rule);
+  border-bottom-width: 2px;
+  border-radius: 4px;
+  background: var(--surface);
+  color: var(--ink);
+  line-height: 1;
+}
+.palette-hint span:last-child { margin-left: auto; }
+@media (max-width: 520px) {
+  .palette-hint span:last-child { margin-left: 0; }
+  .palette-hint { gap: 10px; }
+}
+
+/* Lock body scroll while the palette is open. */
+body.palette-open { overflow: hidden; }
 
 /* Reduced motion
    ------------------------------------------------------------ */
@@ -1567,9 +1935,8 @@ details[open] > .doc-tree-folder-summary::before { transform: rotate(90deg); }
 /* Button labels (consistent padding, hit area, icon+label gap)
    ------------------------------------------------------------ */
 .button,
-button:not([class*="graph-legend"]):not(.tag-chip),
+button:not([class*="graph-legend"]):not(.tag-chip):not(.palette-tab):not(.palette-close):not(.theme-toggle):not(.search-button):not(.rail-toggle):not(.doc-tree-folder-summary),
 a.button,
-.theme-toggle,
 .search-button,
 .rail-toggle,
 .toc-toggle {
@@ -1591,9 +1958,8 @@ a.button,
   transition: border-color 160ms ease, color 160ms ease, background 160ms ease;
 }
 .button:hover,
-button:not([class*="graph-legend"]):not(.tag-chip):hover,
+button:not([class*="graph-legend"]):not(.tag-chip):not(.palette-tab):not(.palette-close):not(.theme-toggle):not(.search-button):not(.rail-toggle):not(.doc-tree-folder-summary):hover,
 a.button:hover,
-.theme-toggle:hover,
 .search-button:hover,
 .rail-toggle:hover,
 .toc-toggle:hover {
@@ -1836,11 +2202,10 @@ body {
 @media (max-width: 1023px) {
   .topbar nav a,
   .topbar .search-button,
-  .topbar .theme-toggle,
   .rail-toggle,
   .toc-toggle,
   .button,
-  button,
+  button:not(.palette-tab):not(.palette-close):not(.theme-toggle):not(.doc-tree-folder-summary),
   a.button,
   a.card,
   .card,
@@ -1852,6 +2217,28 @@ body {
     min-block-size: 44px;
     display: inline-flex;
     align-items: center;
+  }
+  .topbar .theme-toggle {
+    width: 40px;
+    height: 40px;
+    min-block-size: 40px;
+  }
+  .topbar .search-button {
+    min-width: 0;
+    padding: 6px 12px;
+  }
+  .topbar .search-button .search-button-kbd { display: none; }
+}
+@media (max-width: 900px) {
+  .topbar .search-button .search-button-label,
+  .topbar .search-button .search-button-kbd { display: none; }
+  .topbar .search-button {
+    width: 40px;
+    height: 40px;
+    min-width: 0;
+    padding: 0;
+    justify-content: center;
+    border-radius: 999px;
   }
 }
 
@@ -1993,8 +2380,8 @@ body {
   .mobile-bottom-nav { display: block; }
   body { padding-bottom: calc(64px + env(safe-area-inset-bottom)); }
 
-  /* Hero pulse — single column; headline scales with viewport. */
-  .hero h1 { font-size: clamp(28px, 6vw, 48px); }
+  /* Hero pulse — single column; headline matches detail-page H1. */
+  .hero h1 { font-size: clamp(22px, 4.5vw, 28px); }
   .hero .pulse,
   .hero .pulse-cards,
   .pulse-cards { grid-template-columns: 1fr !important; }
@@ -2203,17 +2590,22 @@ body {
     gap: 24px;
     /* Keep the left rail tight against the viewport edge — same clamp
        used at the 768 px breakpoint so desktop and mid widths agree. */
-    padding: var(--space-6) clamp(8px, 1vw, 16px);
+    padding: var(--space-6) clamp(2px, 0.4vw, 8px);
   }
   .main {
-    /* Detail pages cap at the prose-comfortable reading column. */
+    /* Detail and index pages share one column width so a user navigating
+     between them never sees the body re-flow. Graph still opts out via
+     ``.main--graph``. */
     max-width: var(--read-w);
     margin-inline: auto;
     width: 100%;
   }
   .main--wide {
-    /* Index/listing pages stretch — they're tabular not prose. */
-    max-width: min(100vw - 320px, 1640px);
+    /* Index/listing pages historically stretched wider than detail
+     pages; the user wants them aligned now so they all share
+     ``--read-w``. Bump the cap a touch so very-wide tables still
+     breathe on ultra-wide screens. */
+    max-width: var(--read-w);
   }
   .shell--wide {
     /* TOC rail stays available for now but the wide-main is allowed
@@ -2241,12 +2633,11 @@ body {
   :root {
     --rail-w: 220px;
     --toc-w: 240px;
+    --read-w: min(1440px, 96ch);
   }
-  .main {
-    max-width: min(1280px, 80ch);
-  }
+  .main,
   .main--wide {
-    max-width: min(100vw - 360px, 1800px);
+    max-width: var(--read-w);
   }
   .main--graph {
     max-width: min(100vw - 360px, 1900px);
