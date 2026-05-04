@@ -1543,7 +1543,7 @@ def render_home(ctx: SiteContext) -> str:
             with_labels=True,
             start_date=home_start_date,
             day_href_prefix="",
-            cell_size=8,
+            cell_size=14,
         )
     except TypeError:
         # Older signatures may not accept ``cell_size`` — fall back without

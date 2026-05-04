@@ -1067,26 +1067,35 @@ details[open] > .doc-tree-folder-summary::before { transform: rotate(90deg); }
 
 /* Compact activity heatmap (home page).
    The full 26-week grid lives directly under the stat row on the home
-   page; capping width + height keeps it roughly the same vertical mass
-   as the 4-up stat boxes above it. The compact heatmap SVG omits its
-   ``width:100%`` style so the intrinsic ~280×90 viewBox is honoured —
-   we only cap the upper bound here so the widget never overflows on
-   narrow viewports. */
+   page. The previous version capped at 320×110 which made the widget
+   feel cramped against a 1280px reading column; we now let it span the
+   prose width with comfortable upper bounds and a real bottom margin so
+   the next section breathes. */
 .activity--compact {
-  max-width: 320px;
-  max-height: 110px;
-  margin: 0 auto;
+  margin: var(--space-5) auto var(--space-7);
+  padding: var(--space-4) var(--space-4) var(--space-5);
+  background: var(--surface);
+  border: 1px solid var(--rule);
+  border-radius: var(--radius);
+  box-shadow: var(--shadow);
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+  gap: var(--space-3);
 }
 .activity--compact .heatmap {
-  width: auto;
+  width: 100%;
   height: auto;
-  max-width: 100%;
-  max-height: 100px;
+  max-height: 220px;
 }
 .activity-title {
-  font-size: 14px;
+  font-family: var(--type-sans);
+  font-size: 13px;
   font-weight: 600;
-  margin: 0 0 8px;
+  letter-spacing: .02em;
+  text-transform: uppercase;
+  color: var(--ink-muted);
+  margin: 0;
 }
 
 /* AI siblings footer
