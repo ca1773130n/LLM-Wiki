@@ -746,6 +746,29 @@ JS_SEARCH_PALETTE = r"""
 # ---------------------------------------------------------------------------
 JS_GRAPH = r"""
 (function(){
+  // ----------------------------------------------------------------
+  // Interaction state machine (read this first when touching graph.js)
+  //   focusedNode      — the currently selected sphere (or null). Set
+  //                      by activateNode / focusOnNode; drives the
+  //                      auto-orbit hook, the focused-label sprite, and
+  //                      the floating ``#graph-focus-panel`` overlay.
+  //   pinnedNode       — sticky highlight set by a click on a node when
+  //                      the user is NOT focusing (Esc / contextmenu /
+  //                      Reset all clear it).
+  //   pinnedLink       — same as pinnedNode but for a clicked edge.
+  //   hoverNode        — the node currently under the mouse (or last
+  //                      touched on a touch device). Drives the cursor
+  //                      tooltip and 1-hop highlight.
+  //   userInteracted   — flips true on first user gesture (click, drag,
+  //                      scroll, search, focus shortcut). The rest-
+  //                      payload merge skips its post-merge auto-fit
+  //                      when this is set so a click before the rest
+  //                      payload arrives is not stolen back.
+  //   orbitTarget      — ``{x,y,z}`` cluster centroid the auto-orbit
+  //                      hook orbits around AND the camera looks at.
+  //                      One target shared between the focus fly-to
+  //                      and the per-tick orbit so they don't fight.
+  // ----------------------------------------------------------------
   var GROUP_COLORS = {
     sources:   '#94a3b8',
     papers:    '#fb7185',
@@ -823,14 +846,6 @@ JS_GRAPH = r"""
       n.neighbors = new Set();
       n.edges = [];
       n.degree = 0;
-      // Issue 4 — per-node opacity tweens. ``__opacity`` is the current
-      // value passed to ``nodeOpacity``; ``__opacityTarget`` is where
-      // it's heading. The per-frame lerp inside ``onEngineTick`` moves
-      // ``__opacity`` toward ``__opacityTarget`` by 0.15 each frame so
-      // the dim transition reads as a smooth ~150ms ease (rather than
-      // a snap to 0.18 the moment a hover lands).
-      n.__opacity = 1.0;
-      n.__opacityTarget = 1.0;
       byId.set(n.id, n);
     });
     payload.links.forEach(function(l){
@@ -840,10 +855,6 @@ JS_GRAPH = r"""
       a.neighbors.add(b); b.neighbors.add(a);
       a.edges.push(l); b.edges.push(l);
       a.degree += 1; b.degree += 1;
-      // Issue 4 — same opacity-tween init for links. 1.0 baseline; the
-      // hover/focus state changer drops non-incident links to 0.05.
-      l.__opacity = 1.0;
-      l.__opacityTarget = 1.0;
     });
 
     // Compute a high-value cutoff for overview labels. The graph can have
@@ -878,14 +889,13 @@ JS_GRAPH = r"""
       return 0.18 + t * 0.82;
     }
 
-    // F-5 — restore the floating focus-detail panel (NOT the right-rail
-    // info panel — a small bottom-right overlay inside the canvas
-    // wrapper). Tooltip handles hover preview; this panel pins the
-    // currently-focused node's full details (title, type, degree,
-    // description, Open page link) so the user has somewhere to read
-    // them without leaving focus mode. References resolve lazily — the
-    // page may not have a focus panel yet on older builds; treat it as
-    // optional throughout.
+    // F-5 — floating focus-detail panel: a small bottom-right overlay
+    // inside the canvas wrapper that pins the currently-focused node's
+    // full details (title, type, degree, description, Open page link).
+    // The tooltip handles hover preview; this panel persists focus
+    // metadata so the user has somewhere to read them without leaving
+    // focus mode. References resolve lazily — the page may not have a
+    // focus panel yet on older builds; treat it as optional throughout.
     var tooltip       = document.getElementById('graph-tooltip');
     var focusPanel    = document.getElementById('graph-focus-panel');
     var focusPanelTitle    = document.getElementById('graph-focus-panel-title');
@@ -903,6 +913,31 @@ JS_GRAPH = r"""
     var btnReset     = document.querySelector('[data-graph-action="reset"]');
     var btnFullscreen= document.querySelector('[data-graph-action="fullscreen"]');
     var btnAutoBrowse= document.querySelector('[data-graph-action="auto-browse"]');
+    var btnHelp      = document.querySelector('[data-graph-help]');
+    var helpPopover  = document.getElementById('graph-help-popover');
+
+    // F-11 — toggle the help popover. The wrapper carries the
+    // ``[data-graph-help-open]`` attribute so CSS can flip
+    // ``.graph-help`` from display:none to display:block; the popover
+    // itself loses its ``hidden`` attribute so screen readers see it.
+    function setHelpOpen(open){
+      if (!wrapper || !helpPopover) return;
+      if (open) {
+        wrapper.setAttribute('data-graph-help-open', '');
+        helpPopover.hidden = false;
+        if (btnHelp) btnHelp.setAttribute('aria-expanded', 'true');
+      } else {
+        wrapper.removeAttribute('data-graph-help-open');
+        helpPopover.hidden = true;
+        if (btnHelp) btnHelp.setAttribute('aria-expanded', 'false');
+      }
+    }
+    function toggleHelpOpen(){
+      if (!wrapper) return;
+      var open = wrapper.hasAttribute('data-graph-help-open');
+      setHelpOpen(!open);
+    }
+    if (btnHelp) btnHelp.addEventListener('click', toggleHelpOpen);
 
     var reduceMotion = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
 
@@ -1165,7 +1200,6 @@ JS_GRAPH = r"""
         node.neighbors.forEach(function(nb){ highlightNodes.add(nb); });
         node.edges.forEach(function(e){ highlightLinks.add(e); });
       }
-      refreshOpacityTargets();
       refreshHighlightStyles();
     }
 
@@ -1178,52 +1212,17 @@ JS_GRAPH = r"""
         if (endpoints.target) highlightNodes.add(endpoints.target);
         highlightLinks.add(link);
       }
-      refreshOpacityTargets();
       refreshHighlightStyles();
     }
 
-    // Issue 4 — set every node's / link's ``__opacityTarget`` based on the
-    // current focus/hover state. The per-frame lerp inside ``onEngineTick``
-    // moves ``__opacity`` toward ``__opacityTarget`` by 0.15 each frame so
-    // the dim reads as a smooth ~150ms ease. Targets:
-    //   incident node      -> 1.0
-    //   non-incident node  -> 0.18
-    //   incident link      -> 1.0
-    //   non-incident link  -> 0.05
-    // When nothing is focused or hovered the targets reset to 1.0 across
-    // the board so the graph fades back to its calm baseline.
-    function refreshOpacityTargets(){
-      var hoverActive = !!hoverNode;
-      var focusActive = hasFocusFilter();
-      var anyActive = hoverActive || focusActive;
-      payload.nodes.forEach(function(n){
-        var target = 1.0;
-        if (anyActive) {
-          var isIncident = false;
-          if (focusActive && highlightNodes.has(n)) isIncident = true;
-          if (hoverActive) {
-            if (n === hoverNode) isIncident = true;
-            if (hoverNode && hoverNode.neighbors && hoverNode.neighbors.has(n)) isIncident = true;
-          }
-          target = isIncident ? 1.0 : 0.18;
-        }
-        n.__opacityTarget = target;
-      });
-      payload.links.forEach(function(l){
-        var target = 1.0;
-        if (anyActive) {
-          var linkIncident = false;
-          if (focusActive && highlightLinks.has(l)) linkIncident = true;
-          if (hoverActive) {
-            var sId = (typeof l.source === 'object') ? (l.source && l.source.id) : l.source;
-            var tId = (typeof l.target === 'object') ? (l.target && l.target.id) : l.target;
-            if (hoverNode && (sId === hoverNode.id || tId === hoverNode.id)) linkIncident = true;
-          }
-          target = linkIncident ? 1.0 : 0.05;
-        }
-        l.__opacityTarget = target;
-      });
-    }
+    // The dim transition is a snap (immediate). The per-frame opacity
+    // lerp was removed because re-poking nodeColor / linkColor accessors
+    // every frame caused 3d-force-graph to re-evaluate every node and
+    // every link per render, which hung the page on the 388-node corpus.
+    // Dim selection is now driven entirely by the static branches inside
+    // the ``nodeColor`` / ``linkColor`` accessors keyed off
+    // ``isDimmedNode`` / ``isDimmedLink``, refreshed by
+    // ``refreshHighlightStyles``.
 
     function hasFocusFilter(){
       return highlightNodes.size > 0 || highlightLinks.size > 0;
@@ -1314,9 +1313,9 @@ JS_GRAPH = r"""
     // F-8 — search now soft-dims non-matching nodes instead of hiding
     // them. Returns ``true`` when a node matches the active search query
     // (or when the search box is empty — every node matches the empty
-    // query). Used by the dim path inside refreshOpacityTargets +
-    // node/linkColor accessors so non-matching nodes drop to ~0.05
-    // opacity but stay in the canvas (still rendered, still clickable).
+    // query). Used by the dim path inside the ``nodeColor`` /
+    // ``linkColor`` accessors so non-matching nodes drop to a dim
+    // palette but stay in the canvas (still rendered, still clickable).
     function matchesSearch(node){
       if (!searchQuery) return true;
       if (!node) return false;
@@ -1484,11 +1483,6 @@ JS_GRAPH = r"""
     // ``hint`` in the key any more).
     var VARIANT_FONT       = { default: 11, edge: 7, neighbor: 14, hover: 18, focused: 22 };
     var VARIANT_OPACITY    = { default: 0.85, edge: 0.78, neighbor: 0.92, hover: 1.0, focused: 1.0 };
-    // Stroke widths are kept in the table for back-compat but are NEVER
-    // applied to label text (Issue 1 — explicit "NO text stroke. NO outline.
-    // NO border."). The previous round used these to paint accent-tinted
-    // text strokes; we now leave them unused.
-    var VARIANT_STROKE     = { default: 0, edge: 0, neighbor: 0, hover: 0, focused: 0 };
     var VARIANT_RENDER_ORDER = { default: 1, edge: 1, neighbor: 998, hover: 999, focused: 999 };
     // Per-variant pill alpha (dark theme). Light theme inverts the base
     // color but reuses these alphas so the visual weight matches.
@@ -1933,8 +1927,8 @@ JS_GRAPH = r"""
     function sizeGraphToContainer(inst){
       if (!inst || !container) return;
       // In fullscreen we measure the wrapper (it covers the viewport and
-      // contains the toolbar/info panel/legend); otherwise we measure the
-      // canvas container as before.
+      // contains the toolbar / focus panel / legend); otherwise we measure
+      // the canvas container as before.
       var src = (wrapper && wrapper.classList && wrapper.classList.contains('is-fullscreen')) ? wrapper : container;
       var w = Math.max(320, Math.floor(src.clientWidth || src.getBoundingClientRect().width || 800));
       var h = Math.max(360, Math.floor(src.clientHeight || src.getBoundingClientRect().height || 520));
@@ -2502,22 +2496,11 @@ JS_GRAPH = r"""
       // integrate orbitAngle by ~0.2 rad/s using a clock-based dt so the
       // orbit stays smooth at any framerate. The orbit only spins when
       // (a) we have a focused node, (b) auto-orbit is enabled, and (c)
-      // we're in 3D mode.
-      //
-      // Issue 4 — we ALSO use this hook to lerp ``__opacity`` toward
-      // ``__opacityTarget`` for every node and every link by 0.15 per
-      // frame so the dim transition reads as a smooth ~150ms ease.
-      // ``__opacityDirty`` lets us skip the per-frame work once
-      // everything has settled within a tiny epsilon of its target.
+      // we're in 3D mode. The render budget per tick is reserved for
+      // this hook only — no other per-frame work is done here.
       try {
         if (inst.onEngineTick) {
           inst.onEngineTick(function(){
-            // Per-frame opacity lerp was REMOVED — re-poking nodeColor /
-            // linkColor accessors every frame caused 3d-force-graph to
-            // re-evaluate every node and every link per render, which
-            // hung the page on the 388-node corpus. The dim transition
-            // is now a snap (immediate). The render budget per tick is
-            // reserved for the auto-orbit hook below; nothing else.
             if (mode !== '3d') return;
             if (!focusedNode || !autoOrbitEnabled) { lastTickMs = 0; return; }
             var now = (typeof performance !== 'undefined' && performance.now) ? performance.now() : Date.now();
@@ -2928,9 +2911,10 @@ JS_GRAPH = r"""
     }
 
     // ---- Fullscreen (Issue 4) ------------------------------------------
-    // Request fullscreen on the WRAPPER (not the canvas) so the toolbar +
-    // legend + info panel come along. Listen to ``fullscreenchange`` to
-    // toggle the ``is-fullscreen`` class so CSS can repaint the layout.
+    // Request fullscreen on the WRAPPER (not the canvas) so the toolbar,
+    // legend, focus panel, tooltip, and help popover all come along.
+    // Listen to ``fullscreenchange`` to toggle the ``is-fullscreen``
+    // class so CSS can repaint the layout.
     function toggleGraphFullscreen(){
       if (!wrapper) return;
       var fsEl = document.fullscreenElement || document.webkitFullscreenElement || null;
@@ -3252,6 +3236,10 @@ JS_GRAPH = r"""
       var inField = tag === 'INPUT' || tag === 'TEXTAREA';
       if (e.key === '/' && !inField) { e.preventDefault(); searchEl && searchEl.focus(); return; }
       if (inField) return;
+      // F-11 — ``?`` toggles the help popover. ``e.key`` already
+      // resolves shift+/ to the literal ``?`` character on every
+      // keyboard layout the browser knows about.
+      if (e.key === '?') { e.preventDefault(); toggleHelpOpen(); return; }
       if (e.key === 'f') { fitAll(400); }
       if (e.key === 'r') { if (btnReset) btnReset.click(); }
       // Bug 5 — ``o`` toggles auto-orbit. Default is ON when a node is
@@ -3277,7 +3265,11 @@ JS_GRAPH = r"""
         // Bug 5 — Esc unfocuses, clears search/day filter, then auto-fits
         // back to the whole graph so the user gets visual confirmation
         // they're back at the top level. Issue 6 — Esc also stops the
-        // auto-browse tour if one is running.
+        // auto-browse tour if one is running. F-11 — Esc also closes
+        // the help popover if it's open.
+        if (wrapper && wrapper.hasAttribute('data-graph-help-open')) {
+          setHelpOpen(false);
+        }
         if (autoBrowseActive) stopAutoBrowse();
         pinnedNode = null;
         pinnedLink = null;
@@ -3297,9 +3289,8 @@ JS_GRAPH = r"""
     // ---- Rest-payload merge. Called from outside the startGraph closure
     //      once ``payload-rest.json`` lands. Folds new nodes/links into the
     //      running graph via ``Graph.graphData(...)`` so the rest fade in
-    //      alongside the core. Defaults ``__opacity`` at 1.0 so the new
-    //      geometry just appears (the simulation re-settles naturally as
-    //      new edges enter).
+    //      alongside the core. The simulation re-settles naturally as new
+    //      edges enter.
     window.__graphMergeRestPayload = function(rest){
       if (!rest || (!rest.nodes && !rest.links)) return;
       var newNodes = Array.isArray(rest.nodes) ? rest.nodes : [];
@@ -3310,8 +3301,6 @@ JS_GRAPH = r"""
         n.neighbors = new Set();
         n.edges = [];
         n.degree = 0;
-        n.__opacity = 1.0;
-        n.__opacityTarget = 1.0;
         byId.set(n.id, n);
         payload.nodes.push(n);
       });
@@ -3322,8 +3311,6 @@ JS_GRAPH = r"""
         a.neighbors.add(b); b.neighbors.add(a);
         a.edges.push(l); b.edges.push(l);
         a.degree += 1; b.degree += 1;
-        l.__opacity = 1.0;
-        l.__opacityTarget = 1.0;
         payload.links.push(l);
       });
       if (Graph && Graph.graphData) {

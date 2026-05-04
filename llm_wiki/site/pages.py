@@ -2389,14 +2389,17 @@ def render_graph_view(ctx: SiteContext) -> str:
         '</div>'
     )
 
-    body = f"""<header class="hero">
-  <p class="eyebrow">interactive graph · 3D force layout</p>
-  <h1>Knowledge graph</h1>
-  <p class="lead">Tap or click a node to focus it: the camera flies in and orbits, neighbors stay highlighted while non-incident nodes dim. Tap the same node again to open its page. Drag to orbit, scroll/pinch to zoom (cursor-anchored). Press <kbd>/</kbd> to search, <kbd>f</kbd> to fit, <kbd>o</kbd> to toggle auto-orbit, <kbd>b</kbd> to auto-browse, <kbd>2</kbd>/<kbd>3</kbd> to switch projection, <kbd>Esc</kbd> to unfocus.</p>
-</header>
-<section class="graph-page" aria-label="Knowledge graph visualization">
+    # F-11 — slim toolbar instead of a hero. The page IS a viewer; the
+    # first viewport must be the canvas, not docs. Title sits inline at
+    # ~16px on the left of the toolbar; the keyboard shortcuts + corpus
+    # stats line moves into a popover gated by the ``?`` button (and the
+    # ``?`` keyboard shortcut wired in graph.js). The popover content
+    # below is the verbatim previous ``.graph-help`` line + a short
+    # discoverability hint, so nothing is deleted, just relocated.
+    body = f"""<section class="graph-page" aria-label="Knowledge graph visualization" data-graph-page>
   <div class="graph-canvas-wrapper" id="graph-canvas-wrapper">
     <div class="graph-toolbar" role="toolbar" aria-label="Graph controls">
+      <h1 class="graph-toolbar-title">Graph</h1>
       <div class="graph-toolbar-group" role="group" aria-label="Projection">
         <button type="button" class="button" data-graph-mode="3d" aria-pressed="true">3D</button>
         <button type="button" class="button" data-graph-mode="2d" aria-pressed="false">2D</button>
@@ -2412,6 +2415,7 @@ def render_graph_view(ctx: SiteContext) -> str:
         <input id="graph-search-input" type="search" placeholder="Search nodes ( / )" autocomplete="off" spellcheck="false">
       </div>
       <span class="graph-size-hint" title="Node radius scales with sqrt of incident-edge count, capped at degree=200.">node size = √(connections)</span>
+      <button type="button" class="graph-help-button" data-graph-help aria-expanded="false" aria-controls="graph-help-popover" title="Help (?)" aria-label="Toggle help popover">?</button>
     </div>
     <div class="graph-canvas" id="graph-canvas" data-payload-url="payload.json" data-payload-core-url="payload-core.json" data-payload-rest-url="payload-rest.json" role="img" aria-label="Interactive 3D knowledge graph">
       {skeleton}
@@ -2428,8 +2432,11 @@ def render_graph_view(ctx: SiteContext) -> str:
       <div class="graph-focus-panel-neighbors" id="graph-focus-panel-neighbors"></div>
     </aside>
     <div class="graph-legend" id="graph-legend" aria-label="Type legend">{legend_items}</div>
+    <div class="graph-help" id="graph-help-popover" role="dialog" aria-label="Graph keyboard shortcuts" hidden>
+      <p class="graph-help-stats">Showing {len(nodes_payload)} of {len(nodes_payload)} wiki nodes · {len(links_payload)} links</p>
+      <p class="graph-help-shortcuts"><kbd>/</kbd> search · <kbd>f</kbd> fit · <kbd>r</kbd> reset · <kbd>o</kbd> orbit · <kbd>b</kbd> auto-browse · <kbd>2</kbd>/<kbd>3</kbd> mode · <kbd>Esc</kbd> unfocus</p>
+    </div>
   </div>
-  <p class="graph-help muted">Showing {len(nodes_payload)} of {len(nodes_payload)} wiki nodes · {len(links_payload)} links · <kbd>/</kbd> search · <kbd>f</kbd> fit · <kbd>r</kbd> reset · <kbd>o</kbd> orbit · <kbd>b</kbd> auto-browse · <kbd>2</kbd>/<kbd>3</kbd> mode · <kbd>Esc</kbd> unfocus</p>
 </section>"""
     return page_shell(
         title="Graph",

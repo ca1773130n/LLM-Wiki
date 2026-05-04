@@ -244,10 +244,10 @@ def test_graph_edges_are_visible_lines_not_only_particles():
     assert "line.setAttribute('stroke-width', '0.24');" in JS_GRAPH
     assert "el.setAttribute('stroke-width', hot ? '0.85' : '0.28');" in JS_GRAPH
     assert "if (inst.linkThreeObjectExtend) inst.linkThreeObjectExtend(true);" in JS_GRAPH
-    # The linkColor function now branches on hover-incident too. After the
-    # smooth-dim refactor it picks a base from the focus/hover ladder, then
-    # multiplies the alpha by the per-link ``__opacity`` (lerp'd in
-    # onEngineTick) so the dim transition reads as a smooth fade.
+    # The linkColor function branches on hover-incident too. It picks a
+    # base from the focus/hover ladder; the dim transition is a snap
+    # (the per-frame opacity lerp was removed in F-12 — re-poking the
+    # accessors every frame hung the page on the 388-node corpus).
     assert "if (highlightLinks.has(l)) return EDGE_COLOR_HOT;" in JS_GRAPH
     assert "if (isHoverIncidentLink(l)) return EDGE_COLOR_HOT;" in JS_GRAPH
 
@@ -492,8 +492,10 @@ def test_graph_focused_node_label_scales_up_with_outline():
     # smaller, white, no pill behind.
     assert "{ default: 11, edge: 7, neighbor: 14, hover: 18, focused: 22 }" in JS_BUNDLE_GRAPH
     # Issue 1 — explicit "NO text stroke. NO outline. NO border." on
-    # every variant. The stroke widths are zeroed in the table.
-    assert "{ default: 0, edge: 0, neighbor: 0, hover: 0, focused: 0 }" in JS_BUNDLE_GRAPH
+    # every variant. F-12 deleted the previously-zeroed VARIANT_STROKE
+    # table outright (nothing read it); the regression guard against the
+    # table coming back lives in test_graph_f12_dead_state_cleanup_removed.
+    assert "VARIANT_STROKE" not in JS_BUNDLE_GRAPH
     # The focused sprite anchors above the node (positive +y offset based
     # on node.val so it never overlaps the sphere itself).
     assert "n.val * 1.2 + 8" in JS_BUNDLE_GRAPH
@@ -655,7 +657,10 @@ def test_graph_label_variants_unified_across_2d_and_3d():
     # Variant tables drive both paths.
     assert "VARIANT_FONT" in JS_BUNDLE_GRAPH
     assert "VARIANT_OPACITY" in JS_BUNDLE_GRAPH
-    assert "VARIANT_STROKE" in JS_BUNDLE_GRAPH
+    # F-12 — VARIANT_STROKE was kept for back-compat after the user
+    # banned text strokes (Issue 1). The cleanup pass removed it because
+    # nothing read it; the regression guard is in
+    # ``test_graph_dead_state_cleanup_removed`` below.
     # Edge labels use the 'edge' variant in both render paths.
     assert "variant: 'edge'" in JS_BUNDLE_GRAPH
     assert "VARIANT_FONT.edge" in JS_BUNDLE_GRAPH
@@ -1001,6 +1006,47 @@ def test_graph_f10_reset_button_calls_fit_all_not_hardcoded_camera():
     # ``r`` keyboard shortcut dispatches a click on the Reset button so
     # the same fitAll path runs there too.
     assert "if (e.key === 'r') { if (btnReset) btnReset.click(); }" in JS_BUNDLE_GRAPH
+
+
+def test_graph_f11_help_button_and_keyboard_shortcut_wired():
+    """F-11 — the toolbar carries a ``?`` help button. Clicking it (or
+    pressing ``?``) toggles the ``[data-graph-help-open]`` attribute on
+    the wrapper so the popover slides in. Esc closes it."""
+    assert "querySelector('[data-graph-help]')" in JS_GRAPH
+    assert "getElementById('graph-help-popover')" in JS_GRAPH
+    # The wrapper attribute drives the popover visibility (the CSS rule
+    # is asserted in test_graph_compact_toolbar_styles_present).
+    assert "setAttribute('data-graph-help-open', '')" in JS_GRAPH
+    assert "removeAttribute('data-graph-help-open')" in JS_GRAPH
+    # ``?`` keyboard shortcut is wired in the same keydown listener as
+    # the other graph hotkeys.
+    assert "if (e.key === '?')" in JS_GRAPH
+
+
+def test_graph_f12_dead_state_cleanup_removed():
+    """F-12 — the per-frame opacity lerp was deleted (it hung on the
+    388-node corpus); the ``__opacity`` / ``__opacityTarget`` per-node
+    state and the ``VARIANT_STROKE`` table that fed it were all dead.
+    Regression guard so a future round doesn't put them back."""
+    # Per-node / per-link tween state.
+    assert "__opacityTarget" not in JS_GRAPH, (
+        "F-12 — per-node opacity tween state must stay deleted"
+    )
+    assert ".__opacity " not in JS_GRAPH, (
+        "F-12 — per-node opacity tween state must stay deleted"
+    )
+    # Stroke-variant table (kept-for-back-compat -> outright dead).
+    assert "VARIANT_STROKE" not in JS_GRAPH, (
+        "F-12 — VARIANT_STROKE table was unreferenced and must stay deleted"
+    )
+    # The function that wrote __opacityTarget went with it.
+    assert "refreshOpacityTargets" not in JS_GRAPH
+    # Top-of-bundle interaction-state comment block exists so future
+    # readers can locate the live state machine.
+    assert "Interaction state machine" in JS_GRAPH
+    assert "focusedNode" in JS_GRAPH
+    assert "userInteracted" in JS_GRAPH
+    assert "orbitTarget" in JS_GRAPH
 
 
 # ---------------------------------------------------------------------------

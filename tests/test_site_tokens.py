@@ -327,6 +327,29 @@ def test_graph_auto_browse_cursor_cue_present():
     assert "cursor: progress" in CSS
 
 
+def test_graph_compact_toolbar_styles_present():
+    """F-11 — the hero is gone; the title + help button live inline in
+    the toolbar. The popover that holds the keyboard shortcuts is
+    ``display: none`` by default and revealed via the
+    ``[data-graph-help-open]`` attribute on the wrapper."""
+    # Inline toolbar title and help button each have CSS rules.
+    assert ".graph-page .graph-toolbar-title" in CSS
+    assert ".graph-page .graph-help-button" in CSS
+    # The help popover defaults to display:none; the open-state selector
+    # flips it to display:block.
+    import re as _re
+    help_block = _re.search(
+        r"\.graph-page\s+\.graph-help\s*\{([^}]*)\}", CSS
+    )
+    assert help_block is not None, ".graph-help rule missing"
+    assert "display: none" in help_block.group(1), (
+        "F-11 — graph-help popover starts collapsed"
+    )
+    # The wrapper's ``[data-graph-help-open]`` attribute reveals the popover.
+    assert ".graph-canvas-wrapper[data-graph-help-open] .graph-help" in CSS
+    assert "display: block" in CSS
+
+
 # ---------------------------------------------------------------------------
 # Polish pass — accessibility, light theme, mobile
 # ---------------------------------------------------------------------------
@@ -378,7 +401,11 @@ def test_css_light_theme_overrides_present():
     components historically tuned for dark surfaces."""
     assert '[data-theme="light"] .code' in CSS or '[data-theme="light"] code' in CSS
     assert '[data-theme="light"] .subtype-chip' in CSS
-    assert '[data-theme="light"] .graph-info-panel' in CSS
+    # F-12 — the legacy ``.graph-info-panel`` light-theme override was
+    # removed because the right-rail info panel it targeted is gone
+    # (Issue 1); the F-5 ``.graph-focus-panel`` ships its own light-theme
+    # override (asserted by ``test_graph_focus_detail_panel_styles_present``).
+    assert '[data-theme="light"] .graph-canvas-wrapper .graph-focus-panel' in CSS
     assert '[data-theme="light"] .doc-tree-leaf.is-active' in CSS
 
 

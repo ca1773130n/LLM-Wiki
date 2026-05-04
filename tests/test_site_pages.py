@@ -1039,6 +1039,55 @@ def test_render_graph_view_includes_focus_detail_panel_overlay(
     assert "graph-info-overlay" not in out
 
 
+def test_render_graph_view_collapses_hero_into_compact_toolbar(
+    site_ctx: SiteContext,
+) -> None:
+    """F-11 — the graph route is a tool, not a doc page. The first
+    viewport must be the canvas + toolbar, not a hero title and an
+    instruction paragraph. The shortcut hints + corpus stats are
+    relocated to a popover gated by the ``?`` button."""
+    out = render_graph_view(site_ctx)
+    # The hero header is gone — no eyebrow, no big <h1>, no lead paragraph
+    # describing how to drag/click/scroll.
+    assert 'class="eyebrow"' not in out or "interactive graph" not in out
+    assert "<h1>Knowledge graph</h1>" not in out
+    assert "Tap or click a node to focus it" not in out
+    # The toolbar carries the inline title + the ``?`` help button.
+    assert 'class="graph-toolbar-title"' in out
+    assert "<h1 class=\"graph-toolbar-title\">Graph</h1>" in out
+    assert "data-graph-help" in out
+    # First-viewport markup must NOT contain the words "Press" or
+    # "shortcut" — those live inside the popover only. Slice the rendered
+    # HTML at the help popover boundary and check the prefix.
+    popover_marker = 'id="graph-help-popover"'
+    assert popover_marker in out, "help popover must exist"
+    pre_popover = out.split(popover_marker, 1)[0]
+    assert "Press" not in pre_popover, (
+        "F-11 — first viewport must not advertise shortcuts inline"
+    )
+    assert "shortcut" not in pre_popover, (
+        "F-11 — first viewport must not advertise shortcuts inline"
+    )
+    # Popover starts collapsed: ``hidden`` attribute on the popover itself
+    # AND the wrapper does NOT carry ``data-graph-help-open``.
+    assert 'id="graph-help-popover"' in out
+    # Popover content (relocated, not deleted): keyboard shortcuts + stats.
+    assert "<kbd>/</kbd>" in out
+    assert "<kbd>f</kbd>" in out
+    assert "<kbd>Esc</kbd>" in out
+    # The popover element keeps the hidden attribute so the closed state
+    # is the default render.
+    import re as _re
+    popover_block = _re.search(
+        r'<div class="graph-help"[^>]*id="graph-help-popover"[^>]*>',
+        out,
+    )
+    assert popover_block is not None, "popover container must exist"
+    assert "hidden" in popover_block.group(0), (
+        "popover starts hidden by default"
+    )
+
+
 def test_index_pages_emit_canonical_main_wide_not_article_shell(
     site_ctx: SiteContext,
 ) -> None:

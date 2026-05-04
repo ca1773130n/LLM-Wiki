@@ -1047,8 +1047,11 @@ details[open] > .doc-tree-folder-summary::before { transform: rotate(90deg); }
 .graph-page {
   display: flex;
   flex-direction: column;
-  gap: var(--space-4);
-  margin-top: var(--space-4);
+  gap: var(--space-3);
+  /* F-11 — graph route is a tool, not a doc. Drop top margin so the
+     toolbar (and the canvas right under it) sits at the top of the
+     first viewport. */
+  margin-top: var(--space-2);
 }
 .graph-page .graph-toolbar {
   display: flex;
@@ -1056,6 +1059,46 @@ details[open] > .doc-tree-folder-summary::before { transform: rotate(90deg); }
   gap: var(--space-3);
   align-items: center;
   justify-content: flex-start;
+}
+/* F-11 — inline toolbar title replaces the previous hero <h1>. ~16px so
+   it reads as a tool label, not a documentation heading. */
+.graph-page .graph-toolbar-title {
+  margin: 0;
+  font-size: 16px;
+  font-weight: 600;
+  font-family: var(--type-mono);
+  letter-spacing: 0.02em;
+  color: var(--ink);
+}
+/* F-11 — circular ``?`` button on the right of the toolbar; clicking it
+   toggles ``[data-graph-help-open]`` on the wrapper which reveals the
+   popover below. The ``?`` keyboard shortcut (graph.js) flips the same
+   state. */
+.graph-page .graph-help-button {
+  margin-left: auto;
+  width: 28px;
+  height: 28px;
+  padding: 0;
+  font-family: var(--type-mono);
+  font-size: 0.95rem;
+  line-height: 1;
+  color: var(--ink-muted);
+  background: var(--surface);
+  border: 1px solid var(--rule);
+  border-radius: 999px;
+  cursor: pointer;
+  transition: color 160ms ease, border-color 160ms ease, background 160ms ease;
+}
+.graph-page .graph-help-button:hover,
+.graph-page .graph-help-button:focus {
+  color: var(--accent);
+  border-color: var(--accent);
+  background: var(--accent-soft);
+}
+.graph-page .graph-help-button[aria-expanded="true"] {
+  color: var(--accent);
+  border-color: var(--accent);
+  background: var(--accent-soft);
 }
 .graph-page .graph-toolbar-group {
   display: inline-flex;
@@ -1135,15 +1178,10 @@ details[open] > .doc-tree-folder-summary::before { transform: rotate(90deg); }
   }
 }
 .graph-page .graph-canvas canvas { display: block; width: 100% !important; height: 100% !important; }
-/* (Removed Issue 2) The bottom-right floating focused-node info panel
-   is gone — it caused the page to blink on every click and gave the
-   user a redundant view of what the focused-node label sprite already
-   showed inline. The cursor-following tooltip below replaces it for
-   hover preview; the focused-node label sprite shows focus details
-   directly on the canvas. */
 /* Fullscreen mode (Issue 4). The wrapper covers the viewport; the
-   toolbar sits on top, the legend bottom-left, the rail-style info panel
-   is repositioned to the right inside the fullscreen container. */
+   toolbar sits on top, the legend bottom-left. The focus detail panel
+   (``#graph-focus-panel``) is positioned absolutely inside the wrapper
+   so the Fullscreen API still draws it on top of the canvas. */
 .graph-canvas-wrapper {
   display: flex;
   flex-direction: column;
@@ -1402,11 +1440,37 @@ details[open] > .doc-tree-folder-summary::before { transform: rotate(90deg); }
   color: var(--ink-muted);
   margin-left: 2px;
 }
+/* F-11 — ``.graph-help`` is now a popover, not an inline help line.
+   Hidden by default; revealed when the wrapper carries
+   ``[data-graph-help-open]`` (toggled by the ``?`` button or the ``?``
+   keyboard shortcut). Pinned to the top-right inside
+   ``.graph-canvas-wrapper`` so the Fullscreen API still draws it on
+   top of the canvas. */
 .graph-page .graph-help {
+  display: none;
+  position: absolute;
+  top: 56px;
+  right: var(--space-3);
+  z-index: 30;
+  max-width: 320px;
+  padding: 12px 14px;
   font-family: var(--type-mono);
   font-size: 0.78rem;
-  margin: 0;
+  background: var(--surface);
+  color: var(--ink);
+  border: 1px solid var(--rule);
+  border-radius: var(--radius);
+  box-shadow: var(--shadow);
 }
+.graph-page .graph-help[hidden] { display: none; }
+.graph-canvas-wrapper[data-graph-help-open] .graph-help {
+  display: block;
+}
+.graph-page .graph-help-stats,
+.graph-page .graph-help-shortcuts {
+  margin: 0 0 6px;
+}
+.graph-page .graph-help-shortcuts:last-child { margin-bottom: 0; }
 /* Toolbar size legend — explains the radius mapping. */
 .graph-page .graph-size-hint {
   display: inline-flex;
@@ -1421,10 +1485,10 @@ details[open] > .doc-tree-folder-summary::before { transform: rotate(90deg); }
   border-radius: 999px;
   white-space: nowrap;
 }
-/* (Removed) Right-rail graph control panel — the graph route no longer
-   ships a right rail (Issue 1). Hover preview lives in the cursor
-   tooltip above; focused-node display lives in the focused label
-   sprite. */
+/* The graph route does not ship a right TOC rail (Issue 1). Hover
+   preview lives in the cursor tooltip above; focused-node detail lives
+   in the floating ``#graph-focus-panel`` (F-5) pinned to the bottom-
+   right of the canvas wrapper. */
 .graph-page .visually-hidden {
   position: absolute;
   width: 1px; height: 1px;
@@ -1644,18 +1708,6 @@ section.panel > h3,
   background: var(--accent);
   color: #fff;
   border-color: var(--accent);
-}
-
-/* The graph-info-panel was tuned for the dark gradient canvas. On
-   light theme it sits over the same dark canvas (we keep the canvas
-   gradient regardless of theme so the visualization stays legible)
-   but if a future theme shows it on a light surface this override
-   keeps text + border AA. */
-[data-theme="light"] .graph-info-panel {
-  background: var(--surface);
-  color: var(--ink);
-  border: 1px solid var(--rule);
-  box-shadow: var(--shadow);
 }
 
 /* Doc-tree active leaf — terracotta accent over a soft tint reads as
