@@ -782,16 +782,14 @@ JS_GRAPH = r"""
     questions: '#facc15',
     other:     '#cbd5e1'
   };
-  // Default edge: WHITE at 0.5 alpha. Hot (hovered/focused incident): YELLOW
-  // at 0.5 alpha. Dim (everything else when a focus is active): white at very
-  // low alpha so it's still implied without dominating.
-  var EDGE_COLOR_LIGHT = 'rgba(255,255,255,0.5)';
-  var EDGE_COLOR_DIM   = 'rgba(255,255,255,0.05)';
-  // Issue 4 — hot edges (incident to focus or hover) get pure yellow at
-  // 0.5 alpha — same alpha as the white default so the "lit" cue is the
-  // colour shift, not a brightness jump. Yellow particles
-  // ride on top — the color stays warm but readable across themes.
-  var EDGE_COLOR_HOT   = 'rgba(250,204,21,0.5)';
+  // Default edge: WHITE at 0.25 alpha (halved from 0.5 again so the webbing
+  // recedes further into the background). Hot (hovered/focused incident):
+  // YELLOW at 0.25 alpha — same alpha as the default so the "lit" cue is
+  // the colour shift, not a brightness jump. Dim: very low alpha so dimmed
+  // edges are essentially invisible.
+  var EDGE_COLOR_LIGHT = 'rgba(255,255,255,0.25)';
+  var EDGE_COLOR_DIM   = 'rgba(255,255,255,0.025)';
+  var EDGE_COLOR_HOT   = 'rgba(250,204,21,0.25)';
   var THREE_URL = 'https://esm.sh/three@0.169.0';
 
   var GROUP_HSL = {
@@ -1493,9 +1491,11 @@ JS_GRAPH = r"""
     // canvas/texture across nodes (the per-variant pill+text colors are
     // implied by the variant + theme so we don't need ``accent`` or
     // ``hint`` in the key any more).
-    var VARIANT_FONT       = { default: 11, edge: 7, neighbor: 14, hover: 18, focused: 22 };
+    // Node-label fonts doubled for readability; edge-label font stays
+    // small so edge labels never compete with node names visually.
+    var VARIANT_FONT       = { default: 22, edge: 7, neighbor: 28, hover: 36, focused: 44 };
     var VARIANT_OPACITY    = { default: 0.85, edge: 0.78, neighbor: 0.92, hover: 1.0, focused: 1.0 };
-    var VARIANT_RENDER_ORDER = { default: 1, edge: 1, neighbor: 998, hover: 999, focused: 999 };
+    var VARIANT_RENDER_ORDER = { default: 100, edge: 1, neighbor: 998, hover: 999, focused: 999 };
     // Per-variant pill alpha (dark theme). Light theme inverts the base
     // color but reuses these alphas so the visual weight matches.
     // EXACT spec values per Issue 2: default/edge=0.5, neighbor=0.6, hover=0.65, focused=0.78.
@@ -1589,12 +1589,12 @@ JS_GRAPH = r"""
       ctx.fillText(text, w / 2, textY);
       var tex = new THREE.CanvasTexture(canvas);
       tex.minFilter = THREE.LinearFilter;
-      // Issue 1 — defaults and edge labels keep depthTest=true so nearer
-      // geometry occludes them (defaults shouldn't always be on top).
-      // Hover / neighbor / focused turn depthTest off so they always sit
-      // on top. The focused variant additionally turns depthWrite off and
-      // bumps renderOrder to 999 so it renders above EVERYTHING.
-      var depthTest = (variant === 'default' || variant === 'edge');
+      // Node labels (default / hover / neighbor / focused) all turn off
+      // depthTest so they render on top of every sphere — the user found
+      // node-occluded labels unreadable. Edge labels keep depthTest so
+      // they only show when their edge segment is in front of nearer
+      // geometry; otherwise the canvas drowns in mid-graph text.
+      var depthTest = (variant === 'edge');
       var depthWrite = !(variant === 'focused');
       var mat = new THREE.SpriteMaterial({
         map: tex,
@@ -2046,9 +2046,9 @@ JS_GRAPH = r"""
               camScale = Math.max(1.0, Math.min(3.0, dist / 180));
             }
           } catch (_) {}
-          if (highlightLinks.has(l)) return 0.45 * camScale;
-          if (isHoverIncidentLink(l)) return 0.45 * camScale;
-          return 0.125 * camScale;
+          if (highlightLinks.has(l)) return 0.225 * camScale;
+          if (isHoverIncidentLink(l)) return 0.225 * camScale;
+          return 0.0625 * camScale;
         })
         .linkHoverPrecision(8)
         // Issue 4 — particles ONLY on edges incident to the hovered or
@@ -2061,7 +2061,7 @@ JS_GRAPH = r"""
           if (isHoverIncidentLink(l)) return 2;
           return 0;
         })
-        .linkDirectionalParticleWidth(0.3)
+        .linkDirectionalParticleWidth(1.2)
         .linkDirectionalParticleSpeed(0.005)
         .onNodeHover(function(node){
           // F-4 — when a node is FOCUSED/pinned, hover-driven highlight
