@@ -433,6 +433,63 @@ def test_css_bottom_nav_tap_targets_meet_44px():
     assert "min-block-size: 44px" in block.group(1)
 
 
+def test_shell_horizontal_padding_is_tight_at_desktop():
+    """The user has asked twice for a tighter LEFT margin on the shell:
+    the left rail should start ~8-16 px from the viewport edge regardless
+    of breakpoint. Both the 768 px and 1280 px ``.shell`` rules must use
+    ``clamp(8px, 1vw, 16px)`` for horizontal padding; the previous
+    ``var(--space-6) var(--space-5)`` (and the wider ``clamp(16px, 2vw, 24px)``)
+    are forbidden on ``.shell``."""
+    import re
+
+    css_no_comments = re.sub(r"/\*.*?\*/", "", CSS, flags=re.DOTALL)
+
+    def _shell_block_in(media_query: str) -> str:
+        idx = css_no_comments.index(media_query)
+        # Find the next ``.shell {`` opening brace AFTER the media-query
+        # opening brace, then capture up to its matching ``}``.
+        shell_idx = css_no_comments.index(".shell {", idx)
+        end = css_no_comments.index("}", shell_idx)
+        return css_no_comments[shell_idx:end]
+
+    block_768 = _shell_block_in("@media (min-width: 768px)")
+    assert "clamp(8px, 1vw, 16px)" in block_768, (
+        "@media (min-width: 768px) .shell must use clamp(8px, 1vw, 16px) "
+        "for horizontal padding"
+    )
+    assert "var(--space-5)" not in block_768, (
+        "@media (min-width: 768px) .shell must not use --space-5 padding"
+    )
+
+    block_1280 = _shell_block_in("@media (min-width: 1280px)")
+    assert "clamp(8px, 1vw, 16px)" in block_1280, (
+        "@media (min-width: 1280px) .shell must use clamp(8px, 1vw, 16px) "
+        "for horizontal padding"
+    )
+    assert "clamp(16px, 2vw, 24px)" not in block_1280, (
+        "@media (min-width: 1280px) .shell must not use the wider "
+        "clamp(16px, 2vw, 24px) horizontal padding"
+    )
+
+
+def test_activity_compact_styles_present():
+    """The home page heatmap uses ``activity activity--compact`` — the
+    compact rule must cap width and height so the widget sits in roughly
+    the same vertical space as the stat row above it."""
+    import re
+
+    assert ".activity--compact" in CSS, ".activity--compact rule missing"
+    block = re.search(r"\.activity--compact\s*\{([^}]*)\}", CSS)
+    assert block is not None, ".activity--compact rule missing"
+    body = block.group(1)
+    assert "max-width" in body, ".activity--compact must cap max-width"
+    assert "max-height" in body, ".activity--compact must cap max-height"
+
+    # Compact-mode title styling must exist so the ``<h3>`` inside the
+    # widget is visually subdued vs the page-level ``<h2>`` headings.
+    assert ".activity-title" in CSS
+
+
 def test_css_no_overflow_x_scroll_or_hidden_on_layout_roots():
     """Regression test for sticky-positioning. ``.shell``, ``.main``,
     ``body``, ``html`` must not declare ``overflow-x: hidden|scroll``

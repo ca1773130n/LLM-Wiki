@@ -416,6 +416,50 @@ def test_render_home_includes_mobile_chrome(site_ctx: SiteContext) -> None:
     assert '<nav class="mobile-bottom-nav"' in out, "home must include the bottom nav"
 
 
+def test_render_home_orders_stats_then_activity_then_pulse(site_ctx: SiteContext) -> None:
+    """Home order is hero → stats → activity (compact) → pulse → browse.
+
+    Activity must sit immediately under the stat row (compact heatmap),
+    not at the bottom of the page where it used to live."""
+    out = render_home(site_ctx)
+    stats_idx = out.index('class="stats')
+    activity_idx = out.index("activity--compact")
+    browse_idx = out.index("entry-points-wrap")
+    assert stats_idx < activity_idx, (
+        "stats must come before activity heatmap"
+    )
+    assert activity_idx < browse_idx, (
+        "activity heatmap must come before the Browse entry points"
+    )
+    # Pulse cards are conditional (only when a pulse synthesis exists);
+    # when present, they must sit between activity and browse.
+    if "pulse-cards" in out:
+        pulse_idx = out.index("pulse-cards")
+        assert activity_idx < pulse_idx < browse_idx, (
+            "pulse cards must sit between activity and browse when present"
+        )
+
+
+def test_render_home_emits_toc_for_scrollspy(site_ctx: SiteContext) -> None:
+    """Home page must emit a populated right-rail TOC so the scrollspy
+    can highlight the current section while scrolling."""
+    out = render_home(site_ctx)
+    # The wrapper aside (toc-rail) must NOT be hidden — it must contain
+    # an inner ``aside class="toc"`` populated by ``components.toc``.
+    assert '<aside class="toc-rail" id="toc" hidden>' not in out, (
+        "home must populate the right-rail TOC, not emit it hidden"
+    )
+    assert '<aside class="toc"' in out, "home must include the inner TOC panel"
+    # Section ids the TOC points at.
+    for anchor in ("stats", "activity", "browse"):
+        assert f'data-toc-target="{anchor}"' in out, (
+            f"TOC must include data-toc-target for {anchor}"
+        )
+        assert f'id="{anchor}"' in out, (
+            f"home must stamp id={anchor!r} on its matching section"
+        )
+
+
 def test_render_timeline_renders_full_doc(site_ctx: SiteContext) -> None:
     out = render_timeline(site_ctx)
     _assert_doc_shape(out)

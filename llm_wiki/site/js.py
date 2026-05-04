@@ -3505,7 +3505,14 @@ JS_TOC_SCROLLSPY = r"""
       try { history.replaceState(null, '', href); } catch (_) {}
     });
     if (typeof IntersectionObserver === 'undefined') return;
-    var headings = document.querySelectorAll('.article-body h2[id], .article-body h3[id]');
+    // Detail pages stamp ids on ``<h2>``/``<h3>`` inside ``.article-body``;
+    // the home page (and other ``main--wide`` routes) stamp ids on
+    // top-level ``<section>`` blocks instead because they don't use the
+    // canonical article shell. Probe both — whichever set matches the
+    // TOC anchors gets observed by the spy.
+    var headings = document.querySelectorAll(
+      '.article-body h2[id], .article-body h3[id], .main > article > section[id], .main > section[id]'
+    );
     if (!headings.length) return;
     var activeAnchor = null;
     function setActive(anchor){

@@ -507,7 +507,10 @@ details[open] > .doc-tree-folder-summary::before { transform: rotate(90deg); }
 @media (min-width: 768px) {
   .shell {
     grid-template-columns: var(--rail-w) 1fr;
-    padding: var(--space-6) var(--space-5);
+    /* Tight horizontal padding so the left rail starts ~8-16 px from the
+       viewport edge regardless of screen width. Vertical padding stays
+       generous via ``--space-6``. */
+    padding: var(--space-6) clamp(8px, 1vw, 16px);
   }
   .rail {
     display: block;
@@ -961,6 +964,27 @@ details[open] > .doc-tree-folder-summary::before { transform: rotate(90deg); }
 .heatmap rect.day.l-2 { fill: color-mix(in srgb, var(--accent) 45%, var(--surface-2)); }
 .heatmap rect.day.l-3 { fill: color-mix(in srgb, var(--accent) 70%, var(--surface-2)); }
 .heatmap rect.day.l-4 { fill: var(--accent); }
+
+/* Compact activity heatmap (home page).
+   The full 26-week grid lives directly under the stat row on the home
+   page; capping width + height keeps it roughly the same vertical mass
+   as the 4-up stat boxes above it. The inner SVG already declares
+   ``width: 100%; height: auto`` so it scales down inside this box. */
+.activity--compact {
+  max-width: 720px;
+  max-height: 140px;
+  margin: 0 auto;
+}
+.activity--compact .heatmap {
+  width: 100%;
+  height: auto;
+  max-height: 120px;
+}
+.activity-title {
+  font-size: 14px;
+  font-weight: 600;
+  margin: 0 0 8px;
+}
 
 /* AI siblings footer
    ------------------------------------------------------------ */
@@ -2143,7 +2167,9 @@ body {
     max-width: var(--page-w);
     grid-template-columns: var(--rail-w) minmax(0, 1fr) var(--toc-w);
     gap: 24px;
-    padding: var(--space-6) clamp(16px, 2vw, 24px);
+    /* Keep the left rail tight against the viewport edge — same clamp
+       used at the 768 px breakpoint so desktop and mid widths agree. */
+    padding: var(--space-6) clamp(8px, 1vw, 16px);
   }
   .main {
     /* Detail pages cap at the prose-comfortable reading column. */

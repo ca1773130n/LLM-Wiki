@@ -1495,7 +1495,7 @@ def render_home(ctx: SiteContext) -> str:
         bullets = re.findall(r"^[\-\*]\s+(.+)$", pulse.body, flags=re.MULTILINE)[:3]
         if not bullets:
             bullets = [pulse.title]
-        pulse_cards = '<section class="pulse-cards cards" aria-label="What\'s new">' + "".join(
+        pulse_cards = '<section class="pulse-cards cards" id="pulse" aria-label="What\'s new">' + "".join(
             card(
                 title=b[:80],
                 href=f"syntheses/{pulse.slug}.html",
@@ -1505,7 +1505,7 @@ def render_home(ctx: SiteContext) -> str:
             for b in bullets
         ) + "</section>"
 
-    stat_row = f"""<section class="stats hero" aria-label="Corpus stats">
+    stat_row = f"""<section class="stats hero" id="stats" aria-label="Corpus stats">
   <div class="stat"><b>{counts.get('sources', 0)}</b><span>Sources</span></div>
   <div class="stat"><b>{counts.get('concepts', 0)}</b><span>Concepts</span></div>
   <div class="stat"><b>{counts.get('papers', 0)}</b><span>Papers</span></div>
@@ -1541,20 +1541,33 @@ def render_home(ctx: SiteContext) -> str:
     except TypeError:
         heatmap = heatmap_svg(home_weeks_grid)
 
+    # Home-page TOC entries — section ids are stamped on each <section>
+    # below so JS_TOC_SCROLLSPY can light up the active row as the user
+    # scrolls. The hero (title + tagline) stays out of the TOC; it's
+    # always at the top and naming it adds noise without value.
+    home_toc_entries: list[tuple[int, str, str]] = [
+        (2, "Stats", "stats"),
+        (2, "Activity", "activity"),
+    ]
+    if pulse_cards:
+        home_toc_entries.append((2, "What's new", "pulse"))
+    home_toc_entries.append((2, "Browse", "browse"))
+    home_toc_html = toc(home_toc_entries)
+
     body = f"""<section class="hero" aria-label="Project pulse">
   <p class="eyebrow">{_esc(ctx.site_title)} · self-indexing knowledge base</p>
   <h1>{_esc(ctx.site_title)}</h1>
   <p class="lead">{_esc(tagline)}</p>
 </section>
 {stat_row}
+<section class="activity activity--compact" id="activity" aria-label="Activity heatmap">
+  <h3 class="activity-title">26-week activity</h3>
+  {heatmap}
+</section>
 {pulse_cards}
-<section class="entry-points-wrap">
+<section class="entry-points-wrap" id="browse">
   <h2>Browse</h2>
   {entry_points}
-</section>
-<section class="activity hero" aria-label="Activity heatmap">
-  <h2>26-week activity</h2>
-  {heatmap}
 </section>"""
     return page_shell(
         title="Home",
@@ -1566,6 +1579,7 @@ def render_home(ctx: SiteContext) -> str:
         counts=counts,
         main_variant="wide",
         doc_tree_html=_doc_tree_for(ctx, depth=0),
+        toc_html=home_toc_html,
     )
 
 
