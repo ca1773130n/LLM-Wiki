@@ -472,6 +472,50 @@ def test_shell_horizontal_padding_is_tight_at_desktop():
     )
 
 
+def test_article_body_tables_have_visible_borders_and_padding():
+    """Markdown tables on content pages render inside ``.article-body``
+    (paper / source / concept detail pages) and ``.markdown-body`` (raw
+    pages). Both wrappers must carry an explicit table-border CSS block
+    so cells aren't presented as plain unframed text."""
+    import re
+
+    # Both selectors must appear in the table block.
+    assert ".article-body table" in CSS, "missing .article-body table selector"
+    assert ".markdown-body table" in CSS, "missing .markdown-body table selector"
+
+    # Locate the combined ``.article-body table, .markdown-body table {...}``
+    # block and confirm it sets a ``border:`` and ``border-collapse``.
+    table_block = re.search(
+        r"\.article-body table,\s*\.markdown-body table\s*\{([^}]*)\}", CSS
+    )
+    assert table_block is not None, "combined table selector block missing"
+    tbody = table_block.group(1)
+    assert "border:" in tbody, "table-level border missing"
+    assert "border-collapse" in tbody
+
+    # Cell rule: th/td must have border + padding.
+    cell_block = re.search(
+        r"\.article-body table th,\s*\.article-body table td,\s*"
+        r"\.markdown-body table th,\s*\.markdown-body table td\s*\{([^}]*)\}",
+        CSS,
+    )
+    assert cell_block is not None, "th/td cell rule missing"
+    cbody = cell_block.group(1)
+    assert "border:" in cbody, "th/td border missing"
+    assert "padding:" in cbody, "th/td padding missing"
+
+    # Header rule: must shade the th with a non-transparent token.
+    th_block = re.search(
+        r"\.article-body table th,\s*\.markdown-body table th\s*\{([^}]*)\}", CSS
+    )
+    assert th_block is not None, "th header rule missing"
+    th_body = th_block.group(1)
+    assert "background:" in th_body, "th must declare a background"
+    # Token-driven (var(--surface-2) / var(--surface)), not transparent.
+    assert "var(--surface" in th_body, "th background should use a surface token"
+    assert "transparent" not in th_body
+
+
 def test_activity_compact_styles_present():
     """The home page heatmap uses ``activity activity--compact`` — the
     compact rule must cap width and height so the widget sits in roughly

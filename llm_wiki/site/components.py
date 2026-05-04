@@ -336,6 +336,7 @@ def heatmap_svg(
     with_labels: bool = True,
     start_date: _date | None = None,
     day_href_prefix: str = "",
+    cell_size: int = 12,
 ) -> str:
     """Render the activity heatmap (GitHub-style 7-row grid).
 
@@ -345,10 +346,20 @@ def heatmap_svg(
 
     When ``with_labels`` is ``True`` (default) the SVG renders:
       - Month-name labels along the top, one per first-week-of-month
-        transition.
+        transition. The first label and any January transition include a
+        2-digit year suffix (e.g. ``Nov '25``) so 26-week windows that
+        cross a calendar boundary are unambiguous.
       - Weekday labels (Mon, Wed, Fri) on the left edge, mimicking GitHub.
 
     Pass ``with_labels=False`` for tight contexts (sparkline-sized).
+
+    ``cell_size`` controls the on-canvas size of each day cell (default
+    ``12``); the inter-cell gap and viewBox dimensions scale with it so
+    callers can request a compact rendering (e.g. ``cell_size=8``) without
+    the SVG getting stretched to fit a parent container. When
+    ``cell_size <= 8`` the renderer omits the ``style="width:100%"``
+    attribute so the SVG sticks to its intrinsic width — the surrounding
+    wrapper (``.activity--compact``) caps the upper bound.
 
     When ``start_date`` is provided the renderer stamps each cell with a
     ``data-day-click="YYYY-MM-DD"`` attribute (computed from the cell's
@@ -360,23 +371,28 @@ def heatmap_svg(
     or leave empty for site-root pages. ``start_date`` should be the Monday
     of the first week-column.
     """
-    cell = 12
-    gap = 2
+    cell = max(4, int(cell_size))
+    gap = max(1, cell // 6)
+    compact = cell <= 8
     cols = (weeks or [])[-weeks_back:]
 
-    # Reserved gutters for labels (kept stable across the with_labels switch
-    # so the SVG always uses a 420×130 viewBox per the design spec).
-    left_gutter = 28 if with_labels else 0
-    top_gutter = 16 if with_labels else 0
+    # Reserved gutters for labels — scale with cell size so the labels keep
+    # roughly their relative breathing room. The grid extents drive the
+    # viewBox so a compact ``cell_size`` produces a genuinely smaller SVG.
+    left_gutter = max(20, cell * 2 + 4) if with_labels else 0
+    top_gutter = max(12, cell + 4) if with_labels else 0
     grid_w = max(weeks_back, 1) * (cell + gap) + gap
     grid_h = 7 * (cell + gap) + gap
 
     if with_labels:
-        view_w, view_h = 420, 130
+        view_w = left_gutter + grid_w + 4
+        view_h = top_gutter + grid_h + 4
     else:
         view_w, view_h = grid_w, grid_h
 
     label_attrs = ' class="heatmap-label"'
+
+    fluid_style = '' if compact else 'style="width:100%;height:auto" '
 
     if not cols:
         empty_labels = ""
@@ -387,7 +403,7 @@ def heatmap_svg(
         return (
             f'<svg class="heatmap" viewBox="0 0 {view_w} {view_h}" '
             f'preserveAspectRatio="xMidYMid meet" '
-            f'style="width:100%;height:auto" '
+            f'{fluid_style}'
             f'aria-hidden="true" focusable="false">'
             f'<title>No activity yet</title>'
             f"{empty_labels}"
@@ -415,13 +431,30 @@ def heatmap_svg(
     cells: list[str] = []
     month_label_cols: list[tuple[int, str]] = []
     last_month: int | None = None
+    last_year: int | None = None
     for col_idx, week in enumerate(cols):
         # Track first-week-of-month transitions for the top labels.
         if start_date is not None and with_labels:
             col_first_day = start_date + _timedelta(days=col_idx * 7)
             if last_month is None or col_first_day.month != last_month:
-                month_label_cols.append((col_idx, _MONTH_NAMES[col_first_day.month - 1]))
+                name = _MONTH_NAMES[col_first_day.month - 1]
+                # Year suffix on:
+                #   * the very first month label (so the start year is
+                #     unambiguous), AND
+                #   * any January transition (so callers know the year
+                #     just rolled over).
+                # We use the 2-digit ``'YY`` form so the label stays
+                # compact next to the cell column.
+                add_year = (
+                    last_month is None
+                    or col_first_day.month == 1
+                    or (last_year is not None and col_first_day.year != last_year)
+                )
+                if add_year:
+                    name = f"{name} '{col_first_day.year % 100:02d}"
+                month_label_cols.append((col_idx, name))
                 last_month = col_first_day.month
+                last_year = col_first_day.year
         for row_idx in range(7):
             v = week[row_idx] if row_idx < len(week) else 0
             level = _level(v)
@@ -488,7 +521,7 @@ def heatmap_svg(
     return (
         f'<svg class="heatmap"{xlink_ns} viewBox="0 0 {view_w} {view_h}" '
         f'preserveAspectRatio="xMidYMid meet" '
-        f'style="width:100%;height:auto" '
+        f'{fluid_style}'
         f'aria-hidden="true" focusable="false">'
         f'<title>Activity heatmap, last {len(cols)} weeks</title>'
         + label_svg

@@ -968,17 +968,20 @@ details[open] > .doc-tree-folder-summary::before { transform: rotate(90deg); }
 /* Compact activity heatmap (home page).
    The full 26-week grid lives directly under the stat row on the home
    page; capping width + height keeps it roughly the same vertical mass
-   as the 4-up stat boxes above it. The inner SVG already declares
-   ``width: 100%; height: auto`` so it scales down inside this box. */
+   as the 4-up stat boxes above it. The compact heatmap SVG omits its
+   ``width:100%`` style so the intrinsic ~280×90 viewBox is honoured —
+   we only cap the upper bound here so the widget never overflows on
+   narrow viewports. */
 .activity--compact {
-  max-width: 720px;
-  max-height: 140px;
+  max-width: 320px;
+  max-height: 110px;
   margin: 0 auto;
 }
 .activity--compact .heatmap {
-  width: 100%;
+  width: auto;
   height: auto;
-  max-height: 120px;
+  max-width: 100%;
+  max-height: 100px;
 }
 .activity-title {
   font-size: 14px;
@@ -1664,13 +1667,45 @@ section.panel > h3,
 }
 
 /* Markdown-rendered tables get a horizontal scroll affordance on narrow
-   viewports without needing the renderer to wrap each one. */
+   viewports without needing the renderer to wrap each one. We style
+   both the article wrappers (``.article-body`` for paper / source /
+   concept detail pages) and the legacy ``.markdown-body`` so the cells
+   actually have visible borders + padding — not just rows of plain text. */
+.article-body table,
 .markdown-body table {
   display: block;
   max-width: 100%;
   overflow-x: auto;
   -webkit-overflow-scrolling: touch;
   border-collapse: collapse;
+  margin: var(--space-3) 0;
+  font-family: var(--type-sans);
+  font-size: .92rem;
+  border: 1px solid var(--rule);
+}
+.article-body table th,
+.article-body table td,
+.markdown-body table th,
+.markdown-body table td {
+  border: 1px solid var(--rule);
+  padding: 8px 12px;
+  text-align: left;
+  vertical-align: top;
+  line-height: 1.5;
+}
+.article-body table th,
+.markdown-body table th {
+  background: var(--surface-2);
+  font-weight: 600;
+  color: var(--ink);
+}
+.article-body table tbody tr:nth-child(even),
+.markdown-body table tbody tr:nth-child(even) {
+  background: color-mix(in srgb, var(--surface-2) 50%, transparent);
+}
+.article-body table code,
+.markdown-body table code {
+  font-size: .85rem;
 }
 
 /* ============================================================

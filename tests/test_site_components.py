@@ -221,8 +221,15 @@ def test_heatmap_renders_month_and_weekday_labels():
 
     weeks = [[1] * 7] * 26
     out = heatmap_svg(weeks, weeks_back=26, start_date=date(2026, 1, 5))
-    # Default viewBox bumps to 420x130 to make space for labels.
-    assert 'viewBox="0 0 420 130"' in out
+    # Default ``cell_size=12`` produces a viewBox roughly 4 hundred wide
+    # by ~120 tall once gutters + grid extents are summed; we don't pin
+    # the exact value (it's now derived from cell_size) but it MUST be
+    # in that ballpark so labels have room.
+    vb = re.search(r'viewBox="0 0 (\d+) (\d+)"', out)
+    assert vb is not None
+    vw, vh = int(vb.group(1)), int(vb.group(2))
+    assert 380 <= vw <= 460, f"default viewBox width out of range: {vw}"
+    assert 110 <= vh <= 150, f"default viewBox height out of range: {vh}"
     # Weekday labels on the left.
     assert "<text" in out
     assert ">Mon<" in out
@@ -259,6 +266,60 @@ def test_heatmap_without_start_date_uses_generic_month_labels():
     assert "<text" in out
     # Generic placeholder labels.
     assert ">now<" in out
+
+
+def test_heatmap_svg_supports_cell_size_parameter():
+    """Compact callers (home page) pass ``cell_size=8`` to shrink the
+    intrinsic SVG dimensions.  The default ``cell_size=12`` produces a
+    noticeably wider viewBox; the smaller cell size must produce a
+    noticeably smaller one."""
+    weeks = [[1] * 7] * 26
+
+    big = heatmap_svg(weeks, weeks_back=26, with_labels=True)
+    small = heatmap_svg(weeks, weeks_back=26, with_labels=True, cell_size=8)
+
+    big_match = re.search(r'viewBox="0 0 (\d+) (\d+)"', big)
+    small_match = re.search(r'viewBox="0 0 (\d+) (\d+)"', small)
+    assert big_match is not None and small_match is not None
+
+    big_w = int(big_match.group(1))
+    small_w = int(small_match.group(1))
+    # Compact mode must be meaningfully smaller, not equal/rounding noise.
+    assert small_w < big_w - 50, (
+        f"compact heatmap viewBox width {small_w} not <  default {big_w} - 50"
+    )
+
+    # Compact SVG drops the fluid ``style="width:100%"`` attr so the
+    # wrapper enforces the size cap rather than the SVG stretching to
+    # fill its parent.
+    assert 'style="width:100%' not in small
+    assert 'style="width:100%' in big
+
+
+def test_heatmap_svg_renders_year_on_january_or_first_label():
+    """A 26-week window beginning ``2025-11-03`` (Monday) crosses into
+    2026 by the Jan transition.  The first month label MUST carry a
+    year suffix (so callers know which year they're looking at) and the
+    rendered SVG MUST contain a year token (``'25`` or ``'26``)."""
+    from datetime import date
+
+    weeks = [[1] * 7] * 26
+    out = heatmap_svg(
+        weeks,
+        weeks_back=26,
+        with_labels=True,
+        start_date=date(2025, 11, 3),
+    )
+    # The very first month label must include a year suffix — 2-digit
+    # form (``Nov '25``) is the agreed compact rendering.
+    assert ">Nov &#x27;25<" in out or ">Nov '25<" in out, (
+        "first month label must include 2-digit year suffix"
+    )
+    # And SOME flavour of the boundary year (``'25``, ``'26``, ``2025``,
+    # ``2026``) must appear in the SVG so the user can disambiguate.
+    assert any(
+        token in out for token in ("'25", "'26", "&#x27;25", "&#x27;26", "2025", "2026")
+    )
 
 
 # ---------------------------------------------------------------------------

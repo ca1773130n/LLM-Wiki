@@ -1537,9 +1537,21 @@ def render_home(ctx: SiteContext) -> str:
             with_labels=True,
             start_date=home_start_date,
             day_href_prefix="",
+            cell_size=8,
         )
     except TypeError:
-        heatmap = heatmap_svg(home_weeks_grid)
+        # Older signatures may not accept ``cell_size`` — fall back without
+        # it, then to the bare-positional form as a last resort.
+        try:
+            heatmap = heatmap_svg(
+                home_weeks_grid,
+                weeks_back=26,
+                with_labels=True,
+                start_date=home_start_date,
+                day_href_prefix="",
+            )
+        except TypeError:
+            heatmap = heatmap_svg(home_weeks_grid)
 
     # Home-page TOC entries — section ids are stamped on each <section>
     # below so JS_TOC_SCROLLSPY can light up the active row as the user
