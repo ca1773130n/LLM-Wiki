@@ -878,11 +878,21 @@ JS_GRAPH = r"""
       return 0.18 + t * 0.82;
     }
 
-    // Issue 2 — the bottom-right ``#graph-info-panel`` overlay (with its
-    // empty/content/neighbors children) is GONE. The cursor-following
-    // ``#graph-tooltip`` below replaces it for hover preview; the focused
-    // node's label sprite carries the focus details inline.
-    var tooltip      = document.getElementById('graph-tooltip');
+    // F-5 — restore the floating focus-detail panel (NOT the right-rail
+    // info panel — a small bottom-right overlay inside the canvas
+    // wrapper). Tooltip handles hover preview; this panel pins the
+    // currently-focused node's full details (title, type, degree,
+    // description, Open page link) so the user has somewhere to read
+    // them without leaving focus mode. References resolve lazily — the
+    // page may not have a focus panel yet on older builds; treat it as
+    // optional throughout.
+    var tooltip       = document.getElementById('graph-tooltip');
+    var focusPanel    = document.getElementById('graph-focus-panel');
+    var focusPanelTitle    = document.getElementById('graph-focus-panel-title');
+    var focusPanelMeta     = document.getElementById('graph-focus-panel-meta');
+    var focusPanelDesc     = document.getElementById('graph-focus-panel-desc');
+    var focusPanelOpen     = document.getElementById('graph-focus-panel-open');
+    var focusPanelNeighbors= document.getElementById('graph-focus-panel-neighbors');
     var legendEl     = document.getElementById('graph-legend');
     var searchEl     = document.getElementById('graph-search-input');
     var banner       = document.getElementById('graph-error-banner');
@@ -897,18 +907,29 @@ JS_GRAPH = r"""
     var reduceMotion = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
 
     var typeCounts = {};
-    payload.nodes.forEach(function(n){
-      var g = n.group || 'other';
-      typeCounts[g] = (typeCounts[g] || 0) + 1;
-    });
     var hiddenGroups = new Set();
-    if (legendEl) {
+    // F-2 — legend chips render against ``payload.nodes``. The two-stage
+    // payload path means ``startGraph`` first runs against payload-core
+    // (~80 nodes, often missing whole groups like ``repos``) and then
+    // ``__graphMergeRestPayload`` appends the remaining ~328 nodes. We
+    // therefore rebuild the legend from whatever ``payload.nodes``
+    // currently holds and re-call this function after the rest merge so
+    // counts reflect the union, not just the core. Hidden-group state
+    // is preserved across rebuilds via the ``hiddenGroups`` set.
+    function rebuildLegend(){
+      if (!legendEl) return;
+      typeCounts = {};
+      payload.nodes.forEach(function(n){
+        var g = n.group || 'other';
+        typeCounts[g] = (typeCounts[g] || 0) + 1;
+      });
       while (legendEl.firstChild) legendEl.removeChild(legendEl.firstChild);
       Object.keys(typeCounts).sort().forEach(function(group){
         var chip = document.createElement('button');
         chip.type = 'button';
         chip.className = 'graph-legend-chip';
         chip.dataset.group = group;
+        if (hiddenGroups.has(group)) chip.classList.add('is-off');
         var dot = document.createElement('span');
         dot.className = 'graph-legend-dot';
         dot.style.background = GROUP_COLORS[group] || GROUP_COLORS.other;
@@ -928,6 +949,7 @@ JS_GRAPH = r"""
         legendEl.appendChild(chip);
       });
     }
+    rebuildLegend();
 
     var highlightNodes = new Set();
     var highlightLinks = new Set();
@@ -948,6 +970,13 @@ JS_GRAPH = r"""
     // on every hover / drag / resize as the simulation re-cools — must be
     // ignored, otherwise the camera flies around uninvited.
     var hasInitialFit = false;
+    // F-1 — set to ``true`` the moment the user does anything that should
+    // claim camera control: click a node, drag the canvas, scroll/zoom,
+    // type into search, or hit a focusing keyboard shortcut. The rest-
+    // payload merge re-fits the camera ONLY when this flag is still
+    // false, so a click that lands before the rest payload arrives is
+    // not stolen back by a delayed auto-fit.
+    var userInteracted = false;
     // ----------------------------------------------------------------
     // Focus + auto-orbit state (cinematic camera around clicked node).
     //   focusedNode      — the currently selected sphere (or null).
@@ -962,6 +991,14 @@ JS_GRAPH = r"""
     var orbitAngle = 0;
     var orbitRadius = 220;
     var lastTickMs = 0;
+    // F-3 — orbit + look-at target. Initialized to the focused node's
+    // own world position by default; ``focusOnNode`` overwrites it with
+    // the cluster centroid (the focused node + 1-hop neighbours) so the
+    // auto-orbit tick frames the same neighbourhood the initial fly-to
+    // framed. Without this the cameraPosition tween targets the centroid
+    // but the next onEngineTick fires and snaps controls.target to the
+    // focused node's own coordinates instead — the camera fights itself.
+    var orbitTarget = { x: 0, y: 0, z: 0 };
     // Marks node.__focused so nodeThreeObject can pick the focused
     // label sprite vs. the base sprite. Updated on every focus change.
     function markFocused(node){
@@ -988,18 +1025,72 @@ JS_GRAPH = r"""
       return (n && n.color) || GROUP_COLORS[(n && n.group) || 'other'] || GROUP_COLORS.other;
     }
 
-    // Issue 2 — the bottom-right info-panel write functions are GONE.
-    // Hover preview lives in the cursor-following ``#graph-tooltip``;
-    // focused-node details live in the focused label sprite (Issue 3 —
-    // the visible ``[Enter] Open page`` hint that used to render under
-    // the title is dropped; pressing Enter still navigates).
-    // The functions kept below are the only DOM mutations we still do
-    // per interaction.
+    // F-5 — populate / clear the floating focus-detail panel. Called
+    // from every focus-set / focus-clear path so the panel mirrors
+    // ``focusedNode`` exactly. The panel hides itself via the ``hidden``
+    // attribute (and CSS ``display: none`` rule) when ``node`` is null.
+    function populateFocusPanel(node){
+      if (!focusPanel) return;
+      if (!node) {
+        focusPanel.hidden = true;
+        return;
+      }
+      focusPanel.hidden = false;
+      if (focusPanelTitle) focusPanelTitle.textContent = node.name || node.id || '';
+      if (focusPanelMeta) {
+        var kind = node.group || node.kind || '';
+        focusPanelMeta.textContent = (kind ? kind + ' · ' : '') + 'degree ' + (node.degree || 0);
+      }
+      if (focusPanelDesc) {
+        var desc = String(node.description || '').trim();
+        focusPanelDesc.textContent = desc;
+        focusPanelDesc.hidden = !desc;
+      }
+      if (focusPanelOpen) {
+        if (node.href) {
+          focusPanelOpen.setAttribute('href', node.href);
+          focusPanelOpen.hidden = false;
+        } else {
+          focusPanelOpen.removeAttribute('href');
+          focusPanelOpen.hidden = true;
+        }
+      }
+      if (focusPanelNeighbors) {
+        // Show up to 5 neighbour names (sorted by degree desc) so the
+        // user can see what the focused node is connected to.
+        while (focusPanelNeighbors.firstChild) focusPanelNeighbors.removeChild(focusPanelNeighbors.firstChild);
+        if (node.neighbors && node.neighbors.size > 0) {
+          var arr = [];
+          node.neighbors.forEach(function(nb){ arr.push(nb); });
+          arr.sort(function(a, b){ return (b.degree || 0) - (a.degree || 0); });
+          var top = arr.slice(0, 5);
+          var lbl = document.createElement('span');
+          lbl.textContent = 'neighbours: ';
+          focusPanelNeighbors.appendChild(lbl);
+          top.forEach(function(nb, idx){
+            if (idx > 0) {
+              var sep = document.createTextNode(', ');
+              focusPanelNeighbors.appendChild(sep);
+            }
+            var name = document.createElement('span');
+            name.textContent = nb.name || nb.id || '';
+            focusPanelNeighbors.appendChild(name);
+          });
+          if (node.neighbors.size > top.length) {
+            var more = document.createElement('span');
+            more.textContent = ' (+' + (node.neighbors.size - top.length) + ' more)';
+            more.style.opacity = '0.6';
+            focusPanelNeighbors.appendChild(more);
+          }
+        }
+      }
+    }
+
     function clearInfoPanel(){
-      // Kept as a no-op for the call sites that still invoke it (Esc key,
-      // background click, reset button) — every focus-clear path used to
-      // call this and we want the call sites to keep reading naturally.
+      // F-5 — hide the floating focus-detail panel; the cursor tooltip is
+      // a separate concern (mouse hover) and is also hidden defensively.
       hideTooltip();
+      populateFocusPanel(null);
     }
 
     // Cursor-following tooltip (Issue 2). The DOM mutation per frame is
@@ -1139,11 +1230,23 @@ JS_GRAPH = r"""
     }
 
     function isDimmedNode(node){
-      return hasFocusFilter() && !highlightNodes.has(node);
+      // F-8 — non-matching search results are also "dimmed" so the
+      // accessor-driven node/linkColor pipeline drops them to the
+      // de-emphasised palette without making them disappear.
+      if (hasFocusFilter() && !highlightNodes.has(node)) return true;
+      if (searchQuery && !matchesSearch(node)) return true;
+      return false;
     }
 
     function isDimmedLink(link){
-      return hasFocusFilter() && !highlightLinks.has(link);
+      if (hasFocusFilter() && !highlightLinks.has(link)) return true;
+      if (searchQuery) {
+        // A link is dimmed by search when neither endpoint matches.
+        var s = typeof link.source === 'object' ? link.source : byId.get(link.source);
+        var t = typeof link.target === 'object' ? link.target : byId.get(link.target);
+        if (!matchesSearch(s) && !matchesSearch(t)) return true;
+      }
+      return false;
     }
 
     // Issue 2 — true when the link is incident to the currently-hovered
@@ -1192,15 +1295,34 @@ JS_GRAPH = r"""
     }
 
     function isVisible(node){
+      // F-8 — visibility is now a HARD filter only. Type-chip toggles and
+      // the day-filter literally hide non-matching nodes; they're meant
+      // to remove categories from view. The search query no longer
+      // contributes here — it drives a SOFT dim through ``matchesSearch``
+      // / ``isDimmedNode`` instead, so non-matching nodes stay clickable
+      // and the user can still see their context.
       if (!node) return false;
       var g = node.group || 'other';
       if (hiddenGroups.has(g)) return false;
-      if (searchQuery && !(node.name || '').toLowerCase().includes(searchQuery)) return false;
       if (dayFilter) {
         var created = node.metadata && node.metadata.created;
         if (!created || String(created).slice(0, 10) !== dayFilter) return false;
       }
       return true;
+    }
+
+    // F-8 — search now soft-dims non-matching nodes instead of hiding
+    // them. Returns ``true`` when a node matches the active search query
+    // (or when the search box is empty — every node matches the empty
+    // query). Used by the dim path inside refreshOpacityTargets +
+    // node/linkColor accessors so non-matching nodes drop to ~0.05
+    // opacity but stay in the canvas (still rendered, still clickable).
+    function matchesSearch(node){
+      if (!searchQuery) return true;
+      if (!node) return false;
+      var name = String(node.name || '').toLowerCase();
+      var id = String(node.id || '').toLowerCase();
+      return name.indexOf(searchQuery) !== -1 || id.indexOf(searchQuery) !== -1;
     }
 
     function refreshVisibility(){
@@ -1211,6 +1333,12 @@ JS_GRAPH = r"""
         var t = typeof l.target === 'object' ? l.target : byId.get(l.target);
         return isVisible(s) && isVisible(t);
       }); } catch (_) {}
+      // F-8 — re-poke color accessors so the search-driven dim picks up
+      // any change to ``searchQuery`` without waiting for a hover/click.
+      try {
+        if (Graph.nodeColor) Graph.nodeColor(Graph.nodeColor());
+        if (Graph.linkColor) Graph.linkColor(Graph.linkColor());
+      } catch (_) {}
     }
 
     // ---- 2D fallback (SVG) for when force-graph never loads --------------
@@ -1650,6 +1778,9 @@ JS_GRAPH = r"""
       canvas.addEventListener('wheel', function(event){
         event.preventDefault();
         event.stopPropagation();
+        // F-1 — wheel zoom counts as user interaction; suppress the
+        // post-rest-merge auto-fit so it doesn't steal the camera back.
+        userInteracted = true;
 
         var rect = canvas.getBoundingClientRect();
         ndc.set(
@@ -1908,16 +2039,22 @@ JS_GRAPH = r"""
         .linkDirectionalParticleWidth(0.6)
         .linkDirectionalParticleSpeed(0.005)
         .onNodeHover(function(node){
-          // When a node is selected (pinned/focused), HOVER MODE IS OFF.
-          // The focused node's own neighborhood is already highlighted —
-          // overlaying a fresh hover highlight on top would compete with
-          // it. The user explicitly said hover is only for the
-          // "nothing-selected" state. We still keep the cursor pointer
-          // so the click affordance is visible.
+          // F-4 — when a node is FOCUSED/pinned, hover-driven highlight
+          // and dimming stays OFF (the focused neighbourhood is already
+          // lit and re-lighting would compete with it). BUT the cursor
+          // tooltip still shows on hover so the user can read the
+          // names/types/degrees of any other node — including non-
+          // incident ones — without first having to deselect. Without
+          // this, the user is stuck inspecting only what they've
+          // already clicked, with no exit ramp.
           if (focusedNode || pinnedNode || pinnedLink) {
             hoverNode = null;
             container.style.cursor = node && !isDimmedNode(node) ? 'pointer' : 'default';
-            hideTooltip();
+            if (node && !isDimmedNode(node)) {
+              showNodeTooltip(node, lastMouseX, lastMouseY);
+            } else {
+              hideTooltip();
+            }
             return;
           }
           hoverNode = node || null;
@@ -1977,12 +2114,14 @@ JS_GRAPH = r"""
       } catch (_) {}
 
       try { if (inst.nodeOpacity) inst.nodeOpacity(0.95); } catch (_) {}
-      // Issue 4 — keep base edge opacity at 0.35 so non-incident edges
-      // read as faint background structure. Incident edges get an opacity
-      // bump via the ``linkColor`` accessor (it returns EDGE_COLOR_HOT at
-      // alpha 1.0 for focus highlights, EDGE_COLOR_LIGHT at 0.34 baseline,
-      // and a brighter 0.85 alpha when the link is hover-incident).
-      try { if (inst.linkOpacity) inst.linkOpacity(0.35); } catch (_) {}
+      // F-6 — edge alpha is encoded entirely in the rgba strings
+      // (EDGE_COLOR_LIGHT is rgba(255,255,255,0.5); EDGE_COLOR_HOT is
+      // rgba(250,204,21,0.5); EDGE_COLOR_DIM is rgba(255,255,255,0.05)).
+      // ``linkOpacity`` is a scalar multiplier on the per-link material —
+      // setting it to anything below 1.0 multiplies the rgba alpha and
+      // washes the edges out far below the documented spec. We pin it to
+      // 1.0 here so the visible alpha matches what the rgba string says.
+      try { if (inst.linkOpacity) inst.linkOpacity(1.0); } catch (_) {}
       // ``nodeOpacity`` / ``linkOpacity`` accept ONLY a scalar number in
       // 3d-force-graph (verified empirically — passing a function silently
       // corrupts the material opacity to NaN, which renders every node
@@ -2300,24 +2439,32 @@ JS_GRAPH = r"""
             var epillX = midX - epillW / 2;
             var epillY = midY - epillH / 2;
             var epillR = 4 / globalScale;
-            var epillAlpha = (VARIANT_PILL_ALPHA.edge || 0.5);
-            // Issue 1 — same pill rules as node labels: black 0.5 on dark,
-            // white 0.85 on light. NO accent border. NO color stroke.
-            ctx.fillStyle = (theme === 'light')
-              ? 'rgba(255,255,255,0.85)'
-              : 'rgba(0,0,0,' + epillAlpha + ')';
-            ctx.beginPath();
-            ctx.moveTo(epillX + epillR, epillY);
-            ctx.lineTo(epillX + epillW - epillR, epillY);
-            ctx.quadraticCurveTo(epillX + epillW, epillY, epillX + epillW, epillY + epillR);
-            ctx.lineTo(epillX + epillW, epillY + epillH - epillR);
-            ctx.quadraticCurveTo(epillX + epillW, epillY + epillH, epillX + epillW - epillR, epillY + epillH);
-            ctx.lineTo(epillX + epillR, epillY + epillH);
-            ctx.quadraticCurveTo(epillX, epillY + epillH, epillX, epillY + epillH - epillR);
-            ctx.lineTo(epillX, epillY + epillR);
-            ctx.quadraticCurveTo(epillX, epillY, epillX + epillR, epillY);
-            ctx.closePath();
-            ctx.fill();
+            // F-7 — VARIANT_PILL_ALPHA.edge is 0 by spec (edge labels are
+            // text-only, no backing pill). Earlier code used
+            // ``(VARIANT_PILL_ALPHA.edge || 0.5)`` which fell back to 0.5
+            // because JS treats 0 as falsy — so the 2D path drew a pill.
+            // Use a strict numeric check that matches the 3D ``makeLabel``
+            // logic, then skip the pill draw entirely when the alpha is 0.
+            var epillAlpha = (typeof VARIANT_PILL_ALPHA.edge === 'number') ? VARIANT_PILL_ALPHA.edge : 0.5;
+            if (epillAlpha > 0) {
+              // Issue 1 — same pill rules as node labels: black 0.5 on dark,
+              // white 0.85 on light. NO accent border. NO color stroke.
+              ctx.fillStyle = (theme === 'light')
+                ? 'rgba(255,255,255,0.85)'
+                : 'rgba(0,0,0,' + epillAlpha + ')';
+              ctx.beginPath();
+              ctx.moveTo(epillX + epillR, epillY);
+              ctx.lineTo(epillX + epillW - epillR, epillY);
+              ctx.quadraticCurveTo(epillX + epillW, epillY, epillX + epillW, epillY + epillR);
+              ctx.lineTo(epillX + epillW, epillY + epillH - epillR);
+              ctx.quadraticCurveTo(epillX + epillW, epillY + epillH, epillX + epillW - epillR, epillY + epillH);
+              ctx.lineTo(epillX + epillR, epillY + epillH);
+              ctx.quadraticCurveTo(epillX, epillY + epillH, epillX, epillY + epillH - epillR);
+              ctx.lineTo(epillX, epillY + epillR);
+              ctx.quadraticCurveTo(epillX, epillY, epillX + epillR, epillY);
+              ctx.closePath();
+              ctx.fill();
+            }
             // Issue 1 — pure white text on dark, pure dark on light.
             ctx.fillStyle = (theme === 'light')
               ? 'rgb(20, 20, 20)'
@@ -2377,14 +2524,19 @@ JS_GRAPH = r"""
             var dt = lastTickMs ? Math.min(0.1, (now - lastTickMs) / 1000) : 0.016;
             lastTickMs = now;
             orbitAngle += 0.2 * dt;  // ~0.2 rad/s, ~1 full revolution every 31s
-            var nx = focusedNode.x || 0;
-            var ny = focusedNode.y || 0;
-            var nz = focusedNode.z || 0;
-            var camX = nx + Math.sin(orbitAngle) * orbitRadius;
-            var camZ = nz + Math.cos(orbitAngle) * orbitRadius;
+            // F-3 — orbit AROUND the cluster centroid (orbitTarget) and
+            // look AT the same centroid. The previous code used
+            // focusedNode.x/y/z here, which fought the cluster-centroid
+            // framing inside focusOnNode and the deferred controls.target
+            // snap. They now all agree on orbitTarget.
+            var tx = orbitTarget.x || 0;
+            var ty = orbitTarget.y || 0;
+            var tz = orbitTarget.z || 0;
+            var camX = tx + Math.sin(orbitAngle) * orbitRadius;
+            var camZ = tz + Math.cos(orbitAngle) * orbitRadius;
             try {
               if (inst.cameraPosition) {
-                inst.cameraPosition({ x: camX, y: ny, z: camZ }, { x: nx, y: ny, z: nz }, 0);
+                inst.cameraPosition({ x: camX, y: ty, z: camZ }, { x: tx, y: ty, z: tz }, 0);
               }
             } catch (_) {}
           });
@@ -2401,9 +2553,104 @@ JS_GRAPH = r"""
           _controls.addEventListener('start', function(){
             autoOrbitEnabled = false;
             lastTickMs = 0;
+            // F-1 — manual orbit/pan/zoom counts as taking camera control.
+            userInteracted = true;
             // Issue 6 — manual mouse-drag (orbit/pan) interrupts auto-browse.
             if (autoBrowseActive) stopAutoBrowse();
           });
+        }
+      } catch (_) {}
+
+      // F-9 — touch devices never fire ``onNodeHover`` (no mouse), so
+      // the user has no way to preview a node before committing to it.
+      // We intercept touch-pointer down events on the canvas and split
+      // the gesture in two:
+      //   1st tap on node X (when nothing is pinned/focused): treat as
+      //      hover — set hoverNode, applyHighlight, show tooltip.
+      //   2nd tap on the same node: treat as click — let the normal
+      //      onNodeClick path run (which calls activateNode → focus).
+      //   Tap on background: unfocus + clear hover, mirroring the
+      //      onBackgroundClick/Esc paths.
+      // We use ``pointerdown`` (covers touch + stylus + pen) and gate
+      // on ``event.pointerType === 'touch'`` so mouse interaction is
+      // entirely unaffected.
+      try {
+        var _renderer = inst.renderer && inst.renderer();
+        var _canvas = _renderer && _renderer.domElement;
+        var _camera = inst.camera && inst.camera();
+        if (_canvas && _camera && THREE) {
+          var _touchRaycaster = new THREE.Raycaster();
+          var _touchNdc = new THREE.Vector2();
+          // Track the last-tapped node id; the next tap on the same node
+          // is treated as a click-to-focus rather than a hover preview.
+          var _lastTouchNodeId = null;
+          _canvas.addEventListener('pointerdown', function(event){
+            if (event.pointerType !== 'touch') return;
+            // F-1 — touch interaction counts as user-driven camera control.
+            userInteracted = true;
+            // Hit-test the touch location against payload.nodes positions.
+            // (Picking via the raycaster matches what 3d-force-graph does
+            // internally, but we don't want to depend on its private
+            // picker so we run our own — comparing screen-space distance
+            // to each node's projected centre is enough on a touch device.)
+            var rect = _canvas.getBoundingClientRect();
+            var px = event.clientX - rect.left;
+            var py = event.clientY - rect.top;
+            var hitNode = null;
+            var hitDist2 = Infinity;
+            // Convert each node's world position to screen space and pick
+            // the closest within a 28-pixel touch radius.
+            try {
+              for (var i = 0; i < payload.nodes.length; i++) {
+                var n = payload.nodes[i];
+                if (!n || typeof n.x !== 'number') continue;
+                if (!isVisible(n)) continue;
+                var v = new THREE.Vector3(n.x || 0, n.y || 0, n.z || 0);
+                v.project(_camera);
+                var sx = (v.x * 0.5 + 0.5) * rect.width;
+                var sy = (-v.y * 0.5 + 0.5) * rect.height;
+                var dx = sx - px;
+                var dy = sy - py;
+                var d2 = dx * dx + dy * dy;
+                if (d2 < hitDist2 && d2 < 28 * 28) {
+                  hitDist2 = d2;
+                  hitNode = n;
+                }
+              }
+            } catch (_) {}
+            if (!hitNode) {
+              // Tap on background → unfocus, mirroring onBackgroundClick.
+              _lastTouchNodeId = null;
+              if (focusedNode || pinnedNode || pinnedLink || hoverNode) {
+                pinnedNode = null;
+                pinnedLink = null;
+                focusedNode = null;
+                hoverNode = null;
+                try { markFocused(null); } catch (_) {}
+                autoOrbitEnabled = false;
+                applyHighlight(null);
+                clearInfoPanel();
+              }
+              return;
+            }
+            // Second tap on same node → fall through to onNodeClick
+            // (which calls activateNode → focus camera). We DO NOT
+            // preventDefault here because the synthetic click that
+            // follows is what the library listens for.
+            if (_lastTouchNodeId === hitNode.id) {
+              _lastTouchNodeId = null;
+              return;
+            }
+            // First tap → hover preview (tooltip + highlight neighbours).
+            // Suppress the synthetic click that would otherwise fire
+            // activateNode, so the camera doesn't fly on first tap.
+            _lastTouchNodeId = hitNode.id;
+            event.preventDefault();
+            event.stopPropagation();
+            hoverNode = hitNode;
+            applyHighlight(hitNode);
+            showNodeTooltip(hitNode, px, py);
+          }, { passive: false });
         }
       } catch (_) {}
 
@@ -2462,6 +2709,9 @@ JS_GRAPH = r"""
     function activateNode(node, evt){
       if (!node) return;
       if (isDimmedNode(node)) return;
+      // F-1 — clicking a node counts as user interaction; the rest-merge
+      // re-fit is suppressed once the user has taken control.
+      userInteracted = true;
       // Issue 6 — manual node click counts as user interruption: stop
       // the auto-browse tour so the user is back in the driver's seat.
       if (autoBrowseActive) stopAutoBrowse();
@@ -2476,10 +2726,12 @@ JS_GRAPH = r"""
         focusedNode = node;
         markFocused(node);
         applyHighlight(node);
-        // Issue 2 — focused node's label sprite carries the focus details
-        // inline (Issue 3 — no visible Enter-hint line; key still works).
-        // The bottom-right info panel is gone.
+        // F-5 — populate the floating focus-detail panel so the user can
+        // read the full title/type/degree/description and open the page.
+        // Hover tooltip (cursor-following) hides because focus replaces
+        // its purpose for this node.
         hideTooltip();
+        populateFocusPanel(node);
         focusOnNode(node);
         return;
       }
@@ -2489,6 +2741,7 @@ JS_GRAPH = r"""
     function activateLink(link, evt){
       if (!link) return;
       if (isDimmedLink(link)) return;
+      userInteracted = true;
       var samePinned = pinnedLink && linkKey(pinnedLink) === linkKey(link);
       if (evt && (evt.metaKey || evt.ctrlKey)) samePinned = false;
       if (!samePinned) {
@@ -2561,6 +2814,15 @@ JS_GRAPH = r"""
         var cx = (minX + maxX) / 2;
         var cy = (minY + maxY) / 2;
         var cz = (minZ + maxZ) / 2;
+        // F-3 — store the cluster centroid as the orbit target so the
+        // ``onEngineTick`` auto-orbit hook orbits the SAME point the
+        // cameraPosition tween framed. Otherwise the tick uses
+        // ``focusedNode.x/y/z`` (the focused node, not the centroid)
+        // and the camera drifts off the framed cluster on the very next
+        // render frame. The deferred ``controls.target.set(cx,cy,cz)``
+        // below also snaps to this same centroid so all three (initial
+        // fly-to, deferred snap, per-frame orbit) agree.
+        orbitTarget = { x: cx, y: cy, z: cz };
         // Animate to a position ``orbitRadius`` units in +Z from the
         // centroid, looking at the centroid. ``flyMs`` defaults to 600
         // (snappy click-focus) but auto-browse passes a longer value
@@ -2716,10 +2978,15 @@ JS_GRAPH = r"""
       autoOrbitEnabled = false;
       applyHighlight(null);
       clearInfoPanel();
-      if (Graph && Graph.cameraPosition && mode === '3d') {
-        try { Graph.cameraPosition({ x: 0, y: 0, z: 400 }, { x: 0, y: 0, z: 0 }, reduceMotion ? 0 : 600); } catch (_) {}
-      } else if (Graph && Graph.centerAt) {
-        try { Graph.centerAt(0, 0, reduceMotion ? 0 : 600); Graph.zoom(1, reduceMotion ? 0 : 600); } catch (_) {}
+      // F-10 — Reset (and the ``r`` keyboard shortcut, which dispatches
+      // this same click) re-frames ALL visible nodes via the same
+      // bounding-sphere math as the Fit button. The previous code
+      // hard-coded ``z = 400`` which ignored the rest payload's expanded
+      // layout and left the user staring at empty space whenever the
+      // graph extended past the canonical box. ``fitAll`` is the only
+      // call that actually re-frames whatever is visible right now.
+      if (Graph) {
+        try { fitAll(reduceMotion ? 0 : 600); } catch (_) {}
       }
     });
 
@@ -2830,6 +3097,7 @@ JS_GRAPH = r"""
       focusedNode = seedNode;
       markFocused(seedNode);
       applyHighlight(seedNode);
+      populateFocusPanel(seedNode);
       // Pre-compute the neighbour tour list for this seed.
       autoBrowseSeedQueue = topImportantNeighbors(seedNode, AUTO_BROWSE_NEIGHBOURS_PER_SEED);
       autoBrowseTimer = window.setTimeout(function(){
@@ -2847,6 +3115,7 @@ JS_GRAPH = r"""
         focusedNode = nb;
         markFocused(nb);
         applyHighlight(nb);
+        populateFocusPanel(nb);
         autoBrowseTimer = window.setTimeout(function(){
           autoBrowseVisitNextNeighbour(seedNode);
         }, AUTO_BROWSE_NB_DWELL_MS);
@@ -2905,6 +3174,23 @@ JS_GRAPH = r"""
     }
     if (btnAutoBrowse) btnAutoBrowse.addEventListener('click', toggleAutoBrowse);
 
+    // F-5 — close button inside the floating focus-detail panel mirrors
+    // the unfocus action of background-click / Esc / right-click. Lets
+    // touch users dismiss the focus state without having to find empty
+    // canvas to tap on.
+    var btnFocusUnfocus = document.querySelector('[data-graph-action="unfocus"]');
+    if (btnFocusUnfocus) {
+      btnFocusUnfocus.addEventListener('click', function(){
+        pinnedNode = null;
+        pinnedLink = null;
+        focusedNode = null;
+        try { markFocused(null); } catch (_) {}
+        autoOrbitEnabled = false;
+        applyHighlight(null);
+        clearInfoPanel();
+      });
+    }
+
     // Issue 1 — re-tint label sprites when the user toggles theme. Since
     // sprites are cached by ``text|variant|accent|theme|hint`` and baked
     // onto a canvas, a theme flip means we need to clear the cache and
@@ -2923,7 +3209,12 @@ JS_GRAPH = r"""
     };
     if (searchEl) {
       searchEl.addEventListener('input', function(){
+        // F-8 — searchQuery now dim-filters non-matching nodes instead of
+        // hiding them. ``refreshVisibility`` re-pokes the node/link
+        // colour accessors so the dim updates immediately as the user
+        // types.
         searchQuery = (searchEl.value || '').trim().toLowerCase();
+        userInteracted = true;
         refreshVisibility();
       });
       searchEl.addEventListener('keydown', function(e){
@@ -2937,6 +3228,7 @@ JS_GRAPH = r"""
             focusedNode = match;
             markFocused(match);
             applyHighlight(match);
+            populateFocusPanel(match);
             focusOnNode(match);
           }
         }
@@ -3036,6 +3328,33 @@ JS_GRAPH = r"""
       });
       if (Graph && Graph.graphData) {
         try { Graph.graphData({ nodes: payload.nodes, links: payload.links }); } catch (_) {}
+      }
+      // F-2 — rebuild the legend from the union (core + rest) so the
+      // type counts and chips reflect the WHOLE graph, not just the
+      // core subgraph that startGraph saw. ``hiddenGroups`` is preserved
+      // across the rebuild so any user-toggled-off chips stay off.
+      rebuildLegend();
+      // F-1 — the rest payload added new nodes and links to the live
+      // simulation, which will redistribute the existing layout outside
+      // the camera's currently-fitted view. Re-frame the union once,
+      // unless the user has already interacted (clicked a node, dragged
+      // the canvas, typed into search) — in which case stealing the
+      // camera back would feel hostile. We schedule the fit slightly
+      // after the next engine settle so the new nodes have positions.
+      if (!userInteracted && !pinnedNode && !pinnedLink && !focusedNode) {
+        try {
+          // Allow the simulation to absorb the new nodes/links over a
+          // short settle window, then re-fit. ``fitAll(600)`` reuses the
+          // bounding-sphere math the manual Fit button uses, so we get
+          // the same framing the user would on demand.
+          window.setTimeout(function(){
+            if (userInteracted || pinnedNode || pinnedLink || focusedNode) return;
+            // Reset the single-shot flag and call scheduleCenteredFit so
+            // the existing onEngineStop guard reads "still needs fit".
+            hasInitialFit = false;
+            try { scheduleCenteredFit(); } catch (_) {}
+          }, 400);
+        } catch (_) {}
       }
     };
 

@@ -288,6 +288,37 @@ def test_graph_fullscreen_class_styles_present():
     assert ".graph-canvas-wrapper.is-fullscreen .graph-legend" in CSS
 
 
+def test_graph_focus_detail_panel_styles_present():
+    """F-5 — the floating focus-detail panel is styled inside the
+    ``.graph-canvas-wrapper`` so the Fullscreen API draws it on top
+    of the canvas. Bottom-right anchored, semi-transparent surface,
+    max-height 60vh with internal scroll."""
+    assert ".graph-canvas-wrapper .graph-focus-panel" in CSS
+    import re as _re
+    block = _re.search(
+        r"\.graph-canvas-wrapper \.graph-focus-panel\s*\{([^}]*)\}", CSS
+    )
+    assert block is not None, ".graph-canvas-wrapper .graph-focus-panel rule missing"
+    body = block.group(1)
+    # Pinned to the bottom-right corner.
+    assert "position: absolute" in body
+    assert "bottom:" in body
+    assert "right:" in body
+    # Bounded height with internal scroll so long descriptions don't push
+    # content past the viewport.
+    assert "max-height: 60vh" in body
+    assert "overflow-y: auto" in body
+    # Hidden gate matches the JS toggle.
+    assert ".graph-canvas-wrapper .graph-focus-panel[hidden]" in CSS
+    # Slot rules exist for each section the JS populates.
+    assert ".graph-canvas-wrapper .graph-focus-panel-title" in CSS
+    assert ".graph-canvas-wrapper .graph-focus-panel-meta" in CSS
+    assert ".graph-canvas-wrapper .graph-focus-panel-desc" in CSS
+    assert ".graph-canvas-wrapper .graph-focus-panel-open" in CSS
+    # Light theme override flips the surface.
+    assert '[data-theme="light"] .graph-canvas-wrapper .graph-focus-panel' in CSS
+
+
 def test_graph_auto_browse_cursor_cue_present():
     """Issue 6 — ``.graph-canvas-wrapper.is-auto-browsing`` swaps the
     cursor to ``progress`` so the user has an unmistakable signal that

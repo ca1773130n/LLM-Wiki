@@ -2323,11 +2323,14 @@ def render_graph_view(ctx: SiteContext) -> str:
         for group, count in sorted(type_counts.items(), key=lambda kv: kv[0])
     )
 
-    # Issue 2 — the bottom-right floating info overlay panel that
-    # populated on every click is GONE. The cursor-following ``#graph-tooltip``
-    # below (injected into ``.graph-canvas-wrapper`` so it survives the
-    # Fullscreen API hop) replaces it for hover preview, and the focused
-    # node's label sprite shows the focus details inline.
+    # F-5 — restore the floating focus-detail overlay (NOT the right-rail
+    # variant — a small bottom-right panel inside ``.graph-canvas-wrapper``
+    # so the Fullscreen API draws it on top of the canvas). Populated on
+    # focus by ``graph.js`` (title, type, degree, description, Open page
+    # link), cleared on unfocus. Distinct from ``#graph-tooltip``: tooltip
+    # follows the cursor and previews on hover; this panel pins to the
+    # bottom-right corner and shows the persistent detail of whichever
+    # node is currently selected.
     bc = _build_breadcrumbs([("Home", "index.html"), ("Graph", "")], depth=1)
 
     # CDN-loaded ES modules. We pin specific versions and supply integrity
@@ -2416,6 +2419,14 @@ def render_graph_view(ctx: SiteContext) -> str:
       <div class="graph-loading-rest" id="graph-loading-rest" role="status" aria-live="polite" hidden>loading rest of graph&hellip;</div>
     </div>
     <div class="graph-tooltip" id="graph-tooltip" role="status" aria-live="polite" hidden></div>
+    <aside class="graph-focus-panel" id="graph-focus-panel" aria-label="Focused node details" hidden>
+      <button type="button" class="graph-focus-panel-close" data-graph-action="unfocus" aria-label="Close focused node details">&times;</button>
+      <h2 class="graph-focus-panel-title" id="graph-focus-panel-title"></h2>
+      <p class="graph-focus-panel-meta" id="graph-focus-panel-meta"></p>
+      <p class="graph-focus-panel-desc" id="graph-focus-panel-desc"></p>
+      <a class="graph-focus-panel-open button" id="graph-focus-panel-open" href="#" hidden>Open page &rarr;</a>
+      <div class="graph-focus-panel-neighbors" id="graph-focus-panel-neighbors"></div>
+    </aside>
     <div class="graph-legend" id="graph-legend" aria-label="Type legend">{legend_items}</div>
   </div>
   <p class="graph-help muted">Showing {len(nodes_payload)} of {len(nodes_payload)} wiki nodes · {len(links_payload)} links · <kbd>/</kbd> search · <kbd>f</kbd> fit · <kbd>r</kbd> reset · <kbd>o</kbd> orbit · <kbd>b</kbd> auto-browse · <kbd>2</kbd>/<kbd>3</kbd> mode · <kbd>Esc</kbd> unfocus</p>

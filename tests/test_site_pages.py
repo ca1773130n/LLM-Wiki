@@ -1012,6 +1012,33 @@ def test_render_graph_view_drops_right_rail_uses_cursor_tooltip(
     assert "node size = √(connections)" in out
 
 
+def test_render_graph_view_includes_focus_detail_panel_overlay(
+    site_ctx: SiteContext,
+) -> None:
+    """F-5 — the floating focus-detail panel is back. NOT the right-rail
+    info panel that ``test_render_graph_view_drops_right_rail_uses_cursor_tooltip``
+    forbids; this one is a small bottom-right overlay inside the canvas
+    wrapper that pins the currently-focused node's title/type/degree/
+    description and an Open page link."""
+    out = render_graph_view(site_ctx)
+    # Panel container with the new id.
+    assert 'id="graph-focus-panel"' in out
+    assert 'class="graph-focus-panel"' in out
+    # Starts hidden — focus event populates + reveals.
+    assert 'aria-label="Focused node details"' in out
+    # Slot ids the JS writes into.
+    assert 'id="graph-focus-panel-title"' in out
+    assert 'id="graph-focus-panel-meta"' in out
+    assert 'id="graph-focus-panel-desc"' in out
+    assert 'id="graph-focus-panel-open"' in out
+    assert 'id="graph-focus-panel-neighbors"' in out
+    # An explicit unfocus close-button so touch users can dismiss focus.
+    assert 'data-graph-action="unfocus"' in out
+    # The OLD right-rail panel must still be absent (regression guard).
+    assert 'id="graph-info-panel"' not in out
+    assert "graph-info-overlay" not in out
+
+
 def test_index_pages_emit_canonical_main_wide_not_article_shell(
     site_ctx: SiteContext,
 ) -> None:

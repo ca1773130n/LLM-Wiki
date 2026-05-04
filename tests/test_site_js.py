@@ -164,7 +164,12 @@ def test_bundle_uses_scalar_node_and_link_opacity():
     and ``nodeVisibility`` / ``linkVisibility`` for binary on/off.
     """
     assert "inst.nodeOpacity(0.95)" in JS_GRAPH
-    assert "inst.linkOpacity(0.35)" in JS_GRAPH
+    # F-6 — linkOpacity is pinned to 1.0 because the per-link rgba already
+    # encodes the alpha (0.5 default, 0.05 dim, 0.5 hot). The previous
+    # 0.35 scalar double-multiplied the alpha and washed edges out far
+    # below the documented spec.
+    assert "inst.linkOpacity(1.0)" in JS_GRAPH
+    assert "inst.linkOpacity(0.35)" not in JS_GRAPH
     assert "inst.nodeOpacity(function(n)" not in JS_GRAPH
     assert "inst.linkOpacity(function(l)" not in JS_GRAPH
 
@@ -224,7 +229,8 @@ def test_graph_edges_are_visible_lines_not_only_particles():
     assert "rgba(250,204,21,0.5)" in JS_GRAPH
     assert "rgba(191,219,254,0.34)" not in JS_GRAPH
     assert "rgba(250,204,21,0.85)" not in JS_GRAPH
-    assert "if (inst.linkOpacity) inst.linkOpacity(0.35);" in JS_GRAPH
+    # F-6 — linkOpacity is now pinned to 1.0 (alpha lives in the rgba).
+    assert "if (inst.linkOpacity) inst.linkOpacity(1.0);" in JS_GRAPH
     # Issue 4 — edges thinner everywhere; widths now scale by camera
     # distance so they grow when zoomed out and shrink when zoomed in.
     # Defaults: 0.25, incident: 0.9. Multiplied by ``camScale``.
@@ -836,6 +842,165 @@ def test_graph_bundle_has_loading_indicator_hooks():
     rest payload is in flight; the bundle toggles its ``.is-visible`` state."""
     assert "getElementById('graph-loading-rest')" in JS_BUNDLE_GRAPH
     assert "function setRestLoading" in JS_BUNDLE_GRAPH
+
+
+# ---------------------------------------------------------------------------
+# Codex review F-1..F-10 regression tests
+# ---------------------------------------------------------------------------
+
+
+def test_graph_f1_rest_merge_refits_camera_when_user_has_not_interacted():
+    """F-1 — after ``__graphMergeRestPayload`` runs ``Graph.graphData``
+    against the union, it must re-fit the camera so the new nodes get
+    framed. The fit is gated on a ``userInteracted`` flag so a click
+    that lands before the rest payload arrives doesn't get its camera
+    stolen back."""
+    assert "var userInteracted = false" in JS_BUNDLE_GRAPH
+    # Merge path schedules a fit when the user hasn't touched anything.
+    assert "if (!userInteracted && !pinnedNode && !pinnedLink && !focusedNode)" in JS_BUNDLE_GRAPH
+    # Resets the single-shot flag and calls scheduleCenteredFit again.
+    assert "hasInitialFit = false;" in JS_BUNDLE_GRAPH
+    assert "scheduleCenteredFit()" in JS_BUNDLE_GRAPH
+    # User actions claim camera control: clicks, drags, wheel zoom, search.
+    assert "userInteracted = true" in JS_BUNDLE_GRAPH
+
+
+def test_graph_f2_legend_rebuilds_after_rest_merge_from_union():
+    """F-2 — legend chips render against ``payload.nodes``. Since the
+    core payload misses entire groups (e.g. ``repos``), the legend must
+    be rebuilt from the union AFTER the rest merge so chips reflect
+    the WHOLE graph."""
+    assert "function rebuildLegend" in JS_BUNDLE_GRAPH
+    # Initial call still happens at startGraph time.
+    assert "rebuildLegend();" in JS_BUNDLE_GRAPH
+    # The merge path must call rebuildLegend after the graphData update.
+    merge_idx = JS_BUNDLE_GRAPH.index("__graphMergeRestPayload")
+    rebuild_after_merge = JS_BUNDLE_GRAPH.index("rebuildLegend()", merge_idx)
+    assert rebuild_after_merge > merge_idx
+    # Hidden-group state preserved across the rebuild.
+    assert "if (hiddenGroups.has(group)) chip.classList.add('is-off')" in JS_BUNDLE_GRAPH
+
+
+def test_graph_f3_orbit_target_is_cluster_centroid_consistently():
+    """F-3 — the cluster-centroid is used for BOTH the cameraPosition
+    fly-to AND the per-frame onEngineTick auto-orbit. The previous code
+    flew to the centroid but orbited around the focused node, which made
+    the camera fight itself."""
+    assert "var orbitTarget" in JS_BUNDLE_GRAPH
+    # Centroid coords are written to orbitTarget inside focusOnNode.
+    assert "orbitTarget = { x: cx, y: cy, z: cz }" in JS_BUNDLE_GRAPH
+    # The auto-orbit tick reads orbitTarget for both camX/camZ and look-at.
+    assert "var tx = orbitTarget.x" in JS_BUNDLE_GRAPH
+    assert "var camX = tx + Math.sin(orbitAngle) * orbitRadius" in JS_BUNDLE_GRAPH
+    # Ensure we no longer derive the camera target from the focused node's
+    # raw position inside the tick (regression guard for the old code).
+    assert "{ x: camX, y: ty, z: camZ }, { x: tx, y: ty, z: tz }" in JS_BUNDLE_GRAPH
+
+
+def test_graph_f4_hover_tooltip_still_shows_when_focused():
+    """F-4 — hover-driven highlight/dim stays off when a node is focused
+    (the focused neighbourhood is already lit), but the cursor tooltip
+    must still appear so the user can read names of other nodes without
+    deselecting first."""
+    # Inside the focus-active branch of onNodeHover, showNodeTooltip is
+    # called when the node is non-null and not dimmed.
+    assert "if (focusedNode || pinnedNode || pinnedLink) {" in JS_BUNDLE_GRAPH
+    # The two key behaviours: NO applyHighlight inside the focus-active
+    # branch (would replace focus highlight) but DO showNodeTooltip.
+    focus_branch_start = JS_BUNDLE_GRAPH.index("if (focusedNode || pinnedNode || pinnedLink) {")
+    focus_branch_end = JS_BUNDLE_GRAPH.index("hoverNode = node || null;", focus_branch_start)
+    branch = JS_BUNDLE_GRAPH[focus_branch_start:focus_branch_end]
+    assert "showNodeTooltip(node, lastMouseX, lastMouseY)" in branch
+    assert "applyHighlight" not in branch
+
+
+def test_graph_f5_focus_panel_repopulated_on_focus_and_cleared_on_unfocus():
+    """F-5 — the floating focus-detail panel surfaces the currently
+    focused node's title/type/degree/description plus an Open page link.
+    Populated on every focus path; cleared (hidden) on unfocus."""
+    assert "function populateFocusPanel" in JS_BUNDLE_GRAPH
+    assert "getElementById('graph-focus-panel')" in JS_BUNDLE_GRAPH
+    assert "getElementById('graph-focus-panel-title')" in JS_BUNDLE_GRAPH
+    assert "getElementById('graph-focus-panel-meta')" in JS_BUNDLE_GRAPH
+    assert "getElementById('graph-focus-panel-desc')" in JS_BUNDLE_GRAPH
+    assert "getElementById('graph-focus-panel-open')" in JS_BUNDLE_GRAPH
+    # populateFocusPanel(null) hides the panel, populateFocusPanel(node)
+    # shows + fills it.
+    assert "focusPanel.hidden = true" in JS_BUNDLE_GRAPH
+    assert "focusPanel.hidden = false" in JS_BUNDLE_GRAPH
+    # Wired into the activate path.
+    assert "populateFocusPanel(node)" in JS_BUNDLE_GRAPH
+    # Wired into the unfocus path via clearInfoPanel().
+    assert "populateFocusPanel(null)" in JS_BUNDLE_GRAPH
+
+
+def test_graph_f6_link_opacity_pinned_to_one_so_rgba_alpha_is_authoritative():
+    """F-6 — edges are described as 0.5 alpha in the spec but the previous
+    ``linkOpacity(0.35)`` scalar multiplied with the rgba alpha brought
+    the visible opacity down to ~0.175. Pinning ``linkOpacity(1.0)`` keeps
+    the rgba alpha as the single source of truth."""
+    assert "inst.linkOpacity(1.0)" in JS_BUNDLE_GRAPH
+    assert "inst.linkOpacity(0.35)" not in JS_BUNDLE_GRAPH
+
+
+def test_graph_f7_2d_edge_labels_skip_pill_when_alpha_is_zero():
+    """F-7 — VARIANT_PILL_ALPHA.edge is 0 (text-only edge labels) but
+    the 2D path used ``(VARIANT_PILL_ALPHA.edge || 0.5)`` which fell back
+    to 0.5 because JS treats 0 as falsy. The fix uses a numeric typeof
+    check and skips the pill draw when the alpha is 0."""
+    # Strict numeric check (no || fallback).
+    assert "typeof VARIANT_PILL_ALPHA.edge === 'number'" in JS_BUNDLE_GRAPH
+    # Skip the pill draw entirely when the alpha is 0.
+    assert "if (epillAlpha > 0) {" in JS_BUNDLE_GRAPH
+    # Forbid the buggy fallback expression as actual code (it survives in
+    # the explanatory comment so we look for the assignment shape only).
+    assert "var epillAlpha = (VARIANT_PILL_ALPHA.edge || 0.5)" not in JS_BUNDLE_GRAPH
+
+
+def test_graph_f8_search_dims_non_matches_instead_of_hiding():
+    """F-8 — typing in the search box used to call ``nodeVisibility(false)``
+    for non-matching nodes, which made them disappear. The new behaviour
+    is a soft dim (still rendered, still clickable) via the same dim
+    predicate the focus highlight uses."""
+    # New helper that drives the dim path.
+    assert "function matchesSearch" in JS_BUNDLE_GRAPH
+    # isVisible no longer references searchQuery (search drives dim, not visibility).
+    is_visible_def = JS_BUNDLE_GRAPH.index("function isVisible(node)")
+    is_visible_end = JS_BUNDLE_GRAPH.index("\n    }", is_visible_def)
+    is_visible_body = JS_BUNDLE_GRAPH[is_visible_def:is_visible_end]
+    assert "searchQuery" not in is_visible_body
+    # isDimmedNode now factors in matchesSearch.
+    assert "if (searchQuery && !matchesSearch(node)) return true" in JS_BUNDLE_GRAPH
+
+
+def test_graph_f9_touch_first_tap_hovers_second_tap_focuses():
+    """F-9 — touch devices never fire onNodeHover (no mouse). The bundle
+    installs a pointerdown listener that gates on ``pointerType === 'touch'``
+    and splits a tap-on-node into a hover preview (first tap) and a
+    focus action (second tap on the same node)."""
+    assert "addEventListener('pointerdown'" in JS_BUNDLE_GRAPH
+    assert "event.pointerType !== 'touch'" in JS_BUNDLE_GRAPH
+    # The first-tap branch shows the tooltip + applies highlight.
+    assert "showNodeTooltip(hitNode, px, py)" in JS_BUNDLE_GRAPH
+    assert "applyHighlight(hitNode)" in JS_BUNDLE_GRAPH
+    # Tap on background unfocuses (mirroring onBackgroundClick).
+    assert "_lastTouchNodeId = null" in JS_BUNDLE_GRAPH
+
+
+def test_graph_f10_reset_button_calls_fit_all_not_hardcoded_camera():
+    """F-10 — the Reset button (and the ``r`` keyboard shortcut, which
+    dispatches a synthetic click on the same button) re-frames every
+    visible node via ``fitAll`` instead of hard-coding ``z = 400``."""
+    # The hardcoded camera position must be gone from the reset path.
+    btn_reset_idx = JS_BUNDLE_GRAPH.index("if (btnReset) btnReset.addEventListener")
+    btn_reset_end = JS_BUNDLE_GRAPH.index("});", btn_reset_idx)
+    reset_handler = JS_BUNDLE_GRAPH[btn_reset_idx:btn_reset_end]
+    assert "fitAll(reduceMotion ? 0 : 600)" in reset_handler
+    # Forbid the previous hardcoded camera reset.
+    assert "{ x: 0, y: 0, z: 400 }" not in reset_handler
+    # ``r`` keyboard shortcut dispatches a click on the Reset button so
+    # the same fitAll path runs there too.
+    assert "if (e.key === 'r') { if (btnReset) btnReset.click(); }" in JS_BUNDLE_GRAPH
 
 
 # ---------------------------------------------------------------------------

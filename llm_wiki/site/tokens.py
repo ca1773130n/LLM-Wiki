@@ -306,8 +306,12 @@ hr {
      positioning to slide against. The grid default (``stretch``) is
      what makes the TOC column tall enough for the sticky inner aside
      to follow long-article scrolls. */
-  gap: var(--space-5);
-  padding: var(--space-5) clamp(12px, 4vw, 24px);
+  gap: var(--space-3);
+  /* Tighter left/right padding — the previous ``clamp(12px, 4vw, 24px)``
+     burned ~96 px of viewport on a 2560 px monitor for no readable
+     reason. Cap at 16 px so the left rail starts close to the viewport
+     edge and the main column gets the freed space. */
+  padding: var(--space-5) clamp(8px, 1vw, 16px);
   /* sticky position requires no overflow:hidden on ancestors. */
   overflow: visible;
 }
@@ -516,7 +520,7 @@ details[open] > .doc-tree-folder-summary::before { transform: rotate(90deg); }
   .rail-toggle { display: none; }
 }
 
-@media (min-width: 1024px) {
+@media (min-width: 900px) {
   .shell {
     grid-template-columns: var(--rail-w) minmax(0, 1fr) var(--toc-w);
   }
@@ -564,7 +568,39 @@ details[open] > .doc-tree-folder-summary::before { transform: rotate(90deg); }
 .breadcrumbs a { color: var(--ink-muted); text-decoration: none; }
 .breadcrumbs a:hover { color: var(--accent); text-decoration: underline; }
 .breadcrumbs .sep { color: var(--rule); }
-.breadcrumbs .crumb-current { color: var(--ink); }
+.breadcrumbs .crumb-current {
+  color: var(--ink);
+  /* Long arxiv-style titles (e.g. "An Outlook into the Future of
+     Egocentric Vision") would otherwise wrap the breadcrumb to two
+     lines and visually duplicate the H1 below. Truncate to one line
+     with ellipsis; the full title stays in the H1. */
+  display: inline-block;
+  max-width: min(60ch, 70vw);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  vertical-align: bottom;
+}
+/* Cap the article H1 so a multi-clause paper title doesn't render at
+   60 px on a wide monitor — the previous ``clamp(28px, 6vw, 48px)`` on
+   ``.hero h1`` is fine for the home page hero, but a paper-detail page
+   needs a more contained title. */
+.article-body h1 {
+  font-size: clamp(22px, 2.4vw, 32px);
+  line-height: 1.18;
+  margin-block: 0 12px;
+  overflow-wrap: anywhere;
+}
+/* The page-meta line (aliases / source path) shouldn't compete with
+   the H1 — small, muted, no extra block padding. */
+.article-body .page-meta {
+  font-size: 12px;
+  color: var(--ink-muted);
+  margin-block: 0 18px;
+}
+.article-body .page-meta code {
+  font-size: 11px;
+}
 
 /* Cards (§5.3)
    ------------------------------------------------------------ */
@@ -1208,6 +1244,108 @@ details[open] > .doc-tree-folder-summary::before { transform: rotate(90deg); }
   background: rgba(255,255,255,0.92);
   color: var(--ink);
   border-color: var(--rule);
+}
+
+/* F-5 — floating focus-detail panel. Pinned to the bottom-right corner
+   of ``.graph-canvas-wrapper`` (NOT the page rail), semi-transparent so
+   the canvas underneath stays visible, internally scrollable so a long
+   description doesn't push content past the viewport. ``[hidden]``
+   gates visibility — graph.js toggles it as focus/unfocus happens. */
+.graph-canvas-wrapper .graph-focus-panel {
+  position: absolute;
+  right: var(--space-3);
+  bottom: var(--space-3);
+  width: clamp(240px, 28vw, 360px);
+  max-height: 60vh;
+  overflow-y: auto;
+  background: rgba(20,20,20,0.78);
+  color: #fff;
+  -webkit-backdrop-filter: blur(10px);
+  backdrop-filter: blur(10px);
+  border: 1px solid rgba(255,255,255,0.18);
+  border-radius: 8px;
+  padding: 14px 16px 12px;
+  font-size: 13px;
+  line-height: 1.5;
+  z-index: 40;
+  box-shadow: 0 12px 32px rgba(0,0,0,0.32);
+}
+.graph-canvas-wrapper .graph-focus-panel[hidden] { display: none; }
+.graph-canvas-wrapper .graph-focus-panel-title {
+  margin: 0 24px 4px 0;
+  font-size: 15px;
+  font-weight: 600;
+  line-height: 1.3;
+}
+.graph-canvas-wrapper .graph-focus-panel-meta {
+  margin: 0 0 8px;
+  font-family: var(--type-mono);
+  font-size: 11px;
+  opacity: 0.78;
+}
+.graph-canvas-wrapper .graph-focus-panel-desc {
+  margin: 0 0 10px;
+  font-family: var(--type-serif);
+  font-size: 12.5px;
+  opacity: 0.92;
+}
+.graph-canvas-wrapper .graph-focus-panel-open {
+  display: inline-block;
+  margin-bottom: 8px;
+  padding: 6px 12px;
+  font-family: var(--type-mono);
+  font-size: 12px;
+  background: rgba(255,255,255,0.12);
+  color: #fff;
+  border: 1px solid rgba(255,255,255,0.24);
+  border-radius: 4px;
+  text-decoration: none;
+}
+.graph-canvas-wrapper .graph-focus-panel-open:hover,
+.graph-canvas-wrapper .graph-focus-panel-open:focus {
+  background: rgba(255,255,255,0.2);
+  border-color: rgba(255,255,255,0.4);
+}
+.graph-canvas-wrapper .graph-focus-panel-open[hidden] { display: none; }
+.graph-canvas-wrapper .graph-focus-panel-neighbors {
+  margin-top: 6px;
+  font-family: var(--type-mono);
+  font-size: 11px;
+  opacity: 0.78;
+}
+.graph-canvas-wrapper .graph-focus-panel-close {
+  position: absolute;
+  top: 6px;
+  right: 8px;
+  width: 24px;
+  height: 24px;
+  padding: 0;
+  background: transparent;
+  color: #fff;
+  border: none;
+  border-radius: 4px;
+  font-size: 18px;
+  line-height: 1;
+  cursor: pointer;
+  opacity: 0.7;
+}
+.graph-canvas-wrapper .graph-focus-panel-close:hover,
+.graph-canvas-wrapper .graph-focus-panel-close:focus {
+  opacity: 1;
+  background: rgba(255,255,255,0.12);
+}
+[data-theme="light"] .graph-canvas-wrapper .graph-focus-panel {
+  background: rgba(255,255,255,0.94);
+  color: var(--ink);
+  border-color: var(--rule);
+}
+[data-theme="light"] .graph-canvas-wrapper .graph-focus-panel-open {
+  background: var(--surface);
+  color: var(--accent);
+  border-color: var(--rule);
+}
+[data-theme="light"] .graph-canvas-wrapper .graph-focus-panel-close {
+  color: var(--ink);
 }
 .graph-page .graph-error-banner {
   position: absolute;
