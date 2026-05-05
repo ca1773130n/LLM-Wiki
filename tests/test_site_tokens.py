@@ -51,7 +51,8 @@ def test_css_session_pages_use_compact_readable_scale():
     assert ".session-tool-details" in CSS
     assert ".session-token--path" in CSS
     assert ".session-token--tag" in CSS
-    assert ".session-token--noun" in CSS
+    assert ".session-turn-text code" in CSS
+    assert ".session-token--noun" not in CSS
     assert ".session-command-chip" in CSS
     assert ".session-command-name" in CSS
     assert ".session-command-message" in CSS
@@ -63,6 +64,8 @@ def test_css_session_pages_use_compact_readable_scale():
     assert ".session-page code" in CSS
     assert "font-size: 12px" in CSS
     assert ".session-turn-nav" in CSS
+    assert ".session-turn-nav--user" in CSS
+    assert ".session-turn-nav--assistant" not in CSS
     assert ".session-detail-rail" in CSS
     assert ".shell--session" in CSS
     assert "grid-template-columns: var(--rail-w) minmax(0, 1fr) var(--toc-w)" in CSS

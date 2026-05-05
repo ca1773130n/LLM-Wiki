@@ -95,10 +95,6 @@ _PATH_TOKEN_RE = re.compile(
     r"[A-Za-z0-9_.-]+\.(?:py|js|ts|tsx|jsx|md|json|yaml|yml|toml|html|css|sh|txt|sql|rs|go|java|kt|swift|cpp|c|h|hpp|ipynb|lock))"
 )
 _TAG_TOKEN_RE = re.compile(r"(?<![\w&])#([A-Za-z][A-Za-z0-9_-]{1,40})\b")
-_TECH_NOUN_RE = re.compile(
-    r"\b(LLM-Wiki|GitHub Pages|Claude Code|Claude|Codex|Hermes|Ouroboros|"
-    r"[A-Z]{2,}[A-Za-z0-9-]*|[A-Za-z]+(?:[A-Z][a-z0-9]+){1,}|[a-z]+_[a-z0-9_]+)\b"
-)
 _SKIP_DECORATION_TAGS = {"a", "code", "pre", "kbd", "samp", "script", "style"}
 
 
@@ -141,15 +137,10 @@ def _decorate_text_segment(segment: str) -> str:
         token = f"#{match.group(1)}"
         return stash(f"<span class='session-token session-token--tag'>{token}</span>")
 
-    def noun_repl(match: re.Match[str]) -> str:
-        token = match.group(1)
-        return stash(f"<span class='session-token session-token--noun'>{token}</span>")
-
     segment = _COMMAND_TAG_RE.sub(command_repl, segment)
     segment = _TAG_PAIR_RE.sub(tag_pair_repl, segment)
     segment = _PATH_TOKEN_RE.sub(path_repl, segment)
     segment = _TAG_TOKEN_RE.sub(tag_repl, segment)
-    segment = _TECH_NOUN_RE.sub(noun_repl, segment)
     for idx, piece in enumerate(placeholders):
         segment = segment.replace(f"\ue000{idx}\ue001", piece)
     return segment
@@ -383,9 +374,10 @@ def _render_turn_rail(session: HarnessSession) -> str:
             continue
         anchor = _turn_anchor(idx)
         role = _role_label(turn)
+        role_key = str(turn.get("role") or "message").strip().lower() or "message"
         summary = _turn_summary(turn)
         items.append(
-            f"<li data-session-turn-target=\"{_esc(anchor)}\">"
+            f"<li class=\"session-turn-nav--{_esc(role_key)}\" data-session-turn-target=\"{_esc(anchor)}\">"
             f"<a href=\"#{_esc(anchor)}\">"
             f"<span class='session-turn-nav-index'>#{idx}</span>"
             f"<span class='session-turn-nav-role'>{_esc(role)}</span>"

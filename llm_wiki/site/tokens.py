@@ -2211,6 +2211,17 @@ section.panel > h3,
   background: var(--accent-soft);
   color: var(--ink);
 }
+.session-turn-nav--user > a {
+  background: color-mix(in srgb, var(--accent-soft) 48%, transparent);
+  box-shadow: inset 3px 0 0 var(--accent);
+}
+.session-turn-nav--user .session-turn-nav-role,
+.session-turn-nav--user .session-turn-nav-index {
+  color: var(--accent);
+}
+.session-turn-nav--user .session-turn-nav-summary {
+  font-weight: 650;
+}
 .session-turn-nav li.is-active > a {
   box-shadow: inset 3px 0 0 var(--accent);
 }
@@ -2308,6 +2319,32 @@ section.panel > h3,
   padding: 8px;
   margin: 8px 0;
 }
+.session-turn-text code {
+  display: inline-flex;
+  align-items: center;
+  vertical-align: baseline;
+  border: 1px solid color-mix(in srgb, var(--good) 34%, var(--rule));
+  border-radius: 999px;
+  background: color-mix(in srgb, var(--surface) 68%, var(--good) 12%);
+  color: var(--good);
+  font-family: var(--type-mono);
+  font-size: .95em;
+  font-weight: 700;
+  line-height: 1.2;
+  padding: 1px 6px;
+  margin: 0 1px;
+  white-space: nowrap;
+}
+.session-turn-text pre code {
+  display: inline;
+  border: 0;
+  border-radius: 0;
+  background: transparent;
+  color: inherit;
+  padding: 0;
+  margin: 0;
+  white-space: inherit;
+}
 .session-token,
 .session-command-chip,
 .session-tag-block {
@@ -2338,11 +2375,6 @@ section.panel > h3,
   border-color: color-mix(in srgb, var(--accent) 45%, var(--rule));
   background: color-mix(in srgb, var(--surface) 60%, var(--accent-soft));
   color: var(--accent);
-}
-.session-token--noun {
-  border-color: color-mix(in srgb, #6f5bd8 38%, var(--rule));
-  background: color-mix(in srgb, var(--surface) 66%, #6f5bd8 14%);
-  color: color-mix(in srgb, #4b3fb2 82%, var(--ink));
 }
 .session-command-chip {
   gap: 4px;
