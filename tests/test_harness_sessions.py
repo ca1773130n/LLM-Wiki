@@ -31,10 +31,10 @@ def sample_session(project_root):
         redacted_preview="User asked to add harness session history pages.",
         metadata={
             "turns": [
-                {"role": "user", "timestamp": "2026-05-05T10:00:00Z", "text": "Please ingest Claude Code and Codex sessions."},
+                {"role": "user", "timestamp": "2026-05-05T10:00:00Z", "text": "Please ingest Claude Code and Codex sessions from llm_wiki/project.py for #project-memory.\n\n<command-name>/effort</command-name> <command-message>effort</command-message> <command-args></command-args>"},
                 {"role": "assistant", "timestamp": "2026-05-05T10:01:00Z", "text": "I will add **normalized** project-memory session pages.\n\n- Render sessions\n- Index turns"},
                 {"role": "tool", "timestamp": "2026-05-05T10:02:00Z", "name": "Bash", "text": "pytest tests/test_harness_sessions.py -q"},
-                {"role": "assistant", "timestamp": "2026-05-05T10:42:00Z", "text": "Implemented session import and static pages."},
+                {"role": "assistant", "timestamp": "2026-05-05T10:42:00Z", "text": "Implemented session import and static pages. <status>ready</status>"},
             ]
         },
     )
@@ -104,7 +104,19 @@ def test_static_site_renders_harness_sessions_and_search_entries(tmp_path):
     assert "main main--session" in detail_html
     assert "shell shell--session" in detail_html
     assert "href=\"#turn-3\"" in detail_html
-    assert "Please ingest Claude Code and Codex sessions." in detail_html
+    assert "Please ingest" in detail_html
+    assert "session-token session-token--path'>llm_wiki/project.py</span>" in detail_html
+    assert "session-token session-token--tag'>#project-memory</span>" in detail_html
+    assert "session-token session-token--noun'>Claude Code</span>" in detail_html
+    assert "session-token session-token--noun'>Codex</span>" in detail_html
+    assert "session-command-chip" in detail_html
+    assert "session-command-name'>/effort</span>" in detail_html
+    assert "session-command-message'>effort</span>" in detail_html
+    assert "&lt;command-name&gt;" not in detail_html
+    assert "session-tag-block" in detail_html
+    assert "session-tag-name'>status</span>" in detail_html
+    assert "session-tag-content'>ready</span>" in detail_html
+    assert "&lt;status&gt;" not in detail_html
     assert "I will add <strong>normalized</strong> project-memory session pages." in detail_html
     assert "<li>Render sessions</li>" in detail_html
     assert "session-tool-details" in detail_html

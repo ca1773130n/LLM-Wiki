@@ -4,6 +4,7 @@ from __future__ import annotations
 
 import html
 import json
+import re
 from collections import Counter
 from typing import Dict, Iterable, List
 
@@ -77,13 +78,121 @@ def _conversation_groups(session: HarnessSession) -> List[Dict[str, object]]:
     return groups
 
 
+_RAW_COMMAND_FIELD_RE = re.compile(r"<(command-(?:name|message|args))>(.*?)</\1>", re.DOTALL)
+_RAW_COMMAND_TAG_RE = re.compile(
+    r"(?:<command-(?:name|message|args)>.*?</command-(?:name|message|args)>\s*){2,3}",
+    re.DOTALL,
+)
+_COMMAND_FIELD_RE = re.compile(r"&lt;(command-(?:name|message|args))&gt;(.*?)&lt;/\1&gt;", re.DOTALL)
+_COMMAND_TAG_RE = re.compile(
+    r"(?:&lt;command-(?:name|message|args)&gt;.*?&lt;/command-(?:name|message|args)&gt;\s*){2,3}",
+    re.DOTALL,
+)
+_TAG_PAIR_RE = re.compile(r"&lt;([a-z][A-Za-z0-9_-]{1,50})&gt;(.*?)&lt;/\1&gt;", re.DOTALL)
+_RAW_TAG_PAIR_RE = re.compile(r"<([a-z][A-Za-z0-9_-]{1,50})>(.*?)</\1>", re.DOTALL)
+_PATH_TOKEN_RE = re.compile(
+    r"(?<![\w>&])((?:~?/?[A-Za-z0-9_.@%+=:,~-]+/)+[A-Za-z0-9_.@%+=:,~-]+|"
+    r"[A-Za-z0-9_.-]+\.(?:py|js|ts|tsx|jsx|md|json|yaml|yml|toml|html|css|sh|txt|sql|rs|go|java|kt|swift|cpp|c|h|hpp|ipynb|lock))"
+)
+_TAG_TOKEN_RE = re.compile(r"(?<![\w&])#([A-Za-z][A-Za-z0-9_-]{1,40})\b")
+_TECH_NOUN_RE = re.compile(
+    r"\b(LLM-Wiki|GitHub Pages|Claude Code|Claude|Codex|Hermes|Ouroboros|"
+    r"[A-Z]{2,}[A-Za-z0-9-]*|[A-Za-z]+(?:[A-Z][a-z0-9]+){1,}|[a-z]+_[a-z0-9_]+)\b"
+)
+_SKIP_DECORATION_TAGS = {"a", "code", "pre", "kbd", "samp", "script", "style"}
+
+
+def _decorate_text_segment(segment: str) -> str:
+    placeholders: List[str] = []
+
+    def stash(piece: str) -> str:
+        placeholders.append(piece)
+        return f"\ue000{len(placeholders) - 1}\ue001"
+
+    def command_repl(match: re.Match[str]) -> str:
+        fields = {name: value.strip() for name, value in _COMMAND_FIELD_RE.findall(match.group(0))}
+        name = fields.get("command-name", "")
+        message = fields.get("command-message", "")
+        args = fields.get("command-args", "")
+        args_html = f"<span class='session-command-args'>{args}</span>" if args else ""
+        return stash(
+            "<span class='session-command-chip'>"
+            f"<span class='session-command-name'>{name}</span>"
+            f"<span class='session-command-message'>{message}</span>"
+            f"{args_html}"
+            "</span>"
+        )
+
+    def tag_pair_repl(match: re.Match[str]) -> str:
+        tag = match.group(1).strip()
+        body = " ".join(match.group(2).split())
+        return stash(
+            "<span class='session-tag-block'>"
+            f"<span class='session-tag-name'>{tag}</span>"
+            f"<span class='session-tag-content'>{body}</span>"
+            "</span>"
+        )
+
+    def path_repl(match: re.Match[str]) -> str:
+        token = match.group(1)
+        return stash(f"<span class='session-token session-token--path'>{token}</span>")
+
+    def tag_repl(match: re.Match[str]) -> str:
+        token = f"#{match.group(1)}"
+        return stash(f"<span class='session-token session-token--tag'>{token}</span>")
+
+    def noun_repl(match: re.Match[str]) -> str:
+        token = match.group(1)
+        return stash(f"<span class='session-token session-token--noun'>{token}</span>")
+
+    segment = _COMMAND_TAG_RE.sub(command_repl, segment)
+    segment = _TAG_PAIR_RE.sub(tag_pair_repl, segment)
+    segment = _PATH_TOKEN_RE.sub(path_repl, segment)
+    segment = _TAG_TOKEN_RE.sub(tag_repl, segment)
+    segment = _TECH_NOUN_RE.sub(noun_repl, segment)
+    for idx, piece in enumerate(placeholders):
+        segment = segment.replace(f"\ue000{idx}\ue001", piece)
+    return segment
+
+
+def _decorate_conversation_html(rendered: str) -> str:
+    parts = re.split(r"(<[^>]+>)", rendered)
+    skip_stack: List[str] = []
+    out: List[str] = []
+    for part in parts:
+        if not part:
+            continue
+        if part.startswith("<") and part.endswith(">"):
+            tag_match = re.match(r"</?\s*([A-Za-z0-9:-]+)", part)
+            if tag_match:
+                tag = tag_match.group(1).lower()
+                if tag in _SKIP_DECORATION_TAGS:
+                    if part.startswith("</"):
+                        for i in range(len(skip_stack) - 1, -1, -1):
+                            if skip_stack[i] == tag:
+                                del skip_stack[i]
+                                break
+                    elif not part.endswith("/>"):
+                        skip_stack.append(tag)
+            out.append(part)
+            continue
+        out.append(part if skip_stack else _decorate_text_segment(part))
+    return "".join(out)
+
+
 def _render_turn_markdown(text: str) -> str:
     rendered, _ = render_markdown(text or "")
-    return rendered or "<p></p>"
+    return _decorate_conversation_html(rendered or "<p></p>")
 
 
 def _turn_summary(turn: Dict[str, object], limit: int = 110) -> str:
-    text = " ".join(str(turn.get("text") or "").split())
+    raw_text = str(turn.get("text") or "")
+    def _raw_command_summary(match: re.Match[str]) -> str:
+        fields = {name: value.strip() for name, value in _RAW_COMMAND_FIELD_RE.findall(match.group(0))}
+        return " ".join(p for p in [fields.get("command-name", ""), fields.get("command-message", ""), fields.get("command-args", "")] if p)
+    raw_text = _RAW_COMMAND_TAG_RE.sub(_raw_command_summary, raw_text)
+    raw_text = _RAW_TAG_PAIR_RE.sub(lambda m: f"{m.group(1)} {' '.join(m.group(2).split())}", raw_text)
+    text = " ".join(raw_text.split())
     if not text and turn.get("name"):
         text = str(turn.get("name"))
     if len(text) <= limit:

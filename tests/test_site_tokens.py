@@ -49,6 +49,15 @@ def test_css_session_pages_use_compact_readable_scale():
     assert "font-size: 8px" in CSS
     assert ".session-tool-use-text" in CSS
     assert ".session-tool-details" in CSS
+    assert ".session-token--path" in CSS
+    assert ".session-token--tag" in CSS
+    assert ".session-token--noun" in CSS
+    assert ".session-command-chip" in CSS
+    assert ".session-command-name" in CSS
+    assert ".session-command-message" in CSS
+    assert ".session-tag-block" in CSS
+    assert ".session-tag-name" in CSS
+    assert ".session-tag-content" in CSS
     assert "font-size: 10px" in CSS
     assert "line-height: 1.5" in CSS
     assert ".session-page code" in CSS
