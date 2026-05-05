@@ -68,6 +68,7 @@ _TOPNAV: tuple[_RailEntry, ...] = (
     _RailEntry("topics", "Topics", "topics/index.html"),
     _RailEntry("syntheses", "Syntheses", "syntheses/index.html"),
     _RailEntry("questions", "Questions", "questions/index.html"),
+    _RailEntry("sessions", "Sessions", "sessions/index.html"),
     _RailEntry("graph", "Graph", "graph/index.html"),
     _RailEntry("about", "About", "about.html"),
 )
@@ -830,6 +831,7 @@ _BOTTOM_NAV: tuple[tuple[str, str, str, str], ...] = (
     ("concepts",  "Concepts",  "concepts/index.html",   "◆"),  # ◆
     ("papers",    "Papers",    "papers/index.html",     "¶"),  # ¶
     ("syntheses", "Syntheses", "syntheses/index.html",  "✱"),  # ✱
+    ("sessions",  "Sessions",  "sessions/index.html",   "◷"),
     ("graph",     "Graph",     "graph/index.html",      "⁂"),  # ⁂
 )
 

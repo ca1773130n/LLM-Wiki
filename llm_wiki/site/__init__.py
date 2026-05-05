@@ -229,6 +229,7 @@ class StaticSiteBuilder:
             wiki_pages_by_kind=wiki_pages_by_kind,
             site_title=self.site_title,
             project_root=project_root,
+            session_count=len(harness_sessions),
         )
 
         # ------------------------------------------------------ static assets
@@ -305,7 +306,7 @@ class StaticSiteBuilder:
             session_dir.mkdir(parents=True, exist_ok=True)
             session_html = session_dir / f"{session.filename}.html"
             session_html.write_text(
-                render_session_detail(self.site_title, session),
+                render_session_detail(self.site_title, session, session_count=len(harness_sessions)),
                 encoding="utf-8",
             )
             write_siblings(

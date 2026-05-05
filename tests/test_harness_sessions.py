@@ -61,12 +61,23 @@ def test_static_site_renders_harness_sessions_and_search_entries(tmp_path):
     )
 
     assert result["sessions"] == 1
+    home = (wiki.paths.site / "index.html").read_text(encoding="utf-8")
+    assert 'href="sessions/index.html"' in home
+    assert "Sessions" in home
     sessions_index = wiki.paths.site / "sessions" / "index.html"
     detail = wiki.paths.site / "sessions" / "demo-project" / f"{sample_session(project).filename}.html"
     assert sessions_index.exists()
     assert detail.exists()
-    assert "Project memory ingestion" in sessions_index.read_text(encoding="utf-8")
+    index_html = sessions_index.read_text(encoding="utf-8")
+    assert 'href="../sessions/index.html"' in index_html
+    assert "All sessions" in index_html
+    assert "Project memory ingestion" in index_html
     detail_html = detail.read_text(encoding="utf-8")
+    assert "session-hero" in detail_html
+    assert "Session Summary" in detail_html
+    assert "High-Level Summary" in detail_html
+    assert "Main outcome" in detail_html
+    assert "Timeline &amp; size" in detail_html
     assert "Treat harness sessions as first-class project memory." in detail_html
     assert "llm_wiki/project.py" in detail_html
 

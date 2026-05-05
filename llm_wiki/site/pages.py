@@ -292,6 +292,7 @@ class SiteContext:
     # :func:`_build_doc_tree` for the layout. Consumed by
     # :func:`components.doc_tree` from the left rail.
     doc_tree: Mapping[str, object] = field(default_factory=dict)
+    session_count: int = 0
 
     def get_auto_linker(self) -> AutoLinker:
         """Return the cached :class:`AutoLinker`, building it lazily.
@@ -314,6 +315,7 @@ class SiteContext:
         wiki_pages_by_kind: Mapping[str, Sequence[WikiPage]],
         site_title: str = "LLM-Wiki",
         project_root: Optional[Path] = None,
+        session_count: int = 0,
     ) -> "SiteContext":
         nodes_by_id = {n.id: n for n in graph.nodes}
         outgoing: Dict[str, List[ResearchEdge]] = defaultdict(list)
@@ -425,6 +427,7 @@ class SiteContext:
             sources_by_day=sources_by_day,
             project_root=project_root,
             doc_tree=doc_tree,
+            session_count=session_count,
         )
         # Build the auto-link table eagerly — it's a one-time scan over
         # the graph and amortises over every detail-page render. Stash via
@@ -904,13 +907,15 @@ def _build_breadcrumbs(trail: Sequence[Tuple[str, str]], depth: int) -> str:
 
 
 def _nav_counts(ctx: SiteContext) -> Dict[str, int]:
-    return {
+    counts = {
         kind: max(
             len(ctx.wiki_pages_by_kind.get(kind, [])),
             len(ctx.nodes_by_kind.get(kind, [])),
         )
         for kind in ROUTE_FOR_KIND
     }
+    counts["sessions"] = ctx.session_count
+    return counts
 
 
 def _doc_tree_for(
@@ -1515,6 +1520,7 @@ def render_home(ctx: SiteContext) -> str:
   <div class="stat"><b>{counts.get('sources', 0)}</b><span>Sources</span></div>
   <div class="stat"><b>{counts.get('concepts', 0)}</b><span>Concepts</span></div>
   <div class="stat"><b>{counts.get('papers', 0)}</b><span>Papers</span></div>
+  <div class="stat"><b>{counts.get('sessions', 0)}</b><span>Sessions</span></div>
   <div class="stat"><b>{counts.get('questions', 0)}</b><span>Open questions</span></div>
 </section>"""
 
@@ -1526,6 +1532,7 @@ def render_home(ctx: SiteContext) -> str:
         card(title="Topics", href="topics/index.html", kind_label="library", description="Research fields and approach families.", footer=f"{counts.get('topics', 0)} pages"),
         card(title="Syntheses", href="syntheses/index.html", kind_label="library", description="Higher-order synthesis pages.", footer=f"{counts.get('syntheses', 0)} pages"),
         card(title="Open questions", href="questions/index.html", kind_label="library", description="Open research questions.", footer=f"{counts.get('questions', 0)} pages"),
+        card(title="Sessions", href="sessions/index.html", kind_label="memory", description="Agent and subagent history compiled as project memory.", footer=f"{counts.get('sessions', 0)} sessions"),
         card(title="Graph", href="graph/index.html", kind_label="tools", description="Interactive 3D knowledge graph."),
     ]) + "</section>"
 
