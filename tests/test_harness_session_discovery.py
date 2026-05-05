@@ -172,6 +172,9 @@ def test_claude_discovery_does_not_count_subagent_transcripts_as_sessions(tmp_pa
     assert len(sessions) == 1
     assert sessions[0].title == "Parent session"
     assert "subagents" not in sessions[0].raw_transcript_path
+    assert sessions[0].metadata["subagents"][0]["title"] == "Child subagent session"
+    assert sessions[0].metadata["subagents"][0]["message_count"] == 1
+    assert "subagents" in sessions[0].metadata["subagents"][0]["raw_transcript_path"]
 
 
 def test_claude_project_directory_without_session_cwd_is_not_enough(tmp_path):

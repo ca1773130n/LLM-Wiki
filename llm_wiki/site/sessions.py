@@ -15,6 +15,20 @@ def _esc(value: object) -> str:
     return html.escape("" if value is None else str(value), quote=True)
 
 
+def _subagents(session: HarnessSession) -> List[Dict[str, object]]:
+    items = session.metadata.get("subagents") if isinstance(session.metadata, dict) else []
+    if not isinstance(items, list):
+        return []
+    return [item for item in items if isinstance(item, dict)]
+
+
+def _subagent_count_label(session: HarnessSession) -> str:
+    count = len(_subagents(session))
+    if count == 0:
+        return "—"
+    return f"{count} subagent" + ("" if count == 1 else "s")
+
+
 def session_search_entries(sessions: Iterable[HarnessSession]) -> List[Dict[str, object]]:
     entries: List[Dict[str, object]] = []
     for session in sessions:
@@ -62,9 +76,10 @@ def render_sessions_index(site_title: str, sessions: List[HarnessSession]) -> st
             f"<td><code>{_esc(session.model or 'unknown')}</code></td>"
             f"<td>{session.message_count}</td>"
             f"<td>{session.tool_call_count}</td>"
+            f"<td>{_esc(_subagent_count_label(session))}</td>"
             "</tr>"
         )
-    body = "".join(rows) or "<tr><td colspan='7'>No harness sessions ingested yet.</td></tr>"
+    body = "".join(rows) or "<tr><td colspan='8'>No harness sessions ingested yet.</td></tr>"
     tool_counts = Counter(tool for session in sessions for tool in session.tools_used)
     stats = (
         f"{len(sessions)} sessions total"
@@ -83,12 +98,40 @@ def render_sessions_index(site_title: str, sessions: List[HarnessSession]) -> st
   </section>
   <section class="panel">
     <table>
-      <thead><tr><th>Session</th><th>Agent</th><th>Project</th><th>Date</th><th>Model</th><th>Msgs</th><th>Tools</th></tr></thead>
+      <thead><tr><th>Session</th><th>Agent</th><th>Project</th><th>Date</th><th>Model</th><th>Msgs</th><th>Tools</th><th>Subagents</th></tr></thead>
       <tbody>{body}</tbody>
     </table>
   </section>
 </main>
 """,
+    )
+
+
+def _render_subagent_tree(session: HarnessSession) -> str:
+    children = _subagents(session)
+    if not children:
+        return "<section class='panel'><h2>Subagent sessions</h2><p class='muted'>No subagent transcripts attached.</p></section>"
+    rows = []
+    for child in children:
+        files = child.get("files_touched") if isinstance(child.get("files_touched"), list) else []
+        commands = child.get("commands_run") if isinstance(child.get("commands_run"), list) else []
+        files_html = "".join(f"<li><code>{_esc(item)}</code></li>" for item in files[:12]) or "<li class='muted'>No files recorded.</li>"
+        commands_html = "".join(f"<li><code>{_esc(item)}</code></li>" for item in commands[:8]) or "<li class='muted'>No commands recorded.</li>"
+        rows.append(
+            "<li class='subagent-node'>"
+            f"<h3>{_esc(child.get('title') or child.get('id') or 'Subagent session')}</h3>"
+            f"<p class='muted'>{_esc(child.get('started_at') or 'unknown time')} · "
+            f"{_esc(child.get('message_count') or 0)} msgs · {_esc(child.get('tool_call_count') or 0)} tools</p>"
+            f"<p>{_esc(child.get('summary') or 'No summary yet.')}</p>"
+            f"<details><summary>Files and commands</summary><h4>Files touched</h4><ul>{files_html}</ul><h4>Commands run</h4><ul>{commands_html}</ul></details>"
+            "</li>"
+        )
+    return (
+        "<section class='panel subagent-tree'>"
+        f"<details><summary>Subagent sessions ({len(children)})</summary>"
+        "<p class='muted'>Child agent transcripts are hidden by default so the top-level session list stays focused.</p>"
+        f"<ul>{''.join(rows)}</ul>"
+        "</details></section>"
     )
 
 
@@ -131,6 +174,7 @@ def render_session_detail(site_title: str, session: HarnessSession) -> str:
   <section class="panel"><h2>Files touched</h2>{list_items(session.files_touched, code=True)}</section>
   <section class="panel"><h2>Commands run</h2>{list_items(session.commands_run, code=True)}</section>
   <section class="panel"><h2>Tools used</h2>{list_items(session.tools_used)}</section>
+  {_render_subagent_tree(session)}
   <section class="panel"><h2>Redacted preview</h2><pre>{_esc(session.redacted_preview)}</pre></section>
 </main>
 """,

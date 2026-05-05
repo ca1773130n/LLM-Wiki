@@ -290,6 +290,10 @@ def _parse_claude_session(project: Path, root: Path, path: Path) -> Optional[Har
     branch = _first_str(rows, "gitBranch")
     model = _first_message_model(rows)
     slug = safe_slug(title or session_id)
+    subagents = _claude_subagent_summaries(project, root, path, session_id)
+    metadata: Dict[str, object] = {"config_root": str(root), "transcript": str(path)}
+    if subagents:
+        metadata["subagents"] = subagents
     return HarnessSession(
         id=f"claude-code:{session_id}:{path.stem}",
         slug=slug,
@@ -310,8 +314,37 @@ def _parse_claude_session(project: Path, root: Path, path: Path) -> Optional[Har
         commands_run=_dedupe(commands)[:50],
         raw_transcript_path=str(path),
         redacted_preview=preview,
-        metadata={"config_root": str(root), "transcript": str(path)},
+        metadata=metadata,
     )
+
+
+def _claude_subagent_summaries(project: Path, root: Path, parent_path: Path, parent_session_id: str) -> List[Dict[str, object]]:
+    subagents_dir = parent_path.with_suffix("") / "subagents"
+    if not subagents_dir.exists():
+        return []
+    summaries: List[Dict[str, object]] = []
+    for path in sorted(subagents_dir.glob("*.jsonl")):
+        rows = _parse_jsonl(path)
+        if not rows or not _rows_match_project(rows, project):
+            continue
+        timestamps = [v for row in rows if isinstance((v := row.get("timestamp")), str)]
+        title, preview = _title_and_preview_from_claude(rows)
+        tools, commands, files = _claude_activity(rows, project)
+        message_count = sum(1 for row in rows if row.get("type") in {"user", "assistant"})
+        summaries.append({
+            "id": f"claude-code:{parent_session_id}:{path.stem}",
+            "title": title or f"Claude Code subagent {path.stem}",
+            "started_at": min(timestamps) if timestamps else "",
+            "ended_at": max(timestamps) if timestamps else "",
+            "summary": preview,
+            "message_count": message_count,
+            "tool_call_count": len(set(tools)) + len(_dedupe(commands)),
+            "tools_used": sorted(set(tools)),
+            "files_touched": sorted(set(files)),
+            "commands_run": _dedupe(commands)[:50],
+            "raw_transcript_path": str(path),
+        })
+    return sorted(summaries, key=lambda item: str(item.get("started_at") or ""))
 
 
 def _parse_codex_session(project: Path, root: Path, path: Path) -> Optional[HarnessSession]:

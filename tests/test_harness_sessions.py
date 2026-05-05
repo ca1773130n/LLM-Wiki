@@ -79,6 +79,45 @@ def test_static_site_renders_harness_sessions_and_search_entries(tmp_path):
     assert session_entries[0]["href"] == sample_session(project).href
 
 
+def test_static_site_renders_subagent_history_collapsed_under_parent(tmp_path):
+    project = tmp_path / "demo-project"
+    project.mkdir()
+    wiki = ProjectWiki.init(project, name="demo_project", source_kind="Repository")
+    parent = HarnessSession.from_dict({
+        **sample_session(project).to_dict(),
+        "metadata": {
+            "subagents": [
+                {
+                    "id": "claude-code:parent:agent-child",
+                    "title": "Child subagent session",
+                    "started_at": "2026-05-05T10:05:00Z",
+                    "message_count": 2,
+                    "tool_call_count": 3,
+                    "summary": "Subagent investigated frontend links.",
+                    "files_touched": ["llm_wiki/site/sessions.py"],
+                    "commands_run": ["pytest tests/test_harness_sessions.py -q"],
+                    "raw_transcript_path": "/tmp/parent/subagents/agent-child.jsonl",
+                }
+            ]
+        },
+    })
+    HarnessSessionStore(project / ".llm-wiki" / "harness_sessions").write_sessions([parent])
+
+    StaticSiteBuilder(site_title="LLM-Wiki").write_site(
+        ResearchGraph(), wiki.paths.wiki, wiki.paths.site
+    )
+
+    index_html = (wiki.paths.site / "sessions" / "index.html").read_text(encoding="utf-8")
+    detail_html = (wiki.paths.site / "sessions" / "demo-project" / f"{parent.filename}.html").read_text(encoding="utf-8")
+    assert "Subagents" in index_html
+    assert "1 subagent" in index_html
+    assert "<details" in detail_html
+    assert "Subagent sessions (1)" in detail_html
+    assert "Child subagent session" in detail_html
+    assert "Subagent investigated frontend links." in detail_html
+    assert "llm_wiki/site/sessions.py" in detail_html
+
+
 def test_harness_sessions_with_same_date_and_title_get_distinct_pages(tmp_path):
     project = tmp_path / "demo-project"
     project.mkdir()
