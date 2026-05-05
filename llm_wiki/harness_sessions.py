@@ -143,14 +143,47 @@ class HarnessSessionStore:
         return sessions
 
 
-DEFAULT_HARNESS_ROOTS: Tuple[Path, ...] = (
-    Path.home() / ".claude",
-    Path.home() / ".claude-personal1",
-    Path.home() / ".claude-personal2",
-    Path.home() / ".codex",
-    Path.home() / ".codex-personal1",
-    Path.home() / ".codex-personal2",
-)
+DEFAULT_HARNESS_ROOT_NAMES: Tuple[str, ...] = (".claude", ".codex")
+
+
+def discover_harness_roots(home: str | Path | None = None) -> List[Path]:
+    """Find local Claude Code and Codex config roots under ``home``.
+
+    The default accounts live at ``~/.claude`` and ``~/.codex``, but users can
+    keep multiple accounts in arbitrarily named sibling directories. Detect
+    hidden home-directory candidates by harness-specific marker files/directories
+    rather than by a fixed list of account names or suffixes.
+    """
+
+    base = Path(home).expanduser() if home is not None else Path.home()
+    candidates: List[Path] = []
+    for name in DEFAULT_HARNESS_ROOT_NAMES:
+        candidates.append(base / name)
+    try:
+        candidates.extend(
+            p for p in base.iterdir()
+            if p.is_dir() and p.name.startswith(".")
+        )
+    except OSError:
+        pass
+
+    roots: List[Path] = []
+    seen: set[Path] = set()
+    for candidate in sorted(set(candidates)):
+        if candidate in seen or not candidate.exists():
+            continue
+        if _root_supports_claude(candidate) or _root_supports_codex(candidate):
+            seen.add(candidate)
+            roots.append(candidate)
+    return roots
+
+
+def _root_supports_claude(root: Path) -> bool:
+    return any((root / marker).exists() for marker in ("projects", "history.jsonl", "settings.json", "settings.local.json"))
+
+
+def _root_supports_codex(root: Path) -> bool:
+    return any((root / marker).exists() for marker in ("sessions", "history.jsonl", "config.toml", "auth.json"))
 
 
 def discover_harness_sessions(
@@ -168,19 +201,18 @@ def discover_harness_sessions(
 
     project = Path(project_root).resolve()
     selected = {h.lower() for h in (harnesses or ("claude-code", "codex"))}
-    scan_roots = [Path(r).expanduser() for r in (roots or DEFAULT_HARNESS_ROOTS)]
+    scan_roots = [Path(r).expanduser() for r in roots] if roots is not None else discover_harness_roots()
     sessions: List[HarnessSession] = []
     seen: set[str] = set()
     for root in scan_roots:
         if not root.exists():
             continue
-        root_name = root.name.lower()
-        if "claude" in root_name and "claude-code" in selected:
+        if _root_supports_claude(root) and "claude-code" in selected:
             for session in _discover_claude_sessions(project, root):
                 if session.id not in seen:
                     seen.add(session.id)
                     sessions.append(session)
-        if "codex" in root_name and "codex" in selected:
+        if _root_supports_codex(root) and "codex" in selected:
             for session in _discover_codex_sessions(project, root):
                 if session.id not in seen:
                     seen.add(session.id)

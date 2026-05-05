@@ -1,6 +1,6 @@
 import json
 
-from llm_wiki.harness_sessions import discover_harness_sessions
+from llm_wiki.harness_sessions import discover_harness_roots, discover_harness_sessions
 from llm_wiki.project import ProjectWiki
 from llm_wiki.cli import main
 
@@ -64,6 +64,44 @@ def test_discover_codex_sessions_from_session_meta_cwd(tmp_path):
     assert "exec_command" in session.tools_used
     assert "python3 -m pytest tests/ -q" in session.commands_run
     assert "llm_wiki/site/js.py" in session.files_touched
+
+
+def test_discovers_dynamic_claude_and_codex_account_roots_without_fixed_names(tmp_path):
+    home = tmp_path / "home"
+    project = tmp_path / "demo-project"
+    project.mkdir()
+    claude_root = home / ".work-agent-alpha"
+    (claude_root / "projects").mkdir(parents=True)
+    codex_root = home / ".client-agent-beta"
+    (codex_root / "sessions").mkdir(parents=True)
+    ignored = home / ".claude-notes"
+    ignored.mkdir(parents=True)
+
+    roots = discover_harness_roots(home)
+
+    assert claude_root in roots
+    assert codex_root in roots
+    assert ignored not in roots
+
+
+def test_default_discovery_uses_dynamic_account_roots(tmp_path, monkeypatch):
+    home = tmp_path / "home"
+    project = tmp_path / "demo-project"
+    project.mkdir()
+    monkeypatch.setenv("HOME", str(home))
+    root = home / ".client-agent-beta"
+    session_dir = root / "sessions" / "2026" / "05" / "05"
+    session_dir.mkdir(parents=True)
+    (session_dir / "rollout-2026-05-05T11-00-00-abc.jsonl").write_text(
+        json.dumps({"timestamp": "2026-05-05T11:00:00Z", "type": "session_meta", "payload": {"id": "codex-abc", "cwd": str(project)}}) + "\n"
+        + json.dumps({"timestamp": "2026-05-05T11:00:01Z", "type": "response_item", "payload": {"type": "message", "role": "user", "content": [{"type": "input_text", "text": "Import dynamic root"}]}}) + "\n",
+        encoding="utf-8",
+    )
+
+    sessions = discover_harness_sessions(project, roots=None, harnesses=["codex"])
+
+    assert len(sessions) == 1
+    assert sessions[0].title == "Import dynamic root"
 
 
 def test_cli_sessions_discover_imports_matching_roots(tmp_path, capsys):
