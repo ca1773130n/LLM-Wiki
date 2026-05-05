@@ -35,6 +35,27 @@ def test_css_defines_stat_row_grid():
     assert "flex-direction: column" in CSS
 
 
+def test_css_session_pages_use_compact_readable_scale():
+    assert ".session-page" in CSS
+    assert ".session-page .stats" in CSS
+    assert "grid-template-columns: repeat(auto-fit, minmax(150px, 1fr))" in CSS
+    assert ".session-page .stat b" in CSS
+    assert "font-size: clamp(1.15rem, 1.8vw, 1.7rem)" in CSS
+    assert ".session-table" in CSS
+    assert "table-layout: fixed" in CSS
+    assert "text-overflow: ellipsis" in CSS
+    assert ".session-turn-list" in CSS
+    assert ".session-turn" in CSS
+
+
+def test_css_rails_have_breathing_room_padding():
+    assert "padding: var(--space-6) clamp(18px, 2vw, 32px)" in CSS
+    assert ".rail {" in CSS
+    assert "padding-inline: 10px" in CSS
+    assert ".toc-rail .toc" in CSS
+    assert "padding-inline: 12px" in CSS
+
+
 def test_css_button_min_block_size_on_mobile():
     """Buttons should hit the 44 px touch target on mobile breakpoints."""
     assert "min-block-size: 44px" in CSS
@@ -433,43 +454,24 @@ def test_css_bottom_nav_tap_targets_meet_44px():
     assert "min-block-size: 44px" in block.group(1)
 
 
-def test_shell_horizontal_padding_is_tight_at_desktop():
-    """The user has asked twice for a tighter LEFT margin on the shell:
-    the left rail should start ~8-16 px from the viewport edge regardless
-    of breakpoint. Both the 768 px and 1280 px ``.shell`` rules must use
-    ``clamp(8px, 1vw, 16px)`` for horizontal padding; the previous
-    ``var(--space-6) var(--space-5)`` (and the wider ``clamp(16px, 2vw, 24px)``)
-    are forbidden on ``.shell``."""
+def test_shell_horizontal_padding_has_breathing_room_at_desktop():
+    """The side rails need visible horizontal padding so the file tree and
+    right TOC are not glued to the browser edge."""
     import re
 
     css_no_comments = re.sub(r"/\*.*?\*/", "", CSS, flags=re.DOTALL)
 
     def _shell_block_in(media_query: str) -> str:
         idx = css_no_comments.index(media_query)
-        # Find the next ``.shell {`` opening brace AFTER the media-query
-        # opening brace, then capture up to its matching ``}``.
         shell_idx = css_no_comments.index(".shell {", idx)
         end = css_no_comments.index("}", shell_idx)
         return css_no_comments[shell_idx:end]
 
     block_768 = _shell_block_in("@media (min-width: 768px)")
-    assert "clamp(8px, 1vw, 16px)" in block_768, (
-        "@media (min-width: 768px) .shell must use clamp(8px, 1vw, 16px) "
-        "for horizontal padding"
-    )
-    assert "var(--space-5)" not in block_768, (
-        "@media (min-width: 768px) .shell must not use --space-5 padding"
-    )
+    assert "clamp(18px, 2vw, 32px)" in block_768
 
     block_1280 = _shell_block_in("@media (min-width: 1280px)")
-    assert "clamp(8px, 1vw, 16px)" in block_1280, (
-        "@media (min-width: 1280px) .shell must use clamp(8px, 1vw, 16px) "
-        "for horizontal padding"
-    )
-    assert "clamp(16px, 2vw, 24px)" not in block_1280, (
-        "@media (min-width: 1280px) .shell must not use the wider "
-        "clamp(16px, 2vw, 24px) horizontal padding"
-    )
+    assert "clamp(18px, 2vw, 32px)" in block_1280
 
 
 def test_table_does_not_use_display_block_in_outer_rule():

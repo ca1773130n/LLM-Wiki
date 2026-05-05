@@ -30,6 +30,20 @@ def _subagent_count_label(session: HarnessSession) -> str:
     return f"{count} subagent" + ("" if count == 1 else "s")
 
 
+def _turns(session: HarnessSession) -> List[Dict[str, object]]:
+    items = session.metadata.get("turns") if isinstance(session.metadata, dict) else []
+    if not isinstance(items, list):
+        return []
+    return [item for item in items if isinstance(item, dict) and str(item.get("text") or "").strip()]
+
+
+def _role_label(turn: Dict[str, object]) -> str:
+    role = str(turn.get("role") or "message").replace("_", " ").strip().title()
+    if role.lower() == "tool" and turn.get("name"):
+        return f"Tool · {turn.get('name')}"
+    return role or "Message"
+
+
 def session_search_entries(sessions: Iterable[HarnessSession]) -> List[Dict[str, object]]:
     entries: List[Dict[str, object]] = []
     for session in sessions:
@@ -101,6 +115,7 @@ def render_sessions_index(site_title: str, sessions: List[HarnessSession]) -> st
     harness_counts = Counter(session.harness for session in sessions)
     subagent_total = sum(len(_subagents(session)) for session in sessions)
     body = f"""
+<div class="session-page session-index-page">
 <section class="hero session-hero" aria-label="Agent session memory">
   <p class="eyebrow">Project memory · agent history</p>
   <h1>All sessions</h1>
@@ -118,11 +133,12 @@ def render_sessions_index(site_title: str, sessions: List[HarnessSession]) -> st
   <p class="muted">Top tools: {_esc(', '.join(f'{k} {v}' for k, v in tool_counts.most_common(8)) or 'None recorded.')}</p>
 </section>
 <section class="panel" id="sessions">
-  <table>
+  <div class="table-scroll"><table class="node-table session-table">
     <thead><tr><th>Session</th><th>Agent</th><th>Project</th><th>Date</th><th>Model</th><th>Msgs</th><th>Tools</th><th>Subagents</th></tr></thead>
     <tbody>{table_body}</tbody>
-  </table>
+  </table></div>
 </section>
+</div>
 """
     return page_shell(
         title="Sessions",
@@ -135,6 +151,39 @@ def render_sessions_index(site_title: str, sessions: List[HarnessSession]) -> st
         main_variant="wide",
         breadcrumbs_html=breadcrumbs([("Home", "../index.html"), ("Sessions", "")]),
         toc_html=toc([(2, "Stats", "stats"), (2, "Sessions", "sessions")]),
+    )
+
+
+def _render_conversation(session: HarnessSession) -> str:
+    turns = _turns(session)
+    if not turns:
+        return (
+            "<section class='panel session-conversation' id='conversation'>"
+            "<h2>Turn-by-turn conversation</h2>"
+            "<p class='muted'>No normalized turn transcript is attached yet. Re-run session discovery/import to populate redacted turns.</p>"
+            "</section>"
+        )
+    rows: List[str] = []
+    for idx, turn in enumerate(turns, start=1):
+        role = str(turn.get("role") or "message").strip().lower() or "message"
+        timestamp = str(turn.get("timestamp") or "")
+        text = str(turn.get("text") or "")
+        rows.append(
+            f"<article class='session-turn session-turn--{_esc(role)}'>"
+            "<header class='session-turn-header'>"
+            f"<span class='session-turn-index'>#{idx}</span>"
+            f"<span class='session-turn-role'>{_esc(_role_label(turn))}</span>"
+            f"<time>{_esc(timestamp)}</time>"
+            "</header>"
+            f"<pre class='session-turn-text'>{_esc(text)}</pre>"
+            "</article>"
+        )
+    return (
+        "<section class='panel session-conversation' id='conversation'>"
+        "<h2>Turn-by-turn conversation</h2>"
+        "<p class='muted'>Redacted transcript turns, rendered in chronological order like the reference session pages.</p>"
+        f"<div class='session-turn-list'>{''.join(rows)}</div>"
+        "</section>"
     )
 
 
@@ -194,6 +243,7 @@ def render_session_detail(site_title: str, session: HarnessSession, session_coun
     }
     outcome = _shorten(session.summary or session.redacted_preview or "No outcome summary recorded yet.", 720)
     body = f"""
+<div class="session-page session-detail-page">
 <script type="application/json" id="llmwiki-metadata">{_esc(json.dumps(metadata, ensure_ascii=False, sort_keys=True))}</script>
 <section class="hero session-hero" aria-label="Session Summary">
   <p class="eyebrow">{_esc(session.agent_label or session.harness)} · { _esc(session.date) } · { _esc(session.branch or 'unknown branch') }</p>
@@ -225,8 +275,10 @@ def render_session_detail(site_title: str, session: HarnessSession, session_coun
 <section class="panel" id="files"><h2>Files touched</h2>{list_items(session.files_touched, code=True, limit=18)}</section>
 <section class="panel" id="commands"><h2>Commands run</h2>{list_items(session.commands_run, code=True, limit=12)}</section>
 <section class="panel" id="tools"><h2>Tools used</h2>{list_items(session.tools_used, limit=24)}</section>
+{_render_conversation(session)}
 {_render_subagent_tree(session)}
 <section class="panel" id="preview"><h2>Redacted preview</h2><pre>{_esc(session.redacted_preview)}</pre></section>
+</div>
 """
     return page_shell(
         title=f"Session: {session.title or session.slug}",
@@ -242,6 +294,7 @@ def render_session_detail(site_title: str, session: HarnessSession, session_coun
             (2, "Timeline & size", "metadata"),
             (2, "Files touched", "files"),
             (2, "Commands run", "commands"),
+            (2, "Turn-by-turn conversation", "conversation"),
             (2, "Subagent sessions", "subagents"),
         ]),
     )

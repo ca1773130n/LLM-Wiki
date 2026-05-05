@@ -291,7 +291,7 @@ def _parse_claude_session(project: Path, root: Path, path: Path) -> Optional[Har
     model = _first_message_model(rows)
     slug = safe_slug(title or session_id)
     subagents = _claude_subagent_summaries(project, root, path, session_id)
-    metadata: Dict[str, object] = {"config_root": str(root), "transcript": str(path)}
+    metadata: Dict[str, object] = {"config_root": str(root), "transcript": str(path), "turns": _claude_turns(rows)}
     if subagents:
         metadata["subagents"] = subagents
     return HarnessSession(
@@ -386,7 +386,7 @@ def _parse_codex_session(project: Path, root: Path, path: Path) -> Optional[Harn
         commands_run=_dedupe(commands)[:50],
         raw_transcript_path=str(path),
         redacted_preview=preview,
-        metadata={"config_root": str(root), "transcript": str(path)},
+        metadata={"config_root": str(root), "transcript": str(path), "turns": _codex_turns(rows)},
     )
 
 
@@ -466,6 +466,75 @@ def _first_message_model(rows: Sequence[Mapping[str, object]]) -> str:
             if isinstance(value, str):
                 return value
     return ""
+
+
+def _redact_text(text: str) -> str:
+    if not text:
+        return ""
+    patterns = [
+        r"(?i)(api[_-]?key|token|secret|password|passwd|authorization|bearer)\s*[:=]\s*[^\s,;]+",
+        r"(?i)bearer\s+[A-Za-z0-9._~+\-/=]+",
+        r"sk-[A-Za-z0-9]{12,}",
+        r"ghp_[A-Za-z0-9]{20,}",
+        r"xox[baprs]-[A-Za-z0-9-]+",
+    ]
+    redacted = text
+    for pattern in patterns:
+        redacted = re.sub(pattern, "[REDACTED]", redacted)
+    return redacted
+
+
+def _turn_text(text: str, limit: int = 2400) -> str:
+    clean = _redact_text(text.strip())
+    if len(clean) <= limit:
+        return clean
+    return clean[:limit].rstrip() + "…"
+
+
+def _claude_turns(rows: Sequence[Mapping[str, object]], limit: int = 300) -> List[Dict[str, object]]:
+    turns: List[Dict[str, object]] = []
+    for row in rows:
+        role = row.get("type")
+        if role not in {"user", "assistant"}:
+            continue
+        timestamp = row.get("timestamp") if isinstance(row.get("timestamp"), str) else ""
+        msg = row.get("message")
+        if not isinstance(msg, dict):
+            continue
+        content = msg.get("content")
+        text = _content_to_text(content)
+        if text and not text.startswith("<environment_context>"):
+            turns.append({"role": str(role), "timestamp": timestamp, "text": _turn_text(text)})
+        if isinstance(content, list):
+            for item in content:
+                if isinstance(item, dict) and item.get("type") == "tool_use":
+                    name = str(item.get("name") or "tool")
+                    tool_text = _turn_text(json.dumps(item.get("input", {}), ensure_ascii=False, sort_keys=True), limit=1200)
+                    turns.append({"role": "tool", "timestamp": timestamp, "name": name, "text": tool_text})
+        if len(turns) >= limit:
+            break
+    return turns
+
+
+def _codex_turns(rows: Sequence[Mapping[str, object]], limit: int = 300) -> List[Dict[str, object]]:
+    turns: List[Dict[str, object]] = []
+    for row in rows:
+        timestamp = row.get("timestamp") if isinstance(row.get("timestamp"), str) else ""
+        payload = row.get("payload")
+        if not isinstance(payload, dict):
+            continue
+        if payload.get("type") == "message" and payload.get("role") in {"user", "assistant"}:
+            text = _content_to_text(payload.get("content"))
+            if text and not text.startswith("<environment_context>") and not text.startswith("<permissions instructions>"):
+                turns.append({"role": str(payload.get("role")), "timestamp": timestamp, "text": _turn_text(text)})
+        elif payload.get("type") == "function_call":
+            name = str(payload.get("name") or "function_call")
+            tool_text = _turn_text(str(payload.get("arguments") or ""), limit=1200)
+            if tool_text:
+                turns.append({"role": "tool", "timestamp": timestamp, "name": name, "text": tool_text})
+        if len(turns) >= limit:
+            break
+    return turns
 
 
 def _title_and_preview_from_claude(rows: Sequence[Mapping[str, object]]) -> Tuple[str, str]:

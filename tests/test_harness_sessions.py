@@ -29,6 +29,14 @@ def sample_session(project_root):
         commands_run=["pytest tests/test_harness_sessions.py -q"],
         decisions=["Treat harness sessions as first-class project memory."],
         redacted_preview="User asked to add harness session history pages.",
+        metadata={
+            "turns": [
+                {"role": "user", "timestamp": "2026-05-05T10:00:00Z", "text": "Please ingest Claude Code and Codex sessions."},
+                {"role": "assistant", "timestamp": "2026-05-05T10:01:00Z", "text": "I will add normalized project-memory session pages."},
+                {"role": "tool", "timestamp": "2026-05-05T10:02:00Z", "name": "Bash", "text": "pytest tests/test_harness_sessions.py -q"},
+                {"role": "assistant", "timestamp": "2026-05-05T10:42:00Z", "text": "Implemented session import and static pages."},
+            ]
+        },
     )
 
 
@@ -80,6 +88,11 @@ def test_static_site_renders_harness_sessions_and_search_entries(tmp_path):
     assert "Timeline &amp; size" in detail_html
     assert "Treat harness sessions as first-class project memory." in detail_html
     assert "llm_wiki/project.py" in detail_html
+    assert "Turn-by-turn conversation" in detail_html
+    assert "session-turn-list" in detail_html
+    assert "Please ingest Claude Code and Codex sessions." in detail_html
+    assert "I will add normalized project-memory session pages." in detail_html
+    assert "pytest tests/test_harness_sessions.py -q" in detail_html
 
     search = json.loads((wiki.paths.site / "search-index.json").read_text(encoding="utf-8"))
     session_entries = [entry for entry in search if entry["kind"] == "session"]

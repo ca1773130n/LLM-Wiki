@@ -401,10 +401,9 @@ hr {
      what makes the TOC column tall enough for the sticky inner aside
      to follow long-article scrolls. */
   gap: var(--space-3);
-  /* Trim horizontal padding — the doc tree should hug the viewport edge
-     so the file names aren't pushed inboard. Vertical padding stays
-     generous via ``--space-5``. */
-  padding: var(--space-5) clamp(2px, 0.4vw, 8px);
+  /* Restore breathing room around both rails. The previous 2-8 px shell gutter
+     made the file tree and TOC feel glued to the browser edge. */
+  padding: var(--space-5) clamp(14px, 2vw, 28px);
   /* sticky position requires no overflow:hidden on ancestors. */
   overflow: visible;
 }
@@ -673,10 +672,8 @@ details[open] > .doc-tree-folder-summary::before { transform: rotate(90deg); }
 @media (min-width: 768px) {
   .shell {
     grid-template-columns: var(--rail-w) 1fr;
-    /* Tight horizontal padding so the left rail starts ~8-16 px from the
-       viewport edge regardless of screen width. Vertical padding stays
-       generous via ``--space-6``. */
-    padding: var(--space-6) clamp(2px, 0.4vw, 8px);
+    /* Comfortable desktop gutters for left and right rails. */
+    padding: var(--space-6) clamp(18px, 2vw, 32px);
   }
   .rail {
     display: block;
@@ -685,6 +682,7 @@ details[open] > .doc-tree-folder-summary::before { transform: rotate(90deg); }
     align-self: start;
     max-height: calc(100vh - var(--topbar-height, 56px) - 32px);
     overflow-y: auto;
+    padding-inline: 10px;
   }
   .rail-toggle { display: none; }
 }
@@ -720,6 +718,7 @@ details[open] > .doc-tree-folder-summary::before { transform: rotate(90deg); }
     align-self: start;
     max-height: calc(100vh - var(--topbar-height, 56px) - 32px);
     overflow-y: auto;
+    padding-inline: 12px;
   }
 }
 
@@ -2067,6 +2066,122 @@ section.panel > h3,
   margin: 0;
 }
 
+/* Agent-session pages: compact Pratiyush-style memory/timeline view. */
+.session-page .hero {
+  padding-block: 8px 2px;
+}
+.session-page .lead {
+  font-size: 1rem;
+  line-height: 1.55;
+}
+.session-page .stats {
+  grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+  gap: 10px;
+  margin: var(--space-3) 0 var(--space-4);
+}
+.session-page .stat {
+  padding: 12px 14px;
+  gap: 4px;
+}
+.session-page .stat b,
+.session-page .stat .stat-value {
+  font-size: clamp(1.15rem, 1.8vw, 1.7rem);
+}
+.session-page .stat span,
+.session-page .stat .stat-label {
+  font-size: 11px;
+}
+.session-table {
+  font-size: .86rem;
+  table-layout: fixed;
+  width: 100%;
+}
+.session-table th,
+.session-table td {
+  padding: 7px 10px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  vertical-align: top;
+}
+.session-table th:nth-child(1),
+.session-table td:nth-child(1) { width: 34%; }
+.session-table th:nth-child(2),
+.session-table td:nth-child(2) { width: 10%; }
+.session-table th:nth-child(3),
+.session-table td:nth-child(3) { width: 10%; }
+.session-table th:nth-child(4),
+.session-table td:nth-child(4) { width: 9%; }
+.session-table th:nth-child(5),
+.session-table td:nth-child(5) { width: 12%; }
+.session-table th:nth-child(6),
+.session-table td:nth-child(6),
+.session-table th:nth-child(7),
+.session-table td:nth-child(7) { width: 6%; }
+.session-table th:nth-child(8),
+.session-table td:nth-child(8) { width: 9%; }
+.session-table td code {
+  display: inline-block;
+  max-width: 100%;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  vertical-align: bottom;
+}
+.session-table .session-link {
+  font-weight: 600;
+}
+.session-conversation {
+  gap: 12px;
+}
+.session-turn-list {
+  display: grid;
+  gap: 12px;
+}
+.session-turn {
+  border: 1px solid var(--rule);
+  border-radius: var(--radius);
+  background: var(--surface-2);
+  overflow: hidden;
+}
+.session-turn-header {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 12px;
+  border-bottom: 1px solid var(--rule);
+  font-family: var(--type-sans);
+  font-size: 12px;
+  color: var(--ink-muted);
+}
+.session-turn-role {
+  font-weight: 700;
+  color: var(--ink);
+  text-transform: uppercase;
+  letter-spacing: .05em;
+}
+.session-turn-index {
+  font-family: var(--type-mono);
+  color: var(--accent);
+}
+.session-turn-header time {
+  margin-left: auto;
+  font-family: var(--type-mono);
+  font-size: 11px;
+}
+.session-turn-text {
+  margin: 0;
+  border: 0;
+  border-radius: 0;
+  background: transparent;
+  padding: 12px;
+  font-size: 13px;
+  line-height: 1.55;
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+}
+.session-turn--user .session-turn-role { color: var(--accent); }
+.session-turn--assistant .session-turn-role { color: var(--ink); }
+.session-turn--tool .session-turn-role { color: var(--ink-muted); }
+
 /* Table scroll wrapper — keeps wide tables from busting mobile layout. */
 .table-scroll {
   overflow-x: auto;
@@ -2691,9 +2806,8 @@ body {
     max-width: var(--page-w);
     grid-template-columns: var(--rail-w) minmax(0, 1fr) var(--toc-w);
     gap: 24px;
-    /* Keep the left rail tight against the viewport edge — same clamp
-       used at the 768 px breakpoint so desktop and mid widths agree. */
-    padding: var(--space-6) clamp(2px, 0.4vw, 8px);
+    /* Comfortable desktop gutters for left and right rails. */
+    padding: var(--space-6) clamp(18px, 2vw, 32px);
   }
   .main {
     /* Detail and index pages share one column width so a user navigating
