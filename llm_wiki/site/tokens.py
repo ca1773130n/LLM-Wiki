@@ -36,6 +36,16 @@ CSS: str = r"""
   --good: #2a6f4f;
   --warn: #c08a1a;
   --danger: #b03b3b;
+  --session-path-fg: #245f4a;
+  --session-path-bg: #e7f1eb;
+  --session-path-border: #b8d8c7;
+  --session-tag-fg: #8a3a18;
+  --session-tag-bg: #f8e8dd;
+  --session-tag-border: #edc4ad;
+  --session-code-keyword: #8a3a18;
+  --session-code-string: #2f6f53;
+  --session-code-number: #7557b7;
+  --session-code-comment: #766f63;
   --shadow: 0 1px 2px rgba(20, 18, 15, .06);
   --radius: 6px;
   --type-serif: "Source Serif 4", "Iowan Old Style", Georgia, serif;
@@ -67,6 +77,16 @@ CSS: str = r"""
   --link: #f3aa82;             /* polish: AA on dark surfaces (was #f0a075) */
   --rule: #2c2a23;
   --code-bg: #1f1d18;
+  --session-path-fg: #9bd8b7;
+  --session-path-bg: #173326;
+  --session-path-border: #315f48;
+  --session-tag-fg: #ffc29f;
+  --session-tag-bg: #3a2117;
+  --session-tag-border: #6a3925;
+  --session-code-keyword: #ffb07c;
+  --session-code-string: #9bd8b7;
+  --session-code-number: #c5b6ff;
+  --session-code-comment: #948d80;
   --shadow: 0 1px 2px rgba(0, 0, 0, .5);
 }
 
@@ -2301,8 +2321,9 @@ section.panel > h3,
   border-radius: 0;
   background: transparent;
   padding: 8px 10px;
-  font-size: 10px;
-  line-height: 1.5;
+  font-family: var(--type-sans);
+  font-size: 12px;
+  line-height: 1.35;
   overflow-wrap: anywhere;
 }
 .session-turn-text > :first-child { margin-top: 0; }
@@ -2311,7 +2332,7 @@ section.panel > h3,
 .session-turn-text li,
 .session-turn-text blockquote,
 .session-turn-text table {
-  font-size: 10px;
+  font-size: 12px;
 }
 .session-turn-text pre {
   font-size: 9px;
@@ -2323,15 +2344,15 @@ section.panel > h3,
   display: inline-flex;
   align-items: center;
   vertical-align: baseline;
-  border: 1px solid color-mix(in srgb, var(--good) 34%, var(--rule));
+  border: 1px solid var(--session-path-border);
   border-radius: 999px;
-  background: color-mix(in srgb, var(--surface) 68%, var(--good) 12%);
-  color: var(--good);
+  background: var(--session-path-bg);
+  color: var(--session-path-fg);
   font-family: var(--type-mono);
-  font-size: .95em;
+  font-size: .82em;
   font-weight: 700;
-  line-height: 1.2;
-  padding: 1px 6px;
+  line-height: 1.15;
+  padding: 0 4px;
   margin: 0 1px;
   white-space: nowrap;
 }
@@ -2345,6 +2366,29 @@ section.panel > h3,
   margin: 0;
   white-space: inherit;
 }
+.session-code-block {
+  position: relative;
+  background: color-mix(in srgb, var(--code-bg) 82%, var(--surface));
+}
+.session-code-lang {
+  position: absolute;
+  top: 4px;
+  right: 6px;
+  border: 1px solid var(--rule);
+  border-radius: 999px;
+  padding: 0 5px;
+  color: var(--ink-muted);
+  background: var(--surface);
+  font-family: var(--type-mono);
+  font-size: 8px;
+  text-transform: uppercase;
+}
+.session-code-keyword { color: var(--session-code-keyword); font-weight: 800; }
+.session-code-command { color: var(--session-code-keyword); font-weight: 850; }
+.session-code-flag { color: var(--session-code-number); font-weight: 750; }
+.session-code-string { color: var(--session-code-string); }
+.session-code-number { color: var(--session-code-number); font-weight: 700; }
+.session-code-comment { color: var(--session-code-comment); font-style: italic; }
 .session-token,
 .session-command-chip,
 .session-tag-block {
@@ -2355,48 +2399,48 @@ section.panel > h3,
   border: 1px solid color-mix(in srgb, var(--accent) 28%, var(--rule));
   border-radius: 999px;
   font-family: var(--type-sans);
-  font-size: .95em;
+  font-size: .82em;
   font-weight: 700;
-  line-height: 1.2;
-  padding: 1px 6px;
+  line-height: 1.15;
+  padding: 0 4px;
   margin: 0 1px;
   white-space: nowrap;
   color: var(--ink);
   background: color-mix(in srgb, var(--surface) 72%, var(--accent-soft));
 }
 .session-token--path {
-  border-color: color-mix(in srgb, var(--good) 36%, var(--rule));
-  background: color-mix(in srgb, var(--surface) 68%, var(--good) 12%);
-  color: var(--good);
+  border-color: var(--session-path-border);
+  background: var(--session-path-bg);
+  color: var(--session-path-fg);
   font-family: var(--type-mono);
   font-weight: 650;
 }
 .session-token--tag {
-  border-color: color-mix(in srgb, var(--accent) 45%, var(--rule));
-  background: color-mix(in srgb, var(--surface) 60%, var(--accent-soft));
-  color: var(--accent);
+  border-color: var(--session-tag-border);
+  background: var(--session-tag-bg);
+  color: var(--session-tag-fg);
 }
 .session-command-chip {
-  gap: 4px;
-  border-radius: 7px;
-  border-color: color-mix(in srgb, var(--accent) 50%, var(--rule));
-  background: linear-gradient(90deg, color-mix(in srgb, var(--accent-soft) 72%, var(--surface)), var(--surface));
-  padding: 2px 5px 2px 2px;
+  gap: 3px;
+  border-radius: 5px;
+  border-color: var(--session-tag-border);
+  background: var(--session-tag-bg);
+  padding: 1px 4px 1px 1px;
   white-space: normal;
 }
 .session-tag-block {
-  gap: 5px;
-  border-radius: 7px;
-  border-color: color-mix(in srgb, var(--warn) 42%, var(--rule));
-  background: color-mix(in srgb, var(--surface) 62%, var(--warn) 10%);
-  padding: 2px 6px 2px 2px;
+  gap: 3px;
+  border-radius: 5px;
+  border-color: var(--session-tag-border);
+  background: var(--session-tag-bg);
+  padding: 1px 4px 1px 1px;
   white-space: normal;
 }
 .session-tag-name {
-  border-radius: 5px;
-  padding: 1px 5px;
+  border-radius: 4px;
+  padding: 0 4px;
   color: #14130f;
-  background: color-mix(in srgb, var(--warn) 82%, #fff);
+  background: var(--session-tag-border);
   font-family: var(--type-mono);
   font-weight: 800;
 }
@@ -2407,17 +2451,17 @@ section.panel > h3,
 .session-command-name,
 .session-command-message,
 .session-command-args {
-  border-radius: 5px;
-  padding: 1px 5px;
+  border-radius: 4px;
+  padding: 0 4px;
 }
 .session-command-name {
   font-family: var(--type-mono);
-  color: #fff;
-  background: var(--accent);
+  color: #14130f;
+  background: var(--session-tag-border);
 }
 .session-command-message {
-  color: var(--ink);
-  background: color-mix(in srgb, var(--surface) 72%, var(--accent-soft));
+  color: var(--session-tag-fg);
+  background: color-mix(in srgb, var(--session-tag-bg) 72%, var(--surface));
 }
 .session-command-args {
   color: var(--ink-muted);

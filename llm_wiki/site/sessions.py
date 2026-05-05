@@ -146,7 +146,66 @@ def _decorate_text_segment(segment: str) -> str:
     return segment
 
 
+_CODE_BLOCK_RE = re.compile(r"<pre><code(?: class=\"language-([^\"]+)\")?>(.*?)</code></pre>", re.DOTALL)
+_CODE_KEYWORD_RE = re.compile(
+    r"\b(def|class|return|if|else|elif|for|while|try|except|finally|with|import|from|as|"
+    r"const|let|var|function|async|await|new|throw|catch|interface|type|export|"
+    r"SELECT|FROM|WHERE|INSERT|UPDATE|DELETE|CREATE|TABLE|JOIN|GROUP|ORDER|BY)\b"
+)
+_CODE_NUMBER_RE = re.compile(r"\b(\d+(?:\.\d+)?)\b")
+_CODE_COMMENT_RE = re.compile(r"(^|\s)(#.*?$|//.*?$)", re.MULTILINE)
+_CODE_STRING_RE = re.compile(r"(&quot;.*?&quot;|&#x27;.*?&#x27;)")
+_CODE_SHELL_COMMAND_RE = re.compile(r"(^|\n)(\s*)([A-Za-z0-9_.@/+:-]+)(?=\s|$)")
+_CODE_SHELL_FLAG_RE = re.compile(r"(?<![\w-])(--?[A-Za-z0-9][A-Za-z0-9_-]*)\b")
+
+
+def _highlight_code_html(code_html: str, lang: str = "") -> str:
+    placeholders: List[str] = []
+
+    def stash(piece: str) -> str:
+        placeholders.append(piece)
+        idx = len(placeholders) - 1
+        key = ""
+        n = idx
+        while True:
+            key = chr(65 + (n % 26)) + key
+            n = n // 26 - 1
+            if n < 0:
+                break
+        return f"\ue100{key}\ue101"
+
+    code_html = _CODE_STRING_RE.sub(lambda m: stash(f"<span class='session-code-string'>{m.group(1)}</span>"), code_html)
+    code_html = _CODE_COMMENT_RE.sub(lambda m: f"{m.group(1)}" + stash(f"<span class='session-code-comment'>{m.group(2)}</span>"), code_html)
+    if lang.lower() in {"sh", "bash", "shell", "zsh"}:
+        code_html = _CODE_SHELL_COMMAND_RE.sub(lambda m: f"{m.group(1)}{m.group(2)}" + stash(f"<span class='session-code-command'>{m.group(3)}</span>"), code_html)
+        code_html = _CODE_SHELL_FLAG_RE.sub(lambda m: stash(f"<span class='session-code-flag'>{m.group(1)}</span>"), code_html)
+    code_html = _CODE_KEYWORD_RE.sub(lambda m: f"<span class='session-code-keyword'>{m.group(1)}</span>", code_html)
+    code_html = _CODE_NUMBER_RE.sub(lambda m: f"<span class='session-code-number'>{m.group(1)}</span>", code_html)
+    for idx, piece in enumerate(placeholders):
+        key = ""
+        n = idx
+        while True:
+            key = chr(65 + (n % 26)) + key
+            n = n // 26 - 1
+            if n < 0:
+                break
+        code_html = code_html.replace(f"\ue100{key}\ue101", piece)
+    return code_html
+
+
+def _highlight_code_blocks(rendered: str) -> str:
+    def repl(match: re.Match[str]) -> str:
+        lang = match.group(1) or ""
+        code = _highlight_code_html(match.group(2), lang)
+        lang_attr = f' class="language-{html.escape(lang, quote=True)}"' if lang else ""
+        label = f"<span class='session-code-lang'>{html.escape(lang)}</span>" if lang else ""
+        return f"<pre class='session-code-block'>{label}<code{lang_attr}>{code}</code></pre>"
+
+    return _CODE_BLOCK_RE.sub(repl, rendered)
+
+
 def _decorate_conversation_html(rendered: str) -> str:
+    rendered = _highlight_code_blocks(rendered)
     parts = re.split(r"(<[^>]+>)", rendered)
     skip_stack: List[str] = []
     out: List[str] = []

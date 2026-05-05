@@ -32,7 +32,7 @@ def sample_session(project_root):
         metadata={
             "turns": [
                 {"role": "user", "timestamp": "2026-05-05T10:00:00Z", "text": "Please ingest Claude Code and Codex sessions from llm_wiki/project.py for #project-memory.\n\n<command-name>/effort</command-name> <command-message>effort</command-message> <command-args></command-args>"},
-                {"role": "assistant", "timestamp": "2026-05-05T10:01:00Z", "text": "I will add **normalized** `project-memory` session pages.\n\n- Render sessions\n- Index turns"},
+                {"role": "assistant", "timestamp": "2026-05-05T10:01:00Z", "text": "I will add **normalized** `project-memory` session pages.\n\n- Render sessions\n- Index turns\n\n```python\ndef build_session():\n    return 42\n```\n\n```sh\nllm-wiki project build-site --project .\n```"},
                 {"role": "tool", "timestamp": "2026-05-05T10:02:00Z", "name": "Bash", "text": "pytest tests/test_harness_sessions.py -q"},
                 {"role": "assistant", "timestamp": "2026-05-05T10:42:00Z", "text": "Implemented session import and static pages. <status>ready</status>"},
             ]
@@ -120,6 +120,12 @@ def test_static_site_renders_harness_sessions_and_search_entries(tmp_path):
     assert "&lt;status&gt;" not in detail_html
     assert "I will add <strong>normalized</strong> <code>project-memory</code> session pages." in detail_html
     assert "<li>Render sessions</li>" in detail_html
+    assert "session-code-block" in detail_html
+    assert "session-code-lang'>python</span>" in detail_html
+    assert "session-code-keyword'>def</span> build_session" in detail_html
+    assert "session-code-keyword'>return</span> <span class='session-code-number'>42</span>" in detail_html
+    assert "session-code-command'>llm-wiki</span>" in detail_html
+    assert "session-code-flag'>--project</span>" in detail_html
     assert "session-tool-details" in detail_html
     assert "Tool use (1)" in detail_html
     assert "session-tool-use-text" in detail_html
