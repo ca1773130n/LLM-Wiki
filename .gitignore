@@ -18,3 +18,4 @@ __pycache__/
 
 # Local agent session markers
 .agent-sessions/
+.hermes/
