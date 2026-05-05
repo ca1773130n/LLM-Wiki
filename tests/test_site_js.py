@@ -23,6 +23,7 @@ from llm_wiki.site.js import (
     JS_DOC_TREE,
     JS_GRAPH,
     JS_SEARCH_PALETTE,
+    JS_SESSION_TURN_SCROLLSPY,
     JS_THEME_TOGGLE,
     JS_TOC_SCROLLSPY,
 )
@@ -449,6 +450,13 @@ def test_toc_scrollspy_smooth_scrolls_on_anchor_click():
     assert "scrollIntoView" in JS_TOC_SCROLLSPY
     assert "behavior: 'smooth'" in JS_TOC_SCROLLSPY
     assert "block: 'start'" in JS_TOC_SCROLLSPY
+
+
+def test_session_turn_scrollspy_highlights_visible_turn():
+    assert "data-session-turn-target" in JS_SESSION_TURN_SCROLLSPY
+    assert "aria-current" in JS_SESSION_TURN_SCROLLSPY
+    assert "li.is-active" not in JS_SESSION_TURN_SCROLLSPY  # CSS owns styling
+    assert "data-session-turn-target" in JS_BUNDLE_BASE
 
 
 def test_toc_scrollspy_targets_article_body_h2_h3():

@@ -96,10 +96,11 @@ def test_static_site_renders_harness_sessions_and_search_entries(tmp_path):
     assert "Conversation turns" in detail_html
     assert "href=\"#turn-1\"" in detail_html
     assert "All sessions" in detail_html
-    assert "session-back-button" in detail_html
+    assert "session-rail-back" in detail_html
     assert "href=\"../index.html\"" in detail_html
-    assert "session-reference-card" in detail_html
-    assert "Reference project" in detail_html
+    assert "data-session-turn-target=\"turn-1\"" in detail_html
+    assert "session-reference-card" not in detail_html
+    assert "Reference project" not in detail_html
     assert "main main--session" in detail_html
     assert "shell shell--session" in detail_html
     assert "href=\"#turn-3\"" in detail_html

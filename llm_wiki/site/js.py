@@ -3773,6 +3773,80 @@ JS_DOC_TREE = r"""
 """
 
 
+JS_SESSION_TURN_SCROLLSPY = r"""
+(function(){
+  function init(){
+    var navItems = document.querySelectorAll('.session-turn-nav li[data-session-turn-target]');
+    if (!navItems.length) return;
+    var byAnchor = {};
+    for (var i = 0; i < navItems.length; i++) {
+      var anchor = navItems[i].getAttribute('data-session-turn-target') || '';
+      if (anchor) byAnchor[anchor] = navItems[i];
+    }
+    var activeAnchor = null;
+    function setActive(anchor){
+      if (!anchor || anchor === activeAnchor) return;
+      activeAnchor = anchor;
+      for (var i = 0; i < navItems.length; i++) {
+        var item = navItems[i];
+        var on = (item.getAttribute('data-session-turn-target') || '') === anchor;
+        item.classList.toggle('is-active', on);
+        var link = item.querySelector('a');
+        if (link) {
+          if (on) link.setAttribute('aria-current', 'location');
+          else link.removeAttribute('aria-current');
+        }
+      }
+      var active = byAnchor[anchor];
+      if (active && active.scrollIntoView) {
+        try { active.scrollIntoView({ block: 'nearest' }); } catch (_) {}
+      }
+    }
+    document.addEventListener('click', function(evt){
+      var a = evt.target && evt.target.closest && evt.target.closest('.session-turn-nav a[href^="#turn-"]');
+      if (!a) return;
+      var href = a.getAttribute('href') || '';
+      if (href.length > 1) setActive(href.slice(1));
+    });
+    var turns = document.querySelectorAll('.session-turn[id]');
+    if (!turns.length) return;
+    if (typeof IntersectionObserver === 'undefined') {
+      setActive(turns[0].id);
+      return;
+    }
+    var visible = {};
+    var io = new IntersectionObserver(function(entries){
+      for (var i = 0; i < entries.length; i++) {
+        var ent = entries[i];
+        var id = ent.target.id;
+        if (ent.isIntersecting) visible[id] = ent.target;
+        else delete visible[id];
+      }
+      var best = null;
+      var bestTop = Infinity;
+      for (var id in visible) {
+        if (!Object.prototype.hasOwnProperty.call(visible, id)) continue;
+        var rect = visible[id].getBoundingClientRect();
+        var score = Math.abs(rect.top - 120);
+        if (score < bestTop) { bestTop = score; best = id; }
+      }
+      if (best) setActive(best);
+    }, {
+      rootMargin: '-12% 0px -68% 0px',
+      threshold: 0
+    });
+    for (var j = 0; j < turns.length; j++) io.observe(turns[j]);
+    setActive(turns[0].id);
+  }
+  if (document.readyState === 'loading'){
+    document.addEventListener('DOMContentLoaded', init);
+  } else {
+    init();
+  }
+})();
+"""
+
+
 # ``JS_BUNDLE_BASE`` is what every page loads (theme toggle, rail/TOC drawer,
 # search palette, subtype chip filter, doc-tree filter, TOC scrollspy).
 # ``JS_BUNDLE_GRAPH`` is the heavier graph renderer that we only ship on the
@@ -3786,6 +3860,7 @@ JS_BUNDLE_BASE = (
     + "\n" + JS_SUBTYPE_FILTER
     + "\n" + JS_DOC_TREE
     + "\n" + JS_TOC_SCROLLSPY
+    + "\n" + JS_SESSION_TURN_SCROLLSPY
 )
 
 JS_BUNDLE_GRAPH = JS_GRAPH
@@ -3805,6 +3880,7 @@ __all__ = [
     "JS_SUBTYPE_FILTER",
     "JS_DOC_TREE",
     "JS_TOC_SCROLLSPY",
+    "JS_SESSION_TURN_SCROLLSPY",
     "JS_GRAPH",
     "JS_BUNDLE",
     "JS_BUNDLE_BASE",

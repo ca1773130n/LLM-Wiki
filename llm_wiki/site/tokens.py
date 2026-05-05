@@ -703,13 +703,13 @@ details[open] > .doc-tree-folder-summary::before { transform: rotate(90deg); }
     grid-template-columns: var(--rail-w) minmax(0, 1fr) var(--toc-w);
   }
   .shell--session .session-detail-rail {
-    width: min(380px, calc(100vw - 48px));
+    width: min(300px, calc(100vw - 48px));
     min-width: 0;
-    margin-right: -180px;
+    margin-right: -96px;
     z-index: 30;
-    box-shadow: 0 18px 46px rgba(20, 18, 15, .16);
-    -webkit-backdrop-filter: blur(12px) saturate(130%);
-    backdrop-filter: blur(12px) saturate(130%);
+    box-shadow: 0 12px 30px rgba(20, 18, 15, .12);
+    -webkit-backdrop-filter: blur(10px) saturate(120%);
+    backdrop-filter: blur(10px) saturate(120%);
   }
   /* The wrapper grid-stretches to match <main>'s height (no align-self
      override) — that's what gives the inner sticky aside enough column
@@ -2153,83 +2153,33 @@ section.panel > h3,
 .session-page .panel dd {
   font-size: .95rem;
 }
-.session-page-actions {
+.rail-title-row {
   display: flex;
-  justify-content: flex-start;
-  margin: 0 0 var(--space-3);
-  font-family: var(--type-sans);
-}
-.session-back-button {
-  display: inline-flex;
   align-items: center;
-  gap: 6px;
-  padding: 7px 11px;
-  min-block-size: 34px;
+  justify-content: space-between;
+  gap: 8px;
+  padding: 0 8px 8px;
+}
+.rail-title-row .rail-section-label {
+  margin: 0;
+}
+.session-rail-back {
+  flex-shrink: 0;
+  padding: 3px 7px;
   border: 1px solid var(--rule);
   border-radius: 999px;
   background: var(--surface);
-  color: var(--ink);
+  color: var(--ink-muted);
+  font-family: var(--type-sans);
+  font-size: 11px;
+  font-weight: 700;
+  line-height: 1.2;
   text-decoration: none;
-  font-size: 13px;
-  box-shadow: var(--shadow);
 }
-.session-back-button:hover {
+.session-rail-back:hover,
+.session-rail-back:focus-visible {
   border-color: var(--accent);
   color: var(--accent);
-}
-.session-detail-page .session-hero {
-  position: relative;
-  padding-inline-end: min(34vw, 280px);
-  overflow: visible;
-}
-.session-reference-card {
-  position: absolute;
-  top: -14px;
-  right: 18px;
-  z-index: 30;
-  width: min(380px, calc(100vw - 48px));
-  padding: 12px 14px;
-  border: 1px solid color-mix(in srgb, var(--accent) 45%, var(--rule));
-  border-radius: calc(var(--radius) + 4px);
-  background: color-mix(in srgb, var(--surface) 92%, transparent);
-  box-shadow: 0 18px 46px rgba(20, 18, 15, .16);
-  -webkit-backdrop-filter: blur(12px) saturate(130%);
-  backdrop-filter: blur(12px) saturate(130%);
-  font-family: var(--type-sans);
-}
-.session-reference-label {
-  font-size: 10px;
-  letter-spacing: .12em;
-  text-transform: uppercase;
-  color: var(--ink-muted);
-  font-weight: 700;
-}
-.session-reference-title {
-  margin-top: 4px;
-  font-size: 14px;
-  line-height: 1.25;
-  font-weight: 700;
-  overflow-wrap: anywhere;
-}
-.session-reference-title a { text-decoration: none; }
-.session-reference-meta {
-  margin-top: 4px;
-  font-size: 11px;
-  line-height: 1.25;
-  color: var(--ink-muted);
-  overflow-wrap: anywhere;
-}
-@media (max-width: 720px) {
-  .session-detail-page .session-hero {
-    padding-inline-end: var(--space-5);
-    padding-block-start: 78px;
-  }
-  .session-reference-card {
-    top: -10px;
-    left: 18px;
-    right: 18px;
-    width: auto;
-  }
 }
 .session-detail-rail {
   background: color-mix(in srgb, var(--surface) 94%, transparent);
@@ -2256,9 +2206,17 @@ section.panel > h3,
   font-family: var(--type-sans);
 }
 .session-turn-nav a:hover,
-.session-turn-nav a:focus-visible {
+.session-turn-nav a:focus-visible,
+.session-turn-nav li.is-active > a {
   background: var(--accent-soft);
   color: var(--ink);
+}
+.session-turn-nav li.is-active > a {
+  box-shadow: inset 3px 0 0 var(--accent);
+}
+.session-turn-nav li.is-active .session-turn-nav-index,
+.session-turn-nav li.is-active .session-turn-nav-role {
+  color: var(--accent);
 }
 .session-turn-nav-index {
   grid-row: 1 / span 2;
@@ -2332,10 +2290,14 @@ section.panel > h3,
   border-radius: 0;
   background: transparent;
   padding: 8px 10px;
-  font-size: 8px;
-  line-height: 1.45;
+  font-size: 10px;
+  line-height: 1.5;
   white-space: pre-wrap;
   overflow-wrap: anywhere;
+}
+.session-turn--tool .session-turn-text {
+  font-size: 8px;
+  line-height: 1.45;
 }
 .session-turn--user .session-turn-role { color: var(--accent); }
 .session-turn--assistant .session-turn-role { color: var(--ink); }

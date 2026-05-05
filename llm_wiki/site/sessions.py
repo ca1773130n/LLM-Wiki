@@ -209,7 +209,7 @@ def _render_turn_rail(session: HarnessSession) -> str:
         role = _role_label(turn)
         summary = _turn_summary(turn)
         items.append(
-            "<li>"
+            f"<li data-session-turn-target=\"{_esc(anchor)}\">"
             f"<a href=\"#{_esc(anchor)}\">"
             f"<span class='session-turn-nav-index'>#{idx}</span>"
             f"<span class='session-turn-nav-role'>{_esc(role)}</span>"
@@ -221,31 +221,13 @@ def _render_turn_rail(session: HarnessSession) -> str:
     body = "".join(items) or "<li class='muted'>No normalized turns attached.</li>"
     return (
         "<aside class='rail session-detail-rail' id='rail' aria-label='Conversation turns'>"
+        "<div class='rail-title-row'>"
         "<div class='rail-section-label'>Conversation turns</div>"
+        "<a class='session-rail-back' href='../index.html'>All sessions</a>"
+        "</div>"
         "<nav class='session-turn-nav' aria-label='Conversation turns'>"
         f"<ol>{body}</ol>"
         "</nav></aside>"
-    )
-
-
-def _session_reference_card(session: HarnessSession) -> str:
-    metadata = session.metadata if isinstance(session.metadata, dict) else {}
-    repo_url = ""
-    for key in ("github_url", "repo_url", "repository_url", "remote_url"):
-        value = str(metadata.get(key) or "").strip()
-        if value:
-            repo_url = value
-            break
-    title = session.project_name or session.safe_project
-    project_html = _esc(title)
-    if repo_url.startswith(("http://", "https://")):
-        project_html = f"<a href='{_esc(repo_url)}'>{_esc(title)}</a>"
-    return (
-        "<aside class='session-reference-card' aria-label='Reference project'>"
-        "<div class='session-reference-label'>Reference project</div>"
-        f"<div class='session-reference-title'>{project_html}</div>"
-        f"<div class='session-reference-meta'>{_esc(session.branch or 'unknown branch')} · {_esc(session.agent_label or session.harness)}</div>"
-        "</aside>"
     )
 
 
@@ -307,11 +289,7 @@ def render_session_detail(site_title: str, session: HarnessSession, session_coun
     body = f"""
 <div class="session-page session-detail-page">
 <script type="application/json" id="llmwiki-metadata">{_esc(json.dumps(metadata, ensure_ascii=False, sort_keys=True))}</script>
-<nav class="session-page-actions" aria-label="Session navigation">
-  <a class="button session-back-button" href="../index.html">← All sessions</a>
-</nav>
 <section class="hero session-hero" aria-label="Session Summary">
-  {_session_reference_card(session)}
   <p class="eyebrow">{_esc(session.agent_label or session.harness)} · { _esc(session.date) } · { _esc(session.branch or 'unknown branch') }</p>
   <h1>Session Summary: {_esc(session.title or session.slug)}</h1>
   <p class="lead"><strong>Main outcome:</strong> {_esc(outcome)}</p>
