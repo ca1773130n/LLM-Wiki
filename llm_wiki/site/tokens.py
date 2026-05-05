@@ -52,7 +52,7 @@ CSS: str = r"""
   --rail-w: 200px;
   --toc-w: 200px;
   --read-w: min(1280px, 88ch);
-  --page-w: min(100vw - 16px, 1720px);
+  --page-w: min(100vw - 16px, 1640px);
   --topbar-height: 56px;
 }
 
@@ -699,6 +699,18 @@ details[open] > .doc-tree-folder-summary::before { transform: rotate(90deg); }
   .shell--graph {
     grid-template-columns: var(--rail-w) minmax(0, 1fr);
   }
+  .shell--session {
+    grid-template-columns: var(--rail-w) minmax(0, 1fr) var(--toc-w);
+  }
+  .shell--session .session-detail-rail {
+    width: min(380px, calc(100vw - 48px));
+    min-width: 0;
+    margin-right: -180px;
+    z-index: 30;
+    box-shadow: 0 18px 46px rgba(20, 18, 15, .16);
+    -webkit-backdrop-filter: blur(12px) saturate(130%);
+    backdrop-filter: blur(12px) saturate(130%);
+  }
   /* The wrapper grid-stretches to match <main>'s height (no align-self
      override) — that's what gives the inner sticky aside enough column
      to slide against. With grid stretch the rail keeps full column
@@ -1142,6 +1154,8 @@ details[open] > .doc-tree-folder-summary::before { transform: rotate(90deg); }
    the next section breathes. */
 .activity--compact {
   margin: var(--space-5) auto var(--space-7);
+  max-width: min(100%, 920px);
+  max-height: 340px;
   padding: var(--space-4) var(--space-4) var(--space-5);
   background: var(--surface);
   border: 1px solid var(--rule);
@@ -1262,6 +1276,7 @@ details[open] > .doc-tree-folder-summary::before { transform: rotate(90deg); }
   width: 100%;
   border: 0;
   outline: none;
+  box-shadow: 0 0 0 0 transparent;
   padding: 4px 0;
   font-family: var(--type-sans);
   font-size: 15px;
@@ -1274,7 +1289,7 @@ details[open] > .doc-tree-folder-summary::before { transform: rotate(90deg); }
   color: var(--ink-muted);
   opacity: .85;
 }
-.palette-box input#search:focus { outline: none; }
+.palette-box input#search:focus { outline: none; box-shadow: 0 0 0 0 transparent; }
 .palette-close {
   flex-shrink: 0;
   width: 24px;
@@ -1379,6 +1394,7 @@ details[open] > .doc-tree-folder-summary::before { transform: rotate(90deg); }
   background: var(--accent-soft);
   color: var(--ink);
   outline: none;
+  box-shadow: inset 0 0 0 2px color-mix(in srgb, var(--accent) 35%, transparent);
 }
 .palette-result.is-active > .palette-result-link .palette-result-title {
   color: var(--accent);
@@ -2130,15 +2146,93 @@ section.panel > h3,
   font-weight: 600;
 }
 .session-page code {
-  font-size: 14px;
+  font-size: 12px;
 }
 .session-page .panel li,
 .session-page .panel p,
 .session-page .panel dd {
-  font-size: 1rem;
+  font-size: .95rem;
+}
+.session-page-actions {
+  display: flex;
+  justify-content: flex-start;
+  margin: 0 0 var(--space-3);
+  font-family: var(--type-sans);
+}
+.session-back-button {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 7px 11px;
+  min-block-size: 34px;
+  border: 1px solid var(--rule);
+  border-radius: 999px;
+  background: var(--surface);
+  color: var(--ink);
+  text-decoration: none;
+  font-size: 13px;
+  box-shadow: var(--shadow);
+}
+.session-back-button:hover {
+  border-color: var(--accent);
+  color: var(--accent);
+}
+.session-detail-page .session-hero {
+  position: relative;
+  padding-inline-end: min(34vw, 280px);
+  overflow: visible;
+}
+.session-reference-card {
+  position: absolute;
+  top: -14px;
+  right: 18px;
+  z-index: 30;
+  width: min(380px, calc(100vw - 48px));
+  padding: 12px 14px;
+  border: 1px solid color-mix(in srgb, var(--accent) 45%, var(--rule));
+  border-radius: calc(var(--radius) + 4px);
+  background: color-mix(in srgb, var(--surface) 92%, transparent);
+  box-shadow: 0 18px 46px rgba(20, 18, 15, .16);
+  -webkit-backdrop-filter: blur(12px) saturate(130%);
+  backdrop-filter: blur(12px) saturate(130%);
+  font-family: var(--type-sans);
+}
+.session-reference-label {
+  font-size: 10px;
+  letter-spacing: .12em;
+  text-transform: uppercase;
+  color: var(--ink-muted);
+  font-weight: 700;
+}
+.session-reference-title {
+  margin-top: 4px;
+  font-size: 14px;
+  line-height: 1.25;
+  font-weight: 700;
+  overflow-wrap: anywhere;
+}
+.session-reference-title a { text-decoration: none; }
+.session-reference-meta {
+  margin-top: 4px;
+  font-size: 11px;
+  line-height: 1.25;
+  color: var(--ink-muted);
+  overflow-wrap: anywhere;
+}
+@media (max-width: 720px) {
+  .session-detail-page .session-hero {
+    padding-inline-end: var(--space-5);
+    padding-block-start: 78px;
+  }
+  .session-reference-card {
+    top: -10px;
+    left: 18px;
+    right: 18px;
+    width: auto;
+  }
 }
 .session-detail-rail {
-  background: var(--surface);
+  background: color-mix(in srgb, var(--surface) 94%, transparent);
   border: 1px solid var(--rule);
   border-radius: var(--radius);
   padding-block: 12px;
@@ -2184,8 +2278,9 @@ section.panel > h3,
   line-height: 1.35;
   color: var(--ink);
   overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
 }
 .session-turn-nav-more {
   padding: 8px;
@@ -2236,9 +2331,9 @@ section.panel > h3,
   border: 0;
   border-radius: 0;
   background: transparent;
-  padding: 12px;
-  font-size: 15px;
-  line-height: 1.65;
+  padding: 8px 10px;
+  font-size: 8px;
+  line-height: 1.45;
   white-space: pre-wrap;
   overflow-wrap: anywhere;
 }

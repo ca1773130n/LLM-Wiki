@@ -95,6 +95,13 @@ def test_static_site_renders_harness_sessions_and_search_entries(tmp_path):
     assert "session-turn-nav" in detail_html
     assert "Conversation turns" in detail_html
     assert "href=\"#turn-1\"" in detail_html
+    assert "All sessions" in detail_html
+    assert "session-back-button" in detail_html
+    assert "href=\"../index.html\"" in detail_html
+    assert "session-reference-card" in detail_html
+    assert "Reference project" in detail_html
+    assert "main main--session" in detail_html
+    assert "shell shell--session" in detail_html
     assert "href=\"#turn-3\"" in detail_html
     assert "Please ingest Claude Code and Codex sessions." in detail_html
     assert "I will add normalized project-memory session pages." in detail_html

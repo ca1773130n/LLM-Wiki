@@ -922,6 +922,9 @@ def page_shell(
     elif main_variant == "wide":
         main_class = "main main--wide"
         shell_class = "shell shell--wide"
+    elif main_variant == "session":
+        main_class = "main main--session"
+        shell_class = "shell shell--session"
     else:
         main_class = "main"
         shell_class = "shell"

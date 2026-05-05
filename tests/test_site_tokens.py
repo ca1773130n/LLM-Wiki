@@ -46,12 +46,19 @@ def test_css_session_pages_use_compact_readable_scale():
     assert "text-overflow: ellipsis" in CSS
     assert ".session-turn-list" in CSS
     assert ".session-turn-text" in CSS
-    assert "font-size: 15px" in CSS
-    assert "line-height: 1.65" in CSS
+    assert "font-size: 8px" in CSS
+    assert "line-height: 1.45" in CSS
     assert ".session-page code" in CSS
-    assert "font-size: 14px" in CSS
+    assert "font-size: 12px" in CSS
     assert ".session-turn-nav" in CSS
     assert ".session-detail-rail" in CSS
+    assert ".shell--session" in CSS
+    assert "grid-template-columns: var(--rail-w) minmax(0, 1fr) var(--toc-w)" in CSS
+    assert "width: min(380px, calc(100vw - 48px))" in CSS
+    assert "z-index: 30" in CSS
+    assert "box-shadow: 0 18px 46px" in CSS
+    assert ".session-reference-card" in CSS
+    assert ".session-back-button" in CSS
 
 
 def test_css_rails_have_breathing_room_padding():
