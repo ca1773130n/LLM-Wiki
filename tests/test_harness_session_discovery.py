@@ -151,6 +151,25 @@ def test_discovery_uses_plugged_project_root_not_neighbor_project(tmp_path):
     assert all(session.project_root == str(focused.resolve()) for session in sessions)
 
 
+def test_claude_project_directory_without_session_cwd_is_not_enough(tmp_path):
+    project = tmp_path / "focused-project"
+    project.mkdir()
+    root = tmp_path / ".claude-any-account"
+    session_dir = root / "projects" / str(project.resolve()).replace("/", "-")
+    session_dir.mkdir(parents=True)
+    (session_dir / "abc.jsonl").write_text(
+        "\n".join([
+            json.dumps({"type": "permission-mode", "sessionId": "abc"}),
+            json.dumps({"type": "user", "timestamp": "2026-05-05T10:00:00Z", "sessionId": "abc", "message": {"role": "user", "content": "No cwd here"}}),
+        ]) + "\n",
+        encoding="utf-8",
+    )
+
+    sessions = discover_harness_sessions(project, [root], harnesses=["claude-code"])
+
+    assert sessions == []
+
+
 def test_cli_sessions_discover_imports_matching_roots(tmp_path, capsys):
     project = tmp_path / "demo-project"
     project.mkdir()
@@ -167,6 +186,8 @@ def test_cli_sessions_discover_imports_matching_roots(tmp_path, capsys):
     assert main(["project", "sessions", "discover", "--project", str(project), "--root", str(root), "--harness", "codex", "--import"]) == 0
 
     out = capsys.readouterr().out
-    assert "Discovered harness sessions: 1" in out
+    assert f"Project working directory: {project.resolve()}" in out
+    assert "Project-attached harness sessions: 1" in out
+    assert "codex: 1" in out
     assert "Imported harness sessions: 1" in out
     assert (ProjectWiki.load(project).paths.harness_sessions / "codex").exists()

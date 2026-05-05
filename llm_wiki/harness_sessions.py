@@ -274,7 +274,7 @@ def _parse_claude_session(project: Path, root: Path, path: Path) -> Optional[Har
     rows = _parse_jsonl(path)
     if not rows:
         return None
-    if not _claude_path_matches_project(path, project) and not _rows_match_project(rows, project):
+    if not _rows_match_project(rows, project):
         return None
     session_id = _first_str(rows, "sessionId") or path.stem
     timestamps = [v for row in rows if isinstance((v := row.get("timestamp")), str)]

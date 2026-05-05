@@ -6,6 +6,7 @@ import argparse
 import asyncio
 import json
 import sys
+from collections import Counter
 from pathlib import Path
 from typing import Iterable, List
 
@@ -466,7 +467,10 @@ def project_main(argv: List[str] | None = None) -> int:
                 roots=args.root or None,
                 harnesses=args.harness or None,
             )
-            print(f"Discovered harness sessions: {len(sessions)}")
+            print(f"Project working directory: {wiki.project_root.resolve()}")
+            print(f"Project-attached harness sessions: {len(sessions)}")
+            for harness, count in sorted(Counter(session.harness for session in sessions).items()):
+                print(f"  {harness}: {count}")
             for session in sessions[:100]:
                 print(
                     f"  {session.date}  {session.harness}  {session.project_name}  "
