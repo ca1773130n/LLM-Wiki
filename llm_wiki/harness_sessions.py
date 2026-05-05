@@ -227,17 +227,21 @@ def discover_harness_sessions(
     return sessions
 
 
+def _is_claude_subagent_transcript(path: Path) -> bool:
+    return "subagents" in path.parts
+
+
 def _discover_claude_sessions(project: Path, root: Path) -> List[HarnessSession]:
     project_dir = root / "projects" / _claude_project_dir(project)
     candidates: List[Path] = []
     if project_dir.exists():
-        candidates.extend(project_dir.rglob("*.jsonl"))
+        candidates.extend(p for p in project_dir.rglob("*.jsonl") if not _is_claude_subagent_transcript(p))
     projects_root = root / "projects"
     if projects_root.exists():
         # Some account directories may encode paths differently, and history can
         # move between accounts. Scan all project transcripts but keep the
         # parser's strong cwd/path match before importing anything.
-        candidates.extend(projects_root.rglob("*.jsonl"))
+        candidates.extend(p for p in projects_root.rglob("*.jsonl") if not _is_claude_subagent_transcript(p))
     history = root / "history.jsonl"
     if history.exists():
         candidates.append(history)

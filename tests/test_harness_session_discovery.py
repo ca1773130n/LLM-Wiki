@@ -151,6 +151,29 @@ def test_discovery_uses_plugged_project_root_not_neighbor_project(tmp_path):
     assert all(session.project_root == str(focused.resolve()) for session in sessions)
 
 
+def test_claude_discovery_does_not_count_subagent_transcripts_as_sessions(tmp_path):
+    project = tmp_path / "focused-project"
+    project.mkdir()
+    root = tmp_path / ".claude-any-account"
+    session_dir = root / "projects" / str(project.resolve()).replace("/", "-")
+    subagent_dir = session_dir / "parent-session" / "subagents"
+    subagent_dir.mkdir(parents=True)
+    (session_dir / "parent-session.jsonl").write_text(
+        json.dumps({"type": "user", "timestamp": "2026-05-05T10:00:00Z", "cwd": str(project), "sessionId": "parent-session", "message": {"role": "user", "content": "Parent session"}}) + "\n",
+        encoding="utf-8",
+    )
+    (subagent_dir / "agent-child.jsonl").write_text(
+        json.dumps({"type": "user", "timestamp": "2026-05-05T10:01:00Z", "cwd": str(project), "sessionId": "parent-session", "message": {"role": "user", "content": "Child subagent session"}}) + "\n",
+        encoding="utf-8",
+    )
+
+    sessions = discover_harness_sessions(project, [root], harnesses=["claude-code"])
+
+    assert len(sessions) == 1
+    assert sessions[0].title == "Parent session"
+    assert "subagents" not in sessions[0].raw_transcript_path
+
+
 def test_claude_project_directory_without_session_cwd_is_not_enough(tmp_path):
     project = tmp_path / "focused-project"
     project.mkdir()
