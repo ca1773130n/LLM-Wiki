@@ -28,11 +28,22 @@
 <div class="article-body"><p class="eyebrow raw-meta">11.3 KB · updated 2026-05-05 · md</p>
 <h1 class="raw-title" title="README.md">README.md</h1>
 <p class="raw-path"><code>README.md</code></p>
-<article class="raw-page"><section class="markdown-body raw-markdown"><p>&lt;h1 align=&quot;center&quot;&gt;LLM-Wiki&lt;/h1&gt;</p>
-<p>&lt;p align=&quot;center&quot;&gt; &lt;strong&gt;Turn research notes, docs, code, and agent sessions into a typed wiki graph you can browse, search, query, and publish.&lt;/strong&gt; &lt;br /&gt; &lt;em&gt;A local-first knowledge pipeline for humans, coding agents, and long-lived project memory.&lt;/em&gt; &lt;/p&gt;</p>
-<p>&lt;p align=&quot;center&quot;&gt; &lt;a href=&quot;#-quick-start&quot;&gt;&lt;img src=&quot;https://img.shields.io/badge/Quick_Start-blue&quot; alt=&quot;Quick Start&quot; /&gt;&lt;/a&gt; &lt;a href=&quot;LICENSE&quot;&gt;&lt;img src=&quot;https://img.shields.io/badge/License-MIT-yellow&quot; alt=&quot;License: MIT&quot; /&gt;&lt;/a&gt; &lt;a href=&quot;docs/architecture.md&quot;&gt;&lt;img src=&quot;https://img.shields.io/badge/Architecture-typed_graph-8A2BE2&quot; alt=&quot;Architecture&quot; /&gt;&lt;/a&gt; &lt;a href=&quot;docs/session-history.md&quot;&gt;&lt;img src=&quot;https://img.shields.io/badge/Sessions-project_memory-38bdf8&quot; alt=&quot;Session History&quot; /&gt;&lt;/a&gt; &lt;a href=&quot;docs/quickstart.md&quot;&gt;&lt;img src=&quot;https://img.shields.io/badge/Docs-quickstart-d4a574&quot; alt=&quot;Docs&quot; /&gt;&lt;/a&gt; &lt;a href=&quot;https://ca1773130n.github.io/LLM-Wiki/&quot;&gt;&lt;img src=&quot;https://img.shields.io/badge/Demo-GitHub_Pages-00c853&quot; alt=&quot;Demo&quot; /&gt;&lt;/a&gt; &lt;/p&gt;</p>
+<article class="raw-page"><section class="markdown-body raw-markdown"><h1 align="center">LLM-Wiki</h1>
+<p align="center">
+  <strong>Turn research notes, docs, code, and agent sessions into a typed wiki graph you can browse, search, query, and publish.</strong>
+  <br />
+  <em>A local-first knowledge pipeline for humans, coding agents, and long-lived project memory.</em>
+</p>
+<p align="center">
+  <a href="#-quick-start"><img src="https://img.shields.io/badge/Quick_Start-blue" alt="Quick Start" /></a>
+  <a href="LICENSE"><img src="https://img.shields.io/badge/License-MIT-yellow" alt="License: MIT" /></a>
+  <a href="docs/architecture.md"><img src="https://img.shields.io/badge/Architecture-typed_graph-8A2BE2" alt="Architecture" /></a>
+  <a href="docs/session-history.md"><img src="https://img.shields.io/badge/Sessions-project_memory-38bdf8" alt="Session History" /></a>
+  <a href="docs/quickstart.md"><img src="https://img.shields.io/badge/Docs-quickstart-d4a574" alt="Docs" /></a>
+  <a href="https://ca1773130n.github.io/LLM-Wiki/"><img src="https://img.shields.io/badge/Demo-GitHub_Pages-00c853" alt="Demo" /></a>
+</p>
 <hr>
-<blockquote><p>[!TIP] You have papers in one folder, design docs in another, a living codebase, and weeks of Claude/Codex sessions explaining decisions. Where is the map?</p></blockquote>
+<div class="admonition admonition-tip"><p class="admonition-title">Tip</p><p>You have papers in one folder, design docs in another, a living codebase, and weeks of Claude/Codex sessions explaining decisions. Where is the map?</p></div>
 <p>LLM-Wiki builds that map. It compiles raw project knowledge into a validated graph, projects it into a readable markdown/wiki layer, and publishes a static site with search, graph navigation, AI-readable exports, and optional local MCP tools.</p>
 <blockquote><p><strong>Graphs that stay useful &gt; graphs that merely look impressive.</strong></p></blockquote>
 <p>LLM-Wiki is not a generic noun-phrase extractor. It uses a controlled ontology so the important objects stay explicit: papers, repositories, models, datasets, benchmarks, metrics, claims, evidence spans, concepts, source files, classes, functions, dependencies, trends, and imported agent sessions.</p>
@@ -51,7 +62,38 @@
 <h3 id="give-agents-structured-access">Give agents structured access</h3>
 <p>LLM-Wiki writes machine-readable exports alongside the human site:</p>
 <ul><li><code>search-index.json</code></li><li><code>graph.json</code></li><li><code>graph.jsonld</code></li><li><code>llms.txt</code></li><li><code>llms-full.txt</code></li><li><code>manifest.json</code></li><li>per-page <code>.txt</code> and <code>.json</code> siblings</li><li>optional MCP stdio server tools such as <code>search_nodes</code>, <code>node_context</code>, <code>search_facts</code>, and <code>timeline</code></li></ul>
-<p>&lt;table&gt; &lt;tr&gt; &lt;td width=&quot;50%&quot; valign=&quot;top&quot;&gt; &lt;h3&gt;🧭 Typed knowledge graph&lt;/h3&gt; &lt;p&gt;Controlled node and edge vocabularies keep the graph meaningful instead of becoming arbitrary entity soup.&lt;/p&gt; &lt;/td&gt; &lt;td width=&quot;50%&quot; valign=&quot;top&quot;&gt; &lt;h3&gt;🔍 Search + static site&lt;/h3&gt; &lt;p&gt;Generate a dependency-light site with command-palette search, source previews, related pages, graph view, and AI-friendly exports.&lt;/p&gt; &lt;/td&gt; &lt;/tr&gt; &lt;tr&gt; &lt;td width=&quot;50%&quot; valign=&quot;top&quot;&gt; &lt;h3&gt;🧠 Session history&lt;/h3&gt; &lt;p&gt;Turn local Claude Code/Codex sessions into searchable project memory without silently scanning private transcript stores.&lt;/p&gt; &lt;/td&gt; &lt;td width=&quot;50%&quot; valign=&quot;top&quot;&gt; &lt;h3&gt;🧩 Agent harnesses&lt;/h3&gt; &lt;p&gt;Export context/config for Claude Code, Codex, Gemini, Cursor, Kiro, and OpenCode so agents can consume the wiki.&lt;/p&gt; &lt;/td&gt; &lt;/tr&gt; &lt;tr&gt; &lt;td width=&quot;50%&quot; valign=&quot;top&quot;&gt; &lt;h3&gt;🗄️ Storage backends&lt;/h3&gt; &lt;p&gt;Use markdown, SQLite, optional Kuzu, Obsidian vaults, Cognee bundles, and Graphiti-style temporal facts.&lt;/p&gt; &lt;/td&gt; &lt;td width=&quot;50%&quot; valign=&quot;top&quot;&gt; &lt;h3&gt;🔐 Local-first by default&lt;/h3&gt; &lt;p&gt;The deterministic path needs no API key. Optional Claude CLI/OAuth and Codex CLI/OAuth adapters fit no-API-key workflows.&lt;/p&gt; &lt;/td&gt; &lt;/tr&gt; &lt;/table&gt;</p>
+<div class="table-scroll"><table>
+  <tr>
+    <td width="50%" valign="top">
+      <h3>🧭 Typed knowledge graph</h3>
+      <p>Controlled node and edge vocabularies keep the graph meaningful instead of becoming arbitrary entity soup.</p>
+    </td>
+    <td width="50%" valign="top">
+      <h3>🔍 Search + static site</h3>
+      <p>Generate a dependency-light site with command-palette search, source previews, related pages, graph view, and AI-friendly exports.</p>
+    </td>
+  </tr>
+  <tr>
+    <td width="50%" valign="top">
+      <h3>🧠 Session history</h3>
+      <p>Turn local Claude Code/Codex sessions into searchable project memory without silently scanning private transcript stores.</p>
+    </td>
+    <td width="50%" valign="top">
+      <h3>🧩 Agent harnesses</h3>
+      <p>Export context/config for Claude Code, Codex, Gemini, Cursor, Kiro, and OpenCode so agents can consume the wiki.</p>
+    </td>
+  </tr>
+  <tr>
+    <td width="50%" valign="top">
+      <h3>🗄️ Storage backends</h3>
+      <p>Use markdown, SQLite, optional Kuzu, Obsidian vaults, Cognee bundles, and Graphiti-style temporal facts.</p>
+    </td>
+    <td width="50%" valign="top">
+      <h3>🔐 Local-first by default</h3>
+      <p>The deterministic path needs no API key. Optional Claude CLI/OAuth and Codex CLI/OAuth adapters fit no-API-key workflows.</p>
+    </td>
+  </tr>
+</table></div>
 <hr>
 <h2 id="quick-start">🚀 Quick Start</h2>
 <h3 id="1-install">1. Install</h3>
@@ -166,15 +208,19 @@ llm_wiki project deploy --force</code></pre>
   -q</code></pre>
 <p>Run the full suite:</p>
 <pre><code class="language-bash">PYTEST_DISABLE_PLUGIN_AUTOLOAD=1 python3 -m pytest tests/ -q</code></pre>
-<blockquote><p>[!NOTE] If you add or change docs, run <code>llm_wiki project compile</code> before <code>build-site</code>; docs are source inputs, not just static files.</p></blockquote>
+<div class="admonition admonition-note"><p class="admonition-title">Note</p><p>If you add or change docs, run <code>llm_wiki project compile</code> before <code>build-site</code>; docs are source inputs, not just static files.</p></div>
 <hr>
 <h2 id="contributing">🤝 Contributing</h2>
 <p>Contributions are welcome.</p>
 <ol><li>Fork the repository.</li><li>Create a branch: <code>git checkout -b feature/my-change</code>.</li><li>Make the change with tests or docs.</li><li>Run the relevant pytest command.</li><li>Commit and open a pull request.</li></ol>
 <p>Please open an issue first for large changes to ontology, extraction behavior, generated routes, or deploy semantics.</p>
 <hr>
-<p>&lt;p align=&quot;center&quot;&gt; &lt;strong&gt;Stop losing project knowledge in scattered files and forgotten chats. Build the map once, then keep it alive.&lt;/strong&gt; &lt;/p&gt;</p>
-<p>&lt;p align=&quot;center&quot;&gt; MIT License &amp;copy; LLM-Wiki Contributors &lt;/p&gt;</p></section></article></div>
+<p align="center">
+  <strong>Stop losing project knowledge in scattered files and forgotten chats. Build the map once, then keep it alive.</strong>
+</p>
+<p align="center">
+  MIT License &copy; LLM-Wiki Contributors
+</p></section></article></div>
 <footer class="article-footer">
 
 </footer>

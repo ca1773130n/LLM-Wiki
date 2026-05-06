@@ -938,6 +938,30 @@ details[open] > .doc-tree-folder-summary::before { transform: rotate(90deg); }
 .raw-page .raw-markdown {
   font-family: var(--type-serif);
 }
+.admonition {
+  margin: var(--space-4) 0;
+  padding: var(--space-3) var(--space-4);
+  border: 1px solid var(--rule);
+  border-left: 4px solid var(--accent);
+  border-radius: 6px;
+  background: var(--surface-2);
+  color: var(--ink);
+}
+.admonition-title {
+  margin: 0 0 var(--space-2);
+  font-family: var(--type-sans);
+  font-weight: 800;
+  color: var(--accent);
+}
+.admonition-title + p,
+.admonition > :last-child {
+  margin-bottom: 0;
+}
+.admonition-tip { border-left-color: var(--accent); }
+.admonition-note { border-left-color: var(--ink-muted); }
+.admonition-important { border-left-color: #8b5cf6; }
+.admonition-warning { border-left-color: #f59e0b; }
+.admonition-caution { border-left-color: #ef4444; }
 .raw-meta {
   font-family: var(--type-sans);
   text-transform: uppercase;

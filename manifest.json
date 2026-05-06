@@ -28,8 +28,8 @@
     },
     {
       "path": "assets/style.css",
-      "sha256": "0470ccceed07eb5c2bd365080f42f86ae5b9de80dee95c436300b0718f1446a4",
-      "size": 91396
+      "sha256": "6e2693e010f36eb2acd566e051acd19fb70f593ae914bd0e2367f59c8e3664bc",
+      "size": 92102
     },
     {
       "path": "concepts/4d-gaussian-splatting.html",
@@ -2848,8 +2848,8 @@
     },
     {
       "path": "entities/map.html",
-      "sha256": "34f58ace906f4db10962bdd8c12fd566740cf7e80958681ba4c61a541ee371e9",
-      "size": 148760
+      "sha256": "41b915457489677658a974a792ed0d87952b6d13cc831f478f6d567b91a52051",
+      "size": 148738
     },
     {
       "path": "entities/map.json",
@@ -10573,7 +10573,7 @@
     },
     {
       "path": "raw/llm-wiki-site-markdown-py.html",
-      "sha256": "20469a97dc8c3bed05d13b97f9a2a3e7815373ec854ad182f3dcbd5464453fc9",
+      "sha256": "1540933079947215717a368952d24769c42d79b60c48552d4c4e0dcf374ef203",
       "size": 132042
     },
     {
@@ -10603,7 +10603,7 @@
     },
     {
       "path": "raw/llm-wiki-site-tokens-py.html",
-      "sha256": "1422ca2890c8512afde415fd1dee0e841a2958f77ba6ce07a3ac3bb31444fc41",
+      "sha256": "89fc4bf1f27c114af19c862f4c3cc23dc550dac0f01d66586094c02cf42618ed",
       "size": 132032
     },
     {
@@ -10648,8 +10648,8 @@
     },
     {
       "path": "raw/readme-md.html",
-      "sha256": "eb3e082a5fdcd873f43603b6f59430b7170d1a16388b5431155fb02c837ab3bb",
-      "size": 149247
+      "sha256": "7d41ef275823b0873b2b5a9fc22311ef03de626fa32b9724a4bfdf650e77eea1",
+      "size": 148660
     },
     {
       "path": "raw/readme-md.json",
@@ -10978,7 +10978,7 @@
     },
     {
       "path": "raw/tests-test-raw-pages-py.html",
-      "sha256": "b52ff435212eaf2577d964a877c865f82aed1cbdafb79c91d486294f5689ba9e",
+      "sha256": "89a40b3e5bf9311fc0bdf19f320c5ffe2096656f76fb0fdd357060829f0b34ea",
       "size": 132056
     },
     {
@@ -13498,7 +13498,7 @@
     },
     {
       "path": "sessions/llm-wiki/2026-04-27-commit-moified-files-so-far-46521d6e.html",
-      "sha256": "5758d9a8566c3a9b5243136cbf798d3811fb046cef716a6e2ab58bed45185a05",
+      "sha256": "26864c557b6d0ede05105b6c6b2853609f3863c80f0e0ee343e063e7267c005d",
       "size": 510105
     },
     {
@@ -13558,7 +13558,7 @@
     },
     {
       "path": "sessions/llm-wiki/2026-05-05-caveat-the-messages-below-were-generated-by-the-user-while-running-local-commands-do-not-respo-02982c9a.html",
-      "sha256": "d1a913ef4c707f9ab43b949037ed6f3c14bd33d7e65c5fe8d988f107d2ada24a",
+      "sha256": "1246ec0dfda8b0b6c92725c6faf90bfeb05f129adc4f5360eafb6c8e7f10298b",
       "size": 32552
     },
     {
