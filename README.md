@@ -1,9 +1,9 @@
 <h1 align="center">LLM-Wiki</h1>
 
 <p align="center">
-  <strong>Turn research notes, docs, code, and agent sessions into a typed wiki graph you can browse, search, query, and publish.</strong>
+  <strong>Turn research notes, docs, code, and agent sessions into an agent-native wiki graph.</strong>
   <br />
-  <em>A local-first knowledge pipeline for humans, coding agents, and long-lived project memory.</em>
+  <em>A local-first implementation of Andrej Karpathy's LLM Wiki pattern: persistent markdown knowledge, maintained for agents first.</em>
 </p>
 
 <p align="center">
@@ -18,9 +18,13 @@
 ---
 
 > [!TIP]
-> You have papers in one folder, design docs in another, a living codebase, and weeks of Claude/Codex sessions explaining decisions. Where is the map?
+> Andrej Karpathy's [`llm-wiki.md`](https://gist.github.com/karpathy/442a6bf555914893e9891c11519de94f) sketched the core pattern: raw sources stay immutable, an LLM maintains a persistent markdown wiki, and that wiki compounds as new sources and questions arrive.
 
-LLM-Wiki builds that map. It compiles raw project knowledge into a validated graph, projects it into a readable markdown/wiki layer, and publishes a static site with search, graph navigation, AI-readable exports, and optional local MCP tools.
+Many follow-up projects implement that idea with a similar architecture and philosophy: sources in, markdown pages out, with an agent doing the bookkeeping. LLM-Wiki follows the same lineage, but adds a production-oriented layer around it: a validated typed graph, deterministic rebuilds, static publishing, agent-readable exports, MCP access, local session-history import, and optional graph/storage backends.
+
+The important framing: **LLM-Wiki is for agents first.** Humans can browse the generated site, but the primary consumer is a coding/research agent that needs durable project memory it can search, cite, update, lint, and carry across sessions.
+
+LLM-Wiki compiles raw project knowledge into a validated graph, projects it into a readable markdown/wiki layer, and publishes a static site with search, graph navigation, AI-readable exports, and optional local MCP tools.
 
 > **Graphs that stay useful > graphs that merely look impressive.**
 
@@ -32,13 +36,25 @@ raw sources → validated typed graph → markdown/wiki projection → static si
 
 ---
 
-## ✨ What you get
+## ✨ What LLM-Wiki adds to the Karpathy pattern
 
-### Explore a real project wiki
+### Start with the same philosophy
+
+The baseline LLM Wiki idea is deliberately simple:
+
+```text
+raw sources → agent-maintained markdown wiki → compounding project memory
+```
+
+LLM-Wiki keeps that philosophy. Raw sources remain the source of truth. Generated wiki pages are durable artifacts, not throwaway chat answers. New information should update existing pages, indexes, contradictions, comparisons, and source summaries instead of vanishing into a conversation log.
+
+### Add structure agents can trust
 
 Compile a project into a browsable static site with home, sources, concepts, entities, papers, repos, topics, syntheses, open questions, sessions, timeline, graph view, and AI sibling files.
 
-The site is just files under `.llm-wiki/site/`: easy to serve locally, push to GitHub Pages, copy to an internal server, or hand to another agent.
+### Bridge human-readable pages and agent-readable context
+
+The site is just files under `.llm-wiki/site/`: easy for humans to inspect, easy to serve locally, easy to push to GitHub Pages, and easy to hand to another agent. Every major page can have machine-friendly siblings, so an agent can retrieve the same knowledge through search JSON, graph JSON, `llms.txt`, MCP tools, or plain markdown/text.
 
 ### Keep research and code in the same memory system
 
@@ -57,7 +73,7 @@ No surprise scraping: normal builds read already-imported `.llm-wiki/harness_ses
 
 ### Give agents structured access
 
-LLM-Wiki writes machine-readable exports alongside the human site:
+The generated website is useful, but the agent interfaces are the point. LLM-Wiki writes machine-readable exports alongside the browseable pages:
 
 - `search-index.json`
 - `graph.json`
@@ -71,8 +87,8 @@ LLM-Wiki writes machine-readable exports alongside the human site:
 <table>
   <tr>
     <td width="50%" valign="top">
-      <h3>🧭 Typed knowledge graph</h3>
-      <p>Controlled node and edge vocabularies keep the graph meaningful instead of becoming arbitrary entity soup.</p>
+      <h3>🧭 Validated typed graph</h3>
+      <p>Karpathy's markdown-wiki idea gains a controlled node/edge vocabulary, so agents do not lose meaning in arbitrary entity soup.</p>
     </td>
     <td width="50%" valign="top">
       <h3>🔍 Search + static site</h3>
@@ -261,7 +277,7 @@ https://<github-owner>.github.io/<repo-name>/
 
 | Interface | Command / Artifact | Use it for |
 |---|---|---|
-| Static site | `.llm-wiki/site/index.html` | Human browsing, search, graph exploration, Pages deploys |
+| Static site | `.llm-wiki/site/index.html` | Human inspection, graph exploration, Pages deploys, and linkable context for agents |
 | Search index | `.llm-wiki/site/search-index.json` | Fast local search and agent retrieval |
 | Graph JSON | `.llm-wiki/graph.json` and `.llm-wiki/site/graph.json` | Authoritative graph payloads |
 | LLM text exports | `llms.txt`, `llms-full.txt`, per-page `.txt` | Context packs for agents |
@@ -275,7 +291,7 @@ https://<github-owner>.github.io/<repo-name>/
 
 ## 🔧 Under the hood
 
-LLM-Wiki is a pipeline, not a dashboard bolted onto a folder.
+LLM-Wiki is a concrete, agent-first implementation of the LLM Wiki pattern, not a dashboard bolted onto a folder.
 
 | Stage | What happens |
 |---|---|
@@ -342,7 +358,7 @@ Please open an issue first for large changes to ontology, extraction behavior, g
 ---
 
 <p align="center">
-  <strong>Stop losing project knowledge in scattered files and forgotten chats. Build the map once, then keep it alive.</strong>
+  <strong>Karpathy's LLM Wiki idea gives agents a memory pattern. LLM-Wiki turns that pattern into a typed, publishable, queryable project system.</strong>
 </p>
 
 <p align="center">
