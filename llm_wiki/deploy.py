@@ -287,14 +287,27 @@ class GitHubPagesDeployer:
         if result.returncode == 0:
             print(f"Enabled GitHub Pages: {info.pages_url}")
             return
-        # 422 == already configured; treat as success.
+        # GitHub returns 422 for several very different cases. Only treat the
+        # explicit "already exists/configured" shape as success; unsupported
+        # plans/private repos also return 422 and otherwise look like a
+        # successful deploy even though Pages will keep serving 404.
         body = (result.stdout or "") + (result.stderr or "")
-        if "422" in body or "already" in body.lower():
+        body_lower = body.lower()
+        if "already" in body_lower or "exists" in body_lower:
             print(f"GitHub Pages already enabled: {info.pages_url}")
             return
-        print(
+        if "current plan" in body_lower or "does not support" in body_lower:
+            raise DeployError(
+                "GitHub Pages was not enabled: this repository/account plan "
+                "does not support Pages for the current repository. The "
+                f"{info.repo!r} site files were pushed to gh-pages, but "
+                "github.io will keep returning 404 until the repo is public "
+                "or the account/organization plan supports Pages for it."
+            )
+        raise DeployError(
             "Could not enable GitHub Pages via gh CLI. "
-            f"Configure manually at https://github.com/{info.owner}/{info.repo}/settings/pages"
+            f"Configure manually at https://github.com/{info.owner}/{info.repo}/settings/pages\n"
+            f"gh output: {body.strip()}"
         )
 
     def _git(

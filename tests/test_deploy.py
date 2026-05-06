@@ -11,8 +11,11 @@ import os
 import shutil
 import subprocess
 from pathlib import Path
+from unittest.mock import patch
 
 import pytest
+
+_REAL_SUBPROCESS_RUN = subprocess.run
 
 from llm_wiki.deploy import (
     DeployError,
@@ -191,6 +194,36 @@ def test_force_push_refuses_protected_branch(tmp_path):
     with pytest.raises(DeployError) as exc:
         GitHubPagesDeployer(project).deploy(site, branch="main", force_push=True)
     assert "protected" in str(exc.value).lower()
+
+
+def test_enable_pages_reports_unsupported_private_repo_plan(tmp_path):
+    project, bare = _make_project_with_remote(tmp_path)
+    site = _make_site(project)
+    deployer = GitHubPagesDeployer(project)
+
+    failed = subprocess.CompletedProcess(
+        args=["gh"],
+        returncode=1,
+        stdout='{"message":"Your current plan does not support GitHub Pages for this repository.","status":"422"}',
+        stderr="gh: Your current plan does not support GitHub Pages for this repository. (HTTP 422)",
+    )
+    def fake_run(args, *run_args, **run_kwargs):
+        if args and args[0] == "gh":
+            return failed
+        return _REAL_SUBPROCESS_RUN(args, *run_args, **run_kwargs)
+
+    with patch("llm_wiki.deploy.shutil.which", return_value="/usr/bin/gh"), patch(
+        "llm_wiki.deploy.subprocess.run", side_effect=fake_run
+    ):
+        with pytest.raises(DeployError) as exc:
+            deployer.deploy(site, enable_pages=True)
+
+    message = str(exc.value).lower()
+    assert "does not support pages" in message or "does not support" in message
+    assert "gh-pages" in message
+    # The site branch was still pushed; only Pages activation failed.
+    files = _list_remote_tree(bare, "refs/heads/gh-pages")
+    assert "index.html" in files
 
 
 # -- URL parsing ---------------------------------------------------------

@@ -28,6 +28,7 @@ from __future__ import annotations
 import html
 import re
 from dataclasses import dataclass
+from html.parser import HTMLParser
 from typing import Callable, List, Optional, Tuple
 
 
@@ -59,12 +60,147 @@ _OL_RE = re.compile(r"^(\s*)(\d+)\.\s+(.*)$")
 _UL_RE = re.compile(r"^(\s*)([-*+])\s+(.*)$")
 _BLOCKQUOTE_RE = re.compile(r"^\s*>\s?(.*)$")
 _TABLE_SEP_RE = re.compile(r"^\s*\|?\s*:?-+:?\s*(\|\s*:?-+:?\s*)+\|?\s*$")
+_ADMONITION_RE = re.compile(r"^\[!(NOTE|TIP|IMPORTANT|WARNING|CAUTION)\]\s*(.*)$", re.IGNORECASE)
+_HTML_TAG_START_RE = re.compile(r"^\s*<([A-Za-z][A-Za-z0-9:-]*)(?:\s|>|/>)")
+_HTML_CLOSE_RE = re.compile(r"</([A-Za-z][A-Za-z0-9:-]*)\s*>")
+_HTML_OPEN_RE = re.compile(r"<([A-Za-z][A-Za-z0-9:-]*)(?:\s[^<>]*)?>")
+_HTML_SELF_CLOSE_RE = re.compile(r"<([A-Za-z][A-Za-z0-9:-]*)(?:\s[^<>]*)?/>")
+_HTML_VOID_TAGS = {"area", "base", "br", "col", "embed", "hr", "img", "input", "link", "meta", "param", "source", "track", "wbr"}
+_HTML_BLOCK_TAGS = {
+    "address", "article", "aside", "blockquote", "details", "div", "dl", "fieldset", "figcaption", "figure", "footer", "form", "h1", "h2", "h3", "h4", "h5", "h6", "header", "hr", "main", "nav", "ol", "p", "picture", "pre", "section", "table", "tbody", "td", "tfoot", "th", "thead", "tr", "ul",
+}
+_ALLOWED_HTML_TAGS = _HTML_BLOCK_TAGS | {
+    "a", "abbr", "b", "br", "caption", "cite", "code", "col", "colgroup", "dd", "del", "dfn", "dt", "em", "i", "img", "ins", "kbd", "li", "mark", "s", "small", "source", "span", "strong", "sub", "summary", "sup", "u",
+}
+_ALLOWED_HTML_ATTRS = {
+    "abbr", "align", "alt", "aria-label", "class", "colspan", "height", "href", "loading", "media", "rel", "rowspan", "src", "srcset", "target", "title", "type", "valign", "width",
+}
+_URL_ATTRS = {"href", "src", "srcset"}
+_SAFE_URL_RE = re.compile(r"^(?:https?:|mailto:|#|/|\.\.?/|[^:]+$)", re.IGNORECASE)
 
 
 def _slug_anchor(text: str) -> str:
     out = re.sub(r"[^a-z0-9]+", "-", text.lower()).strip("-")
     out = re.sub(r"-+", "-", out)
     return out or "section"
+
+
+# ---------------------------------------------------------------------------
+# Raw HTML / GitHub admonition helpers
+# ---------------------------------------------------------------------------
+
+class _SafeHtmlRenderer(HTMLParser):
+    """Allow a small GitHub-README-like HTML subset and escape everything else."""
+
+    def __init__(self) -> None:
+        super().__init__(convert_charrefs=False)
+        self.parts: List[str] = []
+
+    def handle_starttag(self, tag: str, attrs: List[Tuple[str, Optional[str]]]) -> None:
+        tag_l = tag.lower()
+        if tag_l not in _ALLOWED_HTML_TAGS:
+            self.parts.append(html.escape(self.get_starttag_text() or f"<{tag}>"))
+            return
+        clean_attrs = []
+        for name, value in attrs:
+            name_l = name.lower()
+            if name_l not in _ALLOWED_HTML_ATTRS or value is None:
+                continue
+            value_s = str(value).strip()
+            if name_l in _URL_ATTRS and not _SAFE_URL_RE.match(value_s):
+                continue
+            clean_attrs.append(f'{name_l}="{html.escape(value_s, quote=True)}"')
+        attr_text = (" " + " ".join(clean_attrs)) if clean_attrs else ""
+        suffix = " /" if tag_l in _HTML_VOID_TAGS and (self.get_starttag_text() or "").rstrip().endswith("/>") else ""
+        self.parts.append(f"<{tag_l}{attr_text}{suffix}>")
+
+    def handle_startendtag(self, tag: str, attrs: List[Tuple[str, Optional[str]]]) -> None:
+        self.handle_starttag(tag, attrs)
+
+    def handle_endtag(self, tag: str) -> None:
+        tag_l = tag.lower()
+        if tag_l in _ALLOWED_HTML_TAGS and tag_l not in _HTML_VOID_TAGS:
+            self.parts.append(f"</{tag_l}>")
+        elif tag_l not in _ALLOWED_HTML_TAGS:
+            self.parts.append(html.escape(f"</{tag}>"))
+
+    def handle_data(self, data: str) -> None:
+        self.parts.append(html.escape(data))
+
+    def handle_entityref(self, name: str) -> None:
+        self.parts.append(f"&{name};")
+
+    def handle_charref(self, name: str) -> None:
+        self.parts.append(f"&#{name};")
+
+    def handle_comment(self, data: str) -> None:
+        return
+
+    def handle_decl(self, decl: str) -> None:
+        return
+
+    def unknown_decl(self, data: str) -> None:
+        return
+
+
+def _sanitize_html(raw: str) -> str:
+    parser = _SafeHtmlRenderer()
+    parser.feed(raw)
+    parser.close()
+    return "".join(parser.parts)
+
+
+def _html_block_tag(line: str) -> Optional[str]:
+    match = _HTML_TAG_START_RE.match(line)
+    if not match:
+        return None
+    tag = match.group(1).lower()
+    return tag if tag in _HTML_BLOCK_TAGS else None
+
+
+def _html_depth_delta(line: str) -> int:
+    opens = 0
+    for match in _HTML_OPEN_RE.finditer(line):
+        tag = match.group(1).lower()
+        token = match.group(0)
+        if tag in _HTML_VOID_TAGS or token.rstrip().endswith("/>"):
+            continue
+        opens += 1
+    closes = sum(1 for m in _HTML_CLOSE_RE.finditer(line) if m.group(1).lower() not in _HTML_VOID_TAGS)
+    return opens - closes
+
+
+def _consume_html_block(lines: List[str], start: int) -> Tuple[int, str]:
+    tag = _html_block_tag(lines[start])
+    if not tag:
+        return 0, ""
+    buf = [lines[start]]
+    depth = max(0, _html_depth_delta(lines[start]))
+    i = start + 1
+    if tag in _HTML_VOID_TAGS or depth == 0:
+        return 1, _sanitize_html("\n".join(buf))
+    while i < len(lines):
+        if not lines[i].strip() and depth <= 0:
+            break
+        buf.append(lines[i])
+        depth += _html_depth_delta(lines[i])
+        i += 1
+        if depth <= 0:
+            break
+    return i - start, _sanitize_html("\n".join(buf))
+
+
+def _render_admonition(kind: str, title_tail: str, body_lines: List[str], link_rewriter: Optional[Callable[[str], str]]) -> str:
+    label = kind.upper()
+    title = label.title() if label != "TIP" else "Tip"
+    body = "\n".join(body_lines).strip()
+    body_html, _ = render_markdown(body, link_rewriter=link_rewriter) if body else ("", [])
+    tail_html = _render_inline(title_tail.strip(), link_rewriter=link_rewriter) if title_tail.strip() else ""
+    title_html = f'<p class="admonition-title">{html.escape(title)}'
+    if tail_html:
+        title_html += f" <span>{tail_html}</span>"
+    title_html += "</p>"
+    return f'<div class="admonition admonition-{label.lower()}">{title_html}{body_html}</div>'
 
 
 # ---------------------------------------------------------------------------
@@ -85,6 +221,7 @@ _ITALIC_UNDER_RE = re.compile(r"(?<![\w_])_(?!\s)([^_\n]+?)(?<!\s)_(?![\w_])")
 _AUTOLINK_URL_RE = re.compile(r"(?<![\w/\"'>])(https?://[^\s<>\"'`]+?)(?=[)\].,;:!?]*(?:\s|$))")
 # arXiv:2604.20329 (or 2604.20329v2 etc.) — links to https://arxiv.org/abs/...
 _AUTOLINK_ARXIV_RE = re.compile(r"\barXiv:(\d{4}\.\d{4,6}(?:v\d+)?)\b", re.IGNORECASE)
+_HTML_INLINE_TAG_RE = re.compile(r"</?[A-Za-z][^<>]*?/?>")
 
 
 def _render_inline(text: str, link_rewriter: Optional[Callable[[str], str]] = None) -> str:
@@ -157,6 +294,11 @@ def _render_inline(text: str, link_rewriter: Optional[Callable[[str], str]] = No
 
     text = _AUTOLINK_ARXIV_RE.sub(_autolink_arxiv, text)
 
+    # 3.6. Preserve a safe subset of inline raw HTML used by README-style
+    #      markdown. Unsafe tags/attributes are escaped or dropped by the
+    #      sanitizer before the main text escape runs.
+    text = _HTML_INLINE_TAG_RE.sub(lambda m: _stash(_sanitize_html(m.group(0))), text)
+
     # 4. Now escape the remaining text.
     text = html.escape(text)
 
@@ -228,6 +370,13 @@ def render_markdown(
             out.append(f"<pre><code{cls}>{code_html}</code></pre>")
             continue
 
+        # raw HTML block (GitHub README subset)
+        html_consumed, html_block = _consume_html_block(lines, i)
+        if html_consumed:
+            out.append(html_block)
+            i += html_consumed
+            continue
+
         # horizontal rule
         if _HRULE_RE.match(line) and not (line.lstrip().startswith("---") and _is_table_following(lines, i)):
             out.append("<hr>")
@@ -245,14 +394,27 @@ def render_markdown(
             i += 1
             continue
 
-        # blockquote
+        # blockquote / GitHub-style admonition
         if _BLOCKQUOTE_RE.match(line):
             buf = []
             while i < n and _BLOCKQUOTE_RE.match(lines[i]):
                 buf.append(_BLOCKQUOTE_RE.match(lines[i]).group(1))
                 i += 1
-            inner_html, _ = render_markdown("\n".join(buf), link_rewriter=link_rewriter)
-            out.append(f"<blockquote>{inner_html}</blockquote>")
+            first = buf[0].strip() if buf else ""
+            admonition = _ADMONITION_RE.match(first)
+            if admonition:
+                body_lines = buf[1:]
+                out.append(
+                    _render_admonition(
+                        admonition.group(1),
+                        admonition.group(2),
+                        body_lines,
+                        link_rewriter,
+                    )
+                )
+            else:
+                inner_html, _ = render_markdown("\n".join(buf), link_rewriter=link_rewriter)
+                out.append(f"<blockquote>{inner_html}</blockquote>")
             continue
 
         # table (header line followed by separator line)
@@ -282,6 +444,7 @@ def render_markdown(
                 or _FENCE_RE.match(nxt)
                 or _HRULE_RE.match(nxt)
                 or _BLOCKQUOTE_RE.match(nxt)
+                or _html_block_tag(nxt)
                 or _OL_RE.match(nxt)
                 or _UL_RE.match(nxt)
             ):

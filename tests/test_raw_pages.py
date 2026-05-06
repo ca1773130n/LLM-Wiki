@@ -135,6 +135,38 @@ def test_render_raw_view_markdown_emits_real_headings(tmp_path: Path) -> None:
     assert "\n## " not in out
 
 
+def test_render_raw_view_markdown_preserves_readme_html_and_admonitions(tmp_path: Path) -> None:
+    project = tmp_path / "p"
+    project.mkdir()
+    readme = project / "README.md"
+    readme.write_text(
+        '<h1 align="center">LLM-Wiki</h1>\n\n'
+        '<p align="center">\n'
+        '  <strong>Turn docs into a graph.</strong>\n'
+        '  <br />\n'
+        '  <em>Local-first.</em>\n'
+        '</p>\n\n'
+        '> [!TIP]\n'
+        '> **Compile first.** Then run `build-site`.\n',
+        encoding="utf-8",
+    )
+
+    out = render_raw_view(
+        site_title="LLM-Wiki",
+        project_relative_path="README.md",
+        absolute_path=readme,
+    )
+
+    assert '<h1 align="center">LLM-Wiki</h1>' in out
+    assert '<p align="center">' in out
+    assert '<strong>Turn docs into a graph.</strong>' in out
+    assert '&lt;h1' not in out
+    assert '&lt;p' not in out
+    assert '<div class="admonition admonition-tip">' in out
+    assert '<p class="admonition-title">Tip</p>' in out
+    assert '[!TIP]' not in out
+
+
 def test_render_raw_view_json_emits_pretty_printed_pre(tmp_path: Path) -> None:
     project, _wiki, _site, _paper = _seed_project(tmp_path)
     json_path = project / "data" / "research" / "daily" / "2026-04-25" / "papers" / "2603.24725" / "metadata.json"
