@@ -176,6 +176,7 @@ The controlled ontology is the important part. It keeps the graph useful instead
 - [Architecture](docs/architecture.md)
 - [Feature map](docs/feature-map.md)
 - [Session history](docs/session-history.md)
+- [Understand Anything companion workflow](docs/integrations/understand-anything.md)
 - [Publishing checklist](docs/publishing-checklist.md)
 
 ---
