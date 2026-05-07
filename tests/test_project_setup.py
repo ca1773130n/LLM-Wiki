@@ -52,6 +52,33 @@ def test_setup_command_yes_writes_config_with_external_tool_metadata(tmp_path, c
     assert "Understand Anything" in out
 
 
+def test_setup_persists_config_even_when_initial_external_refresh_fails(tmp_path, capsys):
+    project = tmp_path / "demo"
+    project.mkdir()
+    (project / "README.md").write_text("# Demo\n", encoding="utf-8")
+
+    assert main([
+        "project",
+        "setup",
+        "--project",
+        str(project),
+        "--yes",
+        "--with-understand-anything",
+        "--understand-anything-command",
+        "definitely_missing_understand_command",
+        "--run-understand-anything",
+        "--no-color",
+    ]) == 0
+
+    cfg = json.loads((project / ".llm-wiki" / "config.json").read_text(encoding="utf-8"))
+    assert cfg["external_tools"][0]["refresh_command"] == "definitely_missing_understand_command"
+    assert cfg["external_tools"][0]["auto_refresh"] is True
+    assert (project / ".llm-wiki" / "external" / "understand-anything.md").exists()
+    out = capsys.readouterr().out
+    assert "External tool refresh had warnings" in out
+    assert "definitely_missing_understand_command" in out
+
+
 def test_compile_auto_refreshes_configured_external_tools(tmp_path, capsys):
     project = tmp_path / "demo"
     project.mkdir()

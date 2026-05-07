@@ -180,14 +180,14 @@ def interactive_setup_plan(project_root: str | Path, *, color: bool = True) -> S
     return plan
 
 
-def run_external_tools(plan: SetupPlan) -> List[dict]:
+def run_external_tools(plan: SetupPlan, *, fail_fast: bool = True) -> List[dict]:
     results: List[dict] = []
     if not plan.run_external_tools:
         return results
-    return run_tool_configs(plan.project_root, plan.external_tools, only_auto=False)
+    return run_tool_configs(plan.project_root, plan.external_tools, only_auto=False, fail_fast=fail_fast)
 
 
-def run_tool_configs(project_root: str | Path, tools: Sequence[dict], *, only_auto: bool = True) -> List[dict]:
+def run_tool_configs(project_root: str | Path, tools: Sequence[dict], *, only_auto: bool = True, fail_fast: bool = True) -> List[dict]:
     root = Path(project_root).resolve()
     results: List[dict] = []
     for tool in tools:
@@ -213,7 +213,7 @@ def run_tool_configs(project_root: str | Path, tools: Sequence[dict], *, only_au
                 "stderr": completed.stderr[-2000:],
             }
             results.append(result)
-            if completed.returncode != 0:
+            if completed.returncode != 0 and fail_fast:
                 raise RuntimeError(f"External tool failed: {tool.get('name')} ({completed.returncode})")
         else:
             results.append({"id": tool.get("id"), "status": "skipped", "reason": "no refresh_command"})
@@ -296,7 +296,7 @@ def refresh_configured_external_tools(project_root: str | Path, *, only_auto: bo
 
 
 def apply_setup_plan(plan: SetupPlan) -> SetupResult:
-    ran_tools = run_external_tools(plan)
+    ran_tools = run_external_tools(plan, fail_fast=False)
     wiki = ProjectWiki.init(plan.project_root, name=plan.name, source_kind=plan.source_kind, sources=plan.sources)
     for tool in plan.external_tools:
         if tool.get("id") == "understand-anything":

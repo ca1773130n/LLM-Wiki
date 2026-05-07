@@ -368,7 +368,15 @@ def project_main(argv: List[str] | None = None) -> int:
         print(f"Initialized project wiki: {result.wiki.root}")
         print(f"Config: {result.config_path}")
         if result.ran_tools:
-            print(f"External tools refreshed: {len(result.ran_tools)}")
+            failures = [row for row in result.ran_tools if row.get("status") == "failed"]
+            if failures:
+                print("External tool refresh had warnings; setup was saved anyway.")
+                for failure in failures:
+                    detail = (failure.get("stderr") or failure.get("stdout") or "").strip().splitlines()
+                    tail = f": {detail[-1]}" if detail else ""
+                    print(f"  - {failure.get('id')}: {failure.get('command')} exited {failure.get('returncode')}{tail}")
+            else:
+                print(f"External tools refreshed: {len(result.ran_tools)}")
         print("Next: llm_wiki project compile && llm_wiki project build-site")
         return 0
     if args.command == "ingest":
