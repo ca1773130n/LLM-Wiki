@@ -146,10 +146,14 @@ def test_render_raw_view_markdown_preserves_readme_html_and_admonitions(tmp_path
         '  <br />\n'
         '  <em>Local-first.</em>\n'
         '</p>\n\n'
+        '<p align="center"><img src="docs/assets/wiki-graph-screenshot.png" alt="Graph" /></p>\n\n'
         '> [!TIP]\n'
         '> **Compile first.** Then run `build-site`.\n',
         encoding="utf-8",
     )
+    asset = project / "docs" / "assets" / "wiki-graph-screenshot.png"
+    asset.parent.mkdir(parents=True)
+    asset.write_bytes(b"fake png bytes")
 
     out = render_raw_view(
         site_title="LLM-Wiki",
@@ -160,6 +164,8 @@ def test_render_raw_view_markdown_preserves_readme_html_and_admonitions(tmp_path
     assert '<h1 align="center">LLM-Wiki</h1>' in out
     assert '<p align="center">' in out
     assert '<strong>Turn docs into a graph.</strong>' in out
+    assert '../raw-assets/docs-assets-wiki-graph-screenshot-png.png' in out
+    assert 'src="docs/assets/wiki-graph-screenshot.png"' not in out
     assert '&lt;h1' not in out
     assert '&lt;p' not in out
     assert '<div class="admonition admonition-tip">' in out
@@ -289,6 +295,41 @@ def test_bundled_corpus_emits_n_raw_pages(tmp_path: Path) -> None:
     raw_pages = sorted(raw_dir.glob("*.html"))
     # Exactly one unique source path in the toy graph.
     assert len(raw_pages) == 1
+
+
+def test_builder_copies_raw_markdown_embedded_image_assets(tmp_path: Path) -> None:
+    project = tmp_path / "p"
+    project.mkdir()
+    wiki_root = project / ".llm-wiki" / "wiki"
+    wiki_root.mkdir(parents=True)
+    site_root = project / ".llm-wiki" / "site"
+    readme = project / "README.md"
+    asset = project / "docs" / "assets" / "demo.png"
+    asset.parent.mkdir(parents=True)
+    asset.write_bytes(b"fake png bytes")
+    readme.write_text(
+        '<h1 align="center">Demo</h1>\n\n'
+        '<p align="center"><img src="docs/assets/demo.png" alt="Demo graph" /></p>\n',
+        encoding="utf-8",
+    )
+    graph = ResearchGraph(
+        nodes=[
+            ResearchNode(
+                id="Concept:readme",
+                name="README",
+                type=ResearchNodeType.CONCEPT,
+                source_path=str(readme),
+            )
+        ],
+        edges=[],
+    )
+
+    StaticSiteBuilder().write_site(graph, wiki_root, site_root)
+
+    raw = (site_root / "raw" / "readme-md.html").read_text(encoding="utf-8")
+    assert '../raw-assets/docs-assets-demo-png.png' in raw
+    assert 'src="docs/assets/demo.png"' not in raw
+    assert (site_root / "raw-assets" / "docs-assets-demo-png.png").exists()
 
 
 # ---------------------------------------------------------------------------

@@ -70,6 +70,7 @@ __all__ = [
     "raw_href",
     "render_raw_view",
     "iter_raw_sources",
+    "iter_markdown_binary_assets",
     "copy_raw_asset",
     "is_binary_extension",
     "WikiLinkResolver",
@@ -96,6 +97,11 @@ _HTML_EXTS = {".html", ".htm"}
 _PDF_EXTS = {".pdf"}
 
 _BINARY_EXTS = _IMAGE_EXTS | _PDF_EXTS
+_MD_IMAGE_TARGET_RE = re.compile(r"!\[[^\]]*\]\(([^)\s]+)(?:\s+\"[^\"]*\")?\)")
+_HTML_URL_ATTR_RE = re.compile(
+    r"(?P<prefix>\b(?:src|href)=)(?P<quote>[\"'])(?P<url>[^\"']+)(?P=quote)",
+    re.IGNORECASE,
+)
 
 
 def is_binary_extension(suffix: str) -> bool:
@@ -303,6 +309,75 @@ def copy_raw_asset(absolute: Path, slug: str, assets_dir: Path) -> Optional[str]
         except OSError:
             return None
     return dest_name
+
+
+# ---------------------------------------------------------------------------
+# Page renderer
+# ---------------------------------------------------------------------------
+
+
+def _split_url_suffix(target: str) -> Tuple[str, str, str]:
+    """Return ``(path, query, fragment)`` for a URL-ish markdown/html target."""
+    rest, fragment, query = target, "", ""
+    if "#" in rest:
+        rest, frag = rest.split("#", 1)
+        fragment = "#" + frag
+    if "?" in rest:
+        rest, q = rest.split("?", 1)
+        query = "?" + q
+    return rest, query, fragment
+
+
+def _is_external_or_root_url(target: str) -> bool:
+    return not target or target.startswith(("http://", "https://", "mailto:", "#", "/", "data:"))
+
+
+def _raw_asset_href_for_project_rel(project_rel: str, *, depth: int = 1) -> str:
+    suffix = Path(project_rel).suffix.lower()
+    prefix = "../" * max(depth, 0)
+    return f"{prefix}{RAW_ASSETS_DIR}/{safe_raw_slug(project_rel)}{suffix}"
+
+
+def iter_markdown_binary_assets(
+    markdown_path: Path,
+    project_root: Path,
+) -> List[Tuple[str, str, Path]]:
+    """Find local binary assets referenced from a markdown source.
+
+    README-style source documents often embed screenshots with raw HTML such as
+    ``<img src=\"docs/assets/demo.png\">``. Raw pages live under ``raw/``, so
+    the literal path would resolve to ``raw/docs/assets/...`` and break on the
+    generated/deployed site. We collect those local binary dependencies and copy
+    them to ``raw-assets/`` just like first-class binary source files.
+    """
+    try:
+        text = markdown_path.read_text(encoding="utf-8", errors="replace")
+    except OSError:
+        return []
+    targets: list[str] = []
+    targets.extend(m.group(1) for m in _MD_IMAGE_TARGET_RE.finditer(text))
+    targets.extend(m.group("url") for m in _HTML_URL_ATTR_RE.finditer(text))
+    seen: dict[str, Tuple[str, str, Path]] = {}
+    for target in targets:
+        if _is_external_or_root_url(target):
+            continue
+        rest, _query, _fragment = _split_url_suffix(target)
+        try:
+            resolved = (markdown_path.parent / rest).resolve()
+            project_rel_path = resolved.relative_to(project_root)
+        except (ValueError, OSError):
+            continue
+        suffix = resolved.suffix.lower()
+        if suffix not in _BINARY_EXTS:
+            continue
+        try:
+            if not resolved.is_file():
+                continue
+        except OSError:
+            continue
+        rel = str(project_rel_path).replace("\\", "/")
+        seen[rel] = (rel, safe_raw_slug(rel), resolved)
+    return [seen[k] for k in sorted(seen)]
 
 
 # ---------------------------------------------------------------------------
@@ -621,16 +696,10 @@ def _render_markdown_body(
     text = absolute.read_text(encoding="utf-8", errors="replace")
 
     def _link_rewriter(target: str) -> str:
-        if not target or target.startswith(("http://", "https://", "mailto:", "#", "/")):
+        if _is_external_or_root_url(target):
             return target
         # Split off fragment + query so the remainder is a clean path.
-        rest, fragment, query = target, "", ""
-        if "#" in rest:
-            rest, frag = rest.split("#", 1)
-            fragment = "#" + frag
-        if "?" in rest:
-            rest, q = rest.split("?", 1)
-            query = "?" + q
+        rest, query, fragment = _split_url_suffix(target)
         # Project-file references in docs (``[research_graph.py](../llm_wiki/research_graph.py)``)
         # used to fall through unchanged and 404. The raw viewer can render
         # any project-relative file path, so resolve these against the doc's
@@ -645,7 +714,10 @@ def _render_markdown_body(
                 resolved = (absolute.parent / rest).resolve()
                 if resolved.is_file():
                     project_rel = resolved.relative_to(project_root)
-                    href = raw_href(project_root, str(project_rel), depth=1)
+                    project_rel_s = str(project_rel).replace("\\", "/")
+                    if is_binary_extension(resolved.suffix):
+                        return f"{_raw_asset_href_for_project_rel(project_rel_s, depth=1)}{query}{fragment}"
+                    href = raw_href(project_root, project_rel_s, depth=1)
                     if href:
                         return f"{href}{query}{fragment}"
             except (ValueError, OSError):
@@ -724,7 +796,17 @@ def _render_markdown_body(
             return target
         return f"{href}{query}{fragment}"
 
-    body, _ = render_markdown(text, link_rewriter=_link_rewriter)
+    def _rewrite_raw_html_url_attrs(markdown_text: str) -> str:
+        def repl(match: re.Match[str]) -> str:
+            prefix = match.group("prefix")
+            quote = match.group("quote")
+            url = match.group("url")
+            rewritten = _link_rewriter(url)
+            return f"{prefix}{quote}{rewritten.replace(quote, '')}{quote}"
+
+        return _HTML_URL_ATTR_RE.sub(repl, markdown_text)
+
+    body, _ = render_markdown(_rewrite_raw_html_url_attrs(text), link_rewriter=_link_rewriter)
     body = _wrap_tables_in_scroll(body)
     return f'<section class="markdown-body raw-markdown">{body}</section>'
 

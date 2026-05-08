@@ -80,6 +80,7 @@ from .raw_view import (
     copy_raw_asset,
     derive_project_root,
     is_binary_extension,
+    iter_markdown_binary_assets,
     iter_raw_sources,
     render_raw_view,
 )
@@ -451,6 +452,15 @@ class StaticSiteBuilder:
                                 if isinstance(s, str) and s:
                                     seen_paths.append(s)
             sources_inventory = iter_raw_sources(seen_paths, project_root)
+            linked_asset_paths: list[str] = []
+            for _rel_path, _slug, absolute in sources_inventory:
+                if absolute.suffix.lower() in {".md", ".markdown", ".mdx"}:
+                    linked_asset_paths.extend(
+                        rel for rel, _asset_slug, _asset_path in iter_markdown_binary_assets(absolute, project_root)
+                    )
+            if linked_asset_paths:
+                seen_paths.extend(linked_asset_paths)
+                sources_inventory = iter_raw_sources(seen_paths, project_root)
             if sources_inventory:
                 raw_dir.mkdir(parents=True, exist_ok=True)
             raw_nav_counts: Dict[str, int] = {
