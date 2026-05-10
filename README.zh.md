@@ -131,13 +131,17 @@ llm_wiki project build-site
 llm_wiki project serve --port 8765
 ```
 
-如果想同时使用 Understand Anything 和 Cognee，只需设置一次:
+如果想同时使用 Understand Anything、RAG-Anything 和 Cognee，只需设置一次:
 
 ```bash
 llm_wiki project setup \
   --with-understand-anything \
   --install-understand-anything \
   --understand-anything-platform codex \
+  --with-raganything \
+  --install-raganything \
+  --raganything-parser mineru \
+  --run-raganything \
   --run-cognee \
   --install-cognee
 llm_wiki project compile
@@ -192,6 +196,7 @@ LLM-Wiki 设计为位于工具之间，而不是替代它们。
 | 工具 | 关系 |
 |---|---|
 | Understand Anything | 独立代码图工件 → Markdown 投影 → 已编译记忆 |
+| RAG-Anything | 多模态摄取（PDF/Office/图像）+ LightRAG 运行时后端 |
 | Cognee | 用于混合图/向量检索的记忆后端 |
 | Graphiti 风格系统 | 时间序列 episode/fact 导出路径 |
 | Obsidian / markdown | 可读投影，而不是唯一真相来源 |
@@ -205,6 +210,10 @@ llm_wiki project setup \
   --with-understand-anything \
   --install-understand-anything \
   --understand-anything-platform codex \
+  --with-raganything \
+  --install-raganything \
+  --raganything-parser mineru \
+  --run-raganything \
   --run-cognee \
   --install-cognee
 llm_wiki project compile
@@ -235,6 +244,7 @@ llm_wiki project compile
 | [Architecture](./docs/architecture.md) | 流水线内部机制和图模型 |
 | [Session history](./docs/session-history.md) | Claude/Codex 转录导入 |
 | [Understand Anything companion workflow](./docs/integrations/understand-anything.md) | 配套图刷新和投影 |
+| [RAG-Anything](./docs/integrations/rag-anything.md) | 多模态摄取（PDF/Office/图像）+ LightRAG 运行时后端 |
 | [Publishing checklist](./docs/publishing-checklist.md) | 部署生成的静态站点 |
 
 ---

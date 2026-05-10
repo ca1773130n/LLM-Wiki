@@ -131,13 +131,17 @@ llm_wiki project build-site
 llm_wiki project serve --port 8765
 ```
 
-Pour utiliser Understand Anything et Cognee ensemble, configurez-les une seule fois:
+Pour utiliser Understand Anything, RAG-Anything et Cognee ensemble, configurez-les une seule fois:
 
 ```bash
 llm_wiki project setup \
   --with-understand-anything \
   --install-understand-anything \
   --understand-anything-platform codex \
+  --with-raganything \
+  --install-raganything \
+  --raganything-parser mineru \
+  --run-raganything \
   --run-cognee \
   --install-cognee
 llm_wiki project compile
@@ -192,6 +196,7 @@ LLM-Wiki est conçu pour se placer entre les outils, pas pour les remplacer.
 | Outil | Relation |
 |---|---|
 | Understand Anything | artefact indépendant de graphe de code → projection Markdown → mémoire compilée |
+| RAG-Anything | ingestion multimodale (PDF/Office/images) + backend d’exécution LightRAG |
 | Cognee | backend de mémoire pour récupération hybride graphe/vectorielle |
 | Systèmes de style Graphiti | chemin d’export d’épisodes/faits temporels |
 | Obsidian / markdown | projection lisible, pas l’unique source de vérité |
@@ -205,6 +210,10 @@ llm_wiki project setup \
   --with-understand-anything \
   --install-understand-anything \
   --understand-anything-platform codex \
+  --with-raganything \
+  --install-raganything \
+  --raganything-parser mineru \
+  --run-raganything \
   --run-cognee \
   --install-cognee
 llm_wiki project compile
@@ -235,6 +244,7 @@ Pendant la compilation, LLM-Wiki exécute `project refresh-understand-anything` 
 | [Architecture](./docs/architecture.md) | détails internes du pipeline et modèle de graphe |
 | [Historique des sessions](./docs/session-history.md) | import des transcriptions Claude/Codex |
 | [Workflow complémentaire Understand Anything](./docs/integrations/understand-anything.md) | rafraîchissement et projection du graphe complémentaire |
+| [RAG-Anything](./docs/integrations/rag-anything.md) | ingestion multimodale (PDF/Office/images) + backend d’exécution LightRAG |
 | [Checklist de publication](./docs/publishing-checklist.md) | déployer le site statique généré |
 
 ---

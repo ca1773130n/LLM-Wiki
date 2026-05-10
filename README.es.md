@@ -131,13 +131,17 @@ llm_wiki project build-site
 llm_wiki project serve --port 8765
 ```
 
-Si quieres usar Understand Anything y Cognee juntos, configúralos una vez:
+Si quieres usar Understand Anything, RAG-Anything y Cognee juntos, configúralos una vez:
 
 ```bash
 llm_wiki project setup \
   --with-understand-anything \
   --install-understand-anything \
   --understand-anything-platform codex \
+  --with-raganything \
+  --install-raganything \
+  --raganything-parser mineru \
+  --run-raganything \
   --run-cognee \
   --install-cognee
 llm_wiki project compile
@@ -192,6 +196,7 @@ LLM-Wiki está diseñado para situarse entre herramientas, no para reemplazarlas
 | Herramienta | Relación |
 |---|---|
 | Understand Anything | artefacto independiente de grafo de código → proyección Markdown → memoria compilada |
+| RAG-Anything | ingesta multimodal (PDF/Office/imágenes) + backend en tiempo de ejecución LightRAG |
 | Cognee | backend de memoria para recuperación híbrida grafo/vectorial |
 | Sistemas estilo Graphiti | ruta de exportación de episodios/hechos temporales |
 | Obsidian / markdown | proyección legible, no la única fuente de verdad |
@@ -205,6 +210,10 @@ llm_wiki project setup \
   --with-understand-anything \
   --install-understand-anything \
   --understand-anything-platform codex \
+  --with-raganything \
+  --install-raganything \
+  --raganything-parser mineru \
+  --run-raganything \
   --run-cognee \
   --install-cognee
 llm_wiki project compile
@@ -235,6 +244,7 @@ Durante la compilación, LLM-Wiki ejecuta `project refresh-understand-anything` 
 | [Arquitectura](./docs/architecture.md) | detalles internos de la canalización y modelo de grafo |
 | [Historial de sesiones](./docs/session-history.md) | importación de transcripciones de Claude/Codex |
 | [Flujo de trabajo complementario de Understand Anything](./docs/integrations/understand-anything.md) | actualización y proyección del grafo complementario |
+| [RAG-Anything](./docs/integrations/rag-anything.md) | ingesta multimodal (PDF/Office/imágenes) + backend en tiempo de ejecución LightRAG |
 | [Lista de verificación de publicación](./docs/publishing-checklist.md) | despliega el sitio estático generado |
 
 ---
