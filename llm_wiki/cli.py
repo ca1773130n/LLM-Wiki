@@ -20,7 +20,7 @@ from .llm_extractor import ClaudeCLIResearchExtractor
 from .markdown_projection import GraphMarkdownProjector
 from .persistence import KuzuResearchGraphStore, SQLiteResearchGraphStore
 from .graphiti_adapter import GraphitiSyncUnavailableError
-from .project import CognifyOptions, ProjectWiki, iter_markdown_files
+from .project import CognifyOptions, ProjectWiki, cognify_options_from_config, cognee_backend_config, iter_markdown_files
 from .project_setup import apply_setup_plan, build_setup_plan, interactive_setup_plan, refresh_configured_external_tools, render_setup_summary
 from .report import GraphReporter
 from .research_graph import ResearchCorpusAnalyzer, ResearchGraph, ResearchGraphExtractor
@@ -108,6 +108,51 @@ def _project_query_handler(args) -> int:
     return 0
 
 
+def _project_ask_handler(args) -> int:
+    wiki = ProjectWiki.load(args.project)
+    cfg = wiki.config()
+    cognee_cfg = cognee_backend_config(cfg)
+    backend = args.backend
+    use_cognee = backend == "cognee" or (backend == "auto" and cognee_cfg.get("enabled", False))
+    if use_cognee:
+        from .cognee_query import search_cognee
+
+        dataset = args.cognee_dataset or cognee_cfg.get("dataset")
+        try:
+            results = search_cognee(
+                args.question,
+                dataset=dataset,
+                search_type=args.cognee_search_type,
+                top_k=args.top_k,
+            )
+        except Exception as exc:
+            if backend == "cognee":
+                print(f"Cognee ask failed: {exc}", file=sys.stderr)
+                return 2
+            print(f"Cognee ask unavailable; falling back to compiled wiki query: {exc}", file=sys.stderr)
+        else:
+            if args.json_output:
+                print(json.dumps({"backend": "cognee", "dataset": dataset, "question": args.question, "results": results}, ensure_ascii=False, indent=2))
+            else:
+                print(f"Cognee answer (dataset={dataset or 'default'}):")
+                if results:
+                    for idx, result in enumerate(results, start=1):
+                        print(f"\n[{idx}] {result}")
+                else:
+                    print("No Cognee results returned.")
+            return 0
+
+    result = wiki.query(args.question, top_k=args.top_k, use_llm=False)
+    if args.json_output:
+        payload = result.to_dict()
+        payload["backend"] = "wiki"
+        print(json.dumps(payload, ensure_ascii=False, indent=2))
+    else:
+        print("Compiled wiki answer:")
+        _print_query_result(result)
+    return 0
+
+
 def _print_query_result(result) -> None:
     """Print a human-readable summary of a :class:`QueryResult`."""
 
@@ -187,6 +232,9 @@ def project_main(argv: List[str] | None = None) -> int:
     setup_parser.add_argument("--with-understand-anything", action="store_true", help="Include .understand-anything/knowledge-graph.json as a companion source")
     setup_parser.add_argument("--run-understand-anything", action="store_true", help="Run the configured Understand Anything refresh command now and mark it for compile-time auto-refresh")
     setup_parser.add_argument("--understand-anything-command", help="Shell command that refreshes .understand-anything/knowledge-graph.json")
+    setup_parser.add_argument("--no-cognee", action="store_true", help="Do not enable Cognee as the default project memory backend")
+    setup_parser.add_argument("--cognee-mode", choices=["add", "cognify", "codex_cognify"], default="codex_cognify", help="Cognee mode saved in project config (default: codex_cognify)")
+    setup_parser.add_argument("--run-cognee", action="store_true", help="Auto-add/cognify Cognee on every project compile using the saved safe config")
     setup_parser.add_argument("--yes", action="store_true", help="Accept detected defaults without interactive prompts")
     setup_parser.add_argument("--no-color", action="store_true", help="Disable ANSI colors in setup output")
 
@@ -260,6 +308,15 @@ def project_main(argv: List[str] | None = None) -> int:
     query_parser.add_argument("--model", default="claude-sonnet-4-6", help="Anthropic model id for --llm (default: claude-sonnet-4-6)")
     query_parser.add_argument("--json", dest="json_output", action="store_true", help="Print the structured QueryResult as JSON")
     query_parser.add_argument("--interactive", action="store_true", help="Drop into a REPL with readline history; blank line or EOF exits")
+
+    ask_parser = subparsers.add_parser("ask", help="Ask the configured project memory backend; uses Cognee when enabled")
+    ask_parser.add_argument("question", help="Question text")
+    ask_parser.add_argument("--project", default=".", help="Project root directory; defaults to current working directory")
+    ask_parser.add_argument("--backend", choices=["auto", "cognee", "wiki"], default="auto", help="Question backend (default: auto; Cognee if enabled, otherwise wiki query)")
+    ask_parser.add_argument("--top-k", type=int, default=8, help="Maximum results/context items")
+    ask_parser.add_argument("--cognee-search-type", default="INSIGHTS", help="Cognee SearchType name, e.g. INSIGHTS, CHUNKS, SUMMARIES, GRAPH_COMPLETION")
+    ask_parser.add_argument("--cognee-dataset", help="Override configured Cognee dataset")
+    ask_parser.add_argument("--json", dest="json_output", action="store_true", help="Print backend/result JSON")
 
     mcp_parser = subparsers.add_parser("mcp-config", help="Print a Hermes mcp_servers config snippet for this project")
     mcp_parser.add_argument("--project", default=".", help="Project root directory; defaults to current working directory")
@@ -354,6 +411,9 @@ def project_main(argv: List[str] | None = None) -> int:
                     include_understand_anything=args.with_understand_anything,
                     run_understand_anything=args.run_understand_anything,
                     understand_anything_command=args.understand_anything_command,
+                    enable_cognee=not args.no_cognee,
+                    cognee_mode=args.cognee_mode,
+                    cognee_auto_cognify=args.run_cognee,
                 )
                 print(render_setup_summary(plan, color=not args.no_color), end="")
             else:
@@ -405,6 +465,7 @@ def project_main(argv: List[str] | None = None) -> int:
             return 2
         if refreshed:
             print(f"Refreshed external tools: {len(refreshed)}")
+        explicit_cognee = args.cognee_codex_cognify or args.cognee_cognify or args.cognee_add
         cognify_mode = (
             "codex_cognify" if args.cognee_codex_cognify
             else "cognify" if args.cognee_cognify
@@ -423,7 +484,7 @@ def project_main(argv: List[str] | None = None) -> int:
             local_embedding_dimensions=args.cognee_local_embedding_dimensions,
             system_root=args.cognee_system_root,
             data_root=args.cognee_data_root,
-        )
+        ) if explicit_cognee else cognify_options_from_config(wiki.config())
         result = wiki.compile(
             source_kind=args.source_kind,
             changed_only=args.changed_only,
@@ -431,7 +492,7 @@ def project_main(argv: List[str] | None = None) -> int:
             trends=args.trends,
             min_trend_sources=args.min_trend_sources,
             exclude_data=args.exclude_data,
-            cognify=cognify_options if cognify_options.is_active else None,
+            cognify=cognify_options if (cognify_options and cognify_options.is_active) else None,
         )
         print(
             "Compiled project wiki: "
@@ -460,6 +521,8 @@ def project_main(argv: List[str] | None = None) -> int:
         return 0
     if args.command == "query":
         return _project_query_handler(args)
+    if args.command == "ask":
+        return _project_ask_handler(args)
     if args.command == "mcp-config":
         wiki = ProjectWiki.load(args.project)
         print(wiki.render_mcp_config(server_name=args.server_name, pythonpath=args.pythonpath), end="")

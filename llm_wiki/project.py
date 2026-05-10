@@ -64,6 +64,22 @@ class CognifyOptions:
     system_root: Optional[str] = None
     data_root: Optional[str] = None
 
+    @classmethod
+    def from_mapping(cls, data: dict) -> "CognifyOptions":
+        return cls(
+            mode=str(data.get("mode") or "off"),
+            dataset=str(data.get("dataset") or "llm_wiki_research_graph"),
+            codex_model=str(data.get("codex_model") or "gpt-5.4"),
+            codex_timeout=int(data.get("codex_timeout") or 300),
+            embedding_provider=str(data.get("embedding_provider") or "deterministic"),
+            ollama_embedding_model=str(data.get("ollama_embedding_model") or "qwen3-embedding:0.6b"),
+            ollama_embedding_endpoint=str(data.get("ollama_embedding_endpoint") or "http://127.0.0.1:11434/api/embed"),
+            ollama_embedding_timeout=int(data.get("ollama_embedding_timeout") or 120),
+            local_embedding_dimensions=int(data.get("local_embedding_dimensions") or 128),
+            system_root=data.get("system_root"),
+            data_root=data.get("data_root"),
+        )
+
     @property
     def is_active(self) -> bool:
         return self.mode in {"add", "cognify", "codex_cognify"}
@@ -182,6 +198,9 @@ class ProjectWiki:
             "harness_sessions_path": ".llm-wiki/harness_sessions",
             "obsidian_vault_path": ".llm-wiki/obsidian_vault",
             "site_path": ".llm-wiki/site",
+            "memory_backends": {
+                "cognee": default_cognee_backend_config(name or sanitize_server_name(wiki.project_root.name)),
+            },
         }
         wiki.paths.config.write_text(json.dumps(config, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
         return wiki
@@ -739,6 +758,37 @@ class ProjectWiki:
         if existing:
             existing += "\n"
         self.paths.build_history.write_text(existing + line + "\n", encoding="utf-8")
+
+
+def default_cognee_backend_config(name: str = "llm_wiki") -> dict:
+    dataset_base = sanitize_server_name(name or "llm_wiki")
+    return {
+        "enabled": True,
+        "mode": "codex_cognify",
+        "auto_cognify": False,
+        "dataset": f"{dataset_base}_memory",
+        "system_root": ".llm-wiki/cognee_system",
+        "data_root": ".llm-wiki/cognee_data",
+        "codex_model": "gpt-5.4",
+        "codex_timeout": 300,
+        "embedding_provider": "deterministic",
+        "local_embedding_dimensions": 128,
+    }
+
+
+def cognee_backend_config(config: dict) -> dict:
+    backends = config.get("memory_backends")
+    if not isinstance(backends, dict) or "cognee" not in backends:
+        return default_cognee_backend_config(str(config.get("name") or "llm_wiki"))
+    return dict(backends.get("cognee") or {})
+
+
+def cognify_options_from_config(config: dict) -> Optional[CognifyOptions]:
+    cognee = cognee_backend_config(config)
+    if not cognee.get("enabled", False) or not cognee.get("auto_cognify", False):
+        return None
+    options = CognifyOptions.from_mapping(cognee)
+    return options if options.is_active else None
 
 
 def merge_graphs(graphs: Iterable[ResearchGraph]) -> ResearchGraph:

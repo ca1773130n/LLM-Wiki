@@ -9,7 +9,7 @@ from datetime import date
 from pathlib import Path
 from typing import Iterable, List, Optional, Sequence
 
-from .project import ProjectWiki, sanitize_server_name
+from .project import ProjectWiki, default_cognee_backend_config, sanitize_server_name
 
 
 RESET = "\033[0m"
@@ -30,6 +30,7 @@ class SetupPlan:
     sources: List[str] = field(default_factory=list)
     external_tools: List[dict] = field(default_factory=list)
     run_external_tools: bool = False
+    memory_backends: dict = field(default_factory=dict)
 
 
 @dataclass
@@ -71,6 +72,9 @@ def build_setup_plan(
     include_understand_anything: bool = False,
     run_understand_anything: bool = False,
     understand_anything_command: Optional[str] = None,
+    enable_cognee: bool = True,
+    cognee_mode: str = "codex_cognify",
+    cognee_auto_cognify: bool = False,
 ) -> SetupPlan:
     root = Path(project_root).resolve()
     source_list = [str(source) for source in sources] if sources is not None else discover_default_sources(root)
@@ -94,6 +98,13 @@ def build_setup_plan(
             }
         )
 
+    memory_backends = {}
+    if enable_cognee:
+        cognee = default_cognee_backend_config(name or sanitize_server_name(root.name))
+        cognee["mode"] = cognee_mode
+        cognee["auto_cognify"] = bool(cognee_auto_cognify)
+        memory_backends["cognee"] = cognee
+
     return SetupPlan(
         project_root=root,
         name=name or sanitize_server_name(root.name),
@@ -101,6 +112,7 @@ def build_setup_plan(
         sources=source_list,
         external_tools=external_tools,
         run_external_tools=run_understand_anything,
+        memory_backends=memory_backends,
     )
 
 
@@ -130,6 +142,14 @@ def render_setup_summary(plan: SetupPlan, *, color: bool = True) -> str:
             lines.append(f"  {_paint('◆', CYAN, color)} {tool['name']} → {source} ({command})")
     else:
         lines.append(f"  {_paint('·', DIM, color)} none selected")
+    lines.append("")
+    lines.append(_paint("Memory backends", BOLD, color))
+    cognee = (plan.memory_backends or {}).get("cognee")
+    if cognee and cognee.get("enabled", True):
+        auto = "auto-cognify" if cognee.get("auto_cognify") else "manual cognify"
+        lines.append(f"  {_paint('◆', CYAN, color)} Cognee → {cognee.get('dataset')} ({cognee.get('mode')}, {auto})")
+    else:
+        lines.append(f"  {_paint('·', DIM, color)} Cognee bundle only")
     return "\n".join(lines) + "\n"
 
 
@@ -164,6 +184,10 @@ def interactive_setup_plan(project_root: str | Path, *, color: bool = True) -> S
     if include_ua:
         ua_command = input("Refresh command for Understand Anything before compile [leave blank to skip] ").strip()
         run_ua = bool(ua_command) and _ask_yes_no("Run that refresh command now?", False)
+    enable_cognee = _ask_yes_no("Enable Cognee as the project memory backend?", True)
+    cognee_auto = False
+    if enable_cognee:
+        cognee_auto = _ask_yes_no("Run Cognee add/cognify automatically during compile?", False)
     plan = build_setup_plan(
         root,
         name=name_raw or None,
@@ -172,6 +196,8 @@ def interactive_setup_plan(project_root: str | Path, *, color: bool = True) -> S
         include_understand_anything=include_ua,
         run_understand_anything=run_ua,
         understand_anything_command=ua_command or None,
+        enable_cognee=enable_cognee,
+        cognee_auto_cognify=cognee_auto,
     )
     print()
     print(render_setup_summary(plan, color=color), end="")
@@ -307,5 +333,6 @@ def apply_setup_plan(plan: SetupPlan) -> SetupResult:
         "updated": date.today().isoformat(),
     }
     cfg["external_tools"] = plan.external_tools
+    cfg["memory_backends"] = plan.memory_backends or {"cognee": default_cognee_backend_config(plan.name)}
     wiki.paths.config.write_text(json.dumps(cfg, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
     return SetupResult(wiki=wiki, config_path=wiki.paths.config, ran_tools=ran_tools)
