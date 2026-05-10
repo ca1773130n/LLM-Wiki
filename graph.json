@@ -17389,6 +17389,11 @@
             "text": "Cognee + LLM-Wiki"
           },
           {
+            "anchor": "or-one-off",
+            "level": 1,
+            "text": "or one-off:"
+          },
+          {
             "anchor": "quick-start",
             "level": 2,
             "text": "Quick start"
@@ -37406,7 +37411,7 @@
       "description": "Top-level snapshot of the wiki at compile time.",
       "id": "Synthesis:pulse:6ffe96c09f0f",
       "metadata": {
-        "content_hash": "sha256-bbd1fb222604024c219c5137d3ad1c12d5eed0085d2f0504e1db268338e7170d",
+        "content_hash": "sha256-1baaaafc0335934565634228c7e5bcb06eda4524a48ca68f81ae8f2b34f32e1b",
         "input_ids": [
           "Paper:arxiv-2505-20295:aa977a72ab3f",
           "Paper:arxiv-2605-04527:c0faca348771",

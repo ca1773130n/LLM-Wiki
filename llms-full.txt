@@ -11014,12 +11014,12 @@ Snapshot of the wiki at the most recent compile.
 - CausalClaim: 7
 - Claim: 24
 - CodeClass: 111
-- CodeFunction: 1988
+- CodeFunction: 2004
 - CodeProject: 1
 - ComparisonClaim: 18
 - ContributionClaim: 21
 - Dataset: 4
-- Dependency: 97
+- Dependency: 98
 - EvaluationProtocol: 1
 - EvidenceSpan: 128
 - InferenceStrategy: 1
@@ -11038,7 +11038,7 @@ Snapshot of the wiki at the most recent compile.
 - ResearchTopic: 2
 - Result: 3
 - SourceDocument: 80
-- SourceFile: 116
+- SourceFile: 118
 - Task: 2
 - TechnicalTerm: 2
 - TrainingParadigm: 6

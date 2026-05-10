@@ -119,6 +119,20 @@ flowchart LR
 
 Use Cognee when you want the compiled memory to become a live retrieval substrate for agents. Use LLM-Wiki when you want to control, validate, export, and inspect that memory before it becomes runtime context.
 
+Ask through the configured memory backend:
+
+```bash
+llm_wiki project ask "Where is Mermaid rendering implemented?"
+```
+
+`project ask` uses Cognee automatically when the project config enables it, and falls back to the compiled wiki search if Cognee is unavailable. To let compile auto-refresh Cognee's runtime memory, opt in explicitly:
+
+```bash
+llm_wiki project setup --run-cognee
+# or one-off:
+llm_wiki project compile --cognee-codex-cognify --cognee-dataset my_project_memory
+```
+
 ---
 
 ## Quick start
@@ -126,8 +140,9 @@ Use Cognee when you want the compiled memory to become a live retrieval substrat
 ```bash
 pip install llm-wiki
 
-llm_wiki project setup
-llm_wiki project compile
+llm_wiki project setup          # Cognee backend is enabled in config by default
+llm_wiki project compile        # always writes .llm-wiki/cognee_bundle/
+llm_wiki project ask "Which files implement Mermaid rendering?"
 llm_wiki project build-site
 llm_wiki project serve --port 8765
 ```
@@ -138,7 +153,7 @@ Open:
 http://127.0.0.1:8765/
 ```
 
-The setup wizard detects common sources like `README.md`, `docs`, `src`, `data`, and companion artifacts. You choose what becomes memory; LLM-Wiki writes the project config.
+The setup wizard detects common sources like `README.md`, `docs`, `src`, `data`, and companion artifacts. You choose what becomes memory; LLM-Wiki writes the project config. Cognee is enabled as the default question backend, but automatic Cognee cognify is opt-in so a normal compile never silently spends API-key/provider budget.
 
 ```text
 ◆ LLM-Wiki project setup
@@ -152,6 +167,9 @@ Sources
 
 External tools
   ◆ Understand Anything → .llm-wiki/external/understand-anything.md
+
+Memory backends
+  ◆ Cognee → my_project_memory (codex_cognify, manual cognify)
 ```
 
 ---

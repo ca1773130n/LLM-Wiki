@@ -1,5 +1,5 @@
 {
-  "file_count": 3379,
+  "file_count": 3381,
   "files": [
     {
       "path": "about.html",
@@ -5928,17 +5928,17 @@
     },
     {
       "path": "graph.json",
-      "sha256": "ad0e543d018d6585f137b086d923b907d46e448529a9c4064f64ed6ef2772c78",
-      "size": 1554760
+      "sha256": "f1314b255657058b1593232efbebeeddc39f2e0bc30e190278a1bd137297a2aa",
+      "size": 1554879
     },
     {
       "path": "graph.json.gz",
-      "sha256": "e2a91cc77f99f9e50545c4e7964b7e3b053e113ee0824fb4d249a4dd2ffc3eea",
-      "size": 161293
+      "sha256": "5296d6ecca0ffd1830648ca9c3b922af31647894424c62fc5b645e8289b9d86d",
+      "size": 161310
     },
     {
       "path": "graph.jsonld",
-      "sha256": "a9fb0cff7f01cf1f1dad5404e75215ae04a6f3ffc63fb5c19be4d962c30d0d52",
+      "sha256": "0dd0c91e41f9db4e1465e6877d0e2f9c2ab014d7bc1548b5dee1bb80e6d67b61",
       "size": 339166
     },
     {
@@ -5948,7 +5948,7 @@
     },
     {
       "path": "llms-full.txt",
-      "sha256": "78a519514bb882dbf6cd888596d6066d6949badffebfcefedfdce8b9edd8de05",
+      "sha256": "35b819cb98659079c092f4a614668e8ddf0b78bd913d973411c7b0f004d3c836",
       "size": 411612
     },
     {
@@ -11143,7 +11143,7 @@
     },
     {
       "path": "raw/llm-wiki-cli-py.html",
-      "sha256": "3e1844c0cccc74f0595d4c777be84e463a9777ee7280c7a93001a386bf7bff6b",
+      "sha256": "22601305c1a0dde38fd4ac2514f7423def684cdf2afad480bf0dd96d6d0ad55f",
       "size": 142957
     },
     {
@@ -11165,6 +11165,11 @@
       "path": "raw/llm-wiki-cognee-direct-py.html",
       "sha256": "4b8d90ab18570b621bd5647d67e97caf5a9416c780563205d351826c6e9e45f7",
       "size": 143006
+    },
+    {
+      "path": "raw/llm-wiki-cognee-query-py.html",
+      "sha256": "5789ee7a88384e35ec52dd3a33d9e7d01df7d37e10f050854faf13f096ab4611",
+      "size": 143001
     },
     {
       "path": "raw/llm-wiki-deploy-py.html",
@@ -11263,12 +11268,12 @@
     },
     {
       "path": "raw/llm-wiki-project-py.html",
-      "sha256": "63fdfa16d7061057d304cbb1a6ed39c4975c850a952da8bb8771e5fd486c7813",
+      "sha256": "9952259397e0825b4e641b9c32caf80265f0a00969de35099ecf354cbd890c6b",
       "size": 142977
     },
     {
       "path": "raw/llm-wiki-project-setup-py.html",
-      "sha256": "55af8739822367d51819eab21c8df81e131872f75bb778f521c08db2c9ea2fee",
+      "sha256": "efb760520e6de42e670a9b563f27e344a31127b0e288075bd9feca72dae8f1e4",
       "size": 143007
     },
     {
@@ -11398,18 +11403,18 @@
     },
     {
       "path": "raw/readme-md.html",
-      "sha256": "a4a8cc2681aaa36b61d05fe6a6cfa832ca96ba656b508168bef17099638fd69f",
-      "size": 154945
+      "sha256": "a1b4f0ca38c5350c7ede55c9bba1558884d49f607752d071170550f4acb069a8",
+      "size": 155954
     },
     {
       "path": "raw/readme-md.json",
-      "sha256": "0db7a9a5df045f38d7c1fe8c6d31f13e6e96e3a5b18a59d81b2f9c63e95d1558",
-      "size": 17788
+      "sha256": "efa8de961bb722f42689b51b754625fa27c0469272545c72b6aa94417b5e4348",
+      "size": 19622
     },
     {
       "path": "raw/readme-md.txt",
-      "sha256": "ca4d0c0caeb8ef018eeede3b996b8c1995c8a3cac1e50e4c8b8afd856104505e",
-      "size": 8531
+      "sha256": "9fbc082bc208f56998237d613864aa1c38ab2a88df1b1174f56746bcad23cd80",
+      "size": 9426
     },
     {
       "path": "raw/scripts-install-sh.html",
@@ -11710,6 +11715,11 @@
       "path": "raw/tests-test-project-cli-py.html",
       "sha256": "b191ac666bff0efb677bcc3e7b6c2c1ce666fde689a11e1f90e8e2768a57cc49",
       "size": 143016
+    },
+    {
+      "path": "raw/tests-test-project-cognee-defaults-py.html",
+      "sha256": "2afc25c96e25ec766ba5dec36db95b930ba0435b9bf42bf2697ef46b0a81efd4",
+      "size": 143075
     },
     {
       "path": "raw/tests-test-project-setup-py.html",
@@ -13928,17 +13938,17 @@
     },
     {
       "path": "rss.xml",
-      "sha256": "33478b124ad773749c4f99d02423f43723dac1e30b9531655704a23969a7b298",
+      "sha256": "94e0ef0039360f3fe1e3a9b26edcf58cf99d445d27049e73566b2880963533eb",
       "size": 33660
     },
     {
       "path": "search-index.json",
-      "sha256": "2f8dc3b0e98d4e2e4721ed249037b4c7990c737bcf77bc1dd8244c7e2f6ba240",
+      "sha256": "629488566da1a611c74fd5df220ed36468d5503ab6e9e40ee2e5418b54efb6e0",
       "size": 839244
     },
     {
       "path": "search-index.json.gz",
-      "sha256": "d7e94f52019b139e9f9d673621fbd6a696608853c912ef63d925c0487fb6fe61",
+      "sha256": "139442f76d393883e82a2999c68bc9fdad19ed025cac93f67292f8b54405d0af",
       "size": 95924
     },
     {
@@ -14503,8 +14513,8 @@
     },
     {
       "path": "sitemap.xml",
-      "sha256": "48cf6bd2c6434093af1145744bc84544397a145341b47598b76ea4e82c6f7034",
-      "size": 224706
+      "sha256": "c22ed5642ea043fcc9bfe12f7a36da4d0179b93a0c932f863f07165c07ffc1c7",
+      "size": 225071
     },
     {
       "path": "sources/architecture-fixture.html",
@@ -16213,17 +16223,17 @@
     },
     {
       "path": "syntheses/pulse.html",
-      "sha256": "16f19d0a07a5163b39d90d38de2526d0b3ebd1add3a9b3e54ad10ebd92d15bac",
+      "sha256": "a4d4688b1acf81f65dd59ff68e97e77ddf0b90bbfe999e9f90f5a5e71831d493",
       "size": 149708
     },
     {
       "path": "syntheses/pulse.json",
-      "sha256": "ae5bfb9b67b503f645799e548f0c99636a91065c0325b01096bc1ed68ea35b69",
-      "size": 26054
+      "sha256": "9d4aff38d8e358dbef96e108f827c827d84f7bafb3a0050dd1915b4d355fcd37",
+      "size": 26135
     },
     {
       "path": "syntheses/pulse.txt",
-      "sha256": "4de3e746b41d3a35288b5c71c3502dd0374d7bfe1c2c597dbeb134abd0b3802f",
+      "sha256": "7d33a29eaa51d6244f2e5931a76a7ca5b1161fdd497b26ff92a3bd73643b6450",
       "size": 1271
     },
     {

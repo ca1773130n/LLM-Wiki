@@ -6541,6 +6541,12 @@
     <priority>0.4</priority>
   </url>
   <url>
+    <loc>raw/llm-wiki-cognee-query-py.html</loc>
+    <lastmod>2024-08-17T00:00:00Z</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.4</priority>
+  </url>
+  <url>
     <loc>raw/llm-wiki-deploy-py.html</loc>
     <lastmod>2024-10-08T00:00:00Z</lastmod>
     <changefreq>monthly</changefreq>
@@ -7059,6 +7065,12 @@
   <url>
     <loc>raw/tests-test-project-cli-py.html</loc>
     <lastmod>2024-08-01T00:00:00Z</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.4</priority>
+  </url>
+  <url>
+    <loc>raw/tests-test-project-cognee-defaults-py.html</loc>
+    <lastmod>2024-06-01T00:00:00Z</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.4</priority>
   </url>
