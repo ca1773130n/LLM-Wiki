@@ -112,7 +112,7 @@ LLM-Wiki auto-routes sources to the right parser per file extension:
 
 Override per-bucket with `--text-parser` and `--office-parser` on `refresh-raganything`. The configured default still applies to PDFs and images.
 
-Before the parse loop runs, LLM-Wiki calls `RAGAnything.check_parser_installation()` for each parser actually needed by the discovered sources and bails fast with an install hint when one is missing — no more cascading per-file errors.
+Before the parse loop runs, LLM-Wiki probes whether each required parser's Python package is importable (`importlib.import_module(...)`) and bails fast with a single aggregated error listing every missing parser and its install command. We deliberately don't use upstream `RAGAnything.check_parser_installation()` because it only inspects the parser configured on the instance and folds in model-weight readiness checks that don't fit a pre-flight stage.
 
 ### Parser packages
 

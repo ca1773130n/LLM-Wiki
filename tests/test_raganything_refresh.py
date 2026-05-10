@@ -202,57 +202,57 @@ def test_install_hint_for_known_parsers():
     assert "paddleocr" in _install_hint_for("paddleocr")
 
 
-def test_verify_parsers_or_raise_passes_when_all_ok():
-    from llm_wiki.raganything_refresh import _verify_parsers_or_raise
+def test_verify_parsers_or_raise_passes_when_all_importable(monkeypatch):
+    import llm_wiki.raganything_refresh as mod
 
-    class FakeRag:
-        def check_parser_installation(self, parser_name=None):
-            return True
-
-    _verify_parsers_or_raise(FakeRag(), ["mineru", "docling"])  # should not raise
+    monkeypatch.setattr(mod, "_parser_is_importable", lambda parser: True)
+    mod._verify_parsers_or_raise(rag=None, parsers=["mineru", "docling"])  # should not raise
 
 
-def test_verify_parsers_or_raise_raises_with_actionable_hint():
-    from llm_wiki.raganything_refresh import _verify_parsers_or_raise
+def test_verify_parsers_or_raise_raises_with_actionable_hint(monkeypatch):
+    import llm_wiki.raganything_refresh as mod
     import pytest
 
-    class FakeRag:
-        def check_parser_installation(self, parser_name=None):
-            return parser_name != "mineru"
-
+    monkeypatch.setattr(mod, "_parser_is_importable", lambda parser: parser != "mineru")
     with pytest.raises(RuntimeError) as exc:
-        _verify_parsers_or_raise(FakeRag(), ["mineru"])
+        mod._verify_parsers_or_raise(rag=None, parsers=["mineru"])
     msg = str(exc.value)
     assert "mineru" in msg
     assert "mineru[core]" in msg
 
 
-def test_verify_parsers_or_raise_aggregates_multiple_failures():
-    from llm_wiki.raganything_refresh import _verify_parsers_or_raise
+def test_verify_parsers_or_raise_aggregates_multiple_failures(monkeypatch):
+    import llm_wiki.raganything_refresh as mod
     import pytest
 
-    class FakeRag:
-        def check_parser_installation(self, parser_name=None):
-            return False  # everything missing
-
+    monkeypatch.setattr(mod, "_parser_is_importable", lambda parser: False)
     with pytest.raises(RuntimeError) as exc:
-        _verify_parsers_or_raise(FakeRag(), ["mineru", "docling", "paddleocr"])
+        mod._verify_parsers_or_raise(rag=None, parsers=["mineru", "docling", "paddleocr"])
     msg = str(exc.value)
-    # All three parsers should appear in a single error
     assert "mineru" in msg
     assert "docling" in msg
     assert "paddleocr" in msg
-    # And each hint
     assert "mineru[core]" in msg
     assert "pip install docling" in msg
     assert "paddlepaddle" in msg
 
 
-def test_verify_parsers_handles_old_api_without_parser_name_kwarg():
-    from llm_wiki.raganything_refresh import _verify_parsers_or_raise
+def test_parser_is_importable_returns_true_for_unknown_parsers():
+    from llm_wiki.raganything_refresh import _parser_is_importable
+    assert _parser_is_importable("nonexistent-parser-id") is True
 
-    class OldRag:
-        def check_parser_installation(self):
-            return True
 
-    _verify_parsers_or_raise(OldRag(), ["mineru"])  # should not raise (legacy fallback)
+def test_parser_is_importable_returns_false_for_missing_module(monkeypatch):
+    import sys, llm_wiki.raganything_refresh as mod
+
+    # Force "docling" to fail import even if installed
+    monkeypatch.setitem(sys.modules, "docling", None)
+    assert mod._parser_is_importable("docling") is False
+
+
+def test_parser_is_importable_returns_true_when_module_present(monkeypatch):
+    import sys, types, llm_wiki.raganything_refresh as mod
+
+    fake = types.ModuleType("docling")
+    monkeypatch.setitem(sys.modules, "docling", fake)
+    assert mod._parser_is_importable("docling") is True

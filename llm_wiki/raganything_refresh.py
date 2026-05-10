@@ -16,6 +16,7 @@ from __future__ import annotations
 
 import argparse
 import hashlib
+import importlib
 import json
 import os
 import subprocess
@@ -136,9 +137,34 @@ def _install_hint_for(parser: str) -> str:
     return f"See https://github.com/HKUDS/RAG-Anything for installation instructions for parser '{parser}'."
 
 
+_PARSER_PACKAGE: dict[str, tuple[str, ...]] = {
+    "mineru": ("mineru",),
+    "docling": ("docling",),
+    "paddleocr": ("paddleocr",),
+}
+
+
+def _parser_is_importable(parser: str) -> bool:
+    """Return True if every Python package required for `parser` can be imported."""
+    modules = _PARSER_PACKAGE.get(parser)
+    if not modules:
+        # Unknown parser id — defer to upstream rather than blocking.
+        return True
+    for module in modules:
+        try:
+            importlib.import_module(module)
+        except Exception:
+            return False
+    return True
+
+
 def _verify_parsers_or_raise(rag, parsers: Iterable[str]) -> None:
-    """Run RAGAnything.check_parser_installation() per parser, raising once with
-    every missing parser and its install hint.
+    """Raise once with every missing parser and its install hint.
+
+    Uses direct import probes (the upstream `RAGAnything.check_parser_installation`
+    only inspects the parser configured on the instance and includes model-weight
+    checks that fail before first parse — neither matches what we want here).
+    The `rag` argument is kept for signature stability but unused.
     """
     seen: set[str] = set()
     missing: list[tuple[str, str]] = []
@@ -146,17 +172,7 @@ def _verify_parsers_or_raise(rag, parsers: Iterable[str]) -> None:
         if parser in seen:
             continue
         seen.add(parser)
-        ok = False
-        try:
-            ok = bool(rag.check_parser_installation(parser_name=parser))
-        except TypeError:
-            try:
-                ok = bool(rag.check_parser_installation())
-            except Exception:
-                ok = False
-        except Exception:
-            ok = False
-        if not ok:
+        if not _parser_is_importable(parser):
             missing.append((parser, _install_hint_for(parser)))
     if missing:
         lines = ["RAG-Anything cannot run because the following parsers are not properly installed:"]
