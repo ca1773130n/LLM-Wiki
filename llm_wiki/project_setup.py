@@ -167,17 +167,38 @@ def build_setup_plan(
         else:
             should_install_raganything = bool(install_raganything)
 
+        import sys as _sys
+        _python_too_old = _sys.version_info < (3, 10)
+        if _python_too_old and should_install_raganything:
+            should_install_raganything = False
+            _python_warning = (
+                f"RAG-Anything requires Python 3.10+; current interpreter is "
+                f"{_sys.version_info.major}.{_sys.version_info.minor}. Skipping install. "
+                f"Use a Python 3.10+ environment to enable RAG-Anything."
+            )
+        elif _python_too_old:
+            _python_warning = (
+                f"RAG-Anything requires Python 3.10+; current interpreter is "
+                f"{_sys.version_info.major}.{_sys.version_info.minor}. "
+                f"Use a Python 3.10+ environment to enable RAG-Anything."
+            )
+        else:
+            _python_warning = None
+
         backend = default_raganything_backend_config(name or sanitize_server_name(root.name))
         backend["enabled"] = True
         backend["parser"] = raganything_parser
         install_command = (
-            "{python} -m pip install 'raganything[" + raganything_extras + "]'"
+            "{python} -m pip install 'raganything[" + raganything_extras + "]>=1.3.0'"
             if raganything_extras
-            else "{python} -m pip install raganything"
+            else "{python} -m pip install 'raganything>=1.3.0'"
         )
         if should_install_raganything:
             backend["install"]["auto_install"] = True
             backend["install"]["command"] = install_command
+        if _python_too_old:
+            backend["enabled"] = False
+            backend["python_warning"] = _python_warning
         memory_backends["raganything"] = backend
 
         refresh_command = (
@@ -202,7 +223,8 @@ def build_setup_plan(
                     "auto_install": bool(should_install_raganything),
                     "command": install_command,
                 },
-                "enabled": True,
+                "python_warning": _python_warning,
+                "enabled": not _python_too_old,
             }
         )
 
@@ -244,6 +266,9 @@ def render_setup_summary(plan: SetupPlan, *, color: bool = True) -> str:
             install = tool.get("install") or {}
             install_note = ", installs now" if install.get("auto_install") else ""
             lines.append(f"  {_paint('◆', CYAN, color)} {tool['name']} → {source} ({command}{install_note})")
+            warning = tool.get("python_warning")
+            if warning:
+                lines.append(f"  {_paint('⚠ ' + tool['name'] + ': ' + warning, YELLOW + BOLD, color)}")
     else:
         lines.append(f"  {_paint('·', DIM, color)} none selected")
     lines.append("")

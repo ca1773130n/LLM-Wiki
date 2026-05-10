@@ -1,8 +1,17 @@
 import pytest
 
 
+def _force_modern_python(monkeypatch):
+    """Pin sys.version_info to 3.11 so query tests run regardless of host interpreter."""
+    import sys
+    from collections import namedtuple
+    V = namedtuple("version_info", ["major", "minor", "micro", "releaselevel", "serial"])
+    monkeypatch.setattr(sys, "version_info", V(3, 11, 0, "final", 0))
+
+
 def test_query_returns_string_via_aquery_when_backend_available(monkeypatch, tmp_path):
     import llm_wiki.raganything_query as mod
+    _force_modern_python(monkeypatch)
 
     captured = {}
 
@@ -38,9 +47,22 @@ def test_query_returns_none_when_disabled(tmp_path):
 
 def test_query_returns_none_when_module_missing(monkeypatch, tmp_path):
     import llm_wiki.raganything_query as mod
+    _force_modern_python(monkeypatch)
 
     def boom(cfg):
         raise RuntimeError("raganything not installed")
 
     monkeypatch.setattr(mod, "_load_raganything", boom)
     assert mod.query("q", backend_config={"enabled": True, "working_dir": str(tmp_path)}) is None
+
+
+def test_query_returns_none_when_python_too_old(monkeypatch, capsys, tmp_path):
+    import sys
+    from collections import namedtuple
+    V = namedtuple("version_info", ["major", "minor", "micro", "releaselevel", "serial"])
+    monkeypatch.setattr(sys, "version_info", V(3, 9, 0, "final", 0))
+    from llm_wiki.raganything_query import query
+    result = query("q", backend_config={"enabled": True, "working_dir": str(tmp_path)})
+    assert result is None
+    err = capsys.readouterr().err
+    assert "Python 3.10" in err

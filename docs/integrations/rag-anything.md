@@ -93,7 +93,7 @@ Provenance is preserved on each node:
 
 ## System prerequisites
 
-- **Python 3.10+** (RAG-Anything requirement; LLM-Wiki itself targets 3.9+).
+- **Python 3.10+** is required for RAG-Anything (the upstream `raganything` package ≥1.3.0 transitively depends on `mineru[core]`, which is Python 3.10+). On older Pythons LLM-Wiki disables the integration with a clear warning rather than silently installing a broken placeholder.
 - **LibreOffice** for `.doc/.docx/.ppt/.pptx/.xls/.xlsx` parsing — install separately via your platform's package manager. RAG-Anything skips Office documents with a warning when LibreOffice is missing.
 - **MinerU model weights** are downloaded on first parse and cached (~GBs). Subsequent runs reuse the cache.
 - **OpenAI-compatible LLM/embedding/vision keys** for the runtime memory backend (`OPENAI_API_KEY`, `OPENAI_BASE_URL`). Parser-only mode does not require keys.

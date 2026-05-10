@@ -29,6 +29,13 @@ def _load_raganything(cfg: dict):
 def query(question: str, *, backend_config: dict) -> Optional[str]:
     if not backend_config or not backend_config.get("enabled"):
         return None
+    if sys.version_info < (3, 10):
+        print(
+            f"raganything backend disabled: requires Python 3.10+, "
+            f"current is {sys.version_info.major}.{sys.version_info.minor}",
+            file=sys.stderr,
+        )
+        return None
     try:
         rag = _load_raganything(backend_config)
     except RuntimeError as exc:

@@ -1,7 +1,21 @@
 from llm_wiki.project_setup import build_setup_plan
 
 
-def test_build_setup_plan_with_raganything_appends_external_tool_and_backend(tmp_path):
+def _make_version_info(major, minor, micro=0, releaselevel="final", serial=0):
+    """Build a sys.version_info-compatible namedtuple (the real type is uninstantiable)."""
+    from collections import namedtuple
+    V = namedtuple("version_info", ["major", "minor", "micro", "releaselevel", "serial"])
+    return V(major, minor, micro, releaselevel, serial)
+
+
+def _force_modern_python(monkeypatch):
+    """Pin sys.version_info to a 3.10+ tuple so tests don't depend on the host interpreter."""
+    import sys
+    monkeypatch.setattr(sys, "version_info", _make_version_info(3, 11))
+
+
+def test_build_setup_plan_with_raganything_appends_external_tool_and_backend(tmp_path, monkeypatch):
+    _force_modern_python(monkeypatch)
     plan = build_setup_plan(
         tmp_path,
         name="demo",
@@ -28,6 +42,7 @@ def test_build_setup_plan_without_raganything_does_not_add_entry(tmp_path):
 
 
 def test_build_setup_plan_with_raganything_alone_defaults_to_install_when_missing(tmp_path, monkeypatch):
+    _force_modern_python(monkeypatch)
     # Simulate raganything not being importable
     import sys
     monkeypatch.setitem(sys.modules, "raganything", None)
@@ -45,6 +60,7 @@ def test_build_setup_plan_with_raganything_alone_defaults_to_install_when_missin
 
 
 def test_build_setup_plan_with_raganything_alone_skips_install_when_already_present(tmp_path, monkeypatch):
+    _force_modern_python(monkeypatch)
     import sys, types
     fake = types.ModuleType("raganything")
     monkeypatch.setitem(sys.modules, "raganything", fake)
@@ -60,6 +76,7 @@ def test_build_setup_plan_with_raganything_alone_skips_install_when_already_pres
 
 
 def test_build_setup_plan_explicit_install_raganything_false_overrides_auto(tmp_path, monkeypatch):
+    _force_modern_python(monkeypatch)
     import sys
     monkeypatch.setitem(sys.modules, "raganything", None)
 
@@ -72,3 +89,19 @@ def test_build_setup_plan_explicit_install_raganything_false_overrides_auto(tmp_
     )
     raga = next(t for t in plan.external_tools if t["id"] == "raganything")
     assert raga["install"]["auto_install"] is False
+
+
+def test_build_setup_plan_disables_raganything_on_python_below_3_10(tmp_path, monkeypatch):
+    import sys
+    monkeypatch.setattr(sys, "version_info", _make_version_info(3, 9))
+    plan = build_setup_plan(
+        tmp_path,
+        name="demo",
+        sources=["README.md"],
+        include_raganything=True,
+    )
+    raga = next(t for t in plan.external_tools if t["id"] == "raganything")
+    assert raga["enabled"] is False
+    assert raga["install"]["auto_install"] is False
+    assert "Python 3.10" in (raga.get("python_warning") or "")
+    assert plan.memory_backends["raganything"]["enabled"] is False

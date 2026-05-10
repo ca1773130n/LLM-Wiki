@@ -9,6 +9,7 @@ Exit codes:
     2 - project directory does not exist
     4 - raganything package is not installed
     5 - every discovered source failed to parse
+    6 - Python interpreter is too old (RAG-Anything requires Python 3.10+)
 """
 
 from __future__ import annotations
@@ -231,6 +232,14 @@ def refresh_raganything(
     if not root.exists() or not root.is_dir():
         print(f"RAG-Anything refresh failed: project directory does not exist: {root}", file=sys.stderr)
         return 2
+
+    if sys.version_info < (3, 10):
+        print(
+            f"RAG-Anything requires Python 3.10+; current interpreter is "
+            f"{sys.version_info.major}.{sys.version_info.minor}. Skipping refresh.",
+            file=sys.stderr,
+        )
+        return 6
 
     if not force and not full and _artifact_is_current(root):
         print("RAG-Anything manifest is already current; skipping refresh.")

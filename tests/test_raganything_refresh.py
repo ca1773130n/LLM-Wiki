@@ -4,6 +4,14 @@ from pathlib import Path
 import pytest
 
 
+def _force_modern_python(monkeypatch):
+    """Pin sys.version_info to 3.11 so refresh tests run regardless of host interpreter."""
+    import sys
+    from collections import namedtuple
+    V = namedtuple("version_info", ["major", "minor", "micro", "releaselevel", "serial"])
+    monkeypatch.setattr(sys, "version_info", V(3, 11, 0, "final", 0))
+
+
 def test_artifact_is_current_returns_false_when_manifest_missing(tmp_path):
     from llm_wiki.raganything_refresh import _artifact_is_current
     assert _artifact_is_current(tmp_path) is False
@@ -82,6 +90,7 @@ def test_write_manifest_serializes_documents_with_sha256(tmp_path):
 
 def test_refresh_runs_parse_documents_and_writes_manifest(tmp_path, monkeypatch):
     import llm_wiki.raganything_refresh as mod
+    _force_modern_python(monkeypatch)
 
     (tmp_path / "data").mkdir()
     pdf = tmp_path / "data" / "paper.pdf"
@@ -114,6 +123,7 @@ def test_refresh_runs_parse_documents_and_writes_manifest(tmp_path, monkeypatch)
 
 def test_refresh_returns_5_when_every_source_fails(tmp_path, monkeypatch):
     import llm_wiki.raganything_refresh as mod
+    _force_modern_python(monkeypatch)
 
     (tmp_path / "data").mkdir()
     (tmp_path / "data" / "a.pdf").write_bytes(b"%PDF-1.4")
@@ -130,6 +140,7 @@ def test_refresh_returns_5_when_every_source_fails(tmp_path, monkeypatch):
 
 def test_refresh_skips_when_artifact_current(tmp_path, monkeypatch, capsys):
     import llm_wiki.raganything_refresh as mod
+    _force_modern_python(monkeypatch)
     base = tmp_path / ".llm-wiki" / "external" / "raganything"
     base.mkdir(parents=True)
     (base / "manifest.json").write_text("{}")
@@ -141,3 +152,14 @@ def test_refresh_skips_when_artifact_current(tmp_path, monkeypatch, capsys):
     assert rc == 0
     out = capsys.readouterr().out
     assert "already current" in out
+
+
+def test_refresh_returns_6_when_python_too_old(tmp_path, monkeypatch, capsys):
+    import sys, llm_wiki.raganything_refresh as mod
+    from collections import namedtuple
+    V = namedtuple("version_info", ["major", "minor", "micro", "releaselevel", "serial"])
+    monkeypatch.setattr(sys, "version_info", V(3, 9, 0, "final", 0))
+    rc = mod.refresh_raganything(tmp_path, parser="mineru", force=True)
+    assert rc == 6
+    err = capsys.readouterr().err
+    assert "Python 3.10+" in err
