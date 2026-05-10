@@ -154,3 +154,37 @@ class RagAnythingGraphAdapter:
             "imported_documents": {doc_id: node.id for doc_id, node in sorted(doc_to_node.items())},
         }
         return graph, manifest
+
+
+def merge_raganything_graph(
+    graph: ResearchGraph,
+    *,
+    project_root: str | Path,
+    artifact: str | Path,
+    sync_manifest_path: Optional[str | Path] = None,
+) -> tuple[ResearchGraph, dict]:
+    """Merge a RAG-Anything manifest into an existing graph and optionally persist sync manifest."""
+    adapter = RagAnythingGraphAdapter(project_root)
+    result = adapter.import_artifact(artifact)
+    nodes_by_id: dict[str, ResearchNode] = {n.id: n for n in graph.nodes}
+    for node in result.graph.nodes:
+        nodes_by_id[node.id] = node
+    edges_by_key: dict[tuple[str, str, str], ResearchEdge] = {
+        (e.source, e.type, e.target): e for e in graph.edges
+    }
+    for edge in result.graph.edges:
+        edges_by_key[(edge.source, edge.type, edge.target)] = edge
+
+    merged = ResearchGraph(
+        nodes=list(nodes_by_id.values()),
+        edges=list(edges_by_key.values()),
+    )
+
+    if sync_manifest_path is not None:
+        path = Path(sync_manifest_path)
+        if not path.is_absolute():
+            path = Path(project_root) / path
+        path.parent.mkdir(parents=True, exist_ok=True)
+        path.write_text(json.dumps(result.manifest, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
+
+    return merged, result.manifest

@@ -63,3 +63,24 @@ def test_import_artifact_reads_file_and_records_sha256(tmp_path):
     assert result.manifest["artifact"].endswith("manifest.json")
     assert len(result.manifest["artifact_sha256"]) == 64  # sha256 hex
     assert result.graph.nodes  # at least one node
+
+
+def test_merge_raganything_graph_appends_to_existing_graph_and_writes_manifest(tmp_path):
+    from llm_wiki.raganything_adapter import merge_raganything_graph
+
+    artifact = tmp_path / ".llm-wiki" / "external" / "raganything" / "manifest.json"
+    artifact.parent.mkdir(parents=True)
+    artifact.write_text(json.dumps(_payload()), encoding="utf-8")
+    sync_path = tmp_path / ".llm-wiki" / "external" / "raganything-sync.json"
+
+    base = ResearchGraph(nodes=[], edges=[])
+    merged, manifest = merge_raganything_graph(
+        base,
+        project_root=tmp_path,
+        artifact=artifact,
+        sync_manifest_path=sync_path,
+    )
+    assert merged.nodes  # at least one source file node added
+    assert sync_path.exists()
+    written = json.loads(sync_path.read_text(encoding="utf-8"))
+    assert written == manifest
