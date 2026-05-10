@@ -440,6 +440,31 @@ class LLMWikiMCPServer:
                 },
             },
             {
+                "name": "ask",
+                "description": (
+                    "Ask a natural-language question and get an answer from a configured "
+                    "memory backend (raganything, cognee, or compiled wiki search). Mirrors "
+                    "`llm_wiki project ask`."
+                ),
+                "inputSchema": {
+                    "type": "object",
+                    "properties": {
+                        "question": {"type": "string", "description": "The natural-language question."},
+                        "backend": {
+                            "type": "string",
+                            "enum": ["auto", "raganything", "cognee", "wiki"],
+                            "default": "auto",
+                            "description": "Which backend to use. 'auto' tries raganything (if enabled), then cognee, then compiled wiki search.",
+                        },
+                        "project": project_prop,
+                        "graph_path": graph_path_prop,
+                        "top_k": {"type": "integer", "description": "Maximum results/context items.", "default": 5, "minimum": 1, "maximum": 100},
+                    },
+                    "required": ["question"],
+                    "additionalProperties": False,
+                },
+            },
+            {
                 "name": "list_projects",
                 "description": "List registered LLM-Wiki projects and the active project alias.",
                 "inputSchema": {"type": "object", "properties": {}, "additionalProperties": False},
@@ -534,6 +559,15 @@ class LLMWikiMCPServer:
         if name == "lint_report":
             _, project_root = self._load_requested_graph_with_root(args)
             return self.lint_report(project_root)
+        if name == "ask":
+            question = str(args.get("question") or "").strip()
+            if not question:
+                raise ValueError("ask requires 'question'")
+            backend = str(args.get("backend") or "auto")
+            if backend not in {"auto", "raganything", "cognee", "wiki"}:
+                raise ValueError(f"ask: unknown backend {backend!r}")
+            top_k = int(args.get("top_k") or 5)
+            return self._mcp_ask(args, question=question, backend=backend, top_k=top_k)
         if name == "list_projects":
             return self.registry.list_projects()
         if name == "register_project":
@@ -714,6 +748,113 @@ class LLMWikiMCPServer:
             "truncated": truncated,
             "cap_bytes": LINT_REPORT_BYTE_CAP,
         }
+
+    def _resolve_project_root_for_ask(self, args: JSONDict) -> Path:
+        """Resolve the project root for ``ask`` even when no graph.json exists yet.
+
+        ``ask`` doesn't need a parsed ResearchGraph — it dispatches to memory
+        backends or the compiled-wiki helper, both of which want the project
+        root. We accept ``project`` (registered alias), ``graph_path`` (any
+        path under a ``.llm-wiki`` layout), or fall back to the active
+        registry entry. Raises a clear error if none of those resolve.
+        """
+        raw_path = args.get("graph_path")
+        if raw_path:
+            root = _project_root_for_graph_path(str(raw_path))
+            if root is None:
+                raise ValueError(f"ask: graph_path is not under a .llm-wiki layout: {raw_path}")
+            return root
+        project = args.get("project")
+        if project:
+            entry_path = self.registry.resolve_graph_path(str(project))
+            if entry_path is None:
+                raise ValueError(f"ask: unknown project {project!r}. Use list_projects or register_project.")
+            root = _project_root_for_graph_path(entry_path)
+            if root is None:
+                raise ValueError(f"ask: registered project {project!r} has no .llm-wiki layout")
+            return root
+        active = self.registry.active_graph_path()
+        if active is not None:
+            root = _project_root_for_graph_path(active)
+            if root is not None:
+                return root
+        if self.default_graph_path:
+            root = _project_root_for_graph_path(self.default_graph_path)
+            if root is not None:
+                return root
+        raise ValueError(
+            "ask: no project specified. Pass 'project' or 'graph_path', activate a project, "
+            "or start the MCP server with --graph pointing at a .llm-wiki layout."
+        )
+
+    def _mcp_ask(self, args: JSONDict, *, question: str, backend: str, top_k: int) -> JSONDict:
+        """Dispatch ``ask`` to raganything, cognee, or compiled-wiki search.
+
+        Mirrors the ``llm_wiki project ask`` CLI handler but returns a JSON
+        payload instead of printing. Errors raised here surface as JSON-RPC
+        errors via :class:`MCPRequestHandler`.
+        """
+        from .project import ProjectWiki, cognee_backend_config
+
+        project_root = self._resolve_project_root_for_ask(args)
+        wiki = ProjectWiki.load(project_root)
+        cfg = wiki.config()
+
+        # ---- raganything path ----
+        raganything_cfg = (cfg.get("memory_backends") or {}).get("raganything") or {}
+        raganything_enabled = bool(raganything_cfg.get("enabled"))
+        use_raganything = backend == "raganything" or (backend == "auto" and raganything_enabled)
+        if use_raganything:
+            wd = raganything_cfg.get("working_dir")
+            if wd and not Path(wd).is_absolute():
+                raganything_cfg = {**raganything_cfg, "working_dir": str(project_root / wd)}
+            if backend == "raganything" and not raganything_cfg.get("enabled"):
+                raganything_cfg = {**raganything_cfg, "enabled": True}
+            from .raganything_query import query as _raganything_query
+
+            try:
+                answer = _raganything_query(question, backend_config=raganything_cfg)
+            except Exception as exc:
+                if backend == "raganything":
+                    raise RuntimeError(f"raganything ask failed: {exc}") from exc
+                answer = None
+            if answer is not None:
+                return {"backend": "raganything", "question": question, "answer": answer}
+            if backend == "raganything":
+                return {
+                    "backend": "raganything",
+                    "question": question,
+                    "answer": None,
+                    "note": "no answer (likely missing API keys or empty index)",
+                }
+            # auto: fall through
+
+        # ---- cognee path ----
+        cognee_cfg = cognee_backend_config(cfg)
+        use_cognee = backend == "cognee" or (backend == "auto" and cognee_cfg.get("enabled", False))
+        if use_cognee:
+            from .cognee_query import search_cognee
+
+            dataset = cognee_cfg.get("dataset")
+            try:
+                results = search_cognee(question, dataset=dataset, top_k=top_k)
+            except Exception as exc:
+                if backend == "cognee":
+                    raise RuntimeError(f"cognee ask failed: {exc}") from exc
+            else:
+                return {
+                    "backend": "cognee",
+                    "dataset": dataset,
+                    "question": question,
+                    "results": results,
+                }
+
+        # ---- wiki search fallback ----
+        result = wiki.query(question, top_k=top_k, use_llm=False)
+        payload = result.to_dict()
+        payload["backend"] = "wiki"
+        payload["question"] = question
+        return payload
 
     def node_context(self, graph: ResearchGraph, node_id: Optional[str] = None, node_name: Optional[str] = None, limit: int = 50) -> JSONDict:
         node = self._find_node(graph, node_id=node_id, node_name=node_name)

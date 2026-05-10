@@ -113,8 +113,46 @@ def _project_query_handler(args) -> int:
 def _project_ask_handler(args) -> int:
     wiki = ProjectWiki.load(args.project)
     cfg = wiki.config()
-    cognee_cfg = cognee_backend_config(cfg)
     backend = args.backend
+
+    # ---- raganything branch ----
+    raganything_cfg = (cfg.get("memory_backends") or {}).get("raganything") or {}
+    raganything_enabled = bool(raganything_cfg.get("enabled"))
+    use_raganything = backend == "raganything" or (backend == "auto" and raganything_enabled)
+    if use_raganything:
+        # Resolve working_dir relative to the project if it's not absolute.
+        wd = raganything_cfg.get("working_dir")
+        if wd and not Path(wd).is_absolute():
+            raganything_cfg = {**raganything_cfg, "working_dir": str(wiki.project_root / wd)}
+        # Force enabled True when the user asked explicitly so the runtime
+        # query bridge doesn't short-circuit on a missing flag.
+        if backend == "raganything" and not raganything_cfg.get("enabled"):
+            raganything_cfg = {**raganything_cfg, "enabled": True}
+        from .raganything_query import query as _raganything_query
+
+        try:
+            answer = _raganything_query(args.question, backend_config=raganything_cfg)
+        except Exception as exc:
+            if backend == "raganything":
+                print(f"RAG-Anything ask failed: {exc}", file=sys.stderr)
+                return 2
+            print(f"RAG-Anything ask unavailable; falling back: {exc}", file=sys.stderr)
+            answer = None
+
+        if answer is not None:
+            if args.json_output:
+                print(json.dumps({"backend": "raganything", "question": args.question, "answer": answer}, ensure_ascii=False, indent=2))
+            else:
+                print("RAG-Anything answer:")
+                print(answer)
+            return 0
+        if backend == "raganything":
+            print("RAG-Anything backend returned no answer (likely missing API keys or empty index).", file=sys.stderr)
+            return 2
+        # Otherwise fall through to Cognee/wiki under auto mode.
+
+    # ---- cognee branch ----
+    cognee_cfg = cognee_backend_config(cfg)
     use_cognee = backend == "cognee" or (backend == "auto" and cognee_cfg.get("enabled", False))
     if use_cognee:
         from .cognee_query import search_cognee
@@ -341,10 +379,10 @@ def project_main(argv: List[str] | None = None) -> int:
     query_parser.add_argument("--json", dest="json_output", action="store_true", help="Print the structured QueryResult as JSON")
     query_parser.add_argument("--interactive", action="store_true", help="Drop into a REPL with readline history; blank line or EOF exits")
 
-    ask_parser = subparsers.add_parser("ask", help="Ask the configured project memory backend; uses Cognee when enabled")
+    ask_parser = subparsers.add_parser("ask", help="Ask the configured project memory backend; uses RAG-Anything or Cognee when enabled")
     ask_parser.add_argument("question", help="Question text")
     ask_parser.add_argument("--project", default=".", help="Project root directory; defaults to current working directory")
-    ask_parser.add_argument("--backend", choices=["auto", "cognee", "wiki"], default="auto", help="Question backend (default: auto; Cognee if enabled, otherwise wiki query)")
+    ask_parser.add_argument("--backend", choices=["auto", "raganything", "cognee", "wiki"], default="auto", help="Question backend (default: auto; tries RAG-Anything, then Cognee, then wiki query)")
     ask_parser.add_argument("--top-k", type=int, default=8, help="Maximum results/context items")
     ask_parser.add_argument("--cognee-search-type", default="INSIGHTS", help="Cognee SearchType name, e.g. INSIGHTS, CHUNKS, SUMMARIES, GRAPH_COMPLETION")
     ask_parser.add_argument("--cognee-dataset", help="Override configured Cognee dataset")

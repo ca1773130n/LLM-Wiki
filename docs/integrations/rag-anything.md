@@ -102,6 +102,37 @@ Provenance is preserved on each node:
 
 `memory_backends.raganything` (default produced by `default_raganything_backend_config`) coexists with Cognee. `project ask` tries backends in priority order; per-project priority can be set via `memory_backends.priority`. RAG-Anything is opt-in (default `enabled: false`); the setup flag `--with-raganything` flips it on.
 
+### Invoking from the CLI
+
+```bash
+# Auto mode: tries RAG-Anything (when enabled), then Cognee, then compiled-wiki search.
+llm_wiki project ask "What does the integration spec say about parser routing?"
+
+# Force a specific backend.
+llm_wiki project ask "..." --backend raganything
+llm_wiki project ask "..." --backend cognee
+llm_wiki project ask "..." --backend wiki
+```
+
+`--backend raganything` calls `llm_wiki.raganything_query.query` directly. A relative `working_dir` in `memory_backends.raganything` is resolved against the project root before the call.
+
+### Invoking from MCP
+
+The stdio MCP server exposes an `ask` tool with the same backend selector:
+
+```json
+{
+  "name": "ask",
+  "arguments": {
+    "question": "What does the integration spec say about parser routing?",
+    "backend": "auto",
+    "project": "llm_wiki"
+  }
+}
+```
+
+The dispatch order (`raganything` → `cognee` → compiled-wiki search) and `working_dir` resolution mirror the CLI handler exactly, so coding agents and human operators converge on the same answers.
+
 ## System prerequisites
 
 - **Python 3.10+** is required for RAG-Anything (the upstream `raganything` package ≥1.3.0 transitively depends on `mineru[core]`, which is Python 3.10+). On older Pythons LLM-Wiki disables the integration with a clear warning rather than silently installing a broken placeholder.

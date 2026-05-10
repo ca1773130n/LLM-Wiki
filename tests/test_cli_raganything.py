@@ -68,6 +68,91 @@ def test_cli_with_raganything_alone_passes_none_for_install(tmp_path, monkeypatc
     assert captured["install_raganything"] is None
 
 
+def test_cli_ask_routes_raganything_when_backend_explicit(tmp_path, monkeypatch, capsys):
+    """--backend raganything calls raganything_query.query directly."""
+    from llm_wiki import cli
+    import json as _json
+
+    # Set up a minimal project on disk
+    cfg_dir = tmp_path / ".llm-wiki"
+    cfg_dir.mkdir()
+    cfg = {
+        "name": "demo",
+        "sources": ["README.md"],
+        "external_tools": [],
+        "memory_backends": {
+            "raganything": {
+                "enabled": True,
+                "working_dir": ".llm-wiki/external/raganything/working_dir",
+                "parser": "docling",
+                "query_mode": "hybrid",
+            }
+        },
+    }
+    (cfg_dir / "config.json").write_text(_json.dumps(cfg), encoding="utf-8")
+    (tmp_path / "README.md").write_text("# demo", encoding="utf-8")
+
+    captured = {}
+
+    def fake_query(question, *, backend_config):
+        captured["question"] = question
+        captured["backend_config"] = backend_config
+        return "raganything-answer"
+
+    import llm_wiki.raganything_query as rq
+    monkeypatch.setattr(rq, "query", fake_query)
+    # The CLI imports `query` symbolically; patch the cli reference too if it's bound at call time.
+    monkeypatch.setattr(cli, "_raganything_refresh_main", lambda argv: 0, raising=False)
+
+    rc = cli.main([
+        "project", "ask", "What does the demo say?",
+        "--backend", "raganything",
+        "--project", str(tmp_path),
+    ])
+    assert rc == 0
+    out = capsys.readouterr().out
+    assert "RAG-Anything answer:" in out
+    assert "raganything-answer" in out
+    assert captured["question"] == "What does the demo say?"
+    # working_dir should be resolved relative to the project root
+    assert str(tmp_path) in captured["backend_config"]["working_dir"]
+
+
+def test_cli_ask_falls_through_when_raganything_returns_none(tmp_path, monkeypatch, capsys):
+    """auto mode: raganything returning None falls through to cognee/wiki."""
+    from llm_wiki import cli
+    import json as _json
+
+    cfg_dir = tmp_path / ".llm-wiki"
+    cfg_dir.mkdir()
+    cfg = {
+        "name": "demo",
+        "sources": ["README.md"],
+        "external_tools": [],
+        "memory_backends": {
+            "raganything": {"enabled": True, "working_dir": "wd", "parser": "docling"},
+            "cognee": {"enabled": False},  # force fallback to wiki
+        },
+    }
+    (cfg_dir / "config.json").write_text(_json.dumps(cfg), encoding="utf-8")
+    (tmp_path / "README.md").write_text("# demo\n\nSome content.", encoding="utf-8")
+
+    import llm_wiki.raganything_query as rq
+    monkeypatch.setattr(rq, "query", lambda q, *, backend_config: None)
+
+    # The wiki fallback must run; it should not crash even with minimal corpus.
+    rc = cli.main([
+        "project", "ask", "anything",
+        "--backend", "auto",
+        "--project", str(tmp_path),
+    ])
+    # rc may be 0 regardless of whether the wiki path returns hits — accept 0 or 2.
+    assert rc in (0, 2)
+    err = capsys.readouterr().err
+    # No "RAG-Anything ask failed" since raganything just returned None silently.
+    assert "RAG-Anything ask failed" not in err
+
+
 def test_cli_refresh_raganything_invokes_refresh_main(monkeypatch):
     from llm_wiki import cli
     captured = {}
