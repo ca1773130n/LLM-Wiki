@@ -30,6 +30,7 @@ class SetupPlan:
     sources: List[str] = field(default_factory=list)
     external_tools: List[dict] = field(default_factory=list)
     run_external_tools: bool = False
+    install_external_tools: bool = False
     memory_backends: dict = field(default_factory=dict)
 
 
@@ -63,6 +64,10 @@ def understand_anything_projection_path() -> str:
     return ".llm-wiki/external/understand-anything.md"
 
 
+def understand_anything_install_command(platform: str = "codex") -> str:
+    return f"curl -fsSL https://raw.githubusercontent.com/Lum1104/Understand-Anything/main/install.sh | bash -s {platform}"
+
+
 def build_setup_plan(
     project_root: str | Path,
     *,
@@ -72,6 +77,8 @@ def build_setup_plan(
     include_understand_anything: bool = False,
     run_understand_anything: bool = False,
     understand_anything_command: Optional[str] = None,
+    install_understand_anything: Optional[bool] = None,
+    understand_anything_platform: str = "codex",
     enable_cognee: bool = True,
     cognee_mode: str = "codex_cognify",
     cognee_auto_cognify: bool = False,
@@ -86,6 +93,7 @@ def build_setup_plan(
         projection = understand_anything_projection_path()
         if projection not in source_list:
             source_list.append(projection)
+        should_install = bool(install_understand_anything) if install_understand_anything is not None else not bool(ua_artifact)
         external_tools.append(
             {
                 "id": "understand-anything",
@@ -95,6 +103,12 @@ def build_setup_plan(
                 "refresh_command": understand_anything_command or "",
                 "auto_refresh": bool(run_understand_anything and understand_anything_command),
                 "enabled": True,
+                "install": {
+                    "enabled": True,
+                    "auto_install": should_install,
+                    "platform": understand_anything_platform,
+                    "command": understand_anything_install_command(understand_anything_platform),
+                },
             }
         )
 
@@ -112,6 +126,7 @@ def build_setup_plan(
         sources=source_list,
         external_tools=external_tools,
         run_external_tools=run_understand_anything,
+        install_external_tools=any((tool.get("install") or {}).get("auto_install") for tool in external_tools),
         memory_backends=memory_backends,
     )
 
@@ -139,7 +154,9 @@ def render_setup_summary(plan: SetupPlan, *, color: bool = True) -> str:
         for tool in plan.external_tools:
             command = tool.get("refresh_command") or "configure later"
             source = tool.get("source") or tool.get("artifact")
-            lines.append(f"  {_paint('◆', CYAN, color)} {tool['name']} → {source} ({command})")
+            install = tool.get("install") or {}
+            install_note = ", installs now" if install.get("auto_install") else ""
+            lines.append(f"  {_paint('◆', CYAN, color)} {tool['name']} → {source} ({command}{install_note})")
     else:
         lines.append(f"  {_paint('·', DIM, color)} none selected")
     lines.append("")
@@ -208,18 +225,45 @@ def interactive_setup_plan(project_root: str | Path, *, color: bool = True) -> S
 
 def run_external_tools(plan: SetupPlan, *, fail_fast: bool = True) -> List[dict]:
     results: List[dict] = []
+    if plan.install_external_tools:
+        results.extend(run_tool_configs(plan.project_root, plan.external_tools, only_auto=False, fail_fast=fail_fast, run_installers=True))
     if not plan.run_external_tools:
         return results
-    return run_tool_configs(plan.project_root, plan.external_tools, only_auto=False, fail_fast=fail_fast)
+    results.extend(run_tool_configs(plan.project_root, plan.external_tools, only_auto=False, fail_fast=fail_fast))
+    return results
 
 
-def run_tool_configs(project_root: str | Path, tools: Sequence[dict], *, only_auto: bool = True, fail_fast: bool = True) -> List[dict]:
+def run_tool_configs(project_root: str | Path, tools: Sequence[dict], *, only_auto: bool = True, fail_fast: bool = True, run_installers: bool = False) -> List[dict]:
     root = Path(project_root).resolve()
     results: List[dict] = []
     for tool in tools:
         if not tool.get("enabled", True):
             continue
         if only_auto and not tool.get("auto_refresh"):
+            continue
+        if run_installers:
+            install = tool.get("install") or {}
+            command = str(install.get("command") or "").strip()
+            if not install.get("enabled", False) or not install.get("auto_install", False) or not command:
+                continue
+            completed = subprocess.run(
+                command,
+                shell=True,
+                cwd=root,
+                text=True,
+                capture_output=True,
+            )
+            result = {
+                "id": tool.get("id"),
+                "status": "installed" if completed.returncode == 0 else "install_failed",
+                "command": command,
+                "returncode": completed.returncode,
+                "stdout": completed.stdout[-2000:],
+                "stderr": completed.stderr[-2000:],
+            }
+            results.append(result)
+            if completed.returncode != 0 and fail_fast:
+                raise RuntimeError(f"External tool install failed: {tool.get('name')} ({completed.returncode})")
             continue
         command = str(tool.get("refresh_command") or "").strip()
         if command:

@@ -46,10 +46,42 @@ def test_setup_command_yes_writes_config_with_external_tool_metadata(tmp_path, c
     assert cfg["sources"] == ["README.md", ".llm-wiki/external/understand-anything.md"]
     assert cfg["setup"]["wizard"] == "llm_wiki project setup"
     assert cfg["external_tools"][0]["id"] == "understand-anything"
+    assert cfg["external_tools"][0]["install"]["enabled"] is True
+    assert "install.sh" in cfg["external_tools"][0]["install"]["command"]
     assert (project / ".llm-wiki" / "external" / "understand-anything.md").exists()
     out = capsys.readouterr().out
     assert "LLM-Wiki setup" in out
     assert "Understand Anything" in out
+
+
+def test_setup_installs_understand_anything_when_requested(tmp_path, monkeypatch, capsys):
+    project = tmp_path / "demo"
+    project.mkdir()
+    (project / "README.md").write_text("# Demo\n", encoding="utf-8")
+    calls = []
+
+    def fake_run_tool_configs(project_root, tools, *, only_auto=True, fail_fast=True, run_installers=False):
+        calls.append((project_root, tools, only_auto, fail_fast, run_installers))
+        return [{"id": "understand-anything", "status": "installed", "command": tools[0]["install"]["command"]}]
+
+    monkeypatch.setattr("llm_wiki.project_setup.run_tool_configs", fake_run_tool_configs)
+
+    assert main([
+        "project",
+        "setup",
+        "--project",
+        str(project),
+        "--yes",
+        "--with-understand-anything",
+        "--install-understand-anything",
+        "--no-color",
+    ]) == 0
+
+    assert calls
+    tools = calls[0][1]
+    assert tools[0]["install"]["enabled"] is True
+    assert "install.sh" in tools[0]["install"]["command"]
+    assert "Understand Anything installed/updated" in capsys.readouterr().out
 
 
 def test_setup_persists_config_even_when_initial_external_refresh_fails(tmp_path, capsys):
@@ -67,6 +99,7 @@ def test_setup_persists_config_even_when_initial_external_refresh_fails(tmp_path
         "--understand-anything-command",
         "definitely_missing_understand_command",
         "--run-understand-anything",
+        "--skip-install-understand-anything",
         "--no-color",
     ]) == 0
 
@@ -75,7 +108,7 @@ def test_setup_persists_config_even_when_initial_external_refresh_fails(tmp_path
     assert cfg["external_tools"][0]["auto_refresh"] is True
     assert (project / ".llm-wiki" / "external" / "understand-anything.md").exists()
     out = capsys.readouterr().out
-    assert "External tool refresh had warnings" in out
+    assert "External tool" in out and "warnings" in out
     assert "definitely_missing_understand_command" in out
 
 
@@ -95,6 +128,7 @@ def test_compile_auto_refreshes_configured_external_tools(tmp_path, capsys):
         "--understand-anything-command",
         command,
         "--run-understand-anything",
+        "--skip-install-understand-anything",
         "--no-color",
     ]) == 0
     (project / ".understand-anything" / "knowledge-graph.json").unlink()
@@ -120,13 +154,14 @@ def test_compile_warns_and_continues_when_auto_refresh_command_is_missing(tmp_pa
         "--understand-anything-command",
         "definitely_missing_understand_command",
         "--run-understand-anything",
+        "--skip-install-understand-anything",
         "--no-color",
     ]) == 0
 
     assert main(["project", "compile", "--project", str(project), "--limit", "1"]) == 0
 
     out = capsys.readouterr().out
-    assert "External tool refresh had warnings" in out
+    assert "External tool" in out and "warnings" in out
     assert "definitely_missing_understand_command" in out
     assert "Compiled project wiki" in out
     assert (project / ".llm-wiki" / "graph.json").exists()

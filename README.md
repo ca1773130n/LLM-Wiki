@@ -150,7 +150,7 @@ Open:
 http://127.0.0.1:8765/
 ```
 
-The setup wizard detects common sources like `README.md`, `docs`, `src`, `data`, and companion artifacts. You choose what becomes memory; LLM-Wiki writes the project config. Cognee is enabled as the default question backend, but automatic Cognee cognify is opt-in so a normal compile never silently spends API-key/provider budget.
+The setup wizard detects common sources like `README.md`, `docs`, `src`, `data`, and companion artifacts. You choose what becomes memory; LLM-Wiki writes the project config. If you select Understand Anything and its graph is not present yet, setup installs/updates the Understand Anything plugin for the selected agent platform by default. Cognee is enabled as the default question backend, but automatic Cognee cognify is opt-in so a normal compile never silently spends API-key/provider budget.
 
 ```text
 ◆ LLM-Wiki project setup
@@ -204,6 +204,7 @@ If your refresh command is a shell alias/function, wrap it explicitly:
 llm_wiki project setup \
   --yes \
   --with-understand-anything \
+  --understand-anything-platform codex \
   --understand-anything-command "zsh -ic 'reunderstand'" \
   --run-understand-anything
 ```

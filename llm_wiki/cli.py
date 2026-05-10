@@ -232,6 +232,9 @@ def project_main(argv: List[str] | None = None) -> int:
     setup_parser.add_argument("--with-understand-anything", action="store_true", help="Include .understand-anything/knowledge-graph.json as a companion source")
     setup_parser.add_argument("--run-understand-anything", action="store_true", help="Run the configured Understand Anything refresh command now and mark it for compile-time auto-refresh")
     setup_parser.add_argument("--understand-anything-command", help="Shell command that refreshes .understand-anything/knowledge-graph.json")
+    setup_parser.add_argument("--install-understand-anything", action="store_true", help="Install/update Understand Anything during setup when selected")
+    setup_parser.add_argument("--skip-install-understand-anything", action="store_true", help="Do not auto-install Understand Anything even when selected")
+    setup_parser.add_argument("--understand-anything-platform", default="codex", help="Understand Anything installer platform id (default: codex)")
     setup_parser.add_argument("--no-cognee", action="store_true", help="Do not enable Cognee as the default project memory backend")
     setup_parser.add_argument("--cognee-mode", choices=["add", "cognify", "codex_cognify"], default="codex_cognify", help="Cognee mode saved in project config (default: codex_cognify)")
     setup_parser.add_argument("--run-cognee", action="store_true", help="Auto-add/cognify Cognee on every project compile using the saved safe config")
@@ -411,6 +414,8 @@ def project_main(argv: List[str] | None = None) -> int:
                     include_understand_anything=args.with_understand_anything,
                     run_understand_anything=args.run_understand_anything,
                     understand_anything_command=args.understand_anything_command,
+                    install_understand_anything=(False if args.skip_install_understand_anything else True if args.install_understand_anything else None),
+                    understand_anything_platform=args.understand_anything_platform,
                     enable_cognee=not args.no_cognee,
                     cognee_mode=args.cognee_mode,
                     cognee_auto_cognify=args.run_cognee,
@@ -428,9 +433,12 @@ def project_main(argv: List[str] | None = None) -> int:
         print(f"Initialized project wiki: {result.wiki.root}")
         print(f"Config: {result.config_path}")
         if result.ran_tools:
-            failures = [row for row in result.ran_tools if row.get("status") == "failed"]
+            failures = [row for row in result.ran_tools if row.get("status") in {"failed", "install_failed"}]
+            installed = [row for row in result.ran_tools if row.get("status") == "installed"]
+            if installed:
+                print("Understand Anything installed/updated.")
             if failures:
-                print("External tool refresh had warnings; setup was saved anyway.")
+                print("External tool install/refresh had warnings; setup was saved anyway.")
                 for failure in failures:
                     detail = (failure.get("stderr") or failure.get("stdout") or "").strip().splitlines()
                     tail = f": {detail[-1]}" if detail else ""
