@@ -1,14 +1,7 @@
-<h1 align="center">LLM-Wiki</h1>
-
-<p align="center">
-  <strong>코딩 에이전트를 위한 메모리 컴파일러.</strong>
-  <br />
-  <em>저장소, 문서, 연구 노트, Claude/Codex 세션, 보조 그래프 도구를 Cognee, MCP, Kuzu, SQLite, llms.txt, 정적 문서를 위한 검증된 메모리로 컴파일합니다.</em>
-</p>
+# LLM-Wiki
 
 <p align="center">
   <a href="./README.md">English</a> ·
-  <a href="./README.ko.md">한국어</a> ·
   <a href="./README.zh.md">中文</a> ·
   <a href="./README.ja.md">日本語</a> ·
   <a href="./README.ru.md">Русский</a> ·
@@ -16,239 +9,147 @@
   <a href="./README.fr.md">Français</a>
 </p>
 
-<p align="center">
-  <a href="#빠른-시작"><img src="https://img.shields.io/badge/start-project_setup-blue" alt="프로젝트 설정" /></a>
-  <a href="#cognee--llm-wiki"><img src="https://img.shields.io/badge/Cognee-memory_backend-d4a574" alt="Cognee 메모리 백엔드" /></a>
-  <a href="#에이전트가-사용하는-이유"><img src="https://img.shields.io/badge/agents-MCP%20%7C%20llms.txt%20%7C%20harness-38bdf8" alt="에이전트 내보내기" /></a>
-  <a href="#메모리-파이프라인"><img src="https://img.shields.io/badge/graph-validated%20ontology-8A2BE2" alt="검증된 그래프" /></a>
-  <a href="./LICENSE"><img src="https://img.shields.io/github/license/ca1773130n/LLM-Wiki" alt="라이선스" /></a>
-</p>
+LLM-Wiki는 프로젝트 메모리 컴파일러입니다. 마크다운, 소스 파일, 선택적으로 PDF/Office 문서/이미지가 들어 있는 디렉터리를 입력으로 받아 타입이 지정된 지식 그래프를 추출하고, 쿼리 가능한 위키를 작성하며, 이식 가능한 아티팩트를 함께 생성합니다: 마크다운 프로젝션, Cognee용 번들, 에이전트 하니스, 그리고 Claude Code, Codex 또는 모든 MCP 클라이언트에 연결할 수 있는 MCP 서버. 호스팅 서비스가 아니라 프로젝트 컨텍스트를 위한 빌드 단계입니다.
 
-<p align="center">
-  <img src="./docs/assets/wiki-graph-screenshot.png" alt="컴파일된 프로젝트 메모리 그래프와 소스 탐색기를 보여주는 LLM-Wiki 정적 사이트" width="100%" />
-</p>
+## 언제 사용하고, 언제 사용하지 않을지
 
----
+다음과 같은 경우에 사용하세요:
 
-## 제안
+- 단일 프로젝트의 텍스트 중심 소스(문서, 코드, 연구 노트)에 대해 지속 가능하고 검사 가능한 지식 그래프가 필요할 때.
+- 자신의 파일을 근거로 질문에 답하는 로컬 MCP 서버가 필요할 때.
+- 직접 글루 코드를 작성하지 않고도 Cognee에 깨끗한 번들을 공급하거나, Obsidian에 마크다운 프로젝션을 넣고 싶을 때.
 
-대부분의 LLM 위키 도구는 생성된 노트 페이지를 하나 더 만들 뿐입니다.
+다음의 경우라면 건너뛰세요:
 
-**LLM-Wiki는 다음 에이전트가 시작할 메모리 계층을 구축합니다.** 프로젝트의 복잡한 현실 — 소스 파일, 마크다운 문서, 연구 노트, 로컬 Claude/Codex 기록, 외부 그래프 아티팩트 — 을 가져와 타입이 지정된 이식 가능한 메모리 시스템으로 컴파일합니다.
+- 작은 디렉터리에 대한 벡터 검색만 필요하다면 — `ripgrep`과 임베딩 라이브러리가 더 간단합니다.
+- 편집 UI가 있는 호스팅 위키를 원한다면. 여기서 제공하는 정적 사이트는 읽기 전용입니다.
+- 즉시 사용 가능한 정확한 의미 임베딩이 필요하다면. 기본 RAG-Anything 임베딩은 결정적입니다([Status](#상태) 참조).
+- 턴키 방식의 "무엇이든 질문" 에이전트를 기대한다면. 이 프로젝트는 그 기반을 만들 뿐, 원하는 에이전트에 연결하는 것은 사용자의 몫입니다.
 
-웹사이트는 유리창일 뿐입니다. 제품의 본질은 컴파일된 메모리 아티팩트입니다.
+## 상태
 
-<table>
-  <tr>
-    <td width="33%" valign="top">
-      <h3>🧬 메모리 검증</h3>
-      <p>검색에 도달하기 전에 노드와 엣지를 제한합니다. 무작위 <code>related_to</code> 수프, 중복 엔티티, 흔들리는 스키마를 피하세요.</p>
-    </td>
-    <td width="33%" valign="top">
-      <h3>🧠 에이전트 작업 보존</h3>
-      <p>Claude Code와 Codex 세션을 검색 가능한 프로젝트 메모리로 바꿉니다: 결정, 명령, 파일, 요약, 도구 추적.</p>
-    </td>
-    <td width="33%" valign="top">
-      <h3>🔌 어디로든 내보내기</h3>
-      <p>동일한 메모리를 Cognee, MCP, Kuzu, SQLite, Graphiti 스타일 에피소드, <code>llms.txt</code>, 마크다운, 정적 웹사이트로 전달합니다.</p>
-    </td>
-  </tr>
-</table>
+진화 중인 연구/에이전트 도구 프로젝트입니다. 알려진 한계:
 
----
-
-## 에이전트가 사용하는 이유
-
-| 만약 가진 것이... | 에이전트는 여전히... | LLM-Wiki는... |
-|---|---|---|
-| README | 아키텍처와 결정을 다시 발견해야 합니다 | 타입이 지정된 프로젝트 메모리 + 소스 출처 |
-| 문서 사이트 | 사람처럼 페이지를 검색해야 합니다 | MCP 도구, `llms.txt`, JSON 그래프, 페이지별 컨텍스트 |
-| 벡터 DB | 청크에서 관계를 추측해야 합니다 | 검증된 노드, 엣지, 별칭, 주장, 증거 |
-| 그래프 시각화 도구 | 그림을 감상할 뿐입니다 | 검색 시스템이 사용할 수 있는 이식 가능한 그래프 아티팩트 |
-| 채팅 기록 | 이전 작업을 잊습니다 | 가져온 에이전트 세션을 지속 가능한 메모리로 저장 |
-
----
-
-## 메모리 파이프라인
-
-```mermaid
-flowchart TB
-  A["Raw project sources<br/>README · docs · code · research notes"]
-  B["Agent sessions<br/>Claude Code · Codex · subagents"]
-  C["Companion artifacts<br/>Understand Anything · external graphs"]
-  D["LLM-Wiki compiler<br/>detect · refresh · extract · validate"]
-  E["Typed memory graph<br/>ontology · aliases · evidence · temporal facts"]
-  F["Runtime memory backends<br/>Cognee · MCP · Kuzu · SQLite"]
-  G["Agent context exports<br/>llms.txt · harness · JSON · markdown"]
-  H["Inspectable projections<br/>static wiki · 2D/3D graph · source pages"]
-
-  A --> D
-  B --> D
-  C --> D
-  D --> E
-  E --> F
-  E --> G
-  E --> H
-```
-
----
-
-## Cognee + LLM-Wiki
-
-**LLM-Wiki는 메모리를 컴파일합니다. Cognee는 그것을 검색합니다.**
-
-Cognee는 AI 메모리 백엔드로 강력합니다: 그래프 + 벡터 검색, 의미 메모리, 온톨로지 인식 훅. 하지만 원시 저장소/문서 수집은 입력되는 메모리에 제약이 없으면 여전히 노이즈가 많아질 수 있습니다.
-
-LLM-Wiki는 Cognee 이전의 빌드 단계로 작동합니다:
-
-| 계층 | LLM-Wiki 역할 | Cognee 역할 |
-|---|---|---|
-| 소스 캡처 | 문서, 코드, 연구, 세션, 보조 아티팩트를 추적 | 여러 데이터 유형을 수집 가능 |
-| 구조 | 노드/엣지 타입, 별칭, 증거, 출처를 검증 | 의미 메모리를 저장하고 검색 |
-| 런타임 | 깨끗한 Cognee 번들 또는 Codex/OAuth cognify 흐름을 내보냄 | 하이브리드 그래프/벡터 메모리를 에이전트에 제공 |
-| 안전성 | 결정적이고 로컬 우선인 경로를 유지 | 필요할 때 더 풍부한 메모리 검색을 추가 |
-
-```mermaid
-flowchart LR
-  A["Messy project context"] --> B["LLM-Wiki<br/>validated memory graph"]
-  B --> C["Cognee<br/>hybrid graph + vector retrieval"]
-  C --> D["Coding agents<br/>ask better questions with durable context"]
-```
-
-컴파일된 메모리를 에이전트를 위한 라이브 검색 기반으로 만들고 싶다면 Cognee를 사용하세요. 그 메모리가 런타임 컨텍스트가 되기 전에 제어, 검증, 내보내기, 검사하고 싶다면 LLM-Wiki를 사용하세요.
-
----
+- 컴파일 시간은 코퍼스 크기에 거의 선형으로 비례합니다. 큰 마크다운 트리(수천 개 파일)에 대한 첫 컴파일은 수 분이 걸릴 수 있습니다.
+- 기본 RAG-Anything 임베딩 공급자는 `deterministic`입니다. 재현 가능하고 의존성이 없지만 의미 검색 품질은 제한적입니다. 더 나은 검색을 위해 `ollama`(예: `qwen3-embedding:0.6b`)나 OpenAI 호환 엔드포인트로 전환하세요 — [docs/integrations/rag-anything.md](docs/integrations/rag-anything.md) 참조.
+- RAG-Anything의 비전 지원(이미지 내용 추출)은 아직 엔드-투-엔드로 연결되지 않았습니다. 이미지 파일은 구조적으로 파싱되지만 설명되지는 않습니다.
+- Cognee 런타임 cognify는 best-effort입니다: 누락된 공급자, 유료 API 키, 또는 네트워크 실패는 빌드를 중단시키지 않고 로그에 남고 건너뛰어집니다.
+- MCP 서버는 안정적인 도구 집합을 노출하지만, 내부 그래프 스키마는 여전히 추가될 수 있습니다.
 
 ## 빠른 시작
+
+Python 3.9 이상이 필요합니다. RAG-Anything을 사용하면 Python 3.10 이상이 필요합니다.
 
 ```bash
 pip install llm-wiki
 
+cd /path/to/my-project
 llm_wiki project setup
 llm_wiki project compile
-llm_wiki project ask "Which files implement Mermaid rendering?"
-llm_wiki project build-site
-llm_wiki project serve --port 8765
+llm_wiki project ask "Where is Mermaid rendering implemented?"
+llm_wiki project build-site && llm_wiki project serve --port 8765
 ```
 
-Understand Anything, RAG-Anything, Cognee를 함께 쓰려면 한 번만 이렇게 설정하세요:
+설정 마법사는 일반적인 소스(`README.md`, `docs/`, `src/`, `data/`)를 감지하고 `.llm-wiki/config.json`을 작성합니다. LLM 호출 기능은 기본적으로 OAuth 기반의 `codex` CLI를 사용하므로 일반적인 경로에서는 API 키가 필요 없습니다. 더 자세한 내용은 [docs/quickstart.md](docs/quickstart.md)와 [docs/installation.md](docs/installation.md)를 참고하세요.
 
-```bash
-llm_wiki project setup \
-  --with-understand-anything \
-  --install-understand-anything \
-  --understand-anything-platform codex \
-  --with-raganything \
-  --install-raganything \
-  --raganything-parser mineru \
-  --run-raganything \
-  --run-cognee \
-  --install-cognee
-llm_wiki project compile
-```
-
-열기:
+## 컴파일 후 얻는 것
 
 ```text
-http://127.0.0.1:8765/
+.llm-wiki/
+  config.json
+  graph.json              # 타입 지정된 노드/엣지
+  manifest.json           # 소스 지문 (--changed-only가 사용)
+  sqlite.db               # 쿼리 가능한 그래프 저장소
+  temporal_facts.jsonl
+  graphiti_episodes.jsonl
+  report.md
+  markdown_projection/    # 사람이 읽기 쉬운 위키 페이지
+  obsidian_vault/         # Obsidian에 바로 넣을 수 있는 보관소
+  agent_harness/          # 에이전트별 설정 (Claude/Codex/Gemini/Cursor/...)
+  harness_sessions/       # 가져온 Claude/Codex 세션 메모리
+  cognee_bundle/          # Cognee 수집용 JSONL
+  site/                   # build-site가 만드는 정적 사이트
+  external/               # 보조 도구 출력 (UA, RAG-Anything)
 ```
 
-설정 마법사는 `README.md`, `docs`, `src`, `data`, 보조 아티팩트 같은 일반적인 소스를 감지합니다. Understand Anything을 선택하면 LLM-Wiki가 요청 시 보조 스킬을 설치하고 관리형 새로고침 래퍼를 저장하므로, `project compile`이 UA 설치 경로나 `/understand` 슬래시 명령을 사용자가 알 필요 없이 `.understand-anything/knowledge-graph.json`을 새로고침할 수 있습니다. Cognee는 기본 질문 백엔드로 활성화되며, 런타임 cognify는 `--run-cognee`로 명시적으로 켭니다.
+`project compile` 이후 `ls .llm-wiki/`로 무엇이 생성되었는지 확인하세요.
 
-```text
-◆ LLM-Wiki project setup
-Choose sources and companion tools. Press Enter to accept defaults.
+## CLI 개요
 
-Sources
-  ✓ README.md
-  ✓ docs
-  ✓ src
-  ✓ .llm-wiki/external/understand-anything.md
+일상적으로 사용하는 명령입니다. 전체 플래그는 `llm_wiki <subcommand> --help`로 확인하세요.
 
-External tools
-  ◆ Understand Anything → .llm-wiki/external/understand-anything.md
-
-Memory backends
-  ◆ Cognee → my_project_memory (codex_cognify, manual cognify)
-```
-
----
-
-## 내보내는 항목
-
-| 출력 | 중요한 이유 |
+| 명령 | 하는 일 |
 |---|---|
-| `cognee_bundle/` | Cognee 스타일 메모리 워크플로를 위한 깨끗한 그래프 아티팩트 |
-| `graph.json` / `graph.jsonld` | 이식 가능한 타입 지정 메모리 그래프 |
-| `sqlite.db` / Kuzu 출력 | 쿼리 가능한 로컬 그래프 저장소 |
-| `llms.txt` / `llms-full.txt` | 직접적인 에이전트 컨텍스트 팩 |
-| MCP 서버 | `search_nodes`, `node_context`, `timeline`, 그래프 도구 |
-| `agent_harness/` | Claude Code, Codex, Gemini, Cursor, Kiro, OpenCode 설정 |
-| `markdown_projection/` | 사람과 편집자를 위한 읽기 쉬운 위키 파일 |
-| `.llm-wiki/site/` | 검사, 공유, 디버깅을 위한 정적 웹사이트 |
+| `llm_wiki project setup` | 대화형 마법사. `.llm-wiki/config.json`을 작성합니다. `--with-understand-anything`, `--with-raganything`, `--run-cognee` 등을 받습니다. |
+| `llm_wiki project compile` | 설정된 소스를 읽고, 보조 도구 새로고침을 실행하고, `.llm-wiki/` 아래의 모든 아티팩트를 작성합니다. 증분 재빌드에는 `--changed-only`를 사용하세요. |
+| `llm_wiki project build-site` | 정적 프론트엔드를 `.llm-wiki/site/`에 빌드합니다. |
+| `llm_wiki project serve --port 8765` | 정적 사이트를 로컬에서 제공합니다. |
+| `llm_wiki project refresh-understand-anything` | LLM-Wiki의 관리형 Understand Anything 새로고침 래퍼를 실행합니다. |
+| `llm_wiki project refresh-raganything --parser mineru` | RAG-Anything으로 비코드 소스(PDF, Office, 이미지)를 다시 파싱합니다. |
+| `llm_wiki project ask "<question>"` | 설정된 백엔드(`auto`/`raganything`/`cognee`/`wiki`)에 질문합니다. |
+| `llm_wiki project mcp-config` | Claude Code, Codex 또는 Hermes에 붙여넣을 MCP 서버 설정 스니펫을 출력합니다. |
+| `llm_wiki wiki register <path> --name <alias>` | 공유 레지스트리에 프로젝트를 등록합니다. |
+| `llm_wiki wiki list` / `llm_wiki wiki activate <name>` | 등록된 프로젝트를 나열하고, 활성 프로젝트를 설정합니다. |
+| `llm_wiki ask "<question>" [--wiki <name>]` | 레지스트리를 통해 해석하는 최상위 ask 명령입니다. |
 
----
+## 통합
 
-## 보조 도구, 종속이 아님
+모든 통합은 옵트인입니다. 일반 마크다운/코드 프로젝트에서 LLM-Wiki를 사용하는 데 필수는 아닙니다.
 
-LLM-Wiki는 도구를 대체하는 것이 아니라 도구 사이에 위치하도록 설계되었습니다.
+- **Understand Anything** — `.understand-anything/knowledge-graph.json`에 코드 지식 그래프를 생성하는 별도 프로젝트([Lum1104/Understand-Anything](https://github.com/Lum1104/Understand-Anything))입니다. `--with-understand-anything`으로 활성화합니다. LLM-Wiki가 관리형 새로고침 래퍼를 저장하므로 `project compile`이 그래프를 최신 상태로 유지합니다. [docs/integrations/understand-anything.md](docs/integrations/understand-anything.md) 참조.
+- **RAG-Anything** — MinerU/Docling/PaddleOCR을 통해 PDF, Office 문서, 이미지를 처리하는 멀티모달 수집([HKUDS/RAG-Anything](https://github.com/HKUDS/RAG-Anything))입니다. `--with-raganything`으로 활성화합니다. 런타임 질문 백엔드(LightRAG) 역할도 합니다. Python 3.10 이상이 필요합니다. [docs/integrations/rag-anything.md](docs/integrations/rag-anything.md) 참조.
+- **Cognee** — 그래프+벡터 메모리 백엔드입니다. `--run-cognee --install-cognee`로 활성화합니다. 일반 컴파일은 항상 `.llm-wiki/cognee_bundle/`을 작성하며, 런타임 `cognify` 패스는 best-effort이고 명시적으로 활성화한 경우에만 실행됩니다.
 
-| 도구 | 관계 |
-|---|---|
-| Understand Anything | 독립 코드 그래프 아티팩트 → 마크다운 프로젝션 → 컴파일된 메모리 |
-| RAG-Anything | 멀티모달 수집(PDF/Office/이미지) + LightRAG 런타임 백엔드 |
-| Cognee | 하이브리드 그래프/벡터 검색을 위한 메모리 백엔드 |
-| Graphiti 스타일 시스템 | 시간 기반 에피소드/팩트 내보내기 경로 |
-| Obsidian / markdown | 읽기 쉬운 프로젝션이며, 유일한 진실의 원천은 아님 |
-| Claude Code / Codex | 세션 메모리의 소스이자 컴파일된 컨텍스트의 소비자 |
+## 멀티 프로젝트 레지스트리
 
-관리형 설정 경로를 사용하면 LLM-Wiki가 보조 스킬을 설치하고 새로고침 래퍼를 저장하며, Cognee 런타임 메모리까지 한 번에 켤 수 있습니다:
+`~/.llm-wiki/registry.json`에 있는 영구 레지스트리를 통해 최상위 `ask` CLI와 MCP 서버가 호출마다 `--project`를 지정하지 않아도 프로젝트 이름을 루트로 해석할 수 있습니다.
 
 ```bash
-llm_wiki project setup \
-  --yes \
-  --with-understand-anything \
-  --install-understand-anything \
-  --understand-anything-platform codex \
-  --with-raganything \
-  --install-raganything \
-  --raganything-parser mineru \
-  --run-raganything \
-  --run-cognee \
-  --install-cognee
-llm_wiki project compile
+llm_wiki wiki register /path/to/my-project --name myproj
+llm_wiki wiki activate myproj
+llm_wiki ask "Where is the parser entry point?"
 ```
 
-컴파일 시 LLM-Wiki는 UA 그래프가 없거나 오래되면 `project refresh-understand-anything`를 실행하고, `.llm-wiki/external/understand-anything.md`를 생성하며, `.llm-wiki/cognee_bundle/`을 쓰고, 설정된 경우 Cognee 런타임 메모리를 best-effort로 새로고침합니다. 사용자는 UA나 Cognee가 어디 설치됐는지 알 필요가 없습니다.
+MCP 서버도 같은 레지스트리를 읽으므로, MCP 클라이언트는 등록된 모든 위키에 대해 `list_projects`, `activate_project`, `ask`를 호출할 수 있습니다.
 
----
+## MCP
 
-## LLM-Wiki가 적합한 경우
+`llm_wiki project mcp-config`는 Claude Code, Codex 또는 다른 MCP 클라이언트에 붙여넣을 수 있는 서버 항목을 출력합니다. 서버는 `schema`, `graph_summary`, `search_nodes`, `node_context`, `search_facts`, `timeline`, `wiki_page`, `raw_source`, `lint_report`, `ask` 도구와 레지스트리 도구 `list_projects` / `register_project` / `activate_project` / `unregister_project`를 노출합니다. 특정 프로젝트가 필요한 도구는 CLI와 동일한 레지스트리를 통해 해석합니다.
 
-| 원하는 것... | LLM-Wiki를 사용하는 이유... |
-|---|---|
-| 더 나은 코딩 에이전트 연속성 | 이전 Claude/Codex 세션이 검색 가능한 메모리가 됩니다 |
-| 더 안전한 GraphRAG 입력 | 검색 전에 스키마 검증이 수행됩니다 |
-| 로컬 우선 워크플로 | 결정적 추출과 CLI/OAuth 경로가 필수 API 키 비용을 피하게 합니다 |
-| 이식 가능한 프로젝트 메모리 | 한 번의 컴파일로 Cognee, MCP, SQLite, Kuzu, 마크다운, JSON, 사이트 아티팩트를 생성합니다 |
-| 사람이 검사 가능 | 정적 사이트로 에이전트가 검색할 내용을 디버그할 수 있습니다 |
+## 인증과 LLM 공급자
 
----
+일반적인 경로에서는 API 키가 필요 없습니다:
 
-## 문서
+- **Codex CLI**(기본)를 OAuth로 사용합니다. `--raganything-llm-provider codex`가 기본이며, Cognee `codex_cognify` 모드는 Cognee의 LLM 클라이언트를 Codex CLI로 패치합니다.
+- **Claude Code CLI**를 OAuth로 사용합니다. RAG-Anything 런타임 질의에는 `--raganything-llm-provider claude`를 설정하세요. 멀티 계정 설정은 `--raganything-claude-config-dir ~/.claude-personal2`를 사용합니다(LLM-Wiki가 호출 전에 `CLAUDE_CONFIG_DIR`을 export 합니다).
+- **임베딩**은 기본적으로 인프로세스 결정적 공급자를 사용합니다. `--cognee-embedding-provider ollama --cognee-ollama-embedding-model qwen3-embedding:0.6b`로 Ollama에 연결하거나, OpenAI 호환 엔드포인트를 연결할 수 있습니다 — 두 방법 모두 통합 문서에 설명되어 있습니다.
 
-| 가이드 | 얻을 수 있는 것 |
-|---|---|
-| [빠른 시작](./docs/quickstart.md) | 첫 프로젝트 메모리 컴파일 |
-| [설치](./docs/installation.md) | 설치 옵션과 래퍼 |
-| [아키텍처](./docs/architecture.md) | 파이프라인 내부 구조와 그래프 모델 |
-| [세션 기록](./docs/session-history.md) | Claude/Codex 기록 가져오기 |
-| [Understand Anything 보조 워크플로](./docs/integrations/understand-anything.md) | 보조 그래프 새로고침과 프로젝션 |
-| [RAG-Anything](./docs/integrations/rag-anything.md) | 멀티모달 수집(PDF/Office/이미지) + LightRAG 런타임 백엔드 |
-| [게시 체크리스트](./docs/publishing-checklist.md) | 생성된 정적 사이트 배포 |
+`ANTHROPIC_API_KEY`나 `OPENAI_API_KEY`를 설정하면 해당 경로에서 인식되지만, 필수는 아닙니다.
 
----
+## 프로젝트 레이아웃
 
-<p align="center">
-  <strong>다음 에이전트에게 빈 저장소를 주지 마세요. 컴파일된 메모리를 주세요.</strong>
-</p>
+```text
+llm_wiki/        # 패키지 (CLI, 컴파일러, MCP 서버, 어댑터)
+docs/            # 영어 문서 + 6개 언어를 위한 docs/i18n/
+ontology/        # 컴파일러가 검증하는 노드/엣지 스키마
+prompts/         # 추출 및 종합 프롬프트
+scripts/         # 유지보수 스크립트
+tests/           # pytest 스위트
+evals/           # 그래프 품질 평가 하니스
+data/            # 셀프 도그푸딩에 사용하는 연구 노트 예시
+```
+
+## 현지화된 문서
+
+[English](./README.md) ·
+[中文](./README.zh.md) ·
+[日本語](./README.ja.md) ·
+[Русский](./README.ru.md) ·
+[Español](./README.es.md) ·
+[Français](./README.fr.md)
+
+긴 형식의 문서는 `docs/i18n/` 와 `docs/i18n/integrations/` 에 미러링되어 있습니다.
+
+## 라이선스
+
+MIT. [LICENSE](LICENSE)를 참조하세요.

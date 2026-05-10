@@ -1,10 +1,4 @@
-<h1 align="center">LLM-Wiki</h1>
-
-<p align="center">
-  <strong>El compilador de memoria para agentes de programación.</strong>
-  <br />
-  <em>Compila repositorios, documentación, notas de investigación, sesiones de Claude/Codex y herramientas gráficas complementarias en memoria validada para Cognee, MCP, Kuzu, SQLite, llms.txt y documentación estática.</em>
-</p>
+# LLM-Wiki
 
 <p align="center">
   <a href="./README.md">English</a> ·
@@ -12,243 +6,150 @@
   <a href="./README.zh.md">中文</a> ·
   <a href="./README.ja.md">日本語</a> ·
   <a href="./README.ru.md">Русский</a> ·
-  <a href="./README.es.md">Español</a> ·
   <a href="./README.fr.md">Français</a>
 </p>
 
-<p align="center">
-  <a href="#inicio-rápido"><img src="https://img.shields.io/badge/start-project_setup-blue" alt="Configuración del proyecto" /></a>
-  <a href="#cognee--llm-wiki"><img src="https://img.shields.io/badge/Cognee-memory_backend-d4a574" alt="Backend de memoria Cognee" /></a>
-  <a href="#por-qué-lo-usan-los-agentes"><img src="https://img.shields.io/badge/agents-MCP%20%7C%20llms.txt%20%7C%20harness-38bdf8" alt="Exportaciones para agentes" /></a>
-  <a href="#canalización-de-memoria"><img src="https://img.shields.io/badge/graph-validated%20ontology-8A2BE2" alt="Grafo validado" /></a>
-  <a href="./LICENSE"><img src="https://img.shields.io/github/license/ca1773130n/LLM-Wiki" alt="Licencia" /></a>
-</p>
+LLM-Wiki es un compilador de memoria de proyecto. Apúntalo a un directorio que contenga Markdown, archivos fuente y, opcionalmente, PDFs/documentos de Office/imágenes, y extraerá un grafo de conocimiento tipado, escribirá un wiki consultable y emitirá artefactos portátiles: una proyección Markdown, un bundle listo para Cognee, un agent harness y un servidor MCP que puedes conectar a Claude Code, Codex o cualquier cliente MCP. Es un paso de build para contexto de proyecto, no un servicio alojado.
 
-<p align="center">
-  <img src="./docs/assets/wiki-graph-screenshot.png" alt="Sitio estático de LLM-Wiki que muestra un grafo compilado de memoria del proyecto y un explorador de fuentes" width="100%" />
-</p>
+## Cuándo usarlo (y cuándo no)
 
----
+Úsalo si:
 
-## La propuesta
+- Quieres un grafo de conocimiento duradero e inspeccionable sobre las fuentes mayoritariamente de texto de un único proyecto (documentación, código, notas de investigación).
+- Quieres un servidor MCP local que responda preguntas basándose en tus propios archivos.
+- Quieres alimentar a Cognee con un bundle limpio, o meter una proyección Markdown en Obsidian, sin tener que escribir el código de pegamento tú mismo.
 
-La mayoría de las herramientas wiki para LLM crean otra página de notas generadas.
+Sáltalo si:
 
-**LLM-Wiki construye la capa de memoria desde la que empieza tu próximo agente.** Toma la realidad desordenada de un proyecto — archivos fuente, documentación en Markdown, notas de investigación, transcripciones locales de Claude/Codex y artefactos gráficos externos — y la compila en un sistema de memoria tipado y portátil.
+- Solo necesitas una búsqueda vectorial sobre un directorio pequeño — `ripgrep` más una biblioteca de embeddings es más simple.
+- Quieres un wiki alojado con UI de edición. El sitio estático que aquí se genera es de solo lectura.
+- Esperas embeddings semánticos precisos listos para usar. El embedding por defecto de RAG-Anything es determinista (ver [Estado](#estado)).
+- Esperas un agente «pregunta lo que sea» llave en mano. Esto construye el sustrato; conectarlo al agente que elijas sigue siendo tarea tuya.
 
-El sitio web es solo la ventana de cristal. El producto es el artefacto de memoria compilada.
+## Estado
 
-<table>
-  <tr>
-    <td width="33%" valign="top">
-      <h3>🧬 Validar la memoria</h3>
-      <p>Restringe nodos y aristas antes de que lleguen a la recuperación. Evita una sopa aleatoria de <code>related_to</code>, entidades duplicadas y esquemas que derivan.</p>
-    </td>
-    <td width="33%" valign="top">
-      <h3>🧠 Preservar el trabajo del agente</h3>
-      <p>Convierte sesiones de Claude Code y Codex en memoria de proyecto consultable: decisiones, comandos, archivos, resúmenes y trazas de herramientas.</p>
-    </td>
-    <td width="33%" valign="top">
-      <h3>🔌 Exportar a todas partes</h3>
-      <p>Envía la misma memoria a Cognee, MCP, Kuzu, SQLite, episodios estilo Graphiti, <code>llms.txt</code>, Markdown y un sitio web estático.</p>
-    </td>
-  </tr>
-</table>
+Este es un proyecto de investigación / herramientas para agentes en evolución. Limitaciones conocidas:
 
----
-
-## Por qué lo usan los agentes
-
-| Si solo tienes... | Tu agente todavía tiene que... | LLM-Wiki le da... |
-|---|---|---|
-| Un README | redescubrir la arquitectura y las decisiones | memoria de proyecto tipada + procedencia del código fuente |
-| Un sitio de documentación | buscar páginas como una persona | herramientas MCP, `llms.txt`, grafo JSON, contexto por página |
-| Una base de datos vectorial | adivinar relaciones a partir de fragmentos | nodos, aristas, alias, afirmaciones y evidencias validados |
-| Un visualizador de grafos | admirar una imagen | artefactos de grafo portátiles que los sistemas de recuperación pueden usar |
-| Historial de chat | olvidar el trabajo anterior | sesiones de agentes importadas como memoria duradera |
-
----
-
-## Canalización de memoria
-
-```mermaid
-flowchart TB
-  A["Raw project sources<br/>README · docs · code · research notes"]
-  B["Agent sessions<br/>Claude Code · Codex · subagents"]
-  C["Companion artifacts<br/>Understand Anything · external graphs"]
-  D["LLM-Wiki compiler<br/>detect · refresh · extract · validate"]
-  E["Typed memory graph<br/>ontology · aliases · evidence · temporal facts"]
-  F["Runtime memory backends<br/>Cognee · MCP · Kuzu · SQLite"]
-  G["Agent context exports<br/>llms.txt · harness · JSON · markdown"]
-  H["Inspectable projections<br/>static wiki · 2D/3D graph · source pages"]
-
-  A --> D
-  B --> D
-  C --> D
-  D --> E
-  E --> F
-  E --> G
-  E --> H
-```
-
----
-
-## Cognee + LLM-Wiki
-
-**LLM-Wiki compila memoria. Cognee la recupera.**
-
-Cognee es potente como backend de memoria de IA: recuperación por grafo + vectores, memoria semántica y hooks conscientes de la ontología. Pero la ingesta sin procesar de repositorios/documentación puede volverse ruidosa si la memoria que entra no está restringida.
-
-LLM-Wiki actúa como el paso de compilación antes de Cognee:
-
-| Capa | Rol de LLM-Wiki | Rol de Cognee |
-|---|---|---|
-| Captura de fuentes | rastrea documentación, código, investigación, sesiones y artefactos complementarios | puede ingerir muchos tipos de datos |
-| Estructura | valida tipos de nodos/aristas, alias, evidencia y procedencia | almacena y recupera memoria semántica |
-| Runtime | exporta paquetes Cognee limpios o flujos cognify de Codex/OAuth | sirve memoria híbrida grafo/vectorial a los agentes |
-| Seguridad | mantiene disponibles rutas deterministas/local-first | añade recuperación de memoria más rica cuando se desea |
-
-```mermaid
-flowchart LR
-  A["Messy project context"] --> B["LLM-Wiki<br/>validated memory graph"]
-  B --> C["Cognee<br/>hybrid graph + vector retrieval"]
-  C --> D["Coding agents<br/>ask better questions with durable context"]
-```
-
-Usa Cognee cuando quieras que la memoria compilada se convierta en un sustrato de recuperación en vivo para agentes. Usa LLM-Wiki cuando quieras controlar, validar, exportar e inspeccionar esa memoria antes de que se convierta en contexto de ejecución.
-
----
+- El tiempo de compilación escala aproximadamente de forma lineal con el tamaño del corpus. La primera compilación sobre árboles grandes de Markdown (miles de archivos) puede tardar minutos.
+- El proveedor por defecto de embeddings de RAG-Anything es `deterministic`. Es reproducible y sin dependencias, pero el recall semántico es limitado. Cambia a `ollama` (por ejemplo, `qwen3-embedding:0.6b`) o a un endpoint compatible con OpenAI para mejor recuperación — consulta [docs/integrations/rag-anything.md](docs/integrations/rag-anything.md).
+- El soporte de visión para RAG-Anything (extracción de contenido de imágenes) todavía no está conectado de extremo a extremo. Los archivos de imagen se parsean de forma estructural pero no se describen.
+- Cognee runtime cognify es best-effort: providers que faltan, claves API de pago o fallos de red se registran y se omiten en lugar de abortar el build.
+- El servidor MCP expone un conjunto estable de herramientas, pero el esquema del grafo subyacente todavía puede ampliarse.
 
 ## Inicio rápido
+
+Requiere Python 3.9 o superior. RAG-Anything necesita Python 3.10 o superior si lo habilitas.
 
 ```bash
 pip install llm-wiki
 
+cd /path/to/my-project
 llm_wiki project setup
 llm_wiki project compile
-llm_wiki project ask "Which files implement Mermaid rendering?"
-llm_wiki project build-site
-llm_wiki project serve --port 8765
+llm_wiki project ask "Where is Mermaid rendering implemented?"
+llm_wiki project build-site && llm_wiki project serve --port 8765
 ```
 
-Si quieres usar Understand Anything, RAG-Anything y Cognee juntos, configúralos una vez:
+El asistente de setup detecta fuentes habituales (`README.md`, `docs/`, `src/`, `data/`) y escribe `.llm-wiki/config.json`. Las funciones que llaman a un LLM usan por defecto la CLI `codex` sobre OAuth, así que no se requieren claves API en el camino habitual. Las versiones más largas están en [docs/quickstart.md](docs/quickstart.md) y [docs/installation.md](docs/installation.md).
 
-```bash
-llm_wiki project setup \
-  --with-understand-anything \
-  --install-understand-anything \
-  --understand-anything-platform codex \
-  --with-raganything \
-  --install-raganything \
-  --raganything-parser mineru \
-  --run-raganything \
-  --run-cognee \
-  --install-cognee
-llm_wiki project compile
-```
-
-Abre:
+## Lo que obtienes tras compilar
 
 ```text
-http://127.0.0.1:8765/
+.llm-wiki/
+  config.json
+  graph.json              # nodos/aristas tipados
+  manifest.json           # huellas de fuente (usado por --changed-only)
+  sqlite.db               # almacén de grafo consultable
+  temporal_facts.jsonl
+  graphiti_episodes.jsonl
+  report.md
+  markdown_projection/    # páginas wiki legibles para humanos
+  obsidian_vault/         # listo para soltar en Obsidian
+  agent_harness/          # configuración por agente (Claude/Codex/Gemini/Cursor/...)
+  harness_sessions/       # memoria de sesiones Claude/Codex importada
+  cognee_bundle/          # JSONL listo para ingest en Cognee
+  site/                   # sitio estático construido por build-site
+  external/               # salidas de herramientas complementarias (UA, RAG-Anything)
 ```
 
-El asistente de setup detecta fuentes comunes como `README.md`, `docs`, `src`, `data` y artefactos complementarios. Si seleccionas Understand Anything, LLM-Wiki instala las skills complementarias cuando lo pides y guarda un wrapper de refresh gestionado, de modo que `project compile` puede actualizar `.understand-anything/knowledge-graph.json` sin que el usuario sepa dónde está instalado UA ni cómo invocar `/understand`. Cognee queda habilitado como backend de preguntas por defecto; el cognify en runtime se activa explícitamente con `--run-cognee`.
+Tras `project compile`, ejecuta `ls .llm-wiki/` para verificar lo que se ha generado.
 
-```text
-◆ LLM-Wiki project setup
-Choose sources and companion tools. Press Enter to accept defaults.
+## Visión general de la CLI
 
-Sources
-  ✓ README.md
-  ✓ docs
-  ✓ src
-  ✓ .llm-wiki/external/understand-anything.md
+Comandos de uso diario. Ejecuta `llm_wiki <subcommand> --help` para ver los flags completos.
 
-External tools
-  ◆ Understand Anything → .llm-wiki/external/understand-anything.md
-
-Memory backends
-  ◆ Cognee → my_project_memory (codex_cognify, manual cognify)
-```
-
----
-
-## Qué exporta
-
-| Salida | Por qué importa |
+| Comando | Qué hace |
 |---|---|
-| `cognee_bundle/` | artefactos de grafo limpios para flujos de trabajo de memoria estilo Cognee |
-| `graph.json` / `graph.jsonld` | grafo de memoria tipado y portátil |
-| `sqlite.db` / salida Kuzu | almacenamiento local de grafos consultable |
-| `llms.txt` / `llms-full.txt` | paquetes de contexto directos para agentes |
-| Servidor MCP | `search_nodes`, `node_context`, `timeline` y herramientas de grafo |
-| `agent_harness/` | configuración para Claude Code, Codex, Gemini, Cursor, Kiro y OpenCode |
-| `markdown_projection/` | archivos wiki legibles para personas y editores |
-| `.llm-wiki/site/` | sitio web estático para inspección, uso compartido y depuración |
+| `llm_wiki project setup` | Asistente interactivo. Escribe `.llm-wiki/config.json`. Acepta `--with-understand-anything`, `--with-raganything`, `--run-cognee`, etc. |
+| `llm_wiki project compile` | Lee las fuentes configuradas, ejecuta refresh de las herramientas complementarias y escribe todos los artefactos bajo `.llm-wiki/`. Usa `--changed-only` para rebuilds incrementales. |
+| `llm_wiki project build-site` | Construye el frontend estático en `.llm-wiki/site/`. |
+| `llm_wiki project serve --port 8765` | Sirve el sitio estático localmente. |
+| `llm_wiki project refresh-understand-anything` | Ejecuta el wrapper de refresh gestionado por LLM-Wiki para Understand Anything. |
+| `llm_wiki project refresh-raganything --parser mineru` | Re-parsea fuentes no-código (PDFs, Office, imágenes) vía RAG-Anything. |
+| `llm_wiki project ask "<question>"` | Pregunta al backend configurado (`auto`/`raganything`/`cognee`/`wiki`). |
+| `llm_wiki project mcp-config` | Imprime un fragmento de configuración de servidor MCP que puedes pegar en Claude Code, Codex o Hermes. |
+| `llm_wiki wiki register <path> --name <alias>` | Registra un proyecto en el registry compartido. |
+| `llm_wiki wiki list` / `llm_wiki wiki activate <name>` | Lista los proyectos registrados; fija el activo. |
+| `llm_wiki ask "<question>" [--wiki <name>]` | Comando ask de nivel superior, que resuelve a través del registry. |
 
----
+## Integraciones
 
-## Herramientas complementarias, sin dependencia cautiva
+Todas las integraciones son opt-in. Ninguna es necesaria para usar LLM-Wiki sobre un proyecto sencillo de Markdown/código.
 
-LLM-Wiki está diseñado para situarse entre herramientas, no para reemplazarlas.
+- **Understand Anything** — un proyecto independiente ([Lum1104/Understand-Anything](https://github.com/Lum1104/Understand-Anything)) que produce un grafo de conocimiento de código en `.understand-anything/knowledge-graph.json`. Se habilita con `--with-understand-anything`. LLM-Wiki guarda un wrapper de refresh gestionado, así que `project compile` mantiene el grafo al día. Consulta [docs/integrations/understand-anything.md](docs/integrations/understand-anything.md).
+- **RAG-Anything** — ingestión multimodal ([HKUDS/RAG-Anything](https://github.com/HKUDS/RAG-Anything)) para PDFs, documentos de Office e imágenes vía MinerU/Docling/PaddleOCR. Se habilita con `--with-raganything`. También funciona como backend de preguntas en runtime (LightRAG). Requiere Python 3.10+. Consulta [docs/integrations/rag-anything.md](docs/integrations/rag-anything.md).
+- **Cognee** — backend de memoria graph+vector. Se habilita con `--run-cognee --install-cognee`. El compile normal siempre escribe `.llm-wiki/cognee_bundle/`; la pasada `cognify` en runtime es best-effort y solo se ejecuta cuando se habilita explícitamente.
 
-| Herramienta | Relación |
-|---|---|
-| Understand Anything | artefacto independiente de grafo de código → proyección Markdown → memoria compilada |
-| RAG-Anything | ingesta multimodal (PDF/Office/imágenes) + backend en tiempo de ejecución LightRAG |
-| Cognee | backend de memoria para recuperación híbrida grafo/vectorial |
-| Sistemas estilo Graphiti | ruta de exportación de episodios/hechos temporales |
-| Obsidian / markdown | proyección legible, no la única fuente de verdad |
-| Claude Code / Codex | fuente de memoria de sesiones y consumidores del contexto compilado |
+## Registry multi-proyecto
 
-Usa el setup gestionado: LLM-Wiki instala las skills complementarias, guarda el wrapper de refresh y puede activar la memoria runtime de Cognee en un solo comando:
+Un registry persistente en `~/.llm-wiki/registry.json` permite que la CLI `ask` de nivel superior y el servidor MCP resuelvan nombres de proyecto a rutas raíz sin tener que pasar `--project` en cada llamada.
 
 ```bash
-llm_wiki project setup \
-  --yes \
-  --with-understand-anything \
-  --install-understand-anything \
-  --understand-anything-platform codex \
-  --with-raganything \
-  --install-raganything \
-  --raganything-parser mineru \
-  --run-raganything \
-  --run-cognee \
-  --install-cognee
-llm_wiki project compile
+llm_wiki wiki register /path/to/my-project --name myproj
+llm_wiki wiki activate myproj
+llm_wiki ask "Where is the parser entry point?"
 ```
 
-Durante la compilación, LLM-Wiki ejecuta `project refresh-understand-anything` cuando el grafo de UA falta o está obsoleto, materializa `.llm-wiki/external/understand-anything.md`, escribe `.llm-wiki/cognee_bundle/` y, si está configurado, refresca la memoria runtime de Cognee en modo best-effort. El usuario no necesita saber dónde están instalados UA o Cognee.
+El servidor MCP lee el mismo registry, así que los clientes MCP pueden llamar a `list_projects`, `activate_project` y `ask` sobre cualquier wiki registrado.
 
----
+## MCP
 
-## Cuándo LLM-Wiki es la herramienta adecuada
+`llm_wiki project mcp-config` imprime una entrada de servidor que puedes pegar en Claude Code, Codex o cualquier cliente compatible con MCP. El servidor expone herramientas como `schema`, `graph_summary`, `search_nodes`, `node_context`, `search_facts`, `timeline`, `wiki_page`, `raw_source`, `lint_report`, `ask`, y las del registry `list_projects` / `register_project` / `activate_project` / `unregister_project`. Las herramientas que requieren un proyecto concreto resuelven a través del mismo registry que la CLI.
 
-| Quieres... | Usa LLM-Wiki porque... |
-|---|---|
-| mejor continuidad para agentes de programación | las sesiones antiguas de Claude/Codex se convierten en memoria consultable |
-| entradas GraphRAG más seguras | la validación de esquemas ocurre antes de la recuperación |
-| flujos de trabajo local-first | la extracción determinista y las rutas CLI/OAuth evitan el gasto obligatorio en claves API |
-| memoria de proyecto portátil | una compilación emite artefactos para Cognee, MCP, SQLite, Kuzu, Markdown, JSON y sitio web |
-| inspección humana | el sitio estático te permite depurar lo que recuperarán los agentes |
+## Autenticación y proveedores de LLM
 
----
+El camino habitual no requiere claves API:
 
-## Documentación
+- **Codex CLI** (por defecto) sobre OAuth. `--raganything-llm-provider codex` es el valor por defecto; el modo `codex_cognify` de Cognee parchea el cliente LLM de Cognee a la CLI de Codex.
+- **Claude Code CLI** sobre OAuth. Para consultas en runtime de RAG-Anything, ajusta `--raganything-llm-provider claude`. Las configuraciones multi-cuenta usan `--raganything-claude-config-dir ~/.claude-personal2` (LLM-Wiki exporta `CLAUDE_CONFIG_DIR` antes de cada llamada).
+- **Embeddings** por defecto usan un provider determinista en proceso. Cambia a Ollama con `--cognee-embedding-provider ollama --cognee-ollama-embedding-model qwen3-embedding:0.6b`, o conecta endpoints compatibles con OpenAI — ambos caminos están documentados en las páginas de integración.
 
-| Guía | Qué obtienes |
-|---|---|
-| [Inicio rápido](./docs/quickstart.md) | primera compilación de memoria de proyecto |
-| [Instalación](./docs/installation.md) | opciones de instalación y wrappers |
-| [Arquitectura](./docs/architecture.md) | detalles internos de la canalización y modelo de grafo |
-| [Historial de sesiones](./docs/session-history.md) | importación de transcripciones de Claude/Codex |
-| [Flujo de trabajo complementario de Understand Anything](./docs/integrations/understand-anything.md) | actualización y proyección del grafo complementario |
-| [RAG-Anything](./docs/integrations/rag-anything.md) | ingesta multimodal (PDF/Office/imágenes) + backend en tiempo de ejecución LightRAG |
-| [Lista de verificación de publicación](./docs/publishing-checklist.md) | despliega el sitio estático generado |
+Si defines `ANTHROPIC_API_KEY` o `OPENAI_API_KEY`, los paths correspondientes las recogerán, pero no son necesarias.
 
----
+## Estructura del proyecto
 
-<p align="center">
-  <strong>No le des a tu próximo agente un repositorio en blanco. Dale memoria compilada.</strong>
-</p>
+```text
+llm_wiki/        # el paquete (CLI, compilador, servidor MCP, adapters)
+docs/            # documentación en inglés + docs/i18n/ para los otros seis idiomas
+ontology/        # esquemas de nodo/arista que el compilador valida
+prompts/         # prompts de extracción y síntesis
+scripts/         # scripts de mantenimiento
+tests/           # suite pytest
+evals/           # harnesses de evaluación de calidad del grafo
+data/            # notas de investigación de ejemplo usadas para self-dogfooding
+```
+
+## Documentación localizada
+
+[English](./README.md) ·
+[한국어](./README.ko.md) ·
+[中文](./README.zh.md) ·
+[日本語](./README.ja.md) ·
+[Русский](./README.ru.md) ·
+[Français](./README.fr.md)
+
+La documentación larga se replica bajo `docs/i18n/` y `docs/i18n/integrations/`.
+
+## Licencia
+
+MIT. Consulta [LICENSE](LICENSE).

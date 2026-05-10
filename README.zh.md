@@ -1,254 +1,155 @@
-<h1 align="center">LLM-Wiki</h1>
-
-<p align="center">
-  <strong>面向编码智能体的记忆编译器。</strong>
-  <br />
-  <em>将代码仓库、文档、研究笔记、Claude/Codex 会话以及配套图工具编译为经过验证的记忆，供 Cognee、MCP、Kuzu、SQLite、llms.txt 和静态文档使用。</em>
-</p>
+# LLM-Wiki
 
 <p align="center">
   <a href="./README.md">English</a> ·
   <a href="./README.ko.md">한국어</a> ·
-  <a href="./README.zh.md">中文</a> ·
   <a href="./README.ja.md">日本語</a> ·
   <a href="./README.ru.md">Русский</a> ·
   <a href="./README.es.md">Español</a> ·
   <a href="./README.fr.md">Français</a>
 </p>
 
-<p align="center">
-  <a href="#快速开始"><img src="https://img.shields.io/badge/start-project_setup-blue" alt="项目设置" /></a>
-  <a href="#cognee--llm-wiki"><img src="https://img.shields.io/badge/Cognee-memory_backend-d4a574" alt="Cognee 记忆后端" /></a>
-  <a href="#智能体为什么使用它"><img src="https://img.shields.io/badge/agents-MCP%20%7C%20llms.txt%20%7C%20harness-38bdf8" alt="智能体导出" /></a>
-  <a href="#记忆流水线"><img src="https://img.shields.io/badge/graph-validated%20ontology-8A2BE2" alt="已验证图" /></a>
-  <a href="./LICENSE"><img src="https://img.shields.io/github/license/ca1773130n/LLM-Wiki" alt="许可证" /></a>
-</p>
+LLM-Wiki 是一个项目记忆编译器。把一个包含 Markdown、源代码以及可选 PDF/Office 文档/图片的目录交给它，它会提取一个类型化的知识图谱，写出一份可查询的 wiki，并产出可移植的工件：Markdown 投影、面向 Cognee 的 bundle、智能体 harness，以及一个 MCP 服务器——你可以把它接到 Claude Code、Codex 或任何 MCP 客户端。它是为项目上下文准备的构建步骤，而不是托管服务。
 
-<p align="center">
-  <img src="./docs/assets/wiki-graph-screenshot.png" alt="LLM-Wiki 静态站点，展示已编译的项目记忆图和源码浏览器" width="100%" />
-</p>
+## 何时使用（以及何时不要使用）
 
----
+适合在以下情况使用：
 
-## 核心卖点
+- 你希望为单个项目中以文本为主的来源（文档、代码、研究笔记）建立一个持久、可检视的知识图谱。
+- 你需要一个本地 MCP 服务器，依据自己的文件来回答问题。
+- 你想给 Cognee 灌入一份干净的 bundle，或者把 Markdown 投影放进 Obsidian，而不必自己写胶水代码。
 
-大多数 LLM wiki 工具只是再生成一页笔记。
+下列情况请跳过：
 
-**LLM-Wiki 构建的是下一个智能体启动时所依赖的记忆层。** 它接收项目的复杂现实——源文件、Markdown 文档、研究笔记、本地 Claude/Codex 记录以及外部图谱工件——并将其编译为类型化、可移植的记忆系统。
+- 只需要在一个小目录上做向量检索 —— `ripgrep` 加一个 embedding 库就够了。
+- 想要一个带编辑界面的托管 wiki。这里的静态站点是只读的。
+- 期望开箱即用的高质量语义 embeddings。默认的 RAG-Anything embedding 是确定性的（见[状态](#状态)）。
+- 期望一个一键式的"什么都问"智能体。这套工具构建的是底座，最终接入哪个智能体仍由你决定。
 
-网站只是玻璃橱窗。产品本身是已编译的记忆工件。
+## 状态
 
-<table>
-  <tr>
-    <td width="33%" valign="top">
-      <h3>🧬 验证记忆</h3>
-      <p>在节点和边进入检索之前约束它们。避免随机的 <code>related_to</code> 大杂烩、重复实体和漂移的 schema。</p>
-    </td>
-    <td width="33%" valign="top">
-      <h3>🧠 保留智能体工作</h3>
-      <p>将 Claude Code 和 Codex 会话转换为可搜索的项目记忆：决策、命令、文件、摘要和工具轨迹。</p>
-    </td>
-    <td width="33%" valign="top">
-      <h3>🔌 随处导出</h3>
-      <p>将同一份记忆交付给 Cognee、MCP、Kuzu、SQLite、Graphiti 风格的 episodes、<code>llms.txt</code>、Markdown 和静态网站。</p>
-    </td>
-  </tr>
-</table>
+这是一个不断演进的研究/智能体工具项目。已知限制：
 
----
-
-## 智能体为什么使用它
-
-| 如果你只有... | 你的智能体仍然必须... | LLM-Wiki 为它提供... |
-|---|---|---|
-| 一个 README | 重新发现架构和决策 | 类型化项目记忆 + 源头溯源 |
-| 一个文档站点 | 像人类一样搜索页面 | MCP 工具、`llms.txt`、JSON 图、逐页上下文 |
-| 一个向量数据库 | 根据 chunks 猜测关系 | 已验证节点、边、别名、claims、证据 |
-| 一个图可视化器 | 欣赏一张图片 | 检索系统可使用的可移植图工件 |
-| 聊天历史 | 忘记之前的工作 | 作为持久记忆导入的智能体会话 |
-
----
-
-## 记忆流水线
-
-```mermaid
-flowchart TB
-  A["Raw project sources<br/>README · docs · code · research notes"]
-  B["Agent sessions<br/>Claude Code · Codex · subagents"]
-  C["Companion artifacts<br/>Understand Anything · external graphs"]
-  D["LLM-Wiki compiler<br/>detect · refresh · extract · validate"]
-  E["Typed memory graph<br/>ontology · aliases · evidence · temporal facts"]
-  F["Runtime memory backends<br/>Cognee · MCP · Kuzu · SQLite"]
-  G["Agent context exports<br/>llms.txt · harness · JSON · markdown"]
-  H["Inspectable projections<br/>static wiki · 2D/3D graph · source pages"]
-
-  A --> D
-  B --> D
-  C --> D
-  D --> E
-  E --> F
-  E --> G
-  E --> H
-```
-
----
-
-## Cognee + LLM-Wiki
-
-**LLM-Wiki 编译记忆。Cognee 检索它。**
-
-Cognee 是强大的 AI 记忆后端：图 + 向量检索、语义记忆以及具备本体感知能力的 hooks。但如果进入其中的记忆不受约束，原始仓库/文档摄取仍然可能变得嘈杂。
-
-LLM-Wiki 充当 Cognee 之前的构建步骤：
-
-| 层 | LLM-Wiki 角色 | Cognee 角色 |
-|---|---|---|
-| 来源捕获 | 跟踪文档、代码、研究、会话和配套工件 | 可摄取多种数据类型 |
-| 结构 | 验证节点/边类型、别名、证据和来源 | 存储并检索语义记忆 |
-| 运行时 | 导出干净的 Cognee bundle 或 Codex/OAuth cognify 流程 | 为智能体提供混合图/向量记忆 |
-| 安全性 | 保留确定性、本地优先的路径 | 在需要时增加更丰富的记忆检索 |
-
-```mermaid
-flowchart LR
-  A["Messy project context"] --> B["LLM-Wiki<br/>validated memory graph"]
-  B --> C["Cognee<br/>hybrid graph + vector retrieval"]
-  C --> D["Coding agents<br/>ask better questions with durable context"]
-```
-
-当你希望已编译记忆成为智能体的实时检索底座时，使用 Cognee。当你希望在记忆成为运行时上下文之前控制、验证、导出并检查它时，使用 LLM-Wiki。
-
----
+- 编译时间大致与语料规模成线性关系。在大型 Markdown 树（数千个文件）上的首次编译可能需要几分钟。
+- RAG-Anything 默认的 embedding provider 是 `deterministic`。它可复现且无外部依赖，但语义召回有限。要获得更好的检索质量，请切换到 `ollama`（例如 `qwen3-embedding:0.6b`）或 OpenAI 兼容端点 —— 见 [docs/integrations/rag-anything.md](docs/integrations/rag-anything.md)。
+- RAG-Anything 的视觉支持（图像内容抽取）尚未端到端打通。图像文件只做结构化解析，不会被描述。
+- Cognee runtime cognify 是 best-effort：缺失的 provider、付费 API 密钥或网络故障只会被记录并跳过，不会中断构建。
+- MCP 服务器暴露的工具集合是稳定的，但底层图谱 schema 仍可能继续扩充。
 
 ## 快速开始
+
+需要 Python 3.9 以上。若启用 RAG-Anything，则需要 Python 3.10 以上。
 
 ```bash
 pip install llm-wiki
 
+cd /path/to/my-project
 llm_wiki project setup
 llm_wiki project compile
-llm_wiki project ask "Which files implement Mermaid rendering?"
-llm_wiki project build-site
-llm_wiki project serve --port 8765
+llm_wiki project ask "Where is Mermaid rendering implemented?"
+llm_wiki project build-site && llm_wiki project serve --port 8765
 ```
 
-如果想同时使用 Understand Anything、RAG-Anything 和 Cognee，只需设置一次:
+setup 向导会检测常见来源（`README.md`、`docs/`、`src/`、`data/`），并写入 `.llm-wiki/config.json`。涉及 LLM 调用的功能默认使用基于 OAuth 的 `codex` CLI，因此常规路径无需 API key。更详细的内容见 [docs/quickstart.md](docs/quickstart.md) 和 [docs/installation.md](docs/installation.md)。
 
-```bash
-llm_wiki project setup \
-  --with-understand-anything \
-  --install-understand-anything \
-  --understand-anything-platform codex \
-  --with-raganything \
-  --install-raganything \
-  --raganything-parser mineru \
-  --run-raganything \
-  --run-cognee \
-  --install-cognee
-llm_wiki project compile
-```
-
-打开:
+## 编译后你会得到什么
 
 ```text
-http://127.0.0.1:8765/
+.llm-wiki/
+  config.json
+  graph.json              # 类型化的节点/边
+  manifest.json           # 源文件指纹（被 --changed-only 使用）
+  sqlite.db               # 可查询的图存储
+  temporal_facts.jsonl
+  graphiti_episodes.jsonl
+  report.md
+  markdown_projection/    # 人类可读的 wiki 页面
+  obsidian_vault/         # 可直接放进 Obsidian 的 vault
+  agent_harness/          # 各智能体的配置（Claude/Codex/Gemini/Cursor/...）
+  harness_sessions/       # 导入的 Claude/Codex 会话记忆
+  cognee_bundle/          # 可供 Cognee ingest 的 JSONL
+  site/                   # build-site 生成的静态站点
+  external/               # 配套工具的产物（UA、RAG-Anything）
 ```
 
-设置向导会检测 `README.md`、`docs`、`src`、`data` 和配套工件等常见来源。选择 Understand Anything 后，LLM-Wiki 会按需安装配套技能并保存托管刷新包装器，因此 `project compile` 可以刷新 `.understand-anything/knowledge-graph.json`，用户不需要知道 UA 安装在哪里，也不需要手动输入 `/understand`。Cognee 作为默认问答后端启用；运行时 cognify 通过 `--run-cognee` 显式开启。
+`project compile` 之后用 `ls .llm-wiki/` 即可确认实际生成的内容。
 
-```text
-◆ LLM-Wiki project setup
-Choose sources and companion tools. Press Enter to accept defaults.
+## CLI 概览
 
-Sources
-  ✓ README.md
-  ✓ docs
-  ✓ src
-  ✓ .llm-wiki/external/understand-anything.md
+日常使用的命令。完整 flag 用 `llm_wiki <subcommand> --help` 查看。
 
-External tools
-  ◆ Understand Anything → .llm-wiki/external/understand-anything.md
-
-Memory backends
-  ◆ Cognee → my_project_memory (codex_cognify, manual cognify)
-```
-
----
-
-## 它会导出什么
-
-| 输出 | 重要性 |
+| 命令 | 作用 |
 |---|---|
-| `cognee_bundle/` | 适用于 Cognee 风格记忆工作流的干净图工件 |
-| `graph.json` / `graph.jsonld` | 可移植的类型化记忆图 |
-| `sqlite.db` / Kuzu output | 可查询的本地图存储 |
-| `llms.txt` / `llms-full.txt` | 直接供智能体使用的上下文包 |
-| MCP server | `search_nodes`、`node_context`、`timeline` 和图工具 |
-| `agent_harness/` | Claude Code、Codex、Gemini、Cursor、Kiro、OpenCode 设置 |
-| `markdown_projection/` | 供人类和编辑器阅读的 wiki 文件 |
-| `.llm-wiki/site/` | 用于检查、共享和调试的静态网站 |
+| `llm_wiki project setup` | 交互式向导。写出 `.llm-wiki/config.json`。接受 `--with-understand-anything`、`--with-raganything`、`--run-cognee` 等。 |
+| `llm_wiki project compile` | 读取已配置的来源，运行配套工具刷新，把所有工件写入 `.llm-wiki/`。增量重建请使用 `--changed-only`。 |
+| `llm_wiki project build-site` | 在 `.llm-wiki/site/` 构建静态前端。 |
+| `llm_wiki project serve --port 8765` | 本地提供静态站点。 |
+| `llm_wiki project refresh-understand-anything` | 运行 LLM-Wiki 托管的 Understand Anything 刷新包装器。 |
+| `llm_wiki project refresh-raganything --parser mineru` | 通过 RAG-Anything 重新解析非代码来源（PDF、Office、图像）。 |
+| `llm_wiki project ask "<question>"` | 向已配置的后端（`auto`/`raganything`/`cognee`/`wiki`）提问。 |
+| `llm_wiki project mcp-config` | 打印可以粘贴到 Claude Code、Codex 或 Hermes 的 MCP 服务器配置片段。 |
+| `llm_wiki wiki register <path> --name <alias>` | 把项目注册到共享 registry。 |
+| `llm_wiki wiki list` / `llm_wiki wiki activate <name>` | 列出已注册项目；设置当前激活项目。 |
+| `llm_wiki ask "<question>" [--wiki <name>]` | 通过 registry 解析的顶层 ask 命令。 |
 
----
+## 集成
 
-## 配套工具，而非锁定
+所有集成都是可选的（opt-in）。在普通的 Markdown/代码项目上使用 LLM-Wiki，它们都不是必需的。
 
-LLM-Wiki 设计为位于工具之间，而不是替代它们。
+- **Understand Anything** —— 一个独立项目（[Lum1104/Understand-Anything](https://github.com/Lum1104/Understand-Anything)），会在 `.understand-anything/knowledge-graph.json` 写出代码知识图谱。用 `--with-understand-anything` 启用。LLM-Wiki 会保存一个托管的刷新包装器，使 `project compile` 始终保持该图谱最新。见 [docs/integrations/understand-anything.md](docs/integrations/understand-anything.md)。
+- **RAG-Anything** —— 多模态摄入（[HKUDS/RAG-Anything](https://github.com/HKUDS/RAG-Anything)），通过 MinerU/Docling/PaddleOCR 处理 PDF、Office 文档和图像。用 `--with-raganything` 启用。也作为运行时问答后端（LightRAG）。需要 Python 3.10 以上。见 [docs/integrations/rag-anything.md](docs/integrations/rag-anything.md)。
+- **Cognee** —— 图+向量记忆后端。用 `--run-cognee --install-cognee` 启用。普通 compile 始终写出 `.llm-wiki/cognee_bundle/`；运行时 `cognify` pass 是 best-effort，只有在显式启用时才执行。
 
-| 工具 | 关系 |
-|---|---|
-| Understand Anything | 独立代码图工件 → Markdown 投影 → 已编译记忆 |
-| RAG-Anything | 多模态摄取（PDF/Office/图像）+ LightRAG 运行时后端 |
-| Cognee | 用于混合图/向量检索的记忆后端 |
-| Graphiti 风格系统 | 时间序列 episode/fact 导出路径 |
-| Obsidian / markdown | 可读投影，而不是唯一真相来源 |
-| Claude Code / Codex | 既是会话记忆来源，也是已编译上下文的消费者 |
+## 多项目 registry
 
-使用托管设置路径时，LLM-Wiki 会安装配套技能、保存刷新包装器，并可一次性启用 Cognee 运行时记忆:
+位于 `~/.llm-wiki/registry.json` 的持久 registry 让顶层 `ask` CLI 和 MCP 服务器无需每次都加 `--project`，就能把项目名解析为实际路径。
 
 ```bash
-llm_wiki project setup \
-  --yes \
-  --with-understand-anything \
-  --install-understand-anything \
-  --understand-anything-platform codex \
-  --with-raganything \
-  --install-raganything \
-  --raganything-parser mineru \
-  --run-raganything \
-  --run-cognee \
-  --install-cognee
-llm_wiki project compile
+llm_wiki wiki register /path/to/my-project --name myproj
+llm_wiki wiki activate myproj
+llm_wiki ask "Where is the parser entry point?"
 ```
 
-编译时，LLM-Wiki 会在 UA 图缺失或过期时运行 `project refresh-understand-anything`，生成 `.llm-wiki/external/understand-anything.md`，写出 `.llm-wiki/cognee_bundle/`，并在已配置时以 best-effort 方式刷新 Cognee 运行时记忆。用户不需要知道 UA 或 Cognee 安装在哪里。
+MCP 服务器读取同一份 registry，所以 MCP 客户端可以对任意已注册 wiki 调用 `list_projects`、`activate_project`、`ask`。
 
----
+## MCP
 
-## 什么时候 LLM-Wiki 是合适的工具
+`llm_wiki project mcp-config` 会打印可以粘贴到 Claude Code、Codex 或任何 MCP 兼容客户端的服务器条目。服务器暴露以下工具：`schema`、`graph_summary`、`search_nodes`、`node_context`、`search_facts`、`timeline`、`wiki_page`、`raw_source`、`lint_report`、`ask`，以及 registry 相关工具 `list_projects` / `register_project` / `activate_project` / `unregister_project`。需要明确项目的工具，会使用与 CLI 相同的 registry 解析。
 
-| 你想要... | 使用 LLM-Wiki，因为... |
-|---|---|
-| 更好的编码智能体连续性 | 旧的 Claude/Codex 会话会成为可搜索记忆 |
-| 更安全的 GraphRAG 输入 | schema 验证发生在检索之前 |
-| 本地优先工作流 | 确定性抽取和 CLI/OAuth 路径避免强制 API key 支出 |
-| 可移植项目记忆 | 一次编译即可生成 Cognee、MCP、SQLite、Kuzu、Markdown、JSON 和站点工件 |
-| 人类检查 | 静态站点让你调试智能体将要检索的内容 |
+## 认证与 LLM provider
 
----
+常规路径不需要 API key：
 
-## 文档
+- **Codex CLI**（默认）使用 OAuth。`--raganything-llm-provider codex` 是默认值；Cognee 的 `codex_cognify` 模式会把 Cognee 的 LLM 客户端补丁到 Codex CLI。
+- **Claude Code CLI** 使用 OAuth。把 RAG-Anything 运行时查询切换到 Claude，请设置 `--raganything-llm-provider claude`。多账号场景使用 `--raganything-claude-config-dir ~/.claude-personal2`（LLM-Wiki 会在每次调用前导出 `CLAUDE_CONFIG_DIR`）。
+- **Embeddings** 默认采用进程内的确定性 provider。可以切到 Ollama：`--cognee-embedding-provider ollama --cognee-ollama-embedding-model qwen3-embedding:0.6b`；也可以接 OpenAI 兼容端点 —— 两种方式都在集成文档中有说明。
 
-| 指南 | 你将获得 |
-|---|---|
-| [Quickstart](./docs/quickstart.md) | 第一次项目记忆编译 |
-| [Installation](./docs/installation.md) | 安装选项和 wrappers |
-| [Architecture](./docs/architecture.md) | 流水线内部机制和图模型 |
-| [Session history](./docs/session-history.md) | Claude/Codex 转录导入 |
-| [Understand Anything companion workflow](./docs/integrations/understand-anything.md) | 配套图刷新和投影 |
-| [RAG-Anything](./docs/integrations/rag-anything.md) | 多模态摄取（PDF/Office/图像）+ LightRAG 运行时后端 |
-| [Publishing checklist](./docs/publishing-checklist.md) | 部署生成的静态站点 |
+如果设置了 `ANTHROPIC_API_KEY` 或 `OPENAI_API_KEY`，相应路径会自动识别，但它们不是必需。
 
----
+## 项目布局
 
-<p align="center">
-  <strong>不要把一个空白仓库交给你的下一个智能体。给它已编译的记忆。</strong>
-</p>
+```text
+llm_wiki/        # 包本体（CLI、编译器、MCP 服务器、各 adapter）
+docs/            # 英文文档 + 六种其他语言的 docs/i18n/
+ontology/        # 编译器据以校验的节点/边 schema
+prompts/         # 抽取与综合 prompt
+scripts/         # 维护脚本
+tests/           # pytest 套件
+evals/           # 图谱质量评测 harness
+data/            # 自我 dogfood 所用的示例研究笔记
+```
+
+## 本地化文档
+
+[English](./README.md) ·
+[한국어](./README.ko.md) ·
+[日本語](./README.ja.md) ·
+[Русский](./README.ru.md) ·
+[Español](./README.es.md) ·
+[Français](./README.fr.md)
+
+长文档分别镜像在 `docs/i18n/` 与 `docs/i18n/integrations/`。
+
+## 许可证
+
+MIT。见 [LICENSE](LICENSE)。
