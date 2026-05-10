@@ -200,16 +200,18 @@ LLM-Wiki is designed to sit between tools, not replace them.
 | Obsidian / markdown | readable projection, not the only source of truth |
 | Claude Code / Codex | both source of session memory and consumers of compiled context |
 
-If your refresh command is a shell alias/function, wrap it explicitly:
+Use the managed setup path; LLM-Wiki installs the companion skills and stores a refresh command for you:
 
 ```bash
 llm_wiki project setup \
   --yes \
   --with-understand-anything \
-  --understand-anything-platform codex \
-  --understand-anything-command "zsh -ic 'reunderstand'" \
-  --run-understand-anything
+  --install-understand-anything \
+  --understand-anything-platform codex
+llm_wiki project compile
 ```
+
+On compile, LLM-Wiki runs its own `project refresh-understand-anything` wrapper when the UA graph is missing or stale, then materializes `.llm-wiki/external/understand-anything.md`. Users do not need to know where UA is installed or how to invoke `/understand` manually.
 
 ---
 

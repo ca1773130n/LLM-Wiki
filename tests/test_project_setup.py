@@ -1,7 +1,7 @@
 import json
 
 from llm_wiki.cli import main
-from llm_wiki.project_setup import build_setup_plan, render_setup_summary
+from llm_wiki.project_setup import build_setup_plan, render_setup_summary, expand_tool_command
 
 
 def test_setup_plan_detects_common_sources_and_understand_anything(tmp_path):
@@ -20,7 +20,22 @@ def test_setup_plan_detects_common_sources_and_understand_anything(tmp_path):
     assert plan.external_tools[0]["id"] == "understand-anything"
     assert plan.external_tools[0]["artifact"] == ".understand-anything/knowledge-graph.json"
     assert plan.external_tools[0]["source"] == ".llm-wiki/external/understand-anything.md"
+    assert plan.external_tools[0]["auto_refresh"] is True
+    assert plan.external_tools[0]["managed_refresh"] is True
+    assert "llm_wiki.understand_anything_refresh" in plan.external_tools[0]["refresh_command"]
 
+
+def test_managed_understand_anything_refresh_command_expands_to_current_python(tmp_path):
+    project = tmp_path / "demo"
+    project.mkdir()
+
+    plan = build_setup_plan(project, include_understand_anything=True, understand_anything_platform="opencode")
+    tool = plan.external_tools[0]
+    command = expand_tool_command(tool["refresh_command"], project, tool)
+
+    assert "llm_wiki.understand_anything_refresh" in command
+    assert f"--project {project}" in command
+    assert "--platform opencode" in command
 
 def test_setup_command_yes_writes_config_with_external_tool_metadata(tmp_path, capsys):
     project = tmp_path / "demo"
@@ -47,6 +62,9 @@ def test_setup_command_yes_writes_config_with_external_tool_metadata(tmp_path, c
     assert cfg["setup"]["wizard"] == "llm_wiki project setup"
     assert cfg["external_tools"][0]["id"] == "understand-anything"
     assert cfg["external_tools"][0]["install"]["enabled"] is True
+    assert cfg["external_tools"][0]["auto_refresh"] is True
+    assert cfg["external_tools"][0]["managed_refresh"] is True
+    assert "llm_wiki.understand_anything_refresh" in cfg["external_tools"][0]["refresh_command"]
     assert "install.sh" in cfg["external_tools"][0]["install"]["command"]
     assert (project / ".llm-wiki" / "external" / "understand-anything.md").exists()
     out = capsys.readouterr().out

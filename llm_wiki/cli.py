@@ -23,6 +23,7 @@ from .graphiti_adapter import GraphitiSyncUnavailableError
 from .project import CognifyOptions, ProjectWiki, cognify_options_from_config, cognee_backend_config, iter_markdown_files
 from .project_setup import apply_setup_plan, build_setup_plan, interactive_setup_plan, refresh_configured_external_tools, render_setup_summary
 from .report import GraphReporter
+from .understand_anything_refresh import refresh_understand_anything
 from .research_graph import ResearchCorpusAnalyzer, ResearchGraph, ResearchGraphExtractor
 from .review_workflow import ReviewQueueExporter
 from .selective_extractor import SelectiveClaudeResearchExtractor
@@ -277,6 +278,13 @@ def project_main(argv: List[str] | None = None) -> int:
     compile_parser.add_argument("--cognee-system-root", help="Optional isolated Cognee system root directory")
     compile_parser.add_argument("--cognee-data-root", help="Optional isolated Cognee data root directory")
 
+    ua_refresh_parser = subparsers.add_parser("refresh-understand-anything", help="Run LLM-Wiki's managed Understand Anything refresh")
+    ua_refresh_parser.add_argument("--project", default=".", help="Project root directory; defaults to current working directory")
+    ua_refresh_parser.add_argument("--platform", default="codex", help="Agent platform to use: codex, opencode, or claude")
+    ua_refresh_parser.add_argument("--full", action="store_true", help="Force /understand --full")
+    ua_refresh_parser.add_argument("--force", action="store_true", help="Run even if the existing graph appears current")
+    ua_refresh_parser.add_argument("--timeout", type=int, help="Optional timeout in seconds")
+
     lint_parser = subparsers.add_parser(
         "lint",
         help="Lint the compiled wiki: orphan papers, stale citations, drift, ghost synthesis inputs, and more.",
@@ -523,6 +531,14 @@ def project_main(argv: List[str] | None = None) -> int:
         )
         print(f"Graph: {result['graph_path']}")
         return 0
+    if args.command == "refresh-understand-anything":
+        return refresh_understand_anything(
+            args.project,
+            platform=args.platform,
+            full=args.full,
+            force=args.force,
+            timeout=args.timeout,
+        )
     if args.command == "lint":
         wiki = ProjectWiki.load(args.project)
         report = wiki.lint(fix_trivial=args.fix_trivial, severity_floor=args.severity)

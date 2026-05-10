@@ -35,7 +35,7 @@ The recommended path is the setup wizard:
 llm_wiki project setup
 ```
 
-Choose Understand Anything in the companion-tools step. If you provide a refresh command, LLM-Wiki stores it in `.llm-wiki/config.json` and runs it automatically before future `llm_wiki project compile` calls when auto-refresh is enabled.
+Choose Understand Anything in the companion-tools step. LLM-Wiki installs/updates the companion skills when requested and writes a managed refresh command into `.llm-wiki/config.json`. Future `llm_wiki project compile` calls run that wrapper automatically when the UA graph is missing or stale.
 
 For non-interactive automation, use:
 
@@ -43,8 +43,14 @@ For non-interactive automation, use:
 llm_wiki project setup \
   --yes \
   --with-understand-anything \
-  --understand-anything-command '<command that refreshes .understand-anything/knowledge-graph.json>' \
-  --run-understand-anything
+  --install-understand-anything \
+  --understand-anything-platform codex
+```
+
+The stored command is LLM-Wiki-owned, not something the user has to invent:
+
+```bash
+llm_wiki project refresh-understand-anything --platform codex
 ```
 
 You can also force all configured external refresh commands before a compile:

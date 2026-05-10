@@ -3,7 +3,9 @@
 from __future__ import annotations
 
 import json
+import shlex
 import subprocess
+import sys
 from dataclasses import dataclass, field
 from datetime import date
 from pathlib import Path
@@ -68,6 +70,30 @@ def understand_anything_install_command(platform: str = "codex") -> str:
     return f"curl -fsSL https://raw.githubusercontent.com/Lum1104/Understand-Anything/main/install.sh | bash -s {platform}"
 
 
+def understand_anything_refresh_command(platform: str = "codex") -> str:
+    """Return LLM-Wiki's managed Understand Anything refresh command."""
+    return (
+        "{python} -m llm_wiki.understand_anything_refresh "
+        "--project {project} "
+        f"--platform {shlex.quote(platform)}"
+    )
+
+
+def expand_tool_command(command: str, project_root: str | Path, tool: Optional[dict] = None) -> str:
+    root = Path(project_root).resolve()
+    tool = tool or {}
+    install = tool.get("install") or {}
+    values = {
+        "python": shlex.quote(sys.executable),
+        "project": shlex.quote(str(root)),
+        "platform": shlex.quote(str(install.get("platform") or tool.get("platform") or "codex")),
+    }
+    try:
+        return command.format(**values)
+    except Exception:
+        return command
+
+
 def build_setup_plan(
     project_root: str | Path,
     *,
@@ -95,14 +121,16 @@ def build_setup_plan(
         if projection not in source_list:
             source_list.append(projection)
         should_install = bool(install_understand_anything) if install_understand_anything is not None else not bool(ua_artifact)
+        refresh_command = understand_anything_command or understand_anything_refresh_command(understand_anything_platform)
         external_tools.append(
             {
                 "id": "understand-anything",
                 "name": "Understand Anything",
                 "artifact": artifact,
                 "source": projection,
-                "refresh_command": understand_anything_command or "",
-                "auto_refresh": bool(run_understand_anything and understand_anything_command),
+                "refresh_command": refresh_command,
+                "auto_refresh": True,
+                "managed_refresh": understand_anything_command is None,
                 "enabled": True,
                 "install": {
                     "enabled": True,
@@ -248,6 +276,7 @@ def run_tool_configs(project_root: str | Path, tools: Sequence[dict], *, only_au
             command = str(install.get("command") or "").strip()
             if not install.get("enabled", False) or not install.get("auto_install", False) or not command:
                 continue
+            command = expand_tool_command(command, root, tool)
             completed = subprocess.run(
                 command,
                 shell=True,
@@ -269,6 +298,7 @@ def run_tool_configs(project_root: str | Path, tools: Sequence[dict], *, only_au
             continue
         command = str(tool.get("refresh_command") or "").strip()
         if command:
+            command = expand_tool_command(command, root, tool)
             completed = subprocess.run(
                 command,
                 shell=True,
