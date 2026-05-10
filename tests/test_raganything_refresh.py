@@ -256,3 +256,30 @@ def test_parser_is_importable_returns_true_when_module_present(monkeypatch):
     fake = types.ModuleType("docling")
     monkeypatch.setitem(sys.modules, "docling", fake)
     assert mod._parser_is_importable("docling") is True
+
+
+def test_pick_construction_parser_returns_default_when_routing_empty():
+    from llm_wiki.raganything_refresh import _pick_construction_parser
+    assert _pick_construction_parser([], default="mineru") == "mineru"
+
+
+def test_pick_construction_parser_picks_most_common_routed_parser():
+    from llm_wiki.raganything_refresh import _pick_construction_parser
+    from pathlib import Path
+    routing = [
+        (Path("a.md"), "docling"),
+        (Path("b.md"), "docling"),
+        (Path("c.pdf"), "mineru"),
+    ]
+    assert _pick_construction_parser(routing, default="mineru") == "docling"
+
+
+def test_pick_construction_parser_breaks_ties_by_parser_id():
+    from llm_wiki.raganything_refresh import _pick_construction_parser
+    from pathlib import Path
+    routing = [
+        (Path("a.md"), "docling"),
+        (Path("b.pdf"), "mineru"),
+    ]
+    # Tied counts: alphabetic by parser id.
+    assert _pick_construction_parser(routing, default="paddleocr") == "docling"

@@ -116,6 +116,24 @@ def pick_parser_for_path(
     return default_parser
 
 
+def _pick_construction_parser(routing: Sequence[tuple[Path, str]], *, default: str) -> str:
+    """Choose RAGAnything's construction-time parser based on the actual routing.
+
+    Using the most-frequent picked parser avoids the failure mode where
+    `RAGAnything.__init__` tries to initialize a heavy parser (e.g. mineru)
+    whose models aren't downloaded yet, killing every per-doc call before
+    per-call `parser=` overrides can run.
+    """
+    if not routing:
+        return default
+    counts: dict[str, int] = {}
+    for _, picked in routing:
+        counts[picked] = counts.get(picked, 0) + 1
+    # Sort by count desc, then by parser id for stability.
+    ranked = sorted(counts.items(), key=lambda kv: (-kv[1], kv[0]))
+    return ranked[0][0]
+
+
 def _install_hint_for(parser: str) -> str:
     if parser == "mineru":
         return (
@@ -282,7 +300,15 @@ def parse_documents(
     parsed_root = (project / RAGA_ROOT / "parsed").resolve()
     parsed_root.mkdir(parents=True, exist_ok=True)
 
-    config = RAGAnythingConfig(working_dir=str(working_dir), parser=parser, parse_method=parse_method)
+    # Construction-time parser: pick the most common parser from the routing so
+    # RAGAnything's LightRAG init aligns with the bulk of the corpus.
+    # Heavier parsers (mineru) failing to initialize because of missing model
+    # weights would otherwise brick the entire run before any per-call
+    # parser= override can take effect. Per-call overrides still apply to
+    # individual sources whose picked parser differs.
+    construction_parser = _pick_construction_parser(routing, default=parser)
+
+    config = RAGAnythingConfig(working_dir=str(working_dir), parser=construction_parser, parse_method=parse_method)
     funcs = llm_funcs or {}
     rag = RAGAnything(
         config=config,

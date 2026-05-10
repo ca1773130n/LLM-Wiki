@@ -114,6 +114,8 @@ Override per-bucket with `--text-parser` and `--office-parser` on `refresh-ragan
 
 Before the parse loop runs, LLM-Wiki probes whether each required parser's Python package is importable (`importlib.import_module(...)`) and bails fast with a single aggregated error listing every missing parser and its install command. We deliberately don't use upstream `RAGAnything.check_parser_installation()` because it only inspects the parser configured on the instance and folds in model-weight readiness checks that don't fit a pre-flight stage.
 
+LLM-Wiki also picks `RAGAnything`'s construction-time parser from the actual routing distribution (most-common picked parser wins) rather than from `--raganything-parser` directly. This avoids the failure mode where `RAGAnything.__init__` tries to initialize a heavy parser (e.g. `mineru`) whose model weights aren't yet on disk and brick the entire run before per-call `parser=` overrides can take effect. The `--raganything-parser` flag still controls the default for non-text, non-Office sources (PDFs, images).
+
 ### Parser packages
 
 `raganything[all]` does NOT bundle every parser. Install the ones you actually use:
