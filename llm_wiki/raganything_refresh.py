@@ -3,6 +3,12 @@
 Discovers non-code sources, parses them via RAG-Anything (MinerU/Docling/PaddleOCR),
 and writes `.llm-wiki/external/raganything/manifest.json` plus `meta.json` so the
 adapter has a stable artifact to import during compile.
+
+Exit codes:
+    0 - refresh succeeded (or skipped because artifact was current)
+    2 - project directory does not exist
+    4 - raganything package is not installed
+    5 - every discovered source failed to parse
 """
 
 from __future__ import annotations
@@ -10,6 +16,7 @@ from __future__ import annotations
 import argparse
 import hashlib
 import json
+import os
 import subprocess
 import sys
 from datetime import datetime, timezone
@@ -54,6 +61,11 @@ def _stored_commit(project: Path) -> str | None:
 
 
 def _artifact_is_current(project: Path) -> bool:
+    """Return True when the existing manifest is up-to-date with the project's git HEAD.
+
+    For non-git projects (where ``_git_head`` returns None) the manifest is treated as
+    current once it exists; the user must pass ``--force`` or ``--full`` to refresh.
+    """
     manifest = project / RAGA_ROOT / MANIFEST_NAME
     if not manifest.exists():
         return False
@@ -80,13 +92,12 @@ def discover_sources(project: Path, *, roots: Iterable[str] | None = None) -> li
     candidates: list[Path] = []
     search_roots = [project / r for r in (roots or ["."]) if (project / r).exists()]
     for root in search_roots:
-        for path in root.rglob("*"):
-            if not path.is_file():
-                continue
-            if any(part in _EXCLUDED_DIRS for part in path.relative_to(project).parts):
-                continue
-            if path.suffix.lower() in _SUPPORTED_EXT:
-                candidates.append(path)
+        for dirpath, dirnames, filenames in os.walk(root):
+            dirnames[:] = [d for d in dirnames if d not in _EXCLUDED_DIRS]
+            for name in filenames:
+                path = Path(dirpath) / name
+                if path.suffix.lower() in _SUPPORTED_EXT:
+                    candidates.append(path)
     return sorted(candidates)
 
 
@@ -191,6 +202,7 @@ def parse_documents(
                 )
             except Exception as exc:  # noqa: BLE001
                 print(f"raganything: failed to parse {src}: {exc}", file=sys.stderr)
+                results.append({"path": src, "content_list": [], "error": str(exc)})
                 continue
             content_list_path = out_dir / "content_list.json"
             content_list = []
@@ -250,9 +262,20 @@ def refresh_raganything(
         print(f"RAG-Anything: {exc}", file=sys.stderr)
         return 4
 
+    failures = sum(1 for d in documents if d.get("error"))
+    if failures:
+        print(
+            f"RAG-Anything: {failures} of {len(sources)} source(s) failed to parse; "
+            "continuing with successful documents.",
+            file=sys.stderr,
+        )
+    if failures == len(sources):
+        return 5
+
+    successful = [d for d in documents if not d.get("error")]
     write_manifest(
         root,
-        documents=documents,
+        documents=successful,
         parser=parser,
         git_commit=_git_head(root) or "",
     )

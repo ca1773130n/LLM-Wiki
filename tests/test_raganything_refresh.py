@@ -112,6 +112,22 @@ def test_refresh_runs_parse_documents_and_writes_manifest(tmp_path, monkeypatch)
     assert payload["git_commit"] == "deadbeef"
 
 
+def test_refresh_returns_5_when_every_source_fails(tmp_path, monkeypatch):
+    import llm_wiki.raganything_refresh as mod
+
+    (tmp_path / "data").mkdir()
+    (tmp_path / "data" / "a.pdf").write_bytes(b"%PDF-1.4")
+    (tmp_path / "data" / "b.pdf").write_bytes(b"%PDF-1.4")
+
+    def fake_parse(project, *, sources, parser, parse_method, working_dir, llm_funcs):
+        return [{"path": s, "content_list": [], "error": "boom"} for s in sources]
+
+    monkeypatch.setattr(mod, "parse_documents", fake_parse)
+    monkeypatch.setattr(mod, "_git_head", lambda p: "abc")
+    rc = mod.refresh_raganything(tmp_path, parser="mineru", roots=["data"], force=True)
+    assert rc == 5
+
+
 def test_refresh_skips_when_artifact_current(tmp_path, monkeypatch, capsys):
     import llm_wiki.raganything_refresh as mod
     base = tmp_path / ".llm-wiki" / "external" / "raganything"
