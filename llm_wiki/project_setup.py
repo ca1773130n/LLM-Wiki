@@ -315,10 +315,10 @@ def materialize_understand_anything_source(project_root: str | Path, tool: dict)
     return _rel(root, source)
 
 
-def refresh_configured_external_tools(project_root: str | Path, *, only_auto: bool = True) -> List[dict]:
+def refresh_configured_external_tools(project_root: str | Path, *, only_auto: bool = True, fail_fast: bool = False) -> List[dict]:
     wiki = ProjectWiki.load(project_root)
     cfg = wiki.config()
-    return run_tool_configs(wiki.project_root, cfg.get("external_tools", []), only_auto=only_auto)
+    return run_tool_configs(wiki.project_root, cfg.get("external_tools", []), only_auto=only_auto, fail_fast=fail_fast)
 
 
 def apply_setup_plan(plan: SetupPlan) -> SetupResult:

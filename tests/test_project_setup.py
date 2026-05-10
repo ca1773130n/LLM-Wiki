@@ -105,6 +105,33 @@ def test_compile_auto_refreshes_configured_external_tools(tmp_path, capsys):
     assert "Refreshed external tools" in capsys.readouterr().out
 
 
+def test_compile_warns_and_continues_when_auto_refresh_command_is_missing(tmp_path, capsys):
+    project = tmp_path / "demo"
+    project.mkdir()
+    (project / "README.md").write_text("# Demo\nGaussian Splatting supports novel view synthesis.\n", encoding="utf-8")
+
+    assert main([
+        "project",
+        "setup",
+        "--project",
+        str(project),
+        "--yes",
+        "--with-understand-anything",
+        "--understand-anything-command",
+        "definitely_missing_understand_command",
+        "--run-understand-anything",
+        "--no-color",
+    ]) == 0
+
+    assert main(["project", "compile", "--project", str(project), "--limit", "1"]) == 0
+
+    out = capsys.readouterr().out
+    assert "External tool refresh had warnings" in out
+    assert "definitely_missing_understand_command" in out
+    assert "Compiled project wiki" in out
+    assert (project / ".llm-wiki" / "graph.json").exists()
+
+
 def test_render_setup_summary_contains_ansi_when_color_enabled(tmp_path):
     project = tmp_path / "demo"
     project.mkdir()

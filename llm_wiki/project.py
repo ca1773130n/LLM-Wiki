@@ -63,6 +63,7 @@ class CognifyOptions:
     local_embedding_dimensions: int = 128
     system_root: Optional[str] = None
     data_root: Optional[str] = None
+    fail_fast: bool = True
 
     @classmethod
     def from_mapping(cls, data: dict) -> "CognifyOptions":
@@ -78,6 +79,7 @@ class CognifyOptions:
             local_embedding_dimensions=int(data.get("local_embedding_dimensions") or 128),
             system_root=data.get("system_root"),
             data_root=data.get("data_root"),
+            fail_fast=bool(data.get("fail_fast", False)),
         )
 
     @property
@@ -674,7 +676,12 @@ class ProjectWiki:
         GraphMarkdownProjector().write_projection(graph, self.paths.markdown_projection)
         CogneeResearchGraphAdapter().write_bundle(graph, self.paths.cognee_bundle)
         if cognify and cognify.is_active:
-            self._run_cognify(cognify)
+            try:
+                self._run_cognify(cognify)
+            except Exception as exc:
+                if getattr(cognify, "fail_fast", True):
+                    raise
+                print(f"[llm-wiki] Cognee cognify warning; compile will continue: {exc}", flush=True)
         report = GraphReporter().render_markdown(GraphReporter().summarize(graph))
         self.paths.report.write_text(report, encoding="utf-8")
         TemporalFactProjector().write_jsonl(graph, self.paths.temporal_facts)
@@ -773,6 +780,7 @@ def default_cognee_backend_config(name: str = "llm_wiki") -> dict:
         "codex_timeout": 300,
         "embedding_provider": "deterministic",
         "local_embedding_dimensions": 128,
+        "fail_fast": False,
     }
 
 

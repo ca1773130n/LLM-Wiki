@@ -21,6 +21,7 @@ def test_setup_enables_cognee_backend_by_default(tmp_path):
     assert cognee["dataset"] == "demo_memory"
     assert cognee["system_root"] == ".llm-wiki/cognee_system"
     assert cognee["data_root"] == ".llm-wiki/cognee_data"
+    assert cognee["fail_fast"] is False
 
 
 def test_compile_uses_configured_cognee_when_auto_cognify_enabled(tmp_path, monkeypatch):
@@ -89,6 +90,28 @@ def test_legacy_project_config_gets_default_cognee_backend():
     assert cognee["enabled"] is True
     assert cognee["dataset"] == "legacy_demo_memory"
     assert cognee["auto_cognify"] is False
+
+
+def test_configured_cognee_failure_warns_and_compile_continues(tmp_path, monkeypatch, capsys):
+    project = tmp_path / "demo"
+    project.mkdir()
+    (project / "README.md").write_text("# Demo\nGaussian Splatting supports novel view synthesis.\n", encoding="utf-8")
+    wiki = ProjectWiki.init(project, name="demo", source_kind="Repository", sources=["README.md"])
+    cfg = wiki.config()
+    cfg["memory_backends"]["cognee"]["auto_cognify"] = True
+    cfg["memory_backends"]["cognee"]["fail_fast"] = False
+    wiki.paths.config.write_text(json.dumps(cfg, indent=2) + "\n", encoding="utf-8")
+
+    def fail_cognee(self, options):
+        raise RuntimeError("cognee missing")
+
+    monkeypatch.setattr(ProjectWiki, "_run_cognify", fail_cognee)
+
+    assert main(["project", "compile", "--project", str(project), "--limit", "1"]) == 0
+
+    out = capsys.readouterr().out
+    assert "Cognee cognify warning" in out
+    assert "Compiled project wiki" in out
 
 
 def test_project_ask_uses_configured_cognee_backend(tmp_path, monkeypatch, capsys):

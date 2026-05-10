@@ -459,12 +459,20 @@ def project_main(argv: List[str] | None = None) -> int:
     if args.command == "compile":
         wiki = ProjectWiki.load(args.project)
         try:
-            refreshed = refresh_configured_external_tools(args.project, only_auto=not args.refresh_external_tools)
+            refreshed = refresh_configured_external_tools(args.project, only_auto=not args.refresh_external_tools, fail_fast=False)
         except Exception as exc:
             print(f"External tool refresh failed: {exc}", file=sys.stderr)
             return 2
         if refreshed:
-            print(f"Refreshed external tools: {len(refreshed)}")
+            failures = [row for row in refreshed if row.get("status") == "failed"]
+            if failures:
+                print("External tool refresh had warnings; compile will continue.")
+                for failure in failures:
+                    detail = (failure.get("stderr") or failure.get("stdout") or "").strip().splitlines()
+                    tail = f": {detail[-1]}" if detail else ""
+                    print(f"  - {failure.get('id')}: {failure.get('command')} exited {failure.get('returncode')}{tail}")
+            else:
+                print(f"Refreshed external tools: {len(refreshed)}")
         explicit_cognee = args.cognee_codex_cognify or args.cognee_cognify or args.cognee_add
         cognify_mode = (
             "codex_cognify" if args.cognee_codex_cognify
