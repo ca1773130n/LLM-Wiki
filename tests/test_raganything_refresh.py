@@ -198,7 +198,7 @@ def test_pick_parser_for_path_honors_custom_overrides():
 def test_install_hint_for_known_parsers():
     from llm_wiki.raganything_refresh import _install_hint_for
     assert "mineru[core]" in _install_hint_for("mineru")
-    assert "raganything[all]" in _install_hint_for("docling")
+    assert "pip install docling" in _install_hint_for("docling")
     assert "paddleocr" in _install_hint_for("paddleocr")
 
 
@@ -224,7 +224,28 @@ def test_verify_parsers_or_raise_raises_with_actionable_hint():
         _verify_parsers_or_raise(FakeRag(), ["mineru"])
     msg = str(exc.value)
     assert "mineru" in msg
-    assert "mineru[core]" in msg  # hint included
+    assert "mineru[core]" in msg
+
+
+def test_verify_parsers_or_raise_aggregates_multiple_failures():
+    from llm_wiki.raganything_refresh import _verify_parsers_or_raise
+    import pytest
+
+    class FakeRag:
+        def check_parser_installation(self, parser_name=None):
+            return False  # everything missing
+
+    with pytest.raises(RuntimeError) as exc:
+        _verify_parsers_or_raise(FakeRag(), ["mineru", "docling", "paddleocr"])
+    msg = str(exc.value)
+    # All three parsers should appear in a single error
+    assert "mineru" in msg
+    assert "docling" in msg
+    assert "paddleocr" in msg
+    # And each hint
+    assert "mineru[core]" in msg
+    assert "pip install docling" in msg
+    assert "paddlepaddle" in msg
 
 
 def test_verify_parsers_handles_old_api_without_parser_name_kwarg():

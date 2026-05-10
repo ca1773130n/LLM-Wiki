@@ -112,6 +112,18 @@ Override per-bucket with `--text-parser` and `--office-parser` on `refresh-ragan
 
 Before the parse loop runs, LLM-Wiki calls `RAGAnything.check_parser_installation()` for each parser actually needed by the discovered sources and bails fast with an install hint when one is missing — no more cascading per-file errors.
 
+### Parser packages
+
+`raganything[all]` does NOT bundle every parser. Install the ones you actually use:
+
+| Parser | Install command |
+|---|---|
+| `docling` (default for text/Office) | `pip install docling` |
+| `mineru` (default for PDF/images) | `pip install 'mineru[core]'` + first-run model download (~GBs) |
+| `paddleocr` (optional OCR alternative) | `pip install 'raganything[paddleocr]>=1.3.0'` and `pip install paddlepaddle` (platform-specific wheel) |
+
+When a configured parser is missing, `refresh-raganything` bails fast — listing every missing parser in a single error with the right install command — instead of cascading per-file failures.
+
 ## Collaboration principle
 
 LLM-Wiki remains the memory compiler. RAG-Anything remains an independent companion: a multimodal parser + LightRAG retrieval engine.

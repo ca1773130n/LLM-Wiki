@@ -123,7 +123,11 @@ def _install_hint_for(parser: str) -> str:
             "trigger the download with `mineru -p <any.pdf> -o /tmp/mineru-bootstrap -m auto`."
         )
     if parser == "docling":
-        return "Run `pip install 'raganything[all]>=1.3.0'` (Docling ships with the [all] extras)."
+        return (
+            "Run `pip install docling` (the Docling Python package is not bundled with "
+            "`raganything[all]` — it must be installed directly). "
+            "After install, verify with `python -c 'import docling; print(docling.__version__)'`."
+        )
     if parser == "paddleocr":
         return (
             "Run `pip install 'raganything[paddleocr]>=1.3.0'` AND `pip install paddlepaddle` "
@@ -133,8 +137,11 @@ def _install_hint_for(parser: str) -> str:
 
 
 def _verify_parsers_or_raise(rag, parsers: Iterable[str]) -> None:
-    """Run RAGAnything.check_parser_installation() per parser, raising on first failure."""
+    """Run RAGAnything.check_parser_installation() per parser, raising once with
+    every missing parser and its install hint.
+    """
     seen: set[str] = set()
+    missing: list[tuple[str, str]] = []
     for parser in parsers:
         if parser in seen:
             continue
@@ -143,8 +150,6 @@ def _verify_parsers_or_raise(rag, parsers: Iterable[str]) -> None:
         try:
             ok = bool(rag.check_parser_installation(parser_name=parser))
         except TypeError:
-            # Older raganything: check_parser_installation() takes no args and only
-            # checks the parser configured at construction time. Skip with a warning.
             try:
                 ok = bool(rag.check_parser_installation())
             except Exception:
@@ -152,10 +157,12 @@ def _verify_parsers_or_raise(rag, parsers: Iterable[str]) -> None:
         except Exception:
             ok = False
         if not ok:
-            hint = _install_hint_for(parser)
-            raise RuntimeError(
-                f"RAG-Anything parser '{parser}' is not properly installed. {hint}"
-            )
+            missing.append((parser, _install_hint_for(parser)))
+    if missing:
+        lines = ["RAG-Anything cannot run because the following parsers are not properly installed:"]
+        for parser, hint in missing:
+            lines.append(f"  - {parser}: {hint}")
+        raise RuntimeError("\n".join(lines))
 
 
 def discover_sources(project: Path, *, roots: Iterable[str] | None = None) -> list[Path]:
