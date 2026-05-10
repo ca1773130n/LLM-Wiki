@@ -151,6 +151,10 @@ llm_wiki project setup \
   --with-understand-anything \
   --install-understand-anything \
   --understand-anything-platform codex \
+  --with-raganything \
+  --install-raganything \
+  --raganything-parser mineru \
+  --run-raganything \
   --run-cognee \
   --install-cognee
 llm_wiki project compile
@@ -205,6 +209,7 @@ LLM-Wiki is designed to sit between tools, not replace them.
 | Tool | Relationship |
 |---|---|
 | Understand Anything | independent code graph artifact → markdown projection → compiled memory |
+| RAG-Anything | multimodal ingestion (PDF/Office/images) + LightRAG runtime backend |
 | Cognee | memory backend for hybrid graph/vector retrieval |
 | Graphiti-style systems | temporal episode/fact export path |
 | Obsidian / markdown | readable projection, not the only source of truth |
@@ -217,7 +222,11 @@ llm_wiki project setup \
   --yes \
   --with-understand-anything \
   --install-understand-anything \
-  --understand-anything-platform codex
+  --understand-anything-platform codex \
+  --with-raganything \
+  --install-raganything \
+  --raganything-parser mineru \
+  --run-raganything
 llm_wiki project compile
 ```
 
@@ -246,6 +255,7 @@ On compile, LLM-Wiki runs its own `project refresh-understand-anything` wrapper 
 | [Architecture](docs/architecture.md) | pipeline internals and graph model |
 | [Session history](docs/session-history.md) | Claude/Codex transcript import |
 | [Understand Anything companion workflow](docs/integrations/understand-anything.md) | companion graph refresh and projection |
+| [RAG-Anything](docs/integrations/rag-anything.md) | multimodal ingestion (PDF/Office/images) + LightRAG runtime backend |
 | [Publishing checklist](docs/publishing-checklist.md) | deploy the generated static site |
 
 ---
