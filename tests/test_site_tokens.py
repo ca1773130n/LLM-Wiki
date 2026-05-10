@@ -40,8 +40,10 @@ def test_css_styles_mermaid_diagram_blocks():
     mermaid = CSS.split(".mermaid {", 1)[1].split("}", 1)[0]
     assert "overflow-x: auto" in mermaid
     assert "text-align: center" in mermaid
+    assert ".mermaid[data-mermaid-source]:not([data-mermaid-rendered=\"true\"])" in CSS
+    assert "Rendering Mermaid diagram" in CSS
     assert ".mermaid svg" in CSS
-    assert "[data-mermaid-error] .mermaid" in CSS
+    assert ".mermaid[data-mermaid-error=\"true\"]" in CSS
 
 
 def test_css_session_pages_use_compact_readable_scale():

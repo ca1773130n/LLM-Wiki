@@ -60,8 +60,10 @@ def test_bundle_updates_aria_label_on_theme_toggle():
 
 def test_bundle_renders_mermaid_diagrams():
     assert "cdn.jsdelivr.net/npm/mermaid" in JS_MERMAID_RENDER
-    assert "document.querySelectorAll('.mermaid')" in JS_MERMAID_RENDER
-    assert "mermaid.run" in JS_MERMAID_RENDER
+    assert "document.querySelectorAll('.mermaid[data-mermaid-source]')" in JS_MERMAID_RENDER
+    assert "mermaid.render" in JS_MERMAID_RENDER
+    assert "data-mermaid-rendered" in JS_MERMAID_RENDER
+    assert "data-mermaid-error" in JS_MERMAID_RENDER
     assert JS_MERMAID_RENDER in JS_BUNDLE_BASE
 
 

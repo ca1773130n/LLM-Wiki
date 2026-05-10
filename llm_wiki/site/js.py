@@ -3852,12 +3852,20 @@ JS_SESSION_TURN_SCROLLSPY = r"""
 # ---------------------------------------------------------------------------
 JS_MERMAID_RENDER = r"""
 (function(){
+  function mermaidBlocks(){
+    return Array.prototype.slice.call(document.querySelectorAll('.mermaid[data-mermaid-source]'));
+  }
+  function markFailed(block, err){
+    block.setAttribute('data-mermaid-error', 'true');
+    block.setAttribute('data-mermaid-rendered', 'error');
+    try { console.warn('Mermaid render failed', err); } catch (_) {}
+  }
   function renderMermaid(){
-    var blocks = document.querySelectorAll('.mermaid');
+    var blocks = mermaidBlocks().filter(function(block){
+      return block.getAttribute('data-mermaid-rendered') !== 'true';
+    });
     if (!blocks.length) return;
-    for (var i = 0; i < blocks.length; i++) {
-      blocks[i].setAttribute('data-processed', 'false');
-    }
+    blocks.forEach(function(block){ block.setAttribute('data-mermaid-rendered', 'pending'); });
     import('https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.esm.min.mjs')
       .then(function(mod){
         var mermaid = mod.default || mod;
@@ -3866,11 +3874,23 @@ JS_MERMAID_RENDER = r"""
           securityLevel: 'strict',
           theme: (document.documentElement.getAttribute('data-theme') === 'dark') ? 'dark' : 'default'
         });
-        return mermaid.run({ nodes: blocks });
+        var chain = Promise.resolve();
+        blocks.forEach(function(block, index){
+          chain = chain.then(function(){
+            var source = block.textContent || '';
+            var id = 'mermaid-' + Date.now() + '-' + index;
+            return mermaid.render(id, source).then(function(result){
+              block.innerHTML = result.svg;
+              block.setAttribute('data-mermaid-rendered', 'true');
+              block.removeAttribute('data-mermaid-error');
+              if (result.bindFunctions) result.bindFunctions(block);
+            }).catch(function(err){ markFailed(block, err); });
+          });
+        });
+        return chain;
       })
       .catch(function(err){
-        document.documentElement.setAttribute('data-mermaid-error', '');
-        try { console.warn('Mermaid render failed', err); } catch (_) {}
+        blocks.forEach(function(block){ markFailed(block, err); });
       });
   }
   function scheduleMermaid(){
