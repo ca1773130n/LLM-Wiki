@@ -189,9 +189,9 @@ def build_setup_plan(
         backend["enabled"] = True
         backend["parser"] = raganything_parser
         install_command = (
-            "{python} -m pip install 'raganything[" + raganything_extras + "]>=1.3.0'"
+            "{python} -m pip install 'raganything[" + raganything_extras + "]>=1.3.0' docling"
             if raganything_extras
-            else "{python} -m pip install 'raganything>=1.3.0'"
+            else "{python} -m pip install 'raganything>=1.3.0' docling"
         )
         if should_install_raganything:
             backend["install"]["auto_install"] = True

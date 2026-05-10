@@ -475,6 +475,8 @@ def project_main(argv: List[str] | None = None) -> int:
                 print("Understand Anything installed/updated.")
             if "cognee" in installed_ids:
                 print("Cognee installed/updated.")
+            if "raganything" in installed_ids:
+                print("RAG-Anything (raganything + docling) installed/updated.")
             if failures:
                 print("External tool install/refresh had warnings; setup was saved anyway.")
                 for failure in failures:

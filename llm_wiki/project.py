@@ -907,7 +907,7 @@ def default_raganything_backend_config(name: str = "llm_wiki") -> dict:
         "query_mode": "hybrid",
         "vlm_enhanced": True,
         "install": {
-            "command": "{python} -m pip install 'raganything[all]>=1.3.0'",
+            "command": "{python} -m pip install 'raganything[all]>=1.3.0' docling",
             "auto_install": False,
         },
     }

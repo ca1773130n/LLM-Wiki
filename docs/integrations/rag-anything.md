@@ -33,6 +33,8 @@ llm_wiki project setup \
 llm_wiki project compile
 ```
 
+The setup wizard installs both `raganything` and `docling` together. MinerU stays opt-in: install it with `pip install 'mineru[core]'` only if you have PDFs or images to ingest.
+
 LLM-Wiki stores a managed refresh command rather than asking users to invent one:
 
 ```bash
@@ -118,7 +120,7 @@ Before the parse loop runs, LLM-Wiki calls `RAGAnything.check_parser_installatio
 
 | Parser | Install command |
 |---|---|
-| `docling` (default for text/Office) | `pip install docling` |
+| `docling` (default for text/Office) | bundled when you run `--with-raganything --install-raganything` (or `pip install docling` standalone) |
 | `mineru` (default for PDF/images) | `pip install 'mineru[core]'` + first-run model download (~GBs) |
 | `paddleocr` (optional OCR alternative) | `pip install 'raganything[paddleocr]>=1.3.0'` and `pip install paddlepaddle` (platform-specific wheel) |
 
