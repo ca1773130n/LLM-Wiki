@@ -41,6 +41,7 @@ from .persistence import SQLiteResearchGraphStore
 from .report import GraphReporter
 from .research_graph import ResearchCorpusAnalyzer, ResearchEdge, ResearchGraph, ResearchGraphExtractor, ResearchNode, ResearchNodeType, link_paper_repo_pairs, prefer_research_node
 from .temporal import TemporalFactProjector, render_competitive_report
+from .raganything_adapter import merge_raganything_graph
 from .understand_anything_adapter import merge_understand_anything_graph
 from .wiki_projector import partition_graph
 
@@ -308,6 +309,7 @@ class ProjectWiki:
             graph = merge_graphs([graph, code_graph])
         cfg = self.config()
         graph = self._merge_configured_understand_anything_graph(graph, cfg)
+        graph = self._merge_configured_raganything_graph(graph, cfg)
         # ``--changed-only`` is supposed to be incremental: re-extract only the
         # files whose content hash changed, but keep the rest of the prior
         # corpus. The manifest stores only ``{path: sha256}``, so without this
@@ -380,6 +382,30 @@ class ProjectWiki:
                 project_root=self.project_root,
                 artifact=artifact,
                 sync_manifest_path=manifest,
+            )
+        return graph
+
+    def _merge_configured_raganything_graph(self, graph: ResearchGraph, cfg: dict) -> ResearchGraph:
+        """Merge configured RAG-Anything manifest artifacts natively."""
+        for tool in cfg.get("external_tools", []) or []:
+            if not isinstance(tool, dict):
+                continue
+            if tool.get("id") != "raganything" or tool.get("enabled", True) is False:
+                continue
+            sync_mode = str(tool.get("sync_mode") or "native_graph")
+            if sync_mode not in {"native_graph", "both"}:
+                continue
+            artifact = self.project_root / str(
+                tool.get("artifact") or ".llm-wiki/external/raganything/manifest.json"
+            )
+            if not artifact.exists():
+                continue
+            sync_path = self.project_root / ".llm-wiki" / "external" / "raganything-sync.json"
+            graph, _ = merge_raganything_graph(
+                graph,
+                project_root=self.project_root,
+                artifact=artifact,
+                sync_manifest_path=sync_path,
             )
         return graph
 
