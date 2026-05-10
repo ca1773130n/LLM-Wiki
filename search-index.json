@@ -33,7 +33,7 @@
       "4dgs"
     ],
     "len": 24,
-    "created_ts": 1778205823
+    "created_ts": 1778379534
   },
   {
     "id": "concepts:beam-search",
@@ -59,7 +59,7 @@
       "concepts"
     ],
     "len": 14,
-    "created_ts": 1778205823
+    "created_ts": 1778379534
   },
   {
     "id": "concepts:depth-map",
@@ -82,7 +82,7 @@
       "maps"
     ],
     "len": 11,
-    "created_ts": 1778205823
+    "created_ts": 1778379534
   },
   {
     "id": "concepts:fine-tuning",
@@ -129,7 +129,7 @@
       "concepts"
     ],
     "len": 35,
-    "created_ts": 1778205823
+    "created_ts": 1778379534
   },
   {
     "id": "concepts:gaussian-splatting",
@@ -172,7 +172,7 @@
       "splatting"
     ],
     "len": 31,
-    "created_ts": 1778205823
+    "created_ts": 1778379534
   },
   {
     "id": "concepts:gaussianflow-slam",
@@ -197,7 +197,7 @@
       "concepts"
     ],
     "len": 13,
-    "created_ts": 1778205823
+    "created_ts": 1778379534
   },
   {
     "id": "concepts:multi-view-consistency",
@@ -222,14 +222,14 @@
       "consistency"
     ],
     "len": 13,
-    "created_ts": 1778205823
+    "created_ts": 1778379534
   },
   {
     "id": "concepts:novel-view-synthesis",
     "title": "Novel View Synthesis",
     "kind": "concepts",
     "href": "concepts/novel-view-synthesis.html",
-    "summary": "- **addresses** → Distance Field Rasterization for End-to-End Mesh Reconstruction _(Paper)_ - **addresses** → Geometry-Grounded Gaussian Splatting _(Paper)_",
+    "summary": "- **addresses** → Distance Field Rasterization for End-to-End Mesh Reconstruction _(Paper)_ - **addresses** → GTA: A Geometry-Aware Attention Mechanism for Multi-View Transformers _(Paper)_ - **addre…",
     "source_path": "/Users/neo/Developer/Projects/LLM-Wiki/data/research/daily/2026-04-26/papers/2601.17835/paper.md",
     "tokens": [
       "novel",
@@ -245,11 +245,16 @@
       "reconstruction",
       "paper",
       "addresses",
+      "gta",
       "geometry",
-      "grounded",
-      "gaussian",
-      "splatting",
+      "aware",
+      "attention",
+      "mechanism",
+      "multi",
+      "view",
+      "transformers",
       "paper",
+      "addre",
       "concepts",
       "new",
       "view",
@@ -258,8 +263,8 @@
       "view",
       "synthesis"
     ],
-    "len": 25,
-    "created_ts": 1778205823
+    "len": 30,
+    "created_ts": 1778379534
   },
   {
     "id": "concepts:point-cloud",
@@ -296,7 +301,7 @@
       "cloud"
     ],
     "len": 25,
-    "created_ts": 1778205823
+    "created_ts": 1778379534
   },
   {
     "id": "concepts:pre-training",
@@ -319,7 +324,7 @@
       "concepts"
     ],
     "len": 11,
-    "created_ts": 1778205823
+    "created_ts": 1778379534
   },
   {
     "id": "concepts:pretraining",
@@ -340,7 +345,7 @@
       "concepts"
     ],
     "len": 9,
-    "created_ts": 1778205823
+    "created_ts": 1778379534
   },
   {
     "id": "concepts:reinforcement-learning",
@@ -364,7 +369,7 @@
       "concepts"
     ],
     "len": 12,
-    "created_ts": 1778205823
+    "created_ts": 1778379534
   },
   {
     "id": "concepts:sdfraster",
@@ -387,7 +392,7 @@
       "concepts"
     ],
     "len": 11,
-    "created_ts": 1778205823
+    "created_ts": 1778379534
   },
   {
     "id": "concepts:self-supervised-learning",
@@ -410,7 +415,7 @@
       "learning"
     ],
     "len": 11,
-    "created_ts": 1778205823
+    "created_ts": 1778379534
   },
   {
     "id": "concepts:shape-reconstruction",
@@ -441,7 +446,7 @@
       "재구성"
     ],
     "len": 19,
-    "created_ts": 1778205823
+    "created_ts": 1778379534
   },
   {
     "id": "concepts:stochastic-solid",
@@ -470,7 +475,7 @@
       "solid"
     ],
     "len": 17,
-    "created_ts": 1778205823
+    "created_ts": 1778379534
   },
   {
     "id": "concepts:supervised-learning",
@@ -489,7 +494,7 @@
       "concepts"
     ],
     "len": 7,
-    "created_ts": 1778205823
+    "created_ts": 1778379534
   },
   {
     "id": "concepts:video-diffusion",
@@ -531,7 +536,7 @@
       "diffusion"
     ],
     "len": 30,
-    "created_ts": 1778205823
+    "created_ts": 1778379534
   },
   {
     "id": "concepts:volumetric-rendering",
@@ -571,7 +576,32 @@
       "특성"
     ],
     "len": 28,
-    "created_ts": 1778205823
+    "created_ts": 1778379534
+  },
+  {
+    "id": "entities:199-biotechnologies",
+    "title": "199-biotechnologies",
+    "kind": "entities",
+    "href": "entities/199-biotechnologies.html",
+    "summary": "- **released_by** → GitHub 분석: 199-biotechnologies/claude-deep-research-skill _(Repository)_",
+    "source_path": "/Users/neo/Developer/Projects/LLM-Wiki/data/research/daily/2026-05-09/repos/199-biotechnologies_claude-deep-research-skill.md",
+    "tokens": [
+      "199",
+      "biotechnologies",
+      "released_by",
+      "github",
+      "분석",
+      "199",
+      "biotechnologies",
+      "claude",
+      "deep",
+      "research",
+      "skill",
+      "repository",
+      "entities"
+    ],
+    "len": 13,
+    "created_ts": 1778379534
   },
   {
     "id": "entities:accuracy",
@@ -608,7 +638,7 @@
       "accuracy"
     ],
     "len": 25,
-    "created_ts": 1778205823
+    "created_ts": 1778379534
   },
   {
     "id": "entities:accuracy-90",
@@ -625,7 +655,31 @@
       "entities"
     ],
     "len": 5,
-    "created_ts": 1778205823
+    "created_ts": 1778379534
+  },
+  {
+    "id": "entities:adam-goliński",
+    "title": "Adam Goliński",
+    "kind": "entities",
+    "href": "entities/adam-goliński.html",
+    "summary": "- **authored_by** → SelfReflect: Can LLMs Communicate Their Internal Answer Distribution? _(Paper)_",
+    "source_path": "/Users/neo/Developer/Projects/LLM-Wiki/data/research/daily/2026-05-10/papers/2505.20295/paper.md",
+    "tokens": [
+      "adam",
+      "goliński",
+      "authored_by",
+      "selfreflect",
+      "llms",
+      "communicate",
+      "their",
+      "internal",
+      "answer",
+      "distribution",
+      "paper",
+      "entities"
+    ],
+    "len": 12,
+    "created_ts": 1778379534
   },
   {
     "id": "entities:ade20k",
@@ -645,7 +699,7 @@
       "entities"
     ],
     "len": 8,
-    "created_ts": 1778205823
+    "created_ts": 1778379534
   },
   {
     "id": "entities:aero-ex",
@@ -668,7 +722,7 @@
       "entities"
     ],
     "len": 11,
-    "created_ts": 1778205823
+    "created_ts": 1778379534
   },
   {
     "id": "entities:affaan-m",
@@ -692,7 +746,7 @@
       "entities"
     ],
     "len": 12,
-    "created_ts": 1778205823
+    "created_ts": 1778379534
   },
   {
     "id": "entities:ag2ai",
@@ -712,7 +766,7 @@
       "entities"
     ],
     "len": 8,
-    "created_ts": 1778205823
+    "created_ts": 1778379534
   },
   {
     "id": "entities:ahan-shabanov",
@@ -739,7 +793,7 @@
       "entities"
     ],
     "len": 15,
-    "created_ts": 1778205823
+    "created_ts": 1778379534
   },
   {
     "id": "entities:ai-search-guru",
@@ -771,7 +825,7 @@
       "entities"
     ],
     "len": 20,
-    "created_ts": 1778205823
+    "created_ts": 1778379534
   },
   {
     "id": "entities:alec-jacobson",
@@ -795,7 +849,7 @@
       "entities"
     ],
     "len": 12,
-    "created_ts": 1778205823
+    "created_ts": 1778379534
   },
   {
     "id": "entities:allenai",
@@ -815,7 +869,30 @@
       "entities"
     ],
     "len": 8,
-    "created_ts": 1778205823
+    "created_ts": 1778379534
+  },
+  {
+    "id": "entities:anagh-malik",
+    "title": "Anagh Malik",
+    "kind": "entities",
+    "href": "entities/anagh-malik.html",
+    "summary": "- **authored_by** → Velox: Learning Representations of 4D Geometry and Appearance _(Paper)_",
+    "source_path": "/Users/neo/Developer/Projects/LLM-Wiki/data/research/daily/2026-05-09/papers/2605.04527/paper.md",
+    "tokens": [
+      "anagh",
+      "malik",
+      "authored_by",
+      "velox",
+      "learning",
+      "representations",
+      "4d",
+      "geometry",
+      "appearance",
+      "paper",
+      "entities"
+    ],
+    "len": 11,
+    "created_ts": 1778379534
   },
   {
     "id": "entities:andrea-tagliasacchi",
@@ -853,7 +930,7 @@
       "entities"
     ],
     "len": 26,
-    "created_ts": 1778205823
+    "created_ts": 1778379534
   },
   {
     "id": "entities:andrea-vedaldi",
@@ -880,14 +957,14 @@
       "entities"
     ],
     "len": 15,
-    "created_ts": 1778205823
+    "created_ts": 1778379534
   },
   {
     "id": "entities:andreas-geiger",
     "title": "Andreas Geiger",
     "kind": "entities",
     "href": "entities/andreas-geiger.html",
-    "summary": "- **authored_by** → Feed-Forward 3D Scene Modeling: A Problem-Driven Perspective _(Paper)_",
+    "summary": "- **authored_by** → Feed-Forward 3D Scene Modeling: A Problem-Driven Perspective _(Paper)_ - **authored_by** → GTA: A Geometry-Aware Attention Mechanism for Multi-View Transformers _(Paper)_",
     "source_path": "/Users/neo/Developer/Projects/LLM-Wiki/data/research/daily/2026-05-03/papers/2604.14025/paper.md",
     "tokens": [
       "andreas",
@@ -902,10 +979,20 @@
       "driven",
       "perspective",
       "paper",
+      "authored_by",
+      "gta",
+      "geometry",
+      "aware",
+      "attention",
+      "mechanism",
+      "multi",
+      "view",
+      "transformers",
+      "paper",
       "entities"
     ],
-    "len": 13,
-    "created_ts": 1778205823
+    "len": 23,
+    "created_ts": 1778379534
   },
   {
     "id": "entities:andreas-kurz",
@@ -928,7 +1015,7 @@
       "entities"
     ],
     "len": 11,
-    "created_ts": 1778205823
+    "created_ts": 1778379534
   },
   {
     "id": "entities:andrew-j-davison",
@@ -953,7 +1040,7 @@
       "entities"
     ],
     "len": 13,
-    "created_ts": 1778205823
+    "created_ts": 1778379534
   },
   {
     "id": "entities:andrzej-odrzywołek",
@@ -976,7 +1063,7 @@
       "entities"
     ],
     "len": 11,
-    "created_ts": 1778205823
+    "created_ts": 1778379534
   },
   {
     "id": "entities:anil-matcha",
@@ -1000,7 +1087,7 @@
       "entities"
     ],
     "len": 12,
-    "created_ts": 1778205823
+    "created_ts": 1778379534
   },
   {
     "id": "entities:anish-prabhu",
@@ -1026,7 +1113,7 @@
       "entities"
     ],
     "len": 14,
-    "created_ts": 1778205823
+    "created_ts": 1778379534
   },
   {
     "id": "entities:antonino-furnari",
@@ -1060,14 +1147,14 @@
       "entities"
     ],
     "len": 22,
-    "created_ts": 1778205823
+    "created_ts": 1778379534
   },
   {
     "id": "entities:apple",
     "title": "apple",
     "kind": "entities",
     "href": "entities/apple.html",
-    "summary": "- **released_by** → GitHub 분석: apple/ml-4m _(Repository)_ - **released_by** → GitHub 분석: apple/ml-mobileclip _(Repository)_",
+    "summary": "- **released_by** → GitHub 분석: apple/ml-4m _(Repository)_ - **released_by** → GitHub 분석: apple/ml-lito _(Repository)_ - **released_by** → GitHub 분석: apple/ml-mobileclip _(Repository)_",
     "source_path": "/Users/neo/Developer/Projects/LLM-Wiki/data/research/daily/2026-04-09/papers/2411.14517/repo.md",
     "tokens": [
       "apple",
@@ -1083,12 +1170,19 @@
       "분석",
       "apple",
       "ml",
+      "lito",
+      "repository",
+      "released_by",
+      "github",
+      "분석",
+      "apple",
+      "ml",
       "mobileclip",
       "repository",
       "entities"
     ],
-    "len": 16,
-    "created_ts": 1778205823
+    "len": 23,
+    "created_ts": 1778379534
   },
   {
     "id": "entities:arc-prize-foundation",
@@ -1115,7 +1209,7 @@
       "entities"
     ],
     "len": 15,
-    "created_ts": 1778205823
+    "created_ts": 1778379534
   },
   {
     "id": "entities:armen-avetisyan",
@@ -1141,7 +1235,31 @@
       "entities"
     ],
     "len": 14,
-    "created_ts": 1778205823
+    "created_ts": 1778379534
+  },
+  {
+    "id": "entities:arno-blaas",
+    "title": "Arno Blaas",
+    "kind": "entities",
+    "href": "entities/arno-blaas.html",
+    "summary": "- **authored_by** → SelfReflect: Can LLMs Communicate Their Internal Answer Distribution? _(Paper)_",
+    "source_path": "/Users/neo/Developer/Projects/LLM-Wiki/data/research/daily/2026-05-10/papers/2505.20295/paper.md",
+    "tokens": [
+      "arno",
+      "blaas",
+      "authored_by",
+      "selfreflect",
+      "llms",
+      "communicate",
+      "their",
+      "internal",
+      "answer",
+      "distribution",
+      "paper",
+      "entities"
+    ],
+    "len": 12,
+    "created_ts": 1778379534
   },
   {
     "id": "entities:ate",
@@ -1167,7 +1285,7 @@
       "entities"
     ],
     "len": 14,
-    "created_ts": 1778205823
+    "created_ts": 1778379534
   },
   {
     "id": "entities:awesome-opencode",
@@ -1190,7 +1308,7 @@
       "entities"
     ],
     "len": 11,
-    "created_ts": 1778205823
+    "created_ts": 1778379534
   },
   {
     "id": "entities:aysegul-dundar",
@@ -1214,7 +1332,7 @@
       "entities"
     ],
     "len": 12,
-    "created_ts": 1778205823
+    "created_ts": 1778379534
   },
   {
     "id": "entities:baowen-zhang",
@@ -1235,7 +1353,7 @@
       "entities"
     ],
     "len": 9,
-    "created_ts": 1778205823
+    "created_ts": 1778379534
   },
   {
     "id": "entities:baoxiong-jia",
@@ -1270,7 +1388,32 @@
       "entities"
     ],
     "len": 23,
-    "created_ts": 1778205823
+    "created_ts": 1778379534
+  },
+  {
+    "id": "entities:bernhard-jaeger",
+    "title": "Bernhard Jaeger",
+    "kind": "entities",
+    "href": "entities/bernhard-jaeger.html",
+    "summary": "- **authored_by** → GTA: A Geometry-Aware Attention Mechanism for Multi-View Transformers _(Paper)_",
+    "source_path": "/Users/neo/Developer/Projects/LLM-Wiki/data/research/daily/2026-05-09/papers/2310.10375/paper.md",
+    "tokens": [
+      "bernhard",
+      "jaeger",
+      "authored_by",
+      "gta",
+      "geometry",
+      "aware",
+      "attention",
+      "mechanism",
+      "multi",
+      "view",
+      "transformers",
+      "paper",
+      "entities"
+    ],
+    "len": 13,
+    "created_ts": 1778379534
   },
   {
     "id": "entities:blender",
@@ -1299,7 +1442,7 @@
       "entities"
     ],
     "len": 17,
-    "created_ts": 1778205823
+    "created_ts": 1778379534
   },
   {
     "id": "entities:bo-zhu",
@@ -1326,7 +1469,7 @@
       "entities"
     ],
     "len": 15,
-    "created_ts": 1778205823
+    "created_ts": 1778379534
   },
   {
     "id": "entities:bohan-zhuang",
@@ -1351,7 +1494,7 @@
       "entities"
     ],
     "len": 13,
-    "created_ts": 1778205823
+    "created_ts": 1778379534
   },
   {
     "id": "entities:boris-ivanovic",
@@ -1376,7 +1519,7 @@
       "entities"
     ],
     "len": 13,
-    "created_ts": 1778205823
+    "created_ts": 1778379534
   },
   {
     "id": "entities:chenchen-zhu",
@@ -1397,7 +1540,7 @@
       "entities"
     ],
     "len": 9,
-    "created_ts": 1778205823
+    "created_ts": 1778379534
   },
   {
     "id": "entities:chenjie-cao",
@@ -1421,7 +1564,7 @@
       "entities"
     ],
     "len": 12,
-    "created_ts": 1778205823
+    "created_ts": 1778379534
   },
   {
     "id": "entities:chenxing-jiang",
@@ -1442,7 +1585,7 @@
       "entities"
     ],
     "len": 9,
-    "created_ts": 1778205823
+    "created_ts": 1778379534
   },
   {
     "id": "entities:chi-phung",
@@ -1465,7 +1608,7 @@
       "entities"
     ],
     "len": 11,
-    "created_ts": 1778205823
+    "created_ts": 1778379534
   },
   {
     "id": "entities:chiara-plizzari",
@@ -1487,7 +1630,7 @@
       "entities"
     ],
     "len": 10,
-    "created_ts": 1778205823
+    "created_ts": 1778379534
   },
   {
     "id": "entities:christian-richardt",
@@ -1514,7 +1657,7 @@
       "entities"
     ],
     "len": 15,
-    "created_ts": 1778205823
+    "created_ts": 1778379534
   },
   {
     "id": "entities:christian-rupprecht",
@@ -1538,7 +1681,7 @@
       "entities"
     ],
     "len": 12,
-    "created_ts": 1778205823
+    "created_ts": 1778379534
   },
   {
     "id": "entities:christopher-xie",
@@ -1564,7 +1707,7 @@
       "entities"
     ],
     "len": 14,
-    "created_ts": 1778205823
+    "created_ts": 1778379534
   },
   {
     "id": "entities:chuanxia-zheng",
@@ -1589,7 +1732,7 @@
       "entities"
     ],
     "len": 13,
-    "created_ts": 1778205823
+    "created_ts": 1778379534
   },
   {
     "id": "entities:chumeng-niu",
@@ -1613,7 +1756,7 @@
       "entities"
     ],
     "len": 12,
-    "created_ts": 1778205823
+    "created_ts": 1778379534
   },
   {
     "id": "entities:chun-han-yao",
@@ -1642,7 +1785,7 @@
       "entities"
     ],
     "len": 17,
-    "created_ts": 1778205823
+    "created_ts": 1778379534
   },
   {
     "id": "entities:chunchao-guo",
@@ -1666,7 +1809,7 @@
       "entities"
     ],
     "len": 12,
-    "created_ts": 1778205823
+    "created_ts": 1778379534
   },
   {
     "id": "entities:cijo-jose",
@@ -1687,7 +1830,7 @@
       "entities"
     ],
     "len": 9,
-    "created_ts": 1778205823
+    "created_ts": 1778379534
   },
   {
     "id": "entities:clip",
@@ -1710,7 +1853,7 @@
       "entities"
     ],
     "len": 11,
-    "created_ts": 1778205823
+    "created_ts": 1778379534
   },
   {
     "id": "entities:coco",
@@ -1743,7 +1886,7 @@
       "entities"
     ],
     "len": 21,
-    "created_ts": 1778205823
+    "created_ts": 1778379534
   },
   {
     "id": "entities:cristiano-saltori",
@@ -1768,7 +1911,7 @@
       "entities"
     ],
     "len": 13,
-    "created_ts": 1778205823
+    "created_ts": 1778379534
   },
   {
     "id": "entities:daniel-cremers",
@@ -1792,7 +1935,7 @@
       "entities"
     ],
     "len": 12,
-    "created_ts": 1778205823
+    "created_ts": 1778379534
   },
   {
     "id": "entities:daniel-rebain",
@@ -1827,7 +1970,7 @@
       "entities"
     ],
     "len": 23,
-    "created_ts": 1778205823
+    "created_ts": 1778379534
   },
   {
     "id": "entities:davian-robotics",
@@ -1849,7 +1992,31 @@
       "entities"
     ],
     "len": 10,
-    "created_ts": 1778205823
+    "created_ts": 1778379534
+  },
+  {
+    "id": "entities:david-b-lindell",
+    "title": "David B. Lindell",
+    "kind": "entities",
+    "href": "entities/david-b-lindell.html",
+    "summary": "- **authored_by** → Velox: Learning Representations of 4D Geometry and Appearance _(Paper)_",
+    "source_path": "/Users/neo/Developer/Projects/LLM-Wiki/data/research/daily/2026-05-09/papers/2605.04527/paper.md",
+    "tokens": [
+      "david",
+      "b",
+      "lindell",
+      "authored_by",
+      "velox",
+      "learning",
+      "representations",
+      "4d",
+      "geometry",
+      "appearance",
+      "paper",
+      "entities"
+    ],
+    "len": 12,
+    "created_ts": 1778379534
   },
   {
     "id": "entities:david-j-fleet",
@@ -1874,7 +2041,7 @@
       "entities"
     ],
     "len": 13,
-    "created_ts": 1778205823
+    "created_ts": 1778379534
   },
   {
     "id": "entities:deepseek-ai",
@@ -1896,7 +2063,7 @@
       "entities"
     ],
     "len": 10,
-    "created_ts": 1778205823
+    "created_ts": 1778379534
   },
   {
     "id": "entities:denis-rozumny",
@@ -1923,7 +2090,7 @@
       "entities"
     ],
     "len": 15,
-    "created_ts": 1778205823
+    "created_ts": 1778379534
   },
   {
     "id": "entities:dima-damen",
@@ -1945,7 +2112,7 @@
       "entities"
     ],
     "len": 10,
-    "created_ts": 1778205823
+    "created_ts": 1778379534
   },
   {
     "id": "entities:dmitry-lagun",
@@ -1969,7 +2136,7 @@
       "entities"
     ],
     "len": 12,
-    "created_ts": 1778205823
+    "created_ts": 1778379534
   },
   {
     "id": "entities:dmytro-kurdydyk",
@@ -1997,7 +2164,7 @@
       "entities"
     ],
     "len": 16,
-    "created_ts": 1778205823
+    "created_ts": 1778379534
   },
   {
     "id": "entities:dong-uk-seo",
@@ -2023,7 +2190,7 @@
       "entities"
     ],
     "len": 14,
-    "created_ts": 1778205823
+    "created_ts": 1778379534
   },
   {
     "id": "entities:donny-y-chen",
@@ -2049,7 +2216,7 @@
       "entities"
     ],
     "len": 14,
-    "created_ts": 1778205823
+    "created_ts": 1778379534
   },
   {
     "id": "entities:dor-verbin",
@@ -2075,7 +2242,30 @@
       "entities"
     ],
     "len": 14,
-    "created_ts": 1778205823
+    "created_ts": 1778379534
+  },
+  {
+    "id": "entities:dorian-chan",
+    "title": "Dorian Chan",
+    "kind": "entities",
+    "href": "entities/dorian-chan.html",
+    "summary": "- **authored_by** → Velox: Learning Representations of 4D Geometry and Appearance _(Paper)_",
+    "source_path": "/Users/neo/Developer/Projects/LLM-Wiki/data/research/daily/2026-05-09/papers/2605.04527/paper.md",
+    "tokens": [
+      "dorian",
+      "chan",
+      "authored_by",
+      "velox",
+      "learning",
+      "representations",
+      "4d",
+      "geometry",
+      "appearance",
+      "paper",
+      "entities"
+    ],
+    "len": 11,
+    "created_ts": 1778379534
   },
   {
     "id": "entities:dotan-ankri",
@@ -2096,7 +2286,7 @@
       "entities"
     ],
     "len": 9,
-    "created_ts": 1778205823
+    "created_ts": 1778379534
   },
   {
     "id": "entities:dtu",
@@ -2129,7 +2319,32 @@
       "entities"
     ],
     "len": 21,
-    "created_ts": 1778205823
+    "created_ts": 1778379534
+  },
+  {
+    "id": "entities:eeshan-gunesh-dhekane",
+    "title": "Eeshan Gunesh Dhekane",
+    "kind": "entities",
+    "href": "entities/eeshan-gunesh-dhekane.html",
+    "summary": "- **authored_by** → SelfReflect: Can LLMs Communicate Their Internal Answer Distribution? _(Paper)_",
+    "source_path": "/Users/neo/Developer/Projects/LLM-Wiki/data/research/daily/2026-05-10/papers/2505.20295/paper.md",
+    "tokens": [
+      "eeshan",
+      "gunesh",
+      "dhekane",
+      "authored_by",
+      "selfreflect",
+      "llms",
+      "communicate",
+      "their",
+      "internal",
+      "answer",
+      "distribution",
+      "paper",
+      "entities"
+    ],
+    "len": 13,
+    "created_ts": 1778379534
   },
   {
     "id": "entities:elima-shehu",
@@ -2150,7 +2365,7 @@
       "entities"
     ],
     "len": 9,
-    "created_ts": 1778205823
+    "created_ts": 1778379534
   },
   {
     "id": "entities:eth-ait",
@@ -2173,7 +2388,7 @@
       "entities"
     ],
     "len": 11,
-    "created_ts": 1778205823
+    "created_ts": 1778379534
   },
   {
     "id": "entities:ethan-weber",
@@ -2200,7 +2415,7 @@
       "entities"
     ],
     "len": 15,
-    "created_ts": 1778205823
+    "created_ts": 1778379534
   },
   {
     "id": "entities:eungchang-mason-lee",
@@ -2226,7 +2441,7 @@
       "entities"
     ],
     "len": 14,
-    "created_ts": 1778205823
+    "created_ts": 1778379534
   },
   {
     "id": "entities:evolvinglmms-lab",
@@ -2248,7 +2463,7 @@
       "entities"
     ],
     "len": 10,
-    "created_ts": 1778205823
+    "created_ts": 1778379534
   },
   {
     "id": "entities:eyeline-labs",
@@ -2270,7 +2485,7 @@
       "entities"
     ],
     "len": 10,
-    "created_ts": 1778205823
+    "created_ts": 1778379534
   },
   {
     "id": "entities:fabian-manhardt",
@@ -2294,7 +2509,7 @@
       "entities"
     ],
     "len": 12,
-    "created_ts": 1778205823
+    "created_ts": 1778379534
   },
   {
     "id": "entities:facebookresearch",
@@ -2326,7 +2541,7 @@
       "entities"
     ],
     "len": 20,
-    "created_ts": 1778205823
+    "created_ts": 1778379534
   },
   {
     "id": "entities:federico-tombari",
@@ -2350,7 +2565,7 @@
       "entities"
     ],
     "len": 12,
-    "created_ts": 1778205823
+    "created_ts": 1778379534
   },
   {
     "id": "entities:felix-wimbauer",
@@ -2374,7 +2589,7 @@
       "entities"
     ],
     "len": 12,
-    "created_ts": 1778205823
+    "created_ts": 1778379534
   },
   {
     "id": "entities:felix-windisch",
@@ -2397,7 +2612,7 @@
       "entities"
     ],
     "len": 11,
-    "created_ts": 1778205823
+    "created_ts": 1778379534
   },
   {
     "id": "entities:francesco-ragusa",
@@ -2431,7 +2646,7 @@
       "entities"
     ],
     "len": 22,
-    "created_ts": 1778205823
+    "created_ts": 1778379534
   },
   {
     "id": "entities:francis-engelmann",
@@ -2460,7 +2675,7 @@
       "entities"
     ],
     "len": 17,
-    "created_ts": 1778205823
+    "created_ts": 1778379534
   },
   {
     "id": "entities:gabriele-goletto",
@@ -2482,7 +2697,7 @@
       "entities"
     ],
     "len": 10,
-    "created_ts": 1778205823
+    "created_ts": 1778379534
   },
   {
     "id": "entities:gael-le-lan",
@@ -2510,7 +2725,7 @@
       "entities"
     ],
     "len": 16,
-    "created_ts": 1778205823
+    "created_ts": 1778379534
   },
   {
     "id": "entities:giovanni-maria-farinella",
@@ -2545,7 +2760,7 @@
       "entities"
     ],
     "len": 23,
-    "created_ts": 1778205823
+    "created_ts": 1778379534
   },
   {
     "id": "entities:google-deepmind",
@@ -2567,7 +2782,7 @@
       "entities"
     ],
     "len": 10,
-    "created_ts": 1778205823
+    "created_ts": 1778379534
   },
   {
     "id": "entities:google-research",
@@ -2590,7 +2805,7 @@
       "entities"
     ],
     "len": 11,
-    "created_ts": 1778205823
+    "created_ts": 1778379534
   },
   {
     "id": "entities:h-shiono",
@@ -2612,7 +2827,7 @@
       "entities"
     ],
     "len": 10,
-    "created_ts": 1778205823
+    "created_ts": 1778379534
   },
   {
     "id": "entities:haato-watanabe",
@@ -2641,7 +2856,7 @@
       "entities"
     ],
     "len": 17,
-    "created_ts": 1778205823
+    "created_ts": 1778379534
   },
   {
     "id": "entities:hadar-averbuch-elor",
@@ -2670,7 +2885,7 @@
       "entities"
     ],
     "len": 17,
-    "created_ts": 1778205823
+    "created_ts": 1778379534
   },
   {
     "id": "entities:hailiang-tang",
@@ -2697,7 +2912,7 @@
       "entities"
     ],
     "len": 15,
-    "created_ts": 1778205823
+    "created_ts": 1778379534
   },
   {
     "id": "entities:haiyu-zhang",
@@ -2721,7 +2936,7 @@
       "entities"
     ],
     "len": 12,
-    "created_ts": 1778205823
+    "created_ts": 1778379534
   },
   {
     "id": "entities:hana-bezalel",
@@ -2742,7 +2957,7 @@
       "entities"
     ],
     "len": 9,
-    "created_ts": 1778205823
+    "created_ts": 1778379534
   },
   {
     "id": "entities:hang-su",
@@ -2773,7 +2988,7 @@
       "entities"
     ],
     "len": 19,
-    "created_ts": 1778205823
+    "created_ts": 1778379534
   },
   {
     "id": "entities:hansheng-chen",
@@ -2802,7 +3017,7 @@
       "entities"
     ],
     "len": 17,
-    "created_ts": 1778205823
+    "created_ts": 1778379534
   },
   {
     "id": "entities:hanyu-chen",
@@ -2826,7 +3041,7 @@
       "entities"
     ],
     "len": 12,
-    "created_ts": 1778205823
+    "created_ts": 1778379534
   },
   {
     "id": "entities:hao-zhang",
@@ -2854,7 +3069,7 @@
       "entities"
     ],
     "len": 16,
-    "created_ts": 1778205823
+    "created_ts": 1778379534
   },
   {
     "id": "entities:haofei-xu",
@@ -2879,7 +3094,7 @@
       "entities"
     ],
     "len": 13,
-    "created_ts": 1778205823
+    "created_ts": 1778379534
   },
   {
     "id": "entities:haotong-lin",
@@ -2906,7 +3121,7 @@
       "entities"
     ],
     "len": 15,
-    "created_ts": 1778205823
+    "created_ts": 1778379534
   },
   {
     "id": "entities:haotong-zhang",
@@ -2935,7 +3150,7 @@
       "entities"
     ],
     "len": 17,
-    "created_ts": 1778205823
+    "created_ts": 1778379534
   },
   {
     "id": "entities:haoyu-guo",
@@ -2962,7 +3177,7 @@
       "entities"
     ],
     "len": 15,
-    "created_ts": 1778205823
+    "created_ts": 1778379534
   },
   {
     "id": "entities:haoyuan-wang",
@@ -2986,7 +3201,7 @@
       "entities"
     ],
     "len": 12,
-    "created_ts": 1778205823
+    "created_ts": 1778379534
   },
   {
     "id": "entities:haozhe-liu",
@@ -3009,7 +3224,7 @@
       "entities"
     ],
     "len": 11,
-    "created_ts": 1778205823
+    "created_ts": 1778379534
   },
   {
     "id": "entities:he-wen",
@@ -3026,7 +3241,7 @@
       "entities"
     ],
     "len": 5,
-    "created_ts": 1778205823
+    "created_ts": 1778379534
   },
   {
     "id": "entities:heng-li",
@@ -3047,7 +3262,7 @@
       "entities"
     ],
     "len": 9,
-    "created_ts": 1778205823
+    "created_ts": 1778379534
   },
   {
     "id": "entities:hengshuang-zhao",
@@ -3071,7 +3286,7 @@
       "entities"
     ],
     "len": 12,
-    "created_ts": 1778205823
+    "created_ts": 1778379534
   },
   {
     "id": "entities:henry-howard-jenkins",
@@ -3098,7 +3313,7 @@
       "entities"
     ],
     "len": 15,
-    "created_ts": 1778205823
+    "created_ts": 1778379534
   },
   {
     "id": "entities:heygen-com",
@@ -3120,7 +3335,7 @@
       "entities"
     ],
     "len": 10,
-    "created_ts": 1778205823
+    "created_ts": 1778379534
   },
   {
     "id": "entities:hiroki-furuta",
@@ -3146,7 +3361,7 @@
       "entities"
     ],
     "len": 14,
-    "created_ts": 1778205823
+    "created_ts": 1778379534
   },
   {
     "id": "entities:hku-mmlab",
@@ -3168,7 +3383,7 @@
       "entities"
     ],
     "len": 10,
-    "created_ts": 1778205823
+    "created_ts": 1778379534
   },
   {
     "id": "entities:hongyu-shen",
@@ -3193,7 +3408,7 @@
       "entities"
     ],
     "len": 13,
-    "created_ts": 1778205823
+    "created_ts": 1778379534
   },
   {
     "id": "entities:hongyu-zhou",
@@ -3220,7 +3435,7 @@
       "entities"
     ],
     "len": 15,
-    "created_ts": 1778205823
+    "created_ts": 1778379534
   },
   {
     "id": "entities:howard-zhou",
@@ -3242,7 +3457,7 @@
       "entities"
     ],
     "len": 10,
-    "created_ts": 1778205823
+    "created_ts": 1778379534
   },
   {
     "id": "entities:huaicong-fang",
@@ -3275,7 +3490,7 @@
       "entities"
     ],
     "len": 21,
-    "created_ts": 1778205823
+    "created_ts": 1778379534
   },
   {
     "id": "entities:huangyue-yu",
@@ -3300,7 +3515,7 @@
       "entities"
     ],
     "len": 13,
-    "created_ts": 1778205823
+    "created_ts": 1778379534
   },
   {
     "id": "entities:hui-xiong",
@@ -3332,7 +3547,7 @@
       "entities"
     ],
     "len": 20,
-    "created_ts": 1778205823
+    "created_ts": 1778379534
   },
   {
     "id": "entities:huizhong-chen",
@@ -3354,7 +3569,7 @@
       "entities"
     ],
     "len": 10,
-    "created_ts": 1778205823
+    "created_ts": 1778379534
   },
   {
     "id": "entities:hujun-bao",
@@ -3381,7 +3596,7 @@
       "entities"
     ],
     "len": 15,
-    "created_ts": 1778205823
+    "created_ts": 1778379534
   },
   {
     "id": "entities:hyun-myung",
@@ -3406,7 +3621,7 @@
       "entities"
     ],
     "len": 13,
-    "created_ts": 1778205823
+    "created_ts": 1778379534
   },
   {
     "id": "entities:imagenet",
@@ -3438,7 +3653,7 @@
       "entities"
     ],
     "len": 20,
-    "created_ts": 1778205823
+    "created_ts": 1778379534
   },
   {
     "id": "entities:ipek-oztas",
@@ -3462,7 +3677,7 @@
       "entities"
     ],
     "len": 12,
-    "created_ts": 1778205823
+    "created_ts": 1778379534
   },
   {
     "id": "entities:irene-d-039-ambra",
@@ -3491,7 +3706,7 @@
       "entities"
     ],
     "len": 17,
-    "created_ts": 1778205823
+    "created_ts": 1778379534
   },
   {
     "id": "entities:jaesik-park",
@@ -3517,7 +3732,7 @@
       "entities"
     ],
     "len": 14,
-    "created_ts": 1778205823
+    "created_ts": 1778379534
   },
   {
     "id": "entities:jakob-engel",
@@ -3555,7 +3770,7 @@
       "entities"
     ],
     "len": 26,
-    "created_ts": 1778205823
+    "created_ts": 1778379534
   },
   {
     "id": "entities:james-fort",
@@ -3582,7 +3797,7 @@
       "entities"
     ],
     "len": 15,
-    "created_ts": 1778205823
+    "created_ts": 1778379534
   },
   {
     "id": "entities:javier-civera",
@@ -3606,7 +3821,7 @@
       "entities"
     ],
     "len": 12,
-    "created_ts": 1778205823
+    "created_ts": 1778379534
   },
   {
     "id": "entities:jean-baptiste-alayrac",
@@ -3629,7 +3844,32 @@
       "entities"
     ],
     "len": 11,
-    "created_ts": 1778205823
+    "created_ts": 1778379534
+  },
+  {
+    "id": "entities:jen-hao-rick-chang",
+    "title": "Jen-Hao Rick Chang",
+    "kind": "entities",
+    "href": "entities/jen-hao-rick-chang.html",
+    "summary": "- **authored_by** → Velox: Learning Representations of 4D Geometry and Appearance _(Paper)_",
+    "source_path": "/Users/neo/Developer/Projects/LLM-Wiki/data/research/daily/2026-05-09/papers/2605.04527/paper.md",
+    "tokens": [
+      "jen",
+      "hao",
+      "rick",
+      "chang",
+      "authored_by",
+      "velox",
+      "learning",
+      "representations",
+      "4d",
+      "geometry",
+      "appearance",
+      "paper",
+      "entities"
+    ],
+    "len": 13,
+    "created_ts": 1778379534
   },
   {
     "id": "entities:jia-wang-bian",
@@ -3655,7 +3895,7 @@
       "entities"
     ],
     "len": 14,
-    "created_ts": 1778205823
+    "created_ts": 1778379534
   },
   {
     "id": "entities:jiadong-guo",
@@ -3678,7 +3918,7 @@
       "entities"
     ],
     "len": 11,
-    "created_ts": 1778205823
+    "created_ts": 1778379534
   },
   {
     "id": "entities:jiahao-shao",
@@ -3705,7 +3945,7 @@
       "entities"
     ],
     "len": 15,
-    "created_ts": 1778205823
+    "created_ts": 1778379534
   },
   {
     "id": "entities:jianfei-cai",
@@ -3730,7 +3970,7 @@
       "entities"
     ],
     "len": 13,
-    "created_ts": 1778205823
+    "created_ts": 1778379534
   },
   {
     "id": "entities:jiangyong-huang",
@@ -3755,7 +3995,7 @@
       "entities"
     ],
     "len": 13,
-    "created_ts": 1778205823
+    "created_ts": 1778379534
   },
   {
     "id": "entities:jianuo-cao",
@@ -3780,7 +4020,7 @@
       "entities"
     ],
     "len": 13,
-    "created_ts": 1778205823
+    "created_ts": 1778379534
   },
   {
     "id": "entities:jiaqi-han",
@@ -3809,7 +4049,7 @@
       "entities"
     ],
     "len": 17,
-    "created_ts": 1778205823
+    "created_ts": 1778379534
   },
   {
     "id": "entities:jiaxin-li",
@@ -3834,7 +4074,7 @@
       "entities"
     ],
     "len": 13,
-    "created_ts": 1778205823
+    "created_ts": 1778379534
   },
   {
     "id": "entities:jing-ou",
@@ -3866,7 +4106,7 @@
       "entities"
     ],
     "len": 20,
-    "created_ts": 1778205823
+    "created_ts": 1778379534
   },
   {
     "id": "entities:jinjing-zhu",
@@ -3898,7 +4138,7 @@
       "entities"
     ],
     "len": 20,
-    "created_ts": 1778205823
+    "created_ts": 1778379534
   },
   {
     "id": "entities:jinkai-cui",
@@ -3922,7 +4162,7 @@
       "entities"
     ],
     "len": 12,
-    "created_ts": 1778205823
+    "created_ts": 1778379534
   },
   {
     "id": "entities:jinwoo-jeon",
@@ -3947,7 +4187,7 @@
       "entities"
     ],
     "len": 13,
-    "created_ts": 1778205823
+    "created_ts": 1778379534
   },
   {
     "id": "entities:john-keller",
@@ -3975,7 +4215,7 @@
       "entities"
     ],
     "len": 16,
-    "created_ts": 1778205823
+    "created_ts": 1778379534
   },
   {
     "id": "entities:jonathan-t-barron",
@@ -3998,7 +4238,7 @@
       "entities"
     ],
     "len": 11,
-    "created_ts": 1778205823
+    "created_ts": 1778379534
   },
   {
     "id": "entities:joonsik-nam",
@@ -4024,7 +4264,7 @@
       "entities"
     ],
     "len": 14,
-    "created_ts": 1778205823
+    "created_ts": 1778379534
   },
   {
     "id": "entities:joonsoo-kim",
@@ -4050,7 +4290,7 @@
       "entities"
     ],
     "len": 14,
-    "created_ts": 1778205823
+    "created_ts": 1778379534
   },
   {
     "id": "entities:juan-c-pérez",
@@ -4074,7 +4314,7 @@
       "entities"
     ],
     "len": 12,
-    "created_ts": 1778205823
+    "created_ts": 1778379534
   },
   {
     "id": "entities:juan-manuel-pérez-rúa",
@@ -4099,7 +4339,7 @@
       "entities"
     ],
     "len": 13,
-    "created_ts": 1778205823
+    "created_ts": 1778379534
   },
   {
     "id": "entities:julian-straub",
@@ -4125,7 +4365,7 @@
       "entities"
     ],
     "len": 14,
-    "created_ts": 1778205823
+    "created_ts": 1778379534
   },
   {
     "id": "entities:julieta-martinez",
@@ -4143,7 +4383,7 @@
       "entities"
     ],
     "len": 6,
-    "created_ts": 1778205823
+    "created_ts": 1778379534
   },
   {
     "id": "entities:junchao-he",
@@ -4167,7 +4407,7 @@
       "entities"
     ],
     "len": 12,
-    "created_ts": 1778205823
+    "created_ts": 1778379534
   },
   {
     "id": "entities:junfeng-ni",
@@ -4192,7 +4432,7 @@
       "entities"
     ],
     "len": 13,
-    "created_ts": 1778205823
+    "created_ts": 1778379534
   },
   {
     "id": "entities:junlin-han",
@@ -4215,7 +4455,7 @@
       "entities"
     ],
     "len": 11,
-    "created_ts": 1778205823
+    "created_ts": 1778379534
   },
   {
     "id": "entities:junta-wu",
@@ -4239,7 +4479,7 @@
       "entities"
     ],
     "len": 12,
-    "created_ts": 1778205823
+    "created_ts": 1778379534
   },
   {
     "id": "entities:juyong-zhang",
@@ -4263,7 +4503,7 @@
       "entities"
     ],
     "len": 12,
-    "created_ts": 1778205823
+    "created_ts": 1778379534
   },
   {
     "id": "entities:kaiming-he",
@@ -4284,7 +4524,7 @@
       "entities"
     ],
     "len": 9,
-    "created_ts": 1778205823
+    "created_ts": 1778379534
   },
   {
     "id": "entities:kaist-visual-ai-group",
@@ -4319,7 +4559,7 @@
       "entities"
     ],
     "len": 23,
-    "created_ts": 1778205823
+    "created_ts": 1778379534
   },
   {
     "id": "entities:kaiwen-song",
@@ -4343,7 +4583,7 @@
       "entities"
     ],
     "len": 12,
-    "created_ts": 1778205823
+    "created_ts": 1778379534
   },
   {
     "id": "entities:kam-woh-ng",
@@ -4367,7 +4607,7 @@
       "entities"
     ],
     "len": 12,
-    "created_ts": 1778205823
+    "created_ts": 1778379534
   },
   {
     "id": "entities:karen-truong",
@@ -4389,7 +4629,7 @@
       "entities"
     ],
     "len": 10,
-    "created_ts": 1778205823
+    "created_ts": 1778379534
   },
   {
     "id": "entities:kitti",
@@ -4411,7 +4651,7 @@
       "entities"
     ],
     "len": 10,
-    "created_ts": 1778205823
+    "created_ts": 1778379534
   },
   {
     "id": "entities:kostas-daniilidis",
@@ -4442,7 +4682,7 @@
       "entities"
     ],
     "len": 19,
-    "created_ts": 1778205823
+    "created_ts": 1778379534
   },
   {
     "id": "entities:kugjin-yun",
@@ -4468,7 +4708,7 @@
       "entities"
     ],
     "len": 14,
-    "created_ts": 1778205823
+    "created_ts": 1778379534
   },
   {
     "id": "entities:kwang-moo-yi",
@@ -4504,7 +4744,7 @@
       "entities"
     ],
     "len": 24,
-    "created_ts": 1778205823
+    "created_ts": 1778379534
   },
   {
     "id": "entities:kyeongbo-kong",
@@ -4530,7 +4770,7 @@
       "entities"
     ],
     "len": 14,
-    "created_ts": 1778205823
+    "created_ts": 1778379534
   },
   {
     "id": "entities:kyle-genova",
@@ -4552,7 +4792,7 @@
       "entities"
     ],
     "len": 10,
-    "created_ts": 1778205823
+    "created_ts": 1778379534
   },
   {
     "id": "entities:lab-of-ai-and-robotics",
@@ -4577,7 +4817,7 @@
       "entities"
     ],
     "len": 13,
-    "created_ts": 1778205823
+    "created_ts": 1778379534
   },
   {
     "id": "entities:lawson-l-s-wong",
@@ -4603,7 +4843,7 @@
       "entities"
     ],
     "len": 14,
-    "created_ts": 1778205823
+    "created_ts": 1778379534
   },
   {
     "id": "entities:lei-luo",
@@ -4630,7 +4870,7 @@
       "entities"
     ],
     "len": 15,
-    "created_ts": 1778205823
+    "created_ts": 1778379534
   },
   {
     "id": "entities:leonidas-guibas",
@@ -4659,7 +4899,7 @@
       "entities"
     ],
     "len": 17,
-    "created_ts": 1778205823
+    "created_ts": 1778379534
   },
   {
     "id": "entities:lily-goli",
@@ -4692,7 +4932,7 @@
       "entities"
     ],
     "len": 21,
-    "created_ts": 1778205823
+    "created_ts": 1778379534
   },
   {
     "id": "entities:lin-shao",
@@ -4725,7 +4965,7 @@
       "entities"
     ],
     "len": 21,
-    "created_ts": 1778205823
+    "created_ts": 1778379534
   },
   {
     "id": "entities:linfeng-zhao",
@@ -4749,7 +4989,7 @@
       "entities"
     ],
     "len": 12,
-    "created_ts": 1778205823
+    "created_ts": 1778379534
   },
   {
     "id": "entities:lingxiao-li",
@@ -4776,7 +5016,7 @@
       "entities"
     ],
     "len": 15,
-    "created_ts": 1778205823
+    "created_ts": 1778379534
   },
   {
     "id": "entities:lingzhi-kong",
@@ -4800,7 +5040,31 @@
       "entities"
     ],
     "len": 12,
-    "created_ts": 1778205823
+    "created_ts": 1778379534
+  },
+  {
+    "id": "entities:luca-füger",
+    "title": "Luca Füger",
+    "kind": "entities",
+    "href": "entities/luca-füger.html",
+    "summary": "- **authored_by** → SelfReflect: Can LLMs Communicate Their Internal Answer Distribution? _(Paper)_",
+    "source_path": "/Users/neo/Developer/Projects/LLM-Wiki/data/research/daily/2026-05-10/papers/2505.20295/paper.md",
+    "tokens": [
+      "luca",
+      "füger",
+      "authored_by",
+      "selfreflect",
+      "llms",
+      "communicate",
+      "their",
+      "internal",
+      "answer",
+      "distribution",
+      "paper",
+      "entities"
+    ],
+    "len": 12,
+    "created_ts": 1778379534
   },
   {
     "id": "entities:lucas-yunkyu-lee",
@@ -4827,7 +5091,7 @@
       "entities"
     ],
     "len": 15,
-    "created_ts": 1778205823
+    "created_ts": 1778379534
   },
   {
     "id": "entities:lukas-radl",
@@ -4850,7 +5114,7 @@
       "entities"
     ],
     "len": 11,
-    "created_ts": 1778205823
+    "created_ts": 1778379534
   },
   {
     "id": "entities:m-schuetz",
@@ -4872,7 +5136,7 @@
       "entities"
     ],
     "len": 10,
-    "created_ts": 1778205823
+    "created_ts": 1778379534
   },
   {
     "id": "entities:mandy-guo",
@@ -4894,25 +5158,17 @@
       "entities"
     ],
     "len": 10,
-    "created_ts": 1778205823
+    "created_ts": 1778379534
   },
   {
     "id": "entities:map",
     "title": "mAP",
     "kind": "entities",
     "href": "entities/map.html",
-    "summary": "- **uses_metric** → <h1 align=\"center\">LLM-Wiki</h1> _(SourceDocument)_ - **uses_metric** → ArchSym: Detecting 3D-Grounded Architectural Symmetries in the Wild _(Paper)_ - **uses_metric** → Architect…",
-    "source_path": "/Users/neo/Developer/Projects/LLM-Wiki/README.md",
+    "summary": "- **uses_metric** → ArchSym: Detecting 3D-Grounded Architectural Symmetries in the Wild _(Paper)_ - **uses_metric** → Architecture _(SourceDocument)_ - **uses_metric** → Codex extraction review (2026…",
+    "source_path": "/Users/neo/Developer/Projects/LLM-Wiki/docs/architecture.md",
     "tokens": [
       "map",
-      "uses_metric",
-      "h1",
-      "align",
-      "center",
-      "llm",
-      "wiki",
-      "h1",
-      "sourcedocument",
       "uses_metric",
       "archsym",
       "detecting",
@@ -4923,11 +5179,17 @@
       "wild",
       "paper",
       "uses_metric",
-      "architect",
+      "architecture",
+      "sourcedocument",
+      "uses_metric",
+      "codex",
+      "extraction",
+      "review",
+      "2026",
       "entities"
     ],
-    "len": 21,
-    "created_ts": 1778205823
+    "len": 19,
+    "created_ts": 1778379534
   },
   {
     "id": "entities:map-4",
@@ -4944,7 +5206,7 @@
       "entities"
     ],
     "len": 5,
-    "created_ts": 1778205823
+    "created_ts": 1778379534
   },
   {
     "id": "entities:marc-szafraniec",
@@ -4965,7 +5227,7 @@
       "entities"
     ],
     "len": 9,
-    "created_ts": 1778205823
+    "created_ts": 1778379534
   },
   {
     "id": "entities:marco-pavone",
@@ -4990,7 +5252,7 @@
       "entities"
     ],
     "len": 13,
-    "created_ts": 1778205823
+    "created_ts": 1778379534
   },
   {
     "id": "entities:marcus-brubaker",
@@ -5014,7 +5276,7 @@
       "entities"
     ],
     "len": 12,
-    "created_ts": 1778205823
+    "created_ts": 1778379534
   },
   {
     "id": "entities:mark-matthews",
@@ -5038,7 +5300,7 @@
       "entities"
     ],
     "len": 12,
-    "created_ts": 1778205823
+    "created_ts": 1778379534
   },
   {
     "id": "entities:mark-van-der-wilk",
@@ -5064,7 +5326,7 @@
       "entities"
     ],
     "len": 14,
-    "created_ts": 1778205823
+    "created_ts": 1778379534
   },
   {
     "id": "entities:markus-steinberger",
@@ -5087,7 +5349,7 @@
       "entities"
     ],
     "len": 11,
-    "created_ts": 1778205823
+    "created_ts": 1778379534
   },
   {
     "id": "entities:martin-r-oswald",
@@ -5112,7 +5374,7 @@
       "entities"
     ],
     "len": 13,
-    "created_ts": 1778205823
+    "created_ts": 1778379534
   },
   {
     "id": "entities:masahiro-suzuki",
@@ -5138,7 +5400,7 @@
       "entities"
     ],
     "len": 14,
-    "created_ts": 1778205823
+    "created_ts": 1778379534
   },
   {
     "id": "entities:masayoshi-tomizuka",
@@ -5163,7 +5425,7 @@
       "entities"
     ],
     "len": 13,
-    "created_ts": 1778205823
+    "created_ts": 1778379534
   },
   {
     "id": "entities:math",
@@ -5186,7 +5448,32 @@
       "entities"
     ],
     "len": 11,
-    "created_ts": 1778205823
+    "created_ts": 1778379534
+  },
+  {
+    "id": "entities:max-welling",
+    "title": "Max Welling",
+    "kind": "entities",
+    "href": "entities/max-welling.html",
+    "summary": "- **authored_by** → GTA: A Geometry-Aware Attention Mechanism for Multi-View Transformers _(Paper)_",
+    "source_path": "/Users/neo/Developer/Projects/LLM-Wiki/data/research/daily/2026-05-09/papers/2310.10375/paper.md",
+    "tokens": [
+      "max",
+      "welling",
+      "authored_by",
+      "gta",
+      "geometry",
+      "aware",
+      "attention",
+      "mechanism",
+      "multi",
+      "view",
+      "transformers",
+      "paper",
+      "entities"
+    ],
+    "len": 13,
+    "created_ts": 1778379534
   },
   {
     "id": "entities:maxime-oquab",
@@ -5207,7 +5494,31 @@
       "entities"
     ],
     "len": 9,
-    "created_ts": 1778205823
+    "created_ts": 1778379534
+  },
+  {
+    "id": "entities:michael-kirchhof",
+    "title": "Michael Kirchhof",
+    "kind": "entities",
+    "href": "entities/michael-kirchhof.html",
+    "summary": "- **authored_by** → SelfReflect: Can LLMs Communicate Their Internal Answer Distribution? _(Paper)_",
+    "source_path": "/Users/neo/Developer/Projects/LLM-Wiki/data/research/daily/2026-05-10/papers/2505.20295/paper.md",
+    "tokens": [
+      "michael",
+      "kirchhof",
+      "authored_by",
+      "selfreflect",
+      "llms",
+      "communicate",
+      "their",
+      "internal",
+      "answer",
+      "distribution",
+      "paper",
+      "entities"
+    ],
+    "len": 12,
+    "created_ts": 1778379534
   },
   {
     "id": "entities:michael-oechsle",
@@ -5231,7 +5542,7 @@
       "entities"
     ],
     "len": 12,
-    "created_ts": 1778205823
+    "created_ts": 1778379534
   },
   {
     "id": "entities:michael-steiner",
@@ -5254,7 +5565,7 @@
       "entities"
     ],
     "len": 11,
-    "created_ts": 1778205823
+    "created_ts": 1778379534
   },
   {
     "id": "entities:michele-mazzamuto",
@@ -5281,7 +5592,7 @@
       "entities"
     ],
     "len": 15,
-    "created_ts": 1778205823
+    "created_ts": 1778379534
   },
   {
     "id": "entities:microsoft",
@@ -5302,7 +5613,7 @@
       "entities"
     ],
     "len": 9,
-    "created_ts": 1778205823
+    "created_ts": 1778379534
   },
   {
     "id": "entities:mikaela-angelina-uy",
@@ -5332,7 +5643,7 @@
       "entities"
     ],
     "len": 18,
-    "created_ts": 1778205823
+    "created_ts": 1778379534
   },
   {
     "id": "entities:miou",
@@ -5360,7 +5671,7 @@
       "entities"
     ],
     "len": 16,
-    "created_ts": 1778205823
+    "created_ts": 1778379534
   },
   {
     "id": "entities:miou-24-3",
@@ -5379,7 +5690,7 @@
       "entities"
     ],
     "len": 7,
-    "created_ts": 1778205823
+    "created_ts": 1778379534
   },
   {
     "id": "entities:mip-nerf360",
@@ -5415,7 +5726,7 @@
       "entities"
     ],
     "len": 24,
-    "created_ts": 1778205823
+    "created_ts": 1778379534
   },
   {
     "id": "entities:mohammad-h-taghavi",
@@ -5443,7 +5754,7 @@
       "entities"
     ],
     "len": 16,
-    "created_ts": 1778205823
+    "created_ts": 1778379534
   },
   {
     "id": "entities:naina-dhingra",
@@ -5470,7 +5781,7 @@
       "entities"
     ],
     "len": 15,
-    "created_ts": 1778205823
+    "created_ts": 1778379534
   },
   {
     "id": "entities:narendra-ahuja",
@@ -5498,7 +5809,7 @@
       "entities"
     ],
     "len": 16,
-    "created_ts": 1778205823
+    "created_ts": 1778379534
   },
   {
     "id": "entities:nikhil-keetha",
@@ -5526,7 +5837,7 @@
       "entities"
     ],
     "len": 16,
-    "created_ts": 1778205823
+    "created_ts": 1778379534
   },
   {
     "id": "entities:nikolai-kalischek",
@@ -5550,7 +5861,7 @@
       "entities"
     ],
     "len": 12,
-    "created_ts": 1778205823
+    "created_ts": 1778379534
   },
   {
     "id": "entities:nithish-kannen",
@@ -5572,7 +5883,7 @@
       "entities"
     ],
     "len": 10,
-    "created_ts": 1778205823
+    "created_ts": 1778379534
   },
   {
     "id": "entities:noah-snavely",
@@ -5603,7 +5914,7 @@
       "entities"
     ],
     "len": 19,
-    "created_ts": 1778205823
+    "created_ts": 1778379534
   },
   {
     "id": "entities:nobuyuki-umetani",
@@ -5632,7 +5943,7 @@
       "entities"
     ],
     "len": 17,
-    "created_ts": 1778205823
+    "created_ts": 1778379534
   },
   {
     "id": "entities:numair-khan",
@@ -5659,7 +5970,7 @@
       "entities"
     ],
     "len": 15,
-    "created_ts": 1778205823
+    "created_ts": 1778379534
   },
   {
     "id": "entities:nv-tlabs",
@@ -5681,7 +5992,7 @@
       "entities"
     ],
     "len": 10,
-    "created_ts": 1778205823
+    "created_ts": 1778379534
   },
   {
     "id": "entities:nvidia",
@@ -5714,7 +6025,7 @@
       "entities"
     ],
     "len": 21,
-    "created_ts": 1778205823
+    "created_ts": 1778379534
   },
   {
     "id": "entities:nvlabs",
@@ -5734,7 +6045,7 @@
       "entities"
     ],
     "len": 8,
-    "created_ts": 1778205823
+    "created_ts": 1778379534
   },
   {
     "id": "entities:objaverse",
@@ -5772,7 +6083,7 @@
       "entities"
     ],
     "len": 26,
-    "created_ts": 1778205823
+    "created_ts": 1778379534
   },
   {
     "id": "entities:oliver-wang",
@@ -5794,7 +6105,7 @@
       "entities"
     ],
     "len": 10,
-    "created_ts": 1778205823
+    "created_ts": 1778379534
   },
   {
     "id": "entities:omar-alama",
@@ -5822,7 +6133,30 @@
       "entities"
     ],
     "len": 16,
-    "created_ts": 1778205823
+    "created_ts": 1778379534
+  },
+  {
+    "id": "entities:oncel-tuzel",
+    "title": "Oncel Tuzel",
+    "kind": "entities",
+    "href": "entities/oncel-tuzel.html",
+    "summary": "- **authored_by** → Velox: Learning Representations of 4D Geometry and Appearance _(Paper)_",
+    "source_path": "/Users/neo/Developer/Projects/LLM-Wiki/data/research/daily/2026-05-09/papers/2605.04527/paper.md",
+    "tokens": [
+      "oncel",
+      "tuzel",
+      "authored_by",
+      "velox",
+      "learning",
+      "representations",
+      "4d",
+      "geometry",
+      "appearance",
+      "paper",
+      "entities"
+    ],
+    "len": 11,
+    "created_ts": 1778379534
   },
   {
     "id": "entities:opsiclear-4dgs",
@@ -5844,7 +6178,7 @@
       "entities"
     ],
     "len": 10,
-    "created_ts": 1778205823
+    "created_ts": 1778379534
   },
   {
     "id": "entities:patrick-labatut",
@@ -5865,7 +6199,7 @@
       "entities"
     ],
     "len": 9,
-    "created_ts": 1778205823
+    "created_ts": 1778379534
   },
   {
     "id": "entities:paul-voigtlaender",
@@ -5887,7 +6221,7 @@
       "entities"
     ],
     "len": 10,
-    "created_ts": 1778205823
+    "created_ts": 1778379534
   },
   {
     "id": "entities:peishan-yang",
@@ -5914,7 +6248,7 @@
       "entities"
     ],
     "len": 15,
-    "created_ts": 1778205823
+    "created_ts": 1778379534
   },
   {
     "id": "entities:peiyuan-zhi",
@@ -5939,7 +6273,7 @@
       "entities"
     ],
     "len": 13,
-    "created_ts": 1778205823
+    "created_ts": 1778379534
   },
   {
     "id": "entities:peter-hedman",
@@ -5966,7 +6300,7 @@
       "entities"
     ],
     "len": 15,
-    "created_ts": 1778205823
+    "created_ts": 1778379534
   },
   {
     "id": "entities:petr-hrubý",
@@ -5987,7 +6321,7 @@
       "entities"
     ],
     "len": 9,
-    "created_ts": 1778205823
+    "created_ts": 1778379534
   },
   {
     "id": "entities:ping-tan",
@@ -6008,7 +6342,7 @@
       "entities"
     ],
     "len": 9,
-    "created_ts": 1778205823
+    "created_ts": 1778379534
   },
   {
     "id": "entities:piotr-bojanowski",
@@ -6029,7 +6363,7 @@
       "entities"
     ],
     "len": 9,
-    "created_ts": 1778205823
+    "created_ts": 1778379534
   },
   {
     "id": "entities:polymathicai",
@@ -6049,7 +6383,7 @@
       "entities"
     ],
     "len": 8,
-    "created_ts": 1778205823
+    "created_ts": 1778379534
   },
   {
     "id": "entities:precision",
@@ -6071,7 +6405,7 @@
       "entities"
     ],
     "len": 10,
-    "created_ts": 1778205823
+    "created_ts": 1778379534
   },
   {
     "id": "entities:qihang-cao",
@@ -6096,7 +6430,7 @@
       "entities"
     ],
     "len": 13,
-    "created_ts": 1778205823
+    "created_ts": 1778379534
   },
   {
     "id": "entities:qinglin-yang",
@@ -6123,7 +6457,7 @@
       "entities"
     ],
     "len": 15,
-    "created_ts": 1778205823
+    "created_ts": 1778379534
   },
   {
     "id": "entities:radu-soricut",
@@ -6145,7 +6479,7 @@
       "entities"
     ],
     "len": 10,
-    "created_ts": 1778205823
+    "created_ts": 1778379534
   },
   {
     "id": "entities:raghuraman-krishnamoorthi",
@@ -6166,7 +6500,7 @@
       "entities"
     ],
     "len": 9,
-    "created_ts": 1778205823
+    "created_ts": 1778379534
   },
   {
     "id": "entities:rahul-garg",
@@ -6193,7 +6527,7 @@
       "entities"
     ],
     "len": 15,
-    "created_ts": 1778205823
+    "created_ts": 1778379534
   },
   {
     "id": "entities:rahul-thomas",
@@ -6222,7 +6556,7 @@
       "entities"
     ],
     "len": 17,
-    "created_ts": 1778205823
+    "created_ts": 1778379534
   },
   {
     "id": "entities:rawal-khirodkar",
@@ -6240,7 +6574,7 @@
       "entities"
     ],
     "len": 6,
-    "created_ts": 1778205823
+    "created_ts": 1778379534
   },
   {
     "id": "entities:richard-newcombe",
@@ -6266,7 +6600,7 @@
       "entities"
     ],
     "len": 14,
-    "created_ts": 1778205823
+    "created_ts": 1778379534
   },
   {
     "id": "entities:robin-walters",
@@ -6290,7 +6624,7 @@
       "entities"
     ],
     "len": 12,
-    "created_ts": 1778205823
+    "created_ts": 1778379534
   },
   {
     "id": "entities:rosario-forte",
@@ -6317,7 +6651,7 @@
       "entities"
     ],
     "len": 15,
-    "created_ts": 1778205823
+    "created_ts": 1778379534
   },
   {
     "id": "entities:roshni-cooper",
@@ -6344,7 +6678,7 @@
       "entities"
     ],
     "len": 15,
-    "created_ts": 1778205823
+    "created_ts": 1778379534
   },
   {
     "id": "entities:rpl-cs-ucl",
@@ -6368,7 +6702,7 @@
       "entities"
     ],
     "len": 12,
-    "created_ts": 1778205823
+    "created_ts": 1778379534
   },
   {
     "id": "entities:ruijun-zhang",
@@ -6399,7 +6733,7 @@
       "entities"
     ],
     "len": 19,
-    "created_ts": 1778205823
+    "created_ts": 1778379534
   },
   {
     "id": "entities:ruizhen-hu",
@@ -6426,7 +6760,7 @@
       "entities"
     ],
     "len": 15,
-    "created_ts": 1778205823
+    "created_ts": 1778379534
   },
   {
     "id": "entities:ruojin-cai",
@@ -6459,7 +6793,7 @@
       "entities"
     ],
     "len": 21,
-    "created_ts": 1778205823
+    "created_ts": 1778379534
   },
   {
     "id": "entities:saining-xie",
@@ -6481,7 +6815,7 @@
       "entities"
     ],
     "len": 10,
-    "created_ts": 1778205823
+    "created_ts": 1778379534
   },
   {
     "id": "entities:saksham-suri",
@@ -6502,7 +6836,7 @@
       "entities"
     ],
     "len": 9,
-    "created_ts": 1778205823
+    "created_ts": 1778379534
   },
   {
     "id": "entities:sangmin-kim",
@@ -6528,7 +6862,7 @@
       "entities"
     ],
     "len": 14,
-    "created_ts": 1778205823
+    "created_ts": 1778379534
   },
   {
     "id": "entities:sara-sabour",
@@ -6552,7 +6886,7 @@
       "entities"
     ],
     "len": 12,
-    "created_ts": 1778205823
+    "created_ts": 1778379534
   },
   {
     "id": "entities:saurabh-saxena",
@@ -6576,7 +6910,7 @@
       "entities"
     ],
     "len": 12,
-    "created_ts": 1778205823
+    "created_ts": 1778379534
   },
   {
     "id": "entities:sebastian-scherer",
@@ -6604,7 +6938,7 @@
       "entities"
     ],
     "len": 16,
-    "created_ts": 1778205823
+    "created_ts": 1778379534
   },
   {
     "id": "entities:seeed-projects",
@@ -6627,7 +6961,7 @@
       "entities"
     ],
     "len": 11,
-    "created_ts": 1778205823
+    "created_ts": 1778379534
   },
   {
     "id": "entities:segment-anything",
@@ -6649,7 +6983,7 @@
       "entities"
     ],
     "len": 10,
-    "created_ts": 1778205823
+    "created_ts": 1778379534
   },
   {
     "id": "entities:sensen-gao",
@@ -6674,7 +7008,32 @@
       "entities"
     ],
     "len": 13,
-    "created_ts": 1778205823
+    "created_ts": 1778379534
+  },
+  {
+    "id": "entities:seong-joon-oh",
+    "title": "Seong Joon Oh",
+    "kind": "entities",
+    "href": "entities/seong-joon-oh.html",
+    "summary": "- **authored_by** → SelfReflect: Can LLMs Communicate Their Internal Answer Distribution? _(Paper)_",
+    "source_path": "/Users/neo/Developer/Projects/LLM-Wiki/data/research/daily/2026-05-10/papers/2505.20295/paper.md",
+    "tokens": [
+      "seong",
+      "joon",
+      "oh",
+      "authored_by",
+      "selfreflect",
+      "llms",
+      "communicate",
+      "their",
+      "internal",
+      "answer",
+      "distribution",
+      "paper",
+      "entities"
+    ],
+    "len": 13,
+    "created_ts": 1778379534
   },
   {
     "id": "entities:seth-nabarro",
@@ -6698,7 +7057,7 @@
       "entities"
     ],
     "len": 12,
-    "created_ts": 1778205823
+    "created_ts": 1778379534
   },
   {
     "id": "entities:seungchan-kim",
@@ -6726,7 +7085,7 @@
       "entities"
     ],
     "len": 16,
-    "created_ts": 1778205823
+    "created_ts": 1778379534
   },
   {
     "id": "entities:seunggyu-choi",
@@ -6752,7 +7111,7 @@
       "entities"
     ],
     "len": 14,
-    "created_ts": 1778205823
+    "created_ts": 1778379534
   },
   {
     "id": "entities:shangbang-long",
@@ -6774,7 +7133,7 @@
       "entities"
     ],
     "len": 10,
-    "created_ts": 1778205823
+    "created_ts": 1778379534
   },
   {
     "id": "entities:shaofei-wang",
@@ -6799,7 +7158,7 @@
       "entities"
     ],
     "len": 13,
-    "created_ts": 1778205823
+    "created_ts": 1778379534
   },
   {
     "id": "entities:shaohang-zhu",
@@ -6824,7 +7183,7 @@
       "entities"
     ],
     "len": 13,
-    "created_ts": 1778205823
+    "created_ts": 1778379534
   },
   {
     "id": "entities:shaojie-shen",
@@ -6845,7 +7204,7 @@
       "entities"
     ],
     "len": 9,
-    "created_ts": 1778205823
+    "created_ts": 1778379534
   },
   {
     "id": "entities:shapenet",
@@ -6873,7 +7232,7 @@
       "entities"
     ],
     "len": 16,
-    "created_ts": 1778205823
+    "created_ts": 1778379534
   },
   {
     "id": "entities:sheng-miao",
@@ -6900,7 +7259,7 @@
       "entities"
     ],
     "len": 15,
-    "created_ts": 1778205823
+    "created_ts": 1778379534
   },
   {
     "id": "entities:sherry-ben",
@@ -6922,7 +7281,7 @@
       "entities"
     ],
     "len": 10,
-    "created_ts": 1778205823
+    "created_ts": 1778379534
   },
   {
     "id": "entities:shikun-liu",
@@ -6945,7 +7304,7 @@
       "entities"
     ],
     "len": 11,
-    "created_ts": 1778205823
+    "created_ts": 1778379534
   },
   {
     "id": "entities:shrisudhan-govindarajan",
@@ -6971,7 +7330,7 @@
       "entities"
     ],
     "len": 14,
-    "created_ts": 1778205823
+    "created_ts": 1778379534
   },
   {
     "id": "entities:shuai-zhang",
@@ -7003,7 +7362,7 @@
       "entities"
     ],
     "len": 20,
-    "created_ts": 1778205823
+    "created_ts": 1778379534
   },
   {
     "id": "entities:shunsuke-saito",
@@ -7021,7 +7380,7 @@
       "entities"
     ],
     "len": 6,
-    "created_ts": 1778205823
+    "created_ts": 1778379534
   },
   {
     "id": "entities:shuyang-sun",
@@ -7043,7 +7402,7 @@
       "entities"
     ],
     "len": 10,
-    "created_ts": 1778205823
+    "created_ts": 1778379534
   },
   {
     "id": "entities:sida-peng",
@@ -7070,7 +7429,7 @@
       "entities"
     ],
     "len": 15,
-    "created_ts": 1778205823
+    "created_ts": 1778379534
   },
   {
     "id": "entities:siddhant-bansal",
@@ -7092,7 +7451,7 @@
       "entities"
     ],
     "len": 10,
-    "created_ts": 1778205823
+    "created_ts": 1778379534
   },
   {
     "id": "entities:simon-donné",
@@ -7120,7 +7479,31 @@
       "entities"
     ],
     "len": 16,
-    "created_ts": 1778205823
+    "created_ts": 1778379534
+  },
+  {
+    "id": "entities:sinead-williamson",
+    "title": "Sinead Williamson",
+    "kind": "entities",
+    "href": "entities/sinead-williamson.html",
+    "summary": "- **authored_by** → SelfReflect: Can LLMs Communicate Their Internal Answer Distribution? _(Paper)_",
+    "source_path": "/Users/neo/Developer/Projects/LLM-Wiki/data/research/daily/2026-05-10/papers/2505.20295/paper.md",
+    "tokens": [
+      "sinead",
+      "williamson",
+      "authored_by",
+      "selfreflect",
+      "llms",
+      "communicate",
+      "their",
+      "internal",
+      "answer",
+      "distribution",
+      "paper",
+      "entities"
+    ],
+    "len": 12,
+    "created_ts": 1778379534
   },
   {
     "id": "entities:siyuan-huang",
@@ -7155,7 +7538,7 @@
       "entities"
     ],
     "len": 23,
-    "created_ts": 1778205823
+    "created_ts": 1778379534
   },
   {
     "id": "entities:skalskip",
@@ -7178,7 +7561,7 @@
       "entities"
     ],
     "len": 11,
-    "created_ts": 1778205823
+    "created_ts": 1778379534
   },
   {
     "id": "entities:skyworkai",
@@ -7199,7 +7582,7 @@
       "entities"
     ],
     "len": 9,
-    "created_ts": 1778205823
+    "created_ts": 1778379534
   },
   {
     "id": "entities:song-chun-zhu",
@@ -7225,7 +7608,7 @@
       "entities"
     ],
     "len": 14,
-    "created_ts": 1778205823
+    "created_ts": 1778379534
   },
   {
     "id": "entities:songyou-peng",
@@ -7257,7 +7640,7 @@
       "entities"
     ],
     "len": 20,
-    "created_ts": 1778205823
+    "created_ts": 1778379534
   },
   {
     "id": "entities:ssim",
@@ -7288,7 +7671,7 @@
       "entities"
     ],
     "len": 19,
-    "created_ts": 1778205823
+    "created_ts": 1778379534
   },
   {
     "id": "entities:stable-diffusion",
@@ -7314,7 +7697,7 @@
       "entities"
     ],
     "len": 14,
-    "created_ts": 1778205823
+    "created_ts": 1778379534
   },
   {
     "id": "entities:steve-marschner",
@@ -7338,7 +7721,7 @@
       "entities"
     ],
     "len": 12,
-    "created_ts": 1778205823
+    "created_ts": 1778379534
   },
   {
     "id": "entities:su-zhaoen",
@@ -7356,7 +7739,7 @@
       "entities"
     ],
     "len": 6,
-    "created_ts": 1778205823
+    "created_ts": 1778379534
   },
   {
     "id": "entities:suhas-yogin",
@@ -7378,7 +7761,7 @@
       "entities"
     ],
     "len": 10,
-    "created_ts": 1778205823
+    "created_ts": 1778379534
   },
   {
     "id": "entities:sukju-kang",
@@ -7404,7 +7787,7 @@
       "entities"
     ],
     "len": 14,
-    "created_ts": 1778205823
+    "created_ts": 1778379534
   },
   {
     "id": "entities:suwoong-yeom",
@@ -7430,7 +7813,7 @@
       "entities"
     ],
     "len": 14,
-    "created_ts": 1778205823
+    "created_ts": 1778379534
   },
   {
     "id": "entities:suya-you",
@@ -7458,7 +7841,7 @@
       "entities"
     ],
     "len": 16,
-    "created_ts": 1778205823
+    "created_ts": 1778379534
   },
   {
     "id": "entities:sv-pp",
@@ -7480,7 +7863,32 @@
       "entities"
     ],
     "len": 10,
-    "created_ts": 1778205823
+    "created_ts": 1778379534
+  },
+  {
+    "id": "entities:takeru-miyato",
+    "title": "Takeru Miyato",
+    "kind": "entities",
+    "href": "entities/takeru-miyato.html",
+    "summary": "- **authored_by** → GTA: A Geometry-Aware Attention Mechanism for Multi-View Transformers _(Paper)_",
+    "source_path": "/Users/neo/Developer/Projects/LLM-Wiki/data/research/daily/2026-05-09/papers/2310.10375/paper.md",
+    "tokens": [
+      "takeru",
+      "miyato",
+      "authored_by",
+      "gta",
+      "geometry",
+      "aware",
+      "attention",
+      "mechanism",
+      "multi",
+      "view",
+      "transformers",
+      "paper",
+      "entities"
+    ],
+    "len": 13,
+    "created_ts": 1778379534
   },
   {
     "id": "entities:tanks-and-temples",
@@ -7514,7 +7922,7 @@
       "entities"
     ],
     "len": 22,
-    "created_ts": 1778205823
+    "created_ts": 1778379534
   },
   {
     "id": "entities:tao-xiang",
@@ -7537,7 +7945,7 @@
       "entities"
     ],
     "len": 11,
-    "created_ts": 1778205823
+    "created_ts": 1778379534
   },
   {
     "id": "entities:tat-jen-cham",
@@ -7563,7 +7971,7 @@
       "entities"
     ],
     "len": 14,
-    "created_ts": 1778205823
+    "created_ts": 1778379534
   },
   {
     "id": "entities:tatiana-tommasi",
@@ -7585,7 +7993,7 @@
       "entities"
     ],
     "len": 10,
-    "created_ts": 1778205823
+    "created_ts": 1778379534
   },
   {
     "id": "entities:team-aprl",
@@ -7608,7 +8016,7 @@
       "entities"
     ],
     "len": 11,
-    "created_ts": 1778205823
+    "created_ts": 1778379534
   },
   {
     "id": "entities:tencent-hunyuan",
@@ -7631,7 +8039,7 @@
       "entities"
     ],
     "len": 11,
-    "created_ts": 1778205823
+    "created_ts": 1778379534
   },
   {
     "id": "entities:tengfei-wang",
@@ -7655,7 +8063,7 @@
       "entities"
     ],
     "len": 12,
-    "created_ts": 1778205823
+    "created_ts": 1778379534
   },
   {
     "id": "entities:thomas-funkhouser",
@@ -7677,7 +8085,7 @@
       "entities"
     ],
     "len": 10,
-    "created_ts": 1778205823
+    "created_ts": 1778379534
   },
   {
     "id": "entities:thomas-köhler",
@@ -7700,7 +8108,7 @@
       "entities"
     ],
     "len": 11,
-    "created_ts": 1778205823
+    "created_ts": 1778379534
   },
   {
     "id": "entities:tianrui-zhang",
@@ -7733,7 +8141,7 @@
       "entities"
     ],
     "len": 21,
-    "created_ts": 1778205823
+    "created_ts": 1778379534
   },
   {
     "id": "entities:tisheng-zhang",
@@ -7760,7 +8168,7 @@
       "entities"
     ],
     "len": 15,
-    "created_ts": 1778205823
+    "created_ts": 1778379534
   },
   {
     "id": "entities:tomas-berriel-martins",
@@ -7785,7 +8193,7 @@
       "entities"
     ],
     "len": 13,
-    "created_ts": 1778205823
+    "created_ts": 1778379534
   },
   {
     "id": "entities:tongyan-hua",
@@ -7817,7 +8225,7 @@
       "entities"
     ],
     "len": 20,
-    "created_ts": 1778205823
+    "created_ts": 1778379534
   },
   {
     "id": "entities:tue-mps",
@@ -7839,7 +8247,7 @@
       "entities"
     ],
     "len": 10,
-    "created_ts": 1778205823
+    "created_ts": 1778379534
   },
   {
     "id": "entities:valentin-gabeur",
@@ -7861,7 +8269,7 @@
       "entities"
     ],
     "len": 10,
-    "created_ts": 1778205823
+    "created_ts": 1778379534
   },
   {
     "id": "entities:varun-jampani",
@@ -7889,7 +8297,7 @@
       "entities"
     ],
     "len": 16,
-    "created_ts": 1778205823
+    "created_ts": 1778379534
   },
   {
     "id": "entities:vasileios-balntas",
@@ -7915,7 +8323,7 @@
       "entities"
     ],
     "len": 14,
-    "created_ts": 1778205823
+    "created_ts": 1778379534
   },
   {
     "id": "entities:vikas-chandra",
@@ -7936,7 +8344,7 @@
       "entities"
     ],
     "len": 9,
-    "created_ts": 1778205823
+    "created_ts": 1778379534
   },
   {
     "id": "entities:wei-wen",
@@ -7957,7 +8365,7 @@
       "entities"
     ],
     "len": 9,
-    "created_ts": 1778205823
+    "created_ts": 1778379534
   },
   {
     "id": "entities:weijie-wang",
@@ -7982,7 +8390,7 @@
       "entities"
     ],
     "len": 13,
-    "created_ts": 1778205823
+    "created_ts": 1778379534
   },
   {
     "id": "entities:wenjie-luo",
@@ -8007,7 +8415,7 @@
       "entities"
     ],
     "len": 13,
-    "created_ts": 1778205823
+    "created_ts": 1778379534
   },
   {
     "id": "entities:wenjing-bian",
@@ -8032,7 +8440,7 @@
       "entities"
     ],
     "len": 13,
-    "created_ts": 1778205823
+    "created_ts": 1778379534
   },
   {
     "id": "entities:wenlei-zhou",
@@ -8054,7 +8462,7 @@
       "entities"
     ],
     "len": 10,
-    "created_ts": 1778205823
+    "created_ts": 1778379534
   },
   {
     "id": "entities:wenqiang-sun",
@@ -8078,7 +8486,7 @@
       "entities"
     ],
     "len": 12,
-    "created_ts": 1778205823
+    "created_ts": 1778379534
   },
   {
     "id": "entities:wenshan-wang",
@@ -8106,7 +8514,7 @@
       "entities"
     ],
     "len": 16,
-    "created_ts": 1778205823
+    "created_ts": 1778379534
   },
   {
     "id": "entities:wonbong-jang",
@@ -8129,7 +8537,7 @@
       "entities"
     ],
     "len": 11,
-    "created_ts": 1778205823
+    "created_ts": 1778379534
   },
   {
     "id": "entities:world-in-world",
@@ -8152,7 +8560,7 @@
       "entities"
     ],
     "len": 11,
-    "created_ts": 1778205823
+    "created_ts": 1778379534
   },
   {
     "id": "entities:wufan-zhao",
@@ -8184,7 +8592,7 @@
       "entities"
     ],
     "len": 20,
-    "created_ts": 1778205823
+    "created_ts": 1778379534
   },
   {
     "id": "entities:xiaoji-niu",
@@ -8211,7 +8619,30 @@
       "entities"
     ],
     "len": 15,
-    "created_ts": 1778205823
+    "created_ts": 1778379534
+  },
+  {
+    "id": "entities:xiaoming-zhao",
+    "title": "Xiaoming Zhao",
+    "kind": "entities",
+    "href": "entities/xiaoming-zhao.html",
+    "summary": "- **authored_by** → Velox: Learning Representations of 4D Geometry and Appearance _(Paper)_",
+    "source_path": "/Users/neo/Developer/Projects/LLM-Wiki/data/research/daily/2026-05-09/papers/2605.04527/paper.md",
+    "tokens": [
+      "xiaoming",
+      "zhao",
+      "authored_by",
+      "velox",
+      "learning",
+      "representations",
+      "4d",
+      "geometry",
+      "appearance",
+      "paper",
+      "entities"
+    ],
+    "len": 11,
+    "created_ts": 1778379534
   },
   {
     "id": "entities:xiaowei-zhou",
@@ -8238,7 +8669,7 @@
       "entities"
     ],
     "len": 15,
-    "created_ts": 1778205823
+    "created_ts": 1778379534
   },
   {
     "id": "entities:xin-fei",
@@ -8271,7 +8702,7 @@
       "entities"
     ],
     "len": 21,
-    "created_ts": 1778205823
+    "created_ts": 1778379534
   },
   {
     "id": "entities:xingang-pan",
@@ -8298,7 +8729,7 @@
       "entities"
     ],
     "len": 15,
-    "created_ts": 1778205823
+    "created_ts": 1778379534
   },
   {
     "id": "entities:xingxing-wang",
@@ -8323,7 +8754,7 @@
       "entities"
     ],
     "len": 13,
-    "created_ts": 1778205823
+    "created_ts": 1778379534
   },
   {
     "id": "entities:xingyi-he",
@@ -8349,7 +8780,7 @@
       "entities"
     ],
     "len": 14,
-    "created_ts": 1778205823
+    "created_ts": 1778379534
   },
   {
     "id": "entities:xiquan-li",
@@ -8371,7 +8802,7 @@
       "entities"
     ],
     "len": 10,
-    "created_ts": 1778205823
+    "created_ts": 1778379534
   },
   {
     "id": "entities:xuhui-zuo",
@@ -8395,7 +8826,7 @@
       "entities"
     ],
     "len": 12,
-    "created_ts": 1778205823
+    "created_ts": 1778379534
   },
   {
     "id": "entities:xupeng-zhu",
@@ -8419,7 +8850,7 @@
       "entities"
     ],
     "len": 12,
-    "created_ts": 1778205823
+    "created_ts": 1778379534
   },
   {
     "id": "entities:yalda-foroutan",
@@ -8443,7 +8874,7 @@
       "entities"
     ],
     "len": 12,
-    "created_ts": 1778205823
+    "created_ts": 1778379534
   },
   {
     "id": "entities:yan-wang",
@@ -8478,7 +8909,7 @@
       "entities"
     ],
     "len": 23,
-    "created_ts": 1778205823
+    "created_ts": 1778379534
   },
   {
     "id": "entities:yanan-bao",
@@ -8500,7 +8931,7 @@
       "entities"
     ],
     "len": 10,
-    "created_ts": 1778205823
+    "created_ts": 1778379534
   },
   {
     "id": "entities:yandong-li",
@@ -8522,7 +8953,7 @@
       "entities"
     ],
     "len": 10,
-    "created_ts": 1778205823
+    "created_ts": 1778379534
   },
   {
     "id": "entities:yang-you",
@@ -8550,7 +8981,7 @@
       "entities"
     ],
     "len": 16,
-    "created_ts": 1778205823
+    "created_ts": 1778379534
   },
   {
     "id": "entities:yaowei-zhang",
@@ -8575,7 +9006,7 @@
       "entities"
     ],
     "len": 13,
-    "created_ts": 1778205823
+    "created_ts": 1778379534
   },
   {
     "id": "entities:yawar-siddiqui",
@@ -8601,7 +9032,7 @@
       "entities"
     ],
     "len": 14,
-    "created_ts": 1778205823
+    "created_ts": 1778379534
   },
   {
     "id": "entities:yi-du",
@@ -8630,7 +9061,7 @@
       "entities"
     ],
     "len": 17,
-    "created_ts": 1778205823
+    "created_ts": 1778379534
   },
   {
     "id": "entities:yiannis-douratsos",
@@ -8653,7 +9084,7 @@
       "entities"
     ],
     "len": 11,
-    "created_ts": 1778205823
+    "created_ts": 1778379534
   },
   {
     "id": "entities:yifan-wang",
@@ -8680,7 +9111,7 @@
       "entities"
     ],
     "len": 15,
-    "created_ts": 1778205823
+    "created_ts": 1778379534
   },
   {
     "id": "entities:yiming-gu",
@@ -8702,7 +9133,7 @@
       "entities"
     ],
     "len": 10,
-    "created_ts": 1778205823
+    "created_ts": 1778379534
   },
   {
     "id": "entities:yinrui-ren",
@@ -8734,7 +9165,7 @@
       "entities"
     ],
     "len": 20,
-    "created_ts": 1778205823
+    "created_ts": 1778379534
   },
   {
     "id": "entities:yiwei-zhao",
@@ -8761,7 +9192,7 @@
       "entities"
     ],
     "len": 15,
-    "created_ts": 1778205823
+    "created_ts": 1778379534
   },
   {
     "id": "entities:yixin-chen",
@@ -8786,7 +9217,7 @@
       "entities"
     ],
     "len": 13,
-    "created_ts": 1778205823
+    "created_ts": 1778379534
   },
   {
     "id": "entities:yiyi-liao",
@@ -8813,7 +9244,7 @@
       "entities"
     ],
     "len": 15,
-    "created_ts": 1778205823
+    "created_ts": 1778379534
   },
   {
     "id": "entities:yonatan-bisk",
@@ -8841,7 +9272,7 @@
       "entities"
     ],
     "len": 16,
-    "created_ts": 1778205823
+    "created_ts": 1778379534
   },
   {
     "id": "entities:yong-lu-li",
@@ -8867,7 +9298,7 @@
       "entities"
     ],
     "len": 14,
-    "created_ts": 1778205823
+    "created_ts": 1778379534
   },
   {
     "id": "entities:yu-ning",
@@ -8894,7 +9325,7 @@
       "entities"
     ],
     "len": 15,
-    "created_ts": 1778205823
+    "created_ts": 1778379534
   },
   {
     "id": "entities:yuan-dong",
@@ -8912,7 +9343,7 @@
       "entities"
     ],
     "len": 6,
-    "created_ts": 1778205823
+    "created_ts": 1778379534
   },
   {
     "id": "entities:yuan-li",
@@ -8934,7 +9365,7 @@
       "entities"
     ],
     "len": 10,
-    "created_ts": 1778205823
+    "created_ts": 1778379534
   },
   {
     "id": "entities:yuanbo-xiangli",
@@ -8956,7 +9387,7 @@
       "entities"
     ],
     "len": 10,
-    "created_ts": 1778205823
+    "created_ts": 1778379534
   },
   {
     "id": "entities:yuchen-xiao",
@@ -8981,7 +9412,7 @@
       "entities"
     ],
     "len": 13,
-    "created_ts": 1778205823
+    "created_ts": 1778379534
   },
   {
     "id": "entities:yue-wang",
@@ -9008,7 +9439,7 @@
       "entities"
     ],
     "len": 15,
-    "created_ts": 1778205823
+    "created_ts": 1778379534
   },
   {
     "id": "entities:yuhan-li",
@@ -9033,7 +9464,7 @@
       "entities"
     ],
     "len": 13,
-    "created_ts": 1778205823
+    "created_ts": 1778379534
   },
   {
     "id": "entities:yunshen-wang",
@@ -9058,7 +9489,7 @@
       "entities"
     ],
     "len": 13,
-    "created_ts": 1778205823
+    "created_ts": 1778379534
   },
   {
     "id": "entities:yunyang-xiong",
@@ -9079,7 +9510,7 @@
       "entities"
     ],
     "len": 9,
-    "created_ts": 1778205823
+    "created_ts": 1778379534
   },
   {
     "id": "entities:yuqing-wang",
@@ -9106,7 +9537,7 @@
       "entities"
     ],
     "len": 15,
-    "created_ts": 1778205823
+    "created_ts": 1778379534
   },
   {
     "id": "entities:yurong-you",
@@ -9130,7 +9561,7 @@
       "entities"
     ],
     "len": 12,
-    "created_ts": 1778205823
+    "created_ts": 1778379534
   },
   {
     "id": "entities:yushi-lan",
@@ -9157,7 +9588,7 @@
       "entities"
     ],
     "len": 15,
-    "created_ts": 1778205823
+    "created_ts": 1778379534
   },
   {
     "id": "entities:yuta-oshima",
@@ -9183,7 +9614,7 @@
       "entities"
     ],
     "len": 14,
-    "created_ts": 1778205823
+    "created_ts": 1778379534
   },
   {
     "id": "entities:yutaka-matsuo",
@@ -9209,7 +9640,7 @@
       "entities"
     ],
     "len": 14,
-    "created_ts": 1778205823
+    "created_ts": 1778379534
   },
   {
     "id": "entities:yuxin-chen",
@@ -9234,7 +9665,7 @@
       "entities"
     ],
     "len": 13,
-    "created_ts": 1778205823
+    "created_ts": 1778379534
   },
   {
     "id": "entities:zehan-wang",
@@ -9258,7 +9689,7 @@
       "entities"
     ],
     "len": 12,
-    "created_ts": 1778205823
+    "created_ts": 1778379534
   },
   {
     "id": "entities:zeqi-xiao",
@@ -9285,7 +9716,7 @@
       "entities"
     ],
     "len": 15,
-    "created_ts": 1778205823
+    "created_ts": 1778379534
   },
   {
     "id": "entities:zhen-xu",
@@ -9312,7 +9743,7 @@
       "entities"
     ],
     "len": 15,
-    "created_ts": 1778205823
+    "created_ts": 1778379534
   },
   {
     "id": "entities:zhengqin-li",
@@ -9339,7 +9770,7 @@
       "entities"
     ],
     "len": 15,
-    "created_ts": 1778205823
+    "created_ts": 1778379534
   },
   {
     "id": "entities:zhenwei-wang",
@@ -9363,7 +9794,7 @@
       "entities"
     ],
     "len": 12,
-    "created_ts": 1778205823
+    "created_ts": 1778379534
   },
   {
     "id": "entities:zhicheng-wang",
@@ -9385,7 +9816,7 @@
       "entities"
     ],
     "len": 10,
-    "created_ts": 1778205823
+    "created_ts": 1778379534
   },
   {
     "id": "entities:zhixuan-xu",
@@ -9418,7 +9849,7 @@
       "entities"
     ],
     "len": 21,
-    "created_ts": 1778205823
+    "created_ts": 1778379534
   },
   {
     "id": "entities:zhou-zhao",
@@ -9442,7 +9873,7 @@
       "entities"
     ],
     "len": 12,
-    "created_ts": 1778205823
+    "created_ts": 1778379534
   },
   {
     "id": "entities:zhuoxiao-li",
@@ -9474,7 +9905,7 @@
       "entities"
     ],
     "len": 20,
-    "created_ts": 1778205823
+    "created_ts": 1778379534
   },
   {
     "id": "entities:zidong-cao",
@@ -9506,7 +9937,7 @@
       "entities"
     ],
     "len": 20,
-    "created_ts": 1778205823
+    "created_ts": 1778379534
   },
   {
     "id": "entities:zijian-zhou",
@@ -9529,7 +9960,7 @@
       "entities"
     ],
     "len": 11,
-    "created_ts": 1778205823
+    "created_ts": 1778379534
   },
   {
     "id": "entities:ziyun-wang",
@@ -9560,7 +9991,7 @@
       "entities"
     ],
     "len": 19,
-    "created_ts": 1778205823
+    "created_ts": 1778379534
   },
   {
     "id": "entities:zubair-trabzada",
@@ -9584,7 +10015,7 @@
       "entities"
     ],
     "len": 12,
-    "created_ts": 1778205823
+    "created_ts": 1778379534
   },
   {
     "id": "entities:zxp-s-works",
@@ -9608,7 +10039,7 @@
       "entities"
     ],
     "len": 12,
-    "created_ts": 1778205823
+    "created_ts": 1778379534
   },
   {
     "id": "papers:all-elementary-functions-from-a-single-binary-operator",
@@ -9645,7 +10076,7 @@
       "21852"
     ],
     "len": 25,
-    "created_ts": 1778205823
+    "created_ts": 1778379534
   },
   {
     "id": "papers:an-outlook-into-the-future-of-egocentric-vision",
@@ -9683,7 +10114,7 @@
       "07123"
     ],
     "len": 26,
-    "created_ts": 1778205823
+    "created_ts": 1778379534
   },
   {
     "id": "papers:arc-agi-3-frontier-agentic-intelligence를-위한-새로운-도전",
@@ -9725,7 +10156,7 @@
       "24621"
     ],
     "len": 30,
-    "created_ts": 1778205823
+    "created_ts": 1778379534
   },
   {
     "id": "papers:archsym-detecting-3d-grounded-architectural-symmetries-in-the-wild",
@@ -9768,7 +10199,7 @@
       "22202"
     ],
     "len": 31,
-    "created_ts": 1778205823
+    "created_ts": 1778379534
   },
   {
     "id": "papers:claw-composable-language-annotated-whole-body-motion-generation",
@@ -9812,7 +10243,7 @@
       "11251"
     ],
     "len": 32,
-    "created_ts": 1778205823
+    "created_ts": 1778379534
   },
   {
     "id": "papers:confidence-based-mesh-extraction-from-3d-gaussians",
@@ -9851,7 +10282,7 @@
       "24725"
     ],
     "len": 27,
-    "created_ts": 1778205823
+    "created_ts": 1778379534
   },
   {
     "id": "papers:cross-attentive-multiview-fusion-of-vision-language-embeddings",
@@ -9894,7 +10325,7 @@
       "12551"
     ],
     "len": 31,
-    "created_ts": 1778205823
+    "created_ts": 1778379534
   },
   {
     "id": "papers:distance-field-rasterization-for-end-to-end-mesh-reconstruction",
@@ -9936,7 +10367,7 @@
       "23537"
     ],
     "len": 30,
-    "created_ts": 1778205823
+    "created_ts": 1778379534
   },
   {
     "id": "papers:efficient-multi-camera-tokenization-with-triplanes-for-end-to-end-driving",
@@ -9977,7 +10408,7 @@
       "12251"
     ],
     "len": 29,
-    "created_ts": 1778205823
+    "created_ts": 1778379534
   },
   {
     "id": "papers:efficient-universal-perception-encoder",
@@ -10015,7 +10446,7 @@
       "22387"
     ],
     "len": 26,
-    "created_ts": 1778205823
+    "created_ts": 1778379534
   },
   {
     "id": "papers:ego-extra-expert-trainee-지원을-위한-video-language-egocentric-dataset",
@@ -10060,7 +10491,7 @@
       "13238"
     ],
     "len": 33,
-    "created_ts": 1778205823
+    "created_ts": 1778379534
   },
   {
     "id": "papers:extreme-rotation-estimation-in-the-wild",
@@ -10099,7 +10530,7 @@
       "07096"
     ],
     "len": 27,
-    "created_ts": 1778205823
+    "created_ts": 1778379534
   },
   {
     "id": "papers:feed-forward-3d-scene-modeling-a-problem-driven-perspective",
@@ -10140,7 +10571,7 @@
       "14025"
     ],
     "len": 29,
-    "created_ts": 1778205823
+    "created_ts": 1778379534
   },
   {
     "id": "papers:follow-your-emoji-fine-controllable-and-expressive-freestyle-portrait-animation",
@@ -10179,7 +10610,7 @@
       "01900"
     ],
     "len": 27,
-    "created_ts": 1778205823
+    "created_ts": 1778379534
   },
   {
     "id": "papers:free-range-gaussians-non-grid-aligned-generative-3d-gaussian-reconstruction",
@@ -10222,7 +10653,7 @@
       "04874"
     ],
     "len": 31,
-    "created_ts": 1778205823
+    "created_ts": 1778379534
   },
   {
     "id": "papers:fullcircle-casual한-360-촬영으로-손쉬운-3d-재구성",
@@ -10278,7 +10709,7 @@
       "22572"
     ],
     "len": 44,
-    "created_ts": 1778205823
+    "created_ts": 1778379534
   },
   {
     "id": "papers:gaussianflow-slam-monocular-gaussian-splatting-slam-guided-by-gaussianflow",
@@ -10321,7 +10752,7 @@
       "15612"
     ],
     "len": 31,
-    "created_ts": 1778205823
+    "created_ts": 1778379534
   },
   {
     "id": "papers:geometry-grounded-gaussian-splatting",
@@ -10359,7 +10790,49 @@
       "17835"
     ],
     "len": 26,
-    "created_ts": 1778205823
+    "created_ts": 1778379534
+  },
+  {
+    "id": "papers:gta-a-geometry-aware-attention-mechanism-for-multi-view-transformers",
+    "title": "GTA: A Geometry-Aware Attention Mechanism for Multi-View Transformers",
+    "kind": "papers",
+    "href": "papers/gta-a-geometry-aware-attention-mechanism-for-multi-view-transformers.html",
+    "summary": "- **addresses** → Novel View Synthesis _(Task)_ - **authored_by** → Andreas Geiger _(Person)_ - **authored_by** → Bernhard Jaeger _(Person)_ - **authored_by** → Max Welling _(Person)_ - **authored_by…",
+    "source_path": "/Users/neo/Developer/Projects/LLM-Wiki/data/research/daily/2026-05-09/papers/2310.10375/paper.md",
+    "tokens": [
+      "gta",
+      "geometry",
+      "aware",
+      "attention",
+      "mechanism",
+      "multi",
+      "view",
+      "transformers",
+      "addresses",
+      "novel",
+      "view",
+      "synthesis",
+      "task",
+      "authored_by",
+      "andreas",
+      "geiger",
+      "person",
+      "authored_by",
+      "bernhard",
+      "jaeger",
+      "person",
+      "authored_by",
+      "max",
+      "welling",
+      "person",
+      "authored_by",
+      "papers",
+      "arxiv",
+      "2310",
+      "10375"
+    ],
+    "len": 30,
+    "created_ts": 1778379534
   },
   {
     "id": "papers:holo360d-파노라마-3d-재구성과-그-이상을-발전시키기-위한-연-96474e5d",
@@ -10409,7 +10882,7 @@
       "22482"
     ],
     "len": 38,
-    "created_ts": 1778205823
+    "created_ts": 1778379534
   },
   {
     "id": "Paper:arxiv-2604-22482:89c23a62af15",
@@ -10834,7 +11307,7 @@
       "11806"
     ],
     "len": 31,
-    "created_ts": 1778205823
+    "created_ts": 1778379534
   },
   {
     "id": "papers:image-generators-are-generalist-vision-learners",
@@ -10874,7 +11347,7 @@
       "20329"
     ],
     "len": 28,
-    "created_ts": 1778205823
+    "created_ts": 1778379534
   },
   {
     "id": "papers:img2cad-vlm-assisted-conditional-factorization을-통한-이미지로부터의-3-737a56aa",
@@ -10919,7 +11392,7 @@
       "01437"
     ],
     "len": 33,
-    "created_ts": 1778205823
+    "created_ts": 1778379534
   },
   {
     "id": "Paper:arxiv-2408-01437:9c1714e9cecd",
@@ -11329,7 +11802,7 @@
       "19252"
     ],
     "len": 31,
-    "created_ts": 1778205823
+    "created_ts": 1778379534
   },
   {
     "id": "papers:integrating-symmetry-into-differentiable-planning-with-steerable-convolutions",
@@ -11371,7 +11844,7 @@
       "03674"
     ],
     "len": 30,
-    "created_ts": 1778205823
+    "created_ts": 1778379534
   },
   {
     "id": "papers:learning-in-deep-factor-graphs-with-gaussian-belief-propagation",
@@ -11415,7 +11888,7 @@
       "14649"
     ],
     "len": 32,
-    "created_ts": 1778205823
+    "created_ts": 1778379534
   },
   {
     "id": "papers:lifting-unlabeled-internet-level-data-for-3d-scene-understanding",
@@ -11457,7 +11930,7 @@
       "01907"
     ],
     "len": 30,
-    "created_ts": 1778205823
+    "created_ts": 1778379534
   },
   {
     "id": "papers:long-tail-internet-photo-reconstruction",
@@ -11497,7 +11970,7 @@
       "22714"
     ],
     "len": 28,
-    "created_ts": 1778205823
+    "created_ts": 1778379534
   },
   {
     "id": "papers:lyra-2-0-explorable-generative-3d-worlds",
@@ -11532,7 +12005,7 @@
       "13036"
     ],
     "len": 23,
-    "created_ts": 1778205823
+    "created_ts": 1778379534
   },
   {
     "id": "papers:match-any-events-zero-shot-motion-robust-feature-matching-across-wide-baselines-dbc18631",
@@ -11582,7 +12055,7 @@
       "18744"
     ],
     "len": 38,
-    "created_ts": 1778205823
+    "created_ts": 1778379534
   },
   {
     "id": "Paper:arxiv-2604-18744:d418fd397b58",
@@ -12010,7 +12483,7 @@
       "15941"
     ],
     "len": 30,
-    "created_ts": 1778205823
+    "created_ts": 1778379534
   },
   {
     "id": "Paper:arxiv-2604-15941:ae9ff358479e",
@@ -12392,7 +12865,7 @@
       "23843"
     ],
     "len": 30,
-    "created_ts": 1778205823
+    "created_ts": 1778379534
   },
   {
     "id": "papers:power-foam-unifying-real-time-differentiable-ray-tracing-and-rasterization",
@@ -12434,7 +12907,7 @@
       "24994"
     ],
     "len": 30,
-    "created_ts": 1778205823
+    "created_ts": 1778379534
   },
   {
     "id": "papers:raven-resilient-aerial-navigation-via-open-set-semantic-memory-and-behavior-adaptation",
@@ -12490,7 +12963,7 @@
       "23563"
     ],
     "len": 44,
-    "created_ts": 1778205823
+    "created_ts": 1778379534
   },
   {
     "id": "papers:rays-as-pixels-비디오와-카메라-궤적의-결합-분포-학습",
@@ -12524,7 +12997,7 @@
       "09429"
     ],
     "len": 22,
-    "created_ts": 1778205823
+    "created_ts": 1778379534
   },
   {
     "id": "papers:romo-robust-motion-segmentation-improves-structure-from-motion",
@@ -12565,7 +13038,7 @@
       "18650"
     ],
     "len": 29,
-    "created_ts": 1778205823
+    "created_ts": 1778379534
   },
   {
     "id": "papers:sapiens2",
@@ -12598,7 +13071,7 @@
       "21681"
     ],
     "len": 21,
-    "created_ts": 1778205823
+    "created_ts": 1778379534
   },
   {
     "id": "papers:scaling-4d-representations",
@@ -12633,7 +13106,7 @@
       "15212"
     ],
     "len": 23,
-    "created_ts": 1778205823
+    "created_ts": 1778379534
   },
   {
     "id": "papers:scaling-sequence-to-sequence-generative-neural-rendering",
@@ -12675,7 +13148,48 @@
       "04236"
     ],
     "len": 30,
-    "created_ts": 1778205823
+    "created_ts": 1778379534
+  },
+  {
+    "id": "papers:selfreflect-can-llms-communicate-their-internal-answer-distribution",
+    "title": "SelfReflect: Can LLMs Communicate Their Internal Answer Distribution?",
+    "kind": "papers",
+    "href": "papers/selfreflect-can-llms-communicate-their-internal-answer-distribution.html",
+    "summary": "- **authored_by** → Adam Goliński _(Person)_ - **authored_by** → Arno Blaas _(Person)_ - **authored_by** → Eeshan Gunesh Dhekane _(Person)_ - **authored_by** → Luca Füger _(Person)_ - **authored_by**…",
+    "source_path": "/Users/neo/Developer/Projects/LLM-Wiki/data/research/daily/2026-05-10/papers/2505.20295/paper.md",
+    "tokens": [
+      "selfreflect",
+      "llms",
+      "communicate",
+      "their",
+      "internal",
+      "answer",
+      "distribution",
+      "authored_by",
+      "adam",
+      "goliński",
+      "person",
+      "authored_by",
+      "arno",
+      "blaas",
+      "person",
+      "authored_by",
+      "eeshan",
+      "gunesh",
+      "dhekane",
+      "person",
+      "authored_by",
+      "luca",
+      "füger",
+      "person",
+      "authored_by",
+      "papers",
+      "arxiv",
+      "2505",
+      "20295"
+    ],
+    "len": 29,
+    "created_ts": 1778379534
   },
   {
     "id": "papers:stable-part-diffusion-4d-multi-view-rgb-and-kinematic-parts-video-generation",
@@ -12721,7 +13235,7 @@
       "10687"
     ],
     "len": 34,
-    "created_ts": 1778205823
+    "created_ts": 1778379534
   },
   {
     "id": "papers:stepper-stepwise-immersive-scene-generation-with-multiview-panoramas",
@@ -12761,7 +13275,7 @@
       "28980"
     ],
     "len": 28,
-    "created_ts": 1778205823
+    "created_ts": 1778379534
   },
   {
     "id": "papers:t-r-o-grasp-cross-embodiment-dexterous-grasping을-위한-robot-object-spatial-t-e5dccb3a",
@@ -12812,7 +13326,7 @@
       "12724"
     ],
     "len": 39,
-    "created_ts": 1778205823
+    "created_ts": 1778379534
   },
   {
     "id": "Paper:arxiv-2510-12724:a77dd0d4c1a0",
@@ -13211,7 +13725,7 @@
       "11540"
     ],
     "len": 33,
-    "created_ts": 1778205823
+    "created_ts": 1778379534
   },
   {
     "id": "papers:triangulation-of-points-constrained-to-a-plane",
@@ -13243,7 +13757,7 @@
       "27246"
     ],
     "len": 20,
-    "created_ts": 1778205823
+    "created_ts": 1778379534
   },
   {
     "id": "papers:trigs-temporal-rigid-body-motion-for-scalable-4d-gaussian-splatting",
@@ -13286,7 +13800,49 @@
       "00538"
     ],
     "len": 31,
-    "created_ts": 1778205823
+    "created_ts": 1778379534
+  },
+  {
+    "id": "papers:velox-learning-representations-of-4d-geometry-and-appearance",
+    "title": "Velox: Learning Representations of 4D Geometry and Appearance",
+    "kind": "papers",
+    "href": "papers/velox-learning-representations-of-4d-geometry-and-appearance.html",
+    "summary": "- **authored_by** → Anagh Malik _(Person)_ - **authored_by** → David B. Lindell _(Person)_ - **authored_by** → Dorian Chan _(Person)_ - **authored_by** → Jen-Hao Rick Chang _(Person)_ - **authored_by…",
+    "source_path": "/Users/neo/Developer/Projects/LLM-Wiki/data/research/daily/2026-05-09/papers/2605.04527/paper.md",
+    "tokens": [
+      "velox",
+      "learning",
+      "representations",
+      "4d",
+      "geometry",
+      "appearance",
+      "authored_by",
+      "anagh",
+      "malik",
+      "person",
+      "authored_by",
+      "david",
+      "b",
+      "lindell",
+      "person",
+      "authored_by",
+      "dorian",
+      "chan",
+      "person",
+      "authored_by",
+      "jen",
+      "hao",
+      "rick",
+      "chang",
+      "person",
+      "authored_by",
+      "papers",
+      "arxiv",
+      "2605",
+      "04527"
+    ],
+    "len": 30,
+    "created_ts": 1778379534
   },
   {
     "id": "papers:viba-implicit-bundle-adjustment-with-geometric-and-temporal-consistency-for-robu-4e9b6754",
@@ -13330,7 +13886,7 @@
       "03377"
     ],
     "len": 32,
-    "created_ts": 1778205823
+    "created_ts": 1778379534
   },
   {
     "id": "Paper:arxiv-2604-03377:c77cfb006a2f",
@@ -13773,7 +14329,7 @@
       "03040"
     ],
     "len": 32,
-    "created_ts": 1778205823
+    "created_ts": 1778379534
   },
   {
     "id": "papers:worldcompass-reinforcement-learning-for-long-horizon-world-models",
@@ -13814,7 +14370,7 @@
       "09022"
     ],
     "len": 29,
-    "created_ts": 1778205823
+    "created_ts": 1778379534
   },
   {
     "id": "papers:자기지도학습-요리책",
@@ -13845,7 +14401,7 @@
       "12210"
     ],
     "len": 19,
-    "created_ts": 1778205823
+    "created_ts": 1778379534
   },
   {
     "id": "questions:open-question-그러나-gaussian-primitives로부터-shape를-추출하는-문-3296a33a",
@@ -13884,7 +14440,7 @@
       "questions"
     ],
     "len": 27,
-    "created_ts": 1778205823
+    "created_ts": 1778379534
   },
   {
     "id": "OpenQuestion:open-question-gaussian-primitives-shape:e0ff55f7cfe5",
@@ -14196,7 +14752,7 @@
       "questions"
     ],
     "len": 27,
-    "created_ts": 1778205823
+    "created_ts": 1778379534
   },
   {
     "id": "OpenQuestion:open-question-gaussian-primitive:d927b608de71",
@@ -14537,7 +15093,7 @@
       "questions"
     ],
     "len": 46,
-    "created_ts": 1778205823
+    "created_ts": 1778379534
   },
   {
     "id": "OpenQuestion:open-question-depth-foundation-models:8956834d6de0",
@@ -14961,7 +15517,7 @@
       "questions"
     ],
     "len": 25,
-    "created_ts": 1778205823
+    "created_ts": 1778379534
   },
   {
     "id": "OpenQuestion:open-question-eupe:92ec292fc9d6",
@@ -15271,6 +15827,46 @@
     "created_ts": null
   },
   {
+    "id": "repos:github-분석-199-biotechnologies-claude-deep-research-skill",
+    "title": "GitHub 분석: 199-biotechnologies/claude-deep-research-skill",
+    "kind": "repos",
+    "href": "repos/github-분석-199-biotechnologies-claude-deep-research-skill.html",
+    "summary": "- **released_by** → 199-biotechnologies _(Organization)_",
+    "source_path": "/Users/neo/Developer/Projects/LLM-Wiki/data/research/daily/2026-05-09/repos/199-biotechnologies_claude-deep-research-skill.md",
+    "tokens": [
+      "github",
+      "분석",
+      "199",
+      "biotechnologies",
+      "claude",
+      "deep",
+      "research",
+      "skill",
+      "released_by",
+      "199",
+      "biotechnologies",
+      "organization",
+      "repos",
+      "199",
+      "biotechnologies",
+      "claude",
+      "deep",
+      "research",
+      "skill",
+      "https",
+      "github",
+      "com",
+      "199",
+      "biotechnologies",
+      "claude",
+      "deep",
+      "research",
+      "skill"
+    ],
+    "len": 28,
+    "created_ts": 1778379534
+  },
+  {
     "id": "repos:github-분석-addyosmani-agent-skills",
     "title": "GitHub 분석: addyosmani/agent-skills",
     "kind": "repos",
@@ -15295,7 +15891,7 @@
       "skills"
     ],
     "len": 15,
-    "created_ts": 1778205823
+    "created_ts": 1778379534
   },
   {
     "id": "repos:github-분석-aero-ex-comfyui-segvigen",
@@ -15329,7 +15925,7 @@
       "segvigen"
     ],
     "len": 22,
-    "created_ts": 1778205823
+    "created_ts": 1778379534
   },
   {
     "id": "repos:github-분석-affaan-m-everything-claude-code",
@@ -15377,7 +15973,7 @@
       "12"
     ],
     "len": 36,
-    "created_ts": 1778205823
+    "created_ts": 1778379534
   },
   {
     "id": "repos:github-분석-ag2ai-ag2studio",
@@ -15404,7 +16000,7 @@
       "ag2studio"
     ],
     "len": 15,
-    "created_ts": 1778205823
+    "created_ts": 1778379534
   },
   {
     "id": "repos:github-분석-ahekot-comfyui-hyworld2",
@@ -15428,7 +16024,7 @@
       "comfyui_hyworld2"
     ],
     "len": 12,
-    "created_ts": 1778205823
+    "created_ts": 1778379534
   },
   {
     "id": "repos:github-분석-ahujasid-blender-mcp",
@@ -15458,7 +16054,7 @@
       "mcp"
     ],
     "len": 18,
-    "created_ts": 1778205823
+    "created_ts": 1778379534
   },
   {
     "id": "repos:github-분석-ai-search-guru-getcito-worlds-first-open-source-aio-aeo-or-geo-tool",
@@ -15517,7 +16113,7 @@
       "tool"
     ],
     "len": 47,
-    "created_ts": 1778205823
+    "created_ts": 1778379534
   },
   {
     "id": "repos:github-분석-aismithlab-cobra",
@@ -15541,7 +16137,7 @@
       "cobra"
     ],
     "len": 12,
-    "created_ts": 1778205823
+    "created_ts": 1778379534
   },
   {
     "id": "repos:github-분석-alexbatalov-fallout1-re",
@@ -15568,7 +16164,7 @@
       "re"
     ],
     "len": 15,
-    "created_ts": 1778205823
+    "created_ts": 1778379534
   },
   {
     "id": "repos:github-분석-allenai-molmoact",
@@ -15595,7 +16191,7 @@
       "molmoact"
     ],
     "len": 15,
-    "created_ts": 1778205823
+    "created_ts": 1778379534
   },
   {
     "id": "repos:github-분석-amyangxyz-reze-studio",
@@ -15622,7 +16218,7 @@
       "studio"
     ],
     "len": 15,
-    "created_ts": 1778205823
+    "created_ts": 1778379534
   },
   {
     "id": "repos:github-분석-anil-matcha-open-higgsfield-ai",
@@ -15659,7 +16255,7 @@
       "ai"
     ],
     "len": 25,
-    "created_ts": 1778205823
+    "created_ts": 1778379534
   },
   {
     "id": "repos:github-분석-anthropics-claude-code",
@@ -15686,7 +16282,7 @@
       "code"
     ],
     "len": 15,
-    "created_ts": 1778205823
+    "created_ts": 1778379534
   },
   {
     "id": "repos:github-분석-apinanaivot-ikea-3d-model-download-button",
@@ -15722,7 +16318,7 @@
       "button"
     ],
     "len": 24,
-    "created_ts": 1778205823
+    "created_ts": 1778379534
   },
   {
     "id": "repos:github-분석-apple-ml-4m",
@@ -15752,7 +16348,37 @@
       "4m"
     ],
     "len": 18,
-    "created_ts": 1778205823
+    "created_ts": 1778379534
+  },
+  {
+    "id": "repos:github-분석-apple-ml-lito",
+    "title": "GitHub 분석: apple/ml-lito",
+    "kind": "repos",
+    "href": "repos/github-분석-apple-ml-lito.html",
+    "summary": "- **released_by** → apple _(Organization)_",
+    "source_path": "/Users/neo/Developer/Projects/LLM-Wiki/data/research/daily/2026-05-10/papers/2505.20295/repo.md",
+    "tokens": [
+      "github",
+      "분석",
+      "apple",
+      "ml",
+      "lito",
+      "released_by",
+      "apple",
+      "organization",
+      "repos",
+      "apple",
+      "ml",
+      "lito",
+      "https",
+      "github",
+      "com",
+      "apple",
+      "ml",
+      "lito"
+    ],
+    "len": 18,
+    "created_ts": 1778379534
   },
   {
     "id": "repos:github-분석-apple-ml-mobileclip",
@@ -15782,7 +16408,7 @@
       "mobileclip"
     ],
     "len": 18,
-    "created_ts": 1778205823
+    "created_ts": 1778379534
   },
   {
     "id": "repos:github-분석-aree6-liftshift",
@@ -15806,7 +16432,7 @@
       "liftshift"
     ],
     "len": 12,
-    "created_ts": 1778205823
+    "created_ts": 1778379534
   },
   {
     "id": "repos:github-분석-arthurbrussee-brush",
@@ -15830,7 +16456,7 @@
       "brush"
     ],
     "len": 12,
-    "created_ts": 1778205823
+    "created_ts": 1778379534
   },
   {
     "id": "repos:github-분석-asherikov-shoggoth",
@@ -15854,7 +16480,37 @@
       "shoggoth"
     ],
     "len": 12,
-    "created_ts": 1778205823
+    "created_ts": 1778379534
+  },
+  {
+    "id": "repos:github-분석-ashishps1-awesome-engineering-articles",
+    "title": "GitHub 분석: ashishps1/awesome-engineering-articles",
+    "kind": "repos",
+    "href": "repos/github-분석-ashishps1-awesome-engineering-articles.html",
+    "summary": "",
+    "source_path": "/Users/neo/Developer/Projects/LLM-Wiki/data/research/daily/2026-05-09/repos/ashishps1_awesome-engineering-articles.md",
+    "tokens": [
+      "github",
+      "분석",
+      "ashishps1",
+      "awesome",
+      "engineering",
+      "articles",
+      "repos",
+      "ashishps1",
+      "awesome",
+      "engineering",
+      "articles",
+      "https",
+      "github",
+      "com",
+      "ashishps1",
+      "awesome",
+      "engineering",
+      "articles"
+    ],
+    "len": 18,
+    "created_ts": 1778379534
   },
   {
     "id": "repos:github-분석-asimovinc-asimov-v1",
@@ -15881,7 +16537,7 @@
       "v1"
     ],
     "len": 15,
-    "created_ts": 1778205823
+    "created_ts": 1778379534
   },
   {
     "id": "repos:github-분석-autowarefoundation-autoware",
@@ -15905,7 +16561,7 @@
       "autoware"
     ],
     "len": 12,
-    "created_ts": 1778205823
+    "created_ts": 1778379534
   },
   {
     "id": "repos:github-분석-awesome-opencode-awesome-opencode",
@@ -15939,7 +16595,7 @@
       "opencode"
     ],
     "len": 22,
-    "created_ts": 1778205823
+    "created_ts": 1778379534
   },
   {
     "id": "repos:github-분석-baidu-ernie-image",
@@ -15966,7 +16622,7 @@
       "image"
     ],
     "len": 15,
-    "created_ts": 1778205823
+    "created_ts": 1778379534
   },
   {
     "id": "repos:github-분석-bernakabadayi-physhead",
@@ -15990,7 +16646,7 @@
       "physhead"
     ],
     "len": 12,
-    "created_ts": 1778205823
+    "created_ts": 1778379534
   },
   {
     "id": "repos:github-분석-blaizzy-mlx-vlm",
@@ -16017,7 +16673,7 @@
       "vlm"
     ],
     "len": 15,
-    "created_ts": 1778205823
+    "created_ts": 1778379534
   },
   {
     "id": "repos:github-분석-bolixinyu-lca",
@@ -16041,7 +16697,7 @@
       "lca"
     ],
     "len": 12,
-    "created_ts": 1778205823
+    "created_ts": 1778379534
   },
   {
     "id": "repos:github-분석-bopeng-ai-marketplace-monitor",
@@ -16071,7 +16727,7 @@
       "monitor"
     ],
     "len": 18,
-    "created_ts": 1778205823
+    "created_ts": 1778379534
   },
   {
     "id": "repos:github-분석-cedarconnor-spag4d",
@@ -16095,7 +16751,7 @@
       "spag4d"
     ],
     "len": 12,
-    "created_ts": 1778205823
+    "created_ts": 1778379534
   },
   {
     "id": "repos:github-분석-cintellifusion-multiworld",
@@ -16119,7 +16775,7 @@
       "multiworld"
     ],
     "len": 12,
-    "created_ts": 1778205823
+    "created_ts": 1778379534
   },
   {
     "id": "repos:github-분석-claudiacuttano-sansa",
@@ -16149,7 +16805,7 @@
       "sansa"
     ],
     "len": 18,
-    "created_ts": 1778205823
+    "created_ts": 1778379534
   },
   {
     "id": "repos:github-분석-colmap-colmap",
@@ -16173,7 +16829,7 @@
       "colmap"
     ],
     "len": 12,
-    "created_ts": 1778205823
+    "created_ts": 1778379534
   },
   {
     "id": "repos:github-분석-cvg-resplat",
@@ -16209,7 +16865,7 @@
       "resplat"
     ],
     "len": 24,
-    "created_ts": 1778205823
+    "created_ts": 1778379534
   },
   {
     "id": "repos:github-분석-davian-robotics-egox",
@@ -16240,7 +16896,7 @@
       "egox"
     ],
     "len": 19,
-    "created_ts": 1778205823
+    "created_ts": 1778379534
   },
   {
     "id": "repos:github-분석-deepseek-ai-tilekernels",
@@ -16271,7 +16927,7 @@
       "tilekernels"
     ],
     "len": 19,
-    "created_ts": 1778205823
+    "created_ts": 1778379534
   },
   {
     "id": "repos:github-분석-diygod-rsshub",
@@ -16295,7 +16951,7 @@
       "rsshub"
     ],
     "len": 12,
-    "created_ts": 1778205823
+    "created_ts": 1778379534
   },
   {
     "id": "repos:github-분석-dqj5182-haco-release",
@@ -16319,7 +16975,7 @@
       "haco_release"
     ],
     "len": 12,
-    "created_ts": 1778205823
+    "created_ts": 1778379534
   },
   {
     "id": "repos:github-분석-edward3862-imgdecom",
@@ -16343,7 +16999,7 @@
       "imgdecom"
     ],
     "len": 12,
-    "created_ts": 1778205823
+    "created_ts": 1778379534
   },
   {
     "id": "repos:github-분석-elias1518693-jpeg-textures",
@@ -16367,7 +17023,7 @@
       "jpeg_textures"
     ],
     "len": 12,
-    "created_ts": 1778205823
+    "created_ts": 1778379534
   },
   {
     "id": "repos:github-분석-enidpinxit-awesome-openclaw-agents",
@@ -16397,7 +17053,7 @@
       "agents"
     ],
     "len": 18,
-    "created_ts": 1778205823
+    "created_ts": 1778379534
   },
   {
     "id": "repos:github-분석-enix-x509-certificate-exporter",
@@ -16427,7 +17083,7 @@
       "exporter"
     ],
     "len": 18,
-    "created_ts": 1778205823
+    "created_ts": 1778379534
   },
   {
     "id": "repos:github-분석-eth-ait-gaussian-garments",
@@ -16461,7 +17117,7 @@
       "garments"
     ],
     "len": 22,
-    "created_ts": 1778205823
+    "created_ts": 1778379534
   },
   {
     "id": "repos:github-분석-evolvinglmms-lab-simplestream",
@@ -16492,7 +17148,7 @@
       "simplestream"
     ],
     "len": 19,
-    "created_ts": 1778205823
+    "created_ts": 1778379534
   },
   {
     "id": "repos:github-분석-eyeline-labs-vista4d",
@@ -16523,7 +17179,7 @@
       "vista4d"
     ],
     "len": 19,
-    "created_ts": 1778205823
+    "created_ts": 1778379534
   },
   {
     "id": "repos:github-분석-facebookresearch-aina",
@@ -16550,7 +17206,7 @@
       "aina"
     ],
     "len": 15,
-    "created_ts": 1778205823
+    "created_ts": 1778379534
   },
   {
     "id": "repos:github-분석-facebookresearch-eupe",
@@ -16577,7 +17233,7 @@
       "eupe"
     ],
     "len": 15,
-    "created_ts": 1778205823
+    "created_ts": 1778379534
   },
   {
     "id": "repos:github-분석-facebookresearch-map-anything",
@@ -16610,7 +17266,7 @@
       "anything"
     ],
     "len": 21,
-    "created_ts": 1778205823
+    "created_ts": 1778379534
   },
   {
     "id": "repos:github-분석-facebookresearch-sapiens2",
@@ -16637,7 +17293,7 @@
       "sapiens2"
     ],
     "len": 15,
-    "created_ts": 1778205823
+    "created_ts": 1778379534
   },
   {
     "id": "repos:github-분석-facebookresearch-threadweaver",
@@ -16664,7 +17320,7 @@
       "threadweaver"
     ],
     "len": 15,
-    "created_ts": 1778205823
+    "created_ts": 1778379534
   },
   {
     "id": "repos:github-분석-facebookresearch-tribev2",
@@ -16691,7 +17347,7 @@
       "tribev2"
     ],
     "len": 15,
-    "created_ts": 1778205823
+    "created_ts": 1778379534
   },
   {
     "id": "repos:github-분석-facebookresearch-vjepa2",
@@ -16718,7 +17374,7 @@
       "vjepa2"
     ],
     "len": 15,
-    "created_ts": 1778205823
+    "created_ts": 1778379534
   },
   {
     "id": "repos:github-분석-fanegg-feat2gs",
@@ -16742,7 +17398,7 @@
       "feat2gs"
     ],
     "len": 12,
-    "created_ts": 1778205823
+    "created_ts": 1778379534
   },
   {
     "id": "repos:github-분석-fanjunqiao-m4human",
@@ -16784,7 +17440,7 @@
       "m4human"
     ],
     "len": 30,
-    "created_ts": 1778205823
+    "created_ts": 1778379534
   },
   {
     "id": "repos:github-분석-galaxygeneralrobotics-latent",
@@ -16819,7 +17475,7 @@
       "latent"
     ],
     "len": 23,
-    "created_ts": 1778205823
+    "created_ts": 1778379534
   },
   {
     "id": "repos:github-분석-genforce-josh",
@@ -16854,7 +17510,7 @@
       "03"
     ],
     "len": 23,
-    "created_ts": 1778205823
+    "created_ts": 1778379534
   },
   {
     "id": "repos:github-분석-gmberton-vismatch",
@@ -16878,7 +17534,7 @@
       "vismatch"
     ],
     "len": 12,
-    "created_ts": 1778205823
+    "created_ts": 1778379534
   },
   {
     "id": "repos:github-분석-google-deepmind-representations4d",
@@ -16909,7 +17565,7 @@
       "representations4d"
     ],
     "len": 19,
-    "created_ts": 1778205823
+    "created_ts": 1778379534
   },
   {
     "id": "repos:github-분석-google-research-vision-banana",
@@ -16943,7 +17599,7 @@
       "banana"
     ],
     "len": 22,
-    "created_ts": 1778205823
+    "created_ts": 1778379534
   },
   {
     "id": "repos:github-분석-h-shiono-mrtklib",
@@ -16974,7 +17630,7 @@
       "mrtklib"
     ],
     "len": 19,
-    "created_ts": 1778205823
+    "created_ts": 1778379534
   },
   {
     "id": "repos:github-분석-heygen-com-hyperframes",
@@ -17005,7 +17661,7 @@
       "hyperframes"
     ],
     "len": 19,
-    "created_ts": 1778205823
+    "created_ts": 1778379534
   },
   {
     "id": "repos:github-분석-hku-mmlab-macro",
@@ -17036,7 +17692,7 @@
       "macro"
     ],
     "len": 19,
-    "created_ts": 1778205823
+    "created_ts": 1778379534
   },
   {
     "id": "repos:github-분석-honojs-middleware",
@@ -17060,7 +17716,7 @@
       "middleware"
     ],
     "len": 12,
-    "created_ts": 1778205823
+    "created_ts": 1778379534
   },
   {
     "id": "repos:github-분석-huskydoge-awesome-loop-models",
@@ -17090,7 +17746,7 @@
       "models"
     ],
     "len": 18,
-    "created_ts": 1778205823
+    "created_ts": 1778379534
   },
   {
     "id": "repos:github-분석-imlixinyang-flashworld",
@@ -17123,7 +17779,7 @@
       "flashworld"
     ],
     "len": 21,
-    "created_ts": 1778205823
+    "created_ts": 1778379534
   },
   {
     "id": "repos:github-분석-inspatio-inspatio-world",
@@ -17150,7 +17806,7 @@
       "world"
     ],
     "len": 15,
-    "created_ts": 1778205823
+    "created_ts": 1778379534
   },
   {
     "id": "repos:github-분석-isaaccorley-terrabit",
@@ -17177,7 +17833,7 @@
       "terrabit"
     ],
     "len": 15,
-    "created_ts": 1778205823
+    "created_ts": 1778379534
   },
   {
     "id": "repos:github-분석-jendrikseipp-vulture",
@@ -17201,7 +17857,7 @@
       "vulture"
     ],
     "len": 12,
-    "created_ts": 1778205823
+    "created_ts": 1778379534
   },
   {
     "id": "repos:github-분석-jonbarron-gaussid",
@@ -17225,7 +17881,7 @@
       "gaussid"
     ],
     "len": 12,
-    "created_ts": 1778205823
+    "created_ts": 1778379534
   },
   {
     "id": "repos:github-분석-kaist-visual-ai-group-groundit",
@@ -17264,7 +17920,7 @@
       "groundit"
     ],
     "len": 27,
-    "created_ts": 1778205823
+    "created_ts": 1778379534
   },
   {
     "id": "repos:github-분석-kaist-visual-ai-group-matlat",
@@ -17303,7 +17959,7 @@
       "matlat"
     ],
     "len": 27,
-    "created_ts": 1778205823
+    "created_ts": 1778379534
   },
   {
     "id": "repos:github-분석-kotohibi-3dgs-pipeline-guide",
@@ -17327,7 +17983,7 @@
       "3dgs_pipeline_guide"
     ],
     "len": 12,
-    "created_ts": 1778205823
+    "created_ts": 1778379534
   },
   {
     "id": "repos:github-분석-kumapowerliu-avatarpointillist",
@@ -17362,7 +18018,7 @@
       "avatarpointillist"
     ],
     "len": 23,
-    "created_ts": 1778205823
+    "created_ts": 1778379534
   },
   {
     "id": "repos:github-분석-lab-of-ai-and-robotics-lego-slam",
@@ -17400,7 +18056,7 @@
       "slam"
     ],
     "len": 26,
-    "created_ts": 1778205823
+    "created_ts": 1778379534
   },
   {
     "id": "repos:github-분석-leaplabthu-rvr",
@@ -17424,7 +18080,7 @@
       "rvr"
     ],
     "len": 12,
-    "created_ts": 1778205823
+    "created_ts": 1778379534
   },
   {
     "id": "repos:github-분석-lilanovo-auto-resubmit",
@@ -17451,7 +18107,7 @@
       "resubmit"
     ],
     "len": 15,
-    "created_ts": 1778205823
+    "created_ts": 1778379534
   },
   {
     "id": "repos:github-분석-lllyasviel-vcc",
@@ -17475,7 +18131,7 @@
       "vcc"
     ],
     "len": 12,
-    "created_ts": 1778205823
+    "created_ts": 1778379534
   },
   {
     "id": "repos:github-분석-lyehe-build-gpu-colmap",
@@ -17506,7 +18162,7 @@
       "build_gpu_colmap"
     ],
     "len": 19,
-    "created_ts": 1778205823
+    "created_ts": 1778379534
   },
   {
     "id": "repos:github-분석-m-schuetz-curast",
@@ -17537,7 +18193,7 @@
       "curast"
     ],
     "len": 19,
-    "created_ts": 1778205823
+    "created_ts": 1778379534
   },
   {
     "id": "repos:github-분석-machinestein-deep-improvement-supervision",
@@ -17576,7 +18232,7 @@
       "supervision"
     ],
     "len": 27,
-    "created_ts": 1778205823
+    "created_ts": 1778379534
   },
   {
     "id": "repos:github-분석-mandarwagh9-openeyes",
@@ -17600,7 +18256,7 @@
       "openeyes"
     ],
     "len": 12,
-    "created_ts": 1778205823
+    "created_ts": 1778379534
   },
   {
     "id": "repos:github-분석-meshsplatting-mesh-splatting",
@@ -17627,7 +18283,7 @@
       "splatting"
     ],
     "len": 15,
-    "created_ts": 1778205823
+    "created_ts": 1778379534
   },
   {
     "id": "repos:github-분석-mfranzon-render",
@@ -17671,7 +18327,7 @@
       "render"
     ],
     "len": 32,
-    "created_ts": 1778205823
+    "created_ts": 1778379534
   },
   {
     "id": "repos:github-분석-microsoft-world-r1",
@@ -17701,7 +18357,7 @@
       "r1"
     ],
     "len": 18,
-    "created_ts": 1778205823
+    "created_ts": 1778379534
   },
   {
     "id": "repos:github-분석-mrdoob-three-js",
@@ -17728,7 +18384,7 @@
       "js"
     ],
     "len": 15,
-    "created_ts": 1778205823
+    "created_ts": 1778379534
   },
   {
     "id": "repos:github-분석-mutianxu-kinema4d",
@@ -17752,7 +18408,7 @@
       "kinema4d"
     ],
     "len": 12,
-    "created_ts": 1778205823
+    "created_ts": 1778379534
   },
   {
     "id": "repos:github-분석-naver-multi-hmr",
@@ -17779,7 +18435,7 @@
       "hmr"
     ],
     "len": 15,
-    "created_ts": 1778205823
+    "created_ts": 1778379534
   },
   {
     "id": "repos:github-분석-naver-pow3r",
@@ -17803,7 +18459,7 @@
       "pow3r"
     ],
     "len": 12,
-    "created_ts": 1778205823
+    "created_ts": 1778379534
   },
   {
     "id": "repos:github-분석-netflix-void-model",
@@ -17830,7 +18486,7 @@
       "model"
     ],
     "len": 15,
-    "created_ts": 1778205823
+    "created_ts": 1778379534
   },
   {
     "id": "repos:github-분석-nv-tlabs-lyra",
@@ -17861,7 +18517,7 @@
       "lyra"
     ],
     "len": 19,
-    "created_ts": 1778205823
+    "created_ts": 1778379534
   },
   {
     "id": "repos:github-분석-nvidia-asset-harvester",
@@ -17891,7 +18547,7 @@
       "harvester"
     ],
     "len": 18,
-    "created_ts": 1778205823
+    "created_ts": 1778379534
   },
   {
     "id": "repos:github-분석-nvidia-ncore",
@@ -17918,7 +18574,7 @@
       "ncore"
     ],
     "len": 15,
-    "created_ts": 1778205823
+    "created_ts": 1778379534
   },
   {
     "id": "repos:github-분석-nvidia-openshell",
@@ -17945,7 +18601,7 @@
       "openshell"
     ],
     "len": 15,
-    "created_ts": 1778205823
+    "created_ts": 1778379534
   },
   {
     "id": "repos:github-분석-nvidiagameworks-kaolin",
@@ -17969,7 +18625,7 @@
       "kaolin"
     ],
     "len": 12,
-    "created_ts": 1778205823
+    "created_ts": 1778379534
   },
   {
     "id": "repos:github-분석-nvlabs-pointworld",
@@ -17996,7 +18652,7 @@
       "pointworld"
     ],
     "len": 15,
-    "created_ts": 1778205823
+    "created_ts": 1778379534
   },
   {
     "id": "repos:github-분석-omerb01-didicm",
@@ -18020,7 +18676,7 @@
       "didicm"
     ],
     "len": 12,
-    "created_ts": 1778205823
+    "created_ts": 1778379534
   },
   {
     "id": "repos:github-분석-openclaw-openclaw",
@@ -18044,7 +18700,7 @@
       "openclaw"
     ],
     "len": 12,
-    "created_ts": 1778205823
+    "created_ts": 1778379534
   },
   {
     "id": "repos:github-분석-opendrivelab-simscale",
@@ -18068,7 +18724,7 @@
       "simscale"
     ],
     "len": 12,
-    "created_ts": 1778205823
+    "created_ts": 1778379534
   },
   {
     "id": "repos:github-분석-opendrivelab-worldengine",
@@ -18103,7 +18759,7 @@
       "26"
     ],
     "len": 23,
-    "created_ts": 1778205823
+    "created_ts": 1778379534
   },
   {
     "id": "repos:github-분석-opsiclear-4dgs-trigsvanilla",
@@ -18134,7 +18790,7 @@
       "trigsvanilla"
     ],
     "len": 19,
-    "created_ts": 1778205823
+    "created_ts": 1778379534
   },
   {
     "id": "repos:github-분석-perkins729-omnixtreme",
@@ -18168,7 +18824,7 @@
       "omnixtreme"
     ],
     "len": 22,
-    "created_ts": 1778205823
+    "created_ts": 1778379534
   },
   {
     "id": "repos:github-분석-polymathicai-the-well",
@@ -18195,7 +18851,7 @@
       "the_well"
     ],
     "len": 15,
-    "created_ts": 1778205823
+    "created_ts": 1778379534
   },
   {
     "id": "repos:github-분석-qq456cvb-img2cad",
@@ -18233,7 +18889,7 @@
       "img2cad"
     ],
     "len": 26,
-    "created_ts": 1778205823
+    "created_ts": 1778379534
   },
   {
     "id": "repos:github-분석-r4dl-come",
@@ -18265,7 +18921,7 @@
       "come"
     ],
     "len": 20,
-    "created_ts": 1778205823
+    "created_ts": 1778379534
   },
   {
     "id": "repos:github-분석-reconworldlab-godot-gaussian-splatting",
@@ -18301,7 +18957,7 @@
       "splatting"
     ],
     "len": 24,
-    "created_ts": 1778205823
+    "created_ts": 1778379534
   },
   {
     "id": "repos:github-분석-reinehonoka-voice-design-cloner",
@@ -18331,7 +18987,7 @@
       "cloner"
     ],
     "len": 18,
-    "created_ts": 1778205823
+    "created_ts": 1778379534
   },
   {
     "id": "repos:github-분석-robbyant-lingbot-va",
@@ -18358,7 +19014,7 @@
       "va"
     ],
     "len": 15,
-    "created_ts": 1778205823
+    "created_ts": 1778379534
   },
   {
     "id": "repos:github-분석-roboflow-rf-detr",
@@ -18388,7 +19044,7 @@
       "detr"
     ],
     "len": 18,
-    "created_ts": 1778205823
+    "created_ts": 1778379534
   },
   {
     "id": "repos:github-분석-rpl-cs-ucl-sds",
@@ -18423,7 +19079,41 @@
       "sds"
     ],
     "len": 23,
-    "created_ts": 1778205823
+    "created_ts": 1778379534
+  },
+  {
+    "id": "repos:github-분석-rui314-chibicc",
+    "title": "GitHub 분석: rui314/chibicc",
+    "kind": "repos",
+    "href": "repos/github-분석-rui314-chibicc.html",
+    "summary": "- **implemented_in** → GTA: A Geometry-Aware Attention Mechanism for Multi-View Transformers _(Paper)_",
+    "source_path": "/Users/neo/Developer/Projects/LLM-Wiki/data/research/daily/2026-05-09/papers/2310.10375/repo.md",
+    "tokens": [
+      "github",
+      "분석",
+      "rui314",
+      "chibicc",
+      "implemented_in",
+      "gta",
+      "geometry",
+      "aware",
+      "attention",
+      "mechanism",
+      "multi",
+      "view",
+      "transformers",
+      "paper",
+      "repos",
+      "https",
+      "github",
+      "com",
+      "rui314",
+      "chibicc",
+      "rui314",
+      "chibicc"
+    ],
+    "len": 22,
+    "created_ts": 1778379534
   },
   {
     "id": "repos:github-분석-safishamsi-graphify",
@@ -18447,7 +19137,7 @@
       "graphify"
     ],
     "len": 12,
-    "created_ts": 1778205823
+    "created_ts": 1778379534
   },
   {
     "id": "repos:github-분석-santifer-career-ops",
@@ -18474,7 +19164,7 @@
       "ops"
     ],
     "len": 15,
-    "created_ts": 1778205823
+    "created_ts": 1778379534
   },
   {
     "id": "repos:github-분석-seeed-projects-rebot-devarm",
@@ -18508,7 +19198,7 @@
       "devarm"
     ],
     "len": 22,
-    "created_ts": 1778205823
+    "created_ts": 1778379534
   },
   {
     "id": "repos:github-분석-skalskip-top-cvpr-2026-papers",
@@ -18544,7 +19234,7 @@
       "papers"
     ],
     "len": 24,
-    "created_ts": 1778205823
+    "created_ts": 1778379534
   },
   {
     "id": "repos:github-분석-skyworkai-matrix-3d",
@@ -18574,7 +19264,7 @@
       "3d"
     ],
     "len": 18,
-    "created_ts": 1778205823
+    "created_ts": 1778379534
   },
   {
     "id": "repos:github-분석-stereo4d-stereo4d-code",
@@ -18601,7 +19291,7 @@
       "code"
     ],
     "len": 15,
-    "created_ts": 1778205823
+    "created_ts": 1778379534
   },
   {
     "id": "repos:github-분석-sv-pp-sceneversepp",
@@ -18632,7 +19322,7 @@
       "sceneversepp"
     ],
     "len": 19,
-    "created_ts": 1778205823
+    "created_ts": 1778379534
   },
   {
     "id": "repos:github-분석-takashiyoshinaga-360-to-realityscan",
@@ -18659,7 +19349,7 @@
       "realityscan"
     ],
     "len": 15,
-    "created_ts": 1778205823
+    "created_ts": 1778379534
   },
   {
     "id": "repos:github-분석-takashiyoshinaga-perspective-effect-with-head-tracking-of-mediapipe",
@@ -18695,7 +19385,7 @@
       "mediapipe"
     ],
     "len": 24,
-    "created_ts": 1778205823
+    "created_ts": 1778379534
   },
   {
     "id": "repos:github-분석-taylorallenux-engine-lab",
@@ -18722,7 +19412,7 @@
       "lab"
     ],
     "len": 15,
-    "created_ts": 1778205823
+    "created_ts": 1778379534
   },
   {
     "id": "repos:github-분석-team-aprl-mr-scalemaster",
@@ -18759,7 +19449,7 @@
       "scalemaster"
     ],
     "len": 25,
-    "created_ts": 1778205823
+    "created_ts": 1778379534
   },
   {
     "id": "repos:github-분석-tencent-hunyuan-hy-worldplay",
@@ -18793,7 +19483,7 @@
       "worldplay"
     ],
     "len": 22,
-    "created_ts": 1778205823
+    "created_ts": 1778379534
   },
   {
     "id": "repos:github-분석-tencentarc-motioncrafter",
@@ -18817,7 +19507,7 @@
       "motioncrafter"
     ],
     "len": 12,
-    "created_ts": 1778205823
+    "created_ts": 1778379534
   },
   {
     "id": "repos:github-분석-theialab-fullcircle",
@@ -18850,7 +19540,7 @@
       "fullcircle"
     ],
     "len": 21,
-    "created_ts": 1778205823
+    "created_ts": 1778379534
   },
   {
     "id": "repos:github-분석-therealmjp-msaafilter",
@@ -18874,7 +19564,7 @@
       "msaafilter"
     ],
     "len": 12,
-    "created_ts": 1778205823
+    "created_ts": 1778379534
   },
   {
     "id": "repos:github-분석-tue-mps-eomt",
@@ -18905,7 +19595,7 @@
       "eomt"
     ],
     "len": 19,
-    "created_ts": 1778205823
+    "created_ts": 1778379534
   },
   {
     "id": "repos:github-분석-visinf-insid3",
@@ -18932,7 +19622,7 @@
       "insid3"
     ],
     "len": 15,
-    "created_ts": 1778205823
+    "created_ts": 1778379534
   },
   {
     "id": "repos:github-분석-weitong8591-global-edge-prior",
@@ -18956,7 +19646,7 @@
       "global_edge_prior"
     ],
     "len": 12,
-    "created_ts": 1778205823
+    "created_ts": 1778379534
   },
   {
     "id": "repos:github-분석-world-in-world-world-in-world",
@@ -18990,7 +19680,7 @@
       "world"
     ],
     "len": 22,
-    "created_ts": 1778205823
+    "created_ts": 1778379534
   },
   {
     "id": "repos:github-분석-xiquan-li-tinymu",
@@ -19021,7 +19711,7 @@
       "tinymu"
     ],
     "len": 19,
-    "created_ts": 1778205823
+    "created_ts": 1778379534
   },
   {
     "id": "repos:github-분석-xyxingx-luminet",
@@ -19045,7 +19735,7 @@
       "luminet"
     ],
     "len": 12,
-    "created_ts": 1778205823
+    "created_ts": 1778379534
   },
   {
     "id": "repos:github-분석-yuqingwang1029-cubid",
@@ -19069,7 +19759,7 @@
       "cubid"
     ],
     "len": 12,
-    "created_ts": 1778205823
+    "created_ts": 1778379534
   },
   {
     "id": "repos:github-분석-zju3dv-scal3r",
@@ -19105,7 +19795,7 @@
       "scal3r"
     ],
     "len": 24,
-    "created_ts": 1778205823
+    "created_ts": 1778379534
   },
   {
     "id": "repos:github-분석-zsh523-unirecgen",
@@ -19129,7 +19819,7 @@
       "unirecgen"
     ],
     "len": 12,
-    "created_ts": 1778205823
+    "created_ts": 1778379534
   },
   {
     "id": "repos:github-분석-zubair-trabzada-ai-legal-claude",
@@ -19166,7 +19856,7 @@
       "claude"
     ],
     "len": 25,
-    "created_ts": 1778205823
+    "created_ts": 1778379534
   },
   {
     "id": "repos:github-분석-zxp-s-works-equact",
@@ -19201,7 +19891,7 @@
       "equact"
     ],
     "len": 23,
-    "created_ts": 1778205823
+    "created_ts": 1778379534
   },
   {
     "id": "claude-code:c2d6cadb-2a23-47db-ae37-3efe838295f9:c2d6cadb-2a23-47db-ae37-3efe838295f9",
@@ -23956,7 +24646,7 @@
     "title": "<h1 align=\"center\">LLM-Wiki</h1>",
     "kind": "sources",
     "href": "sources/h1-align-center-llm-wiki-h1.html",
-    "summary": "- **uses_metric** → mAP _(Metric)_",
+    "summary": "",
     "source_path": "/Users/neo/Developer/Projects/LLM-Wiki/README.md",
     "tokens": [
       "h1",
@@ -23965,13 +24655,10 @@
       "llm",
       "wiki",
       "h1",
-      "uses_metric",
-      "map",
-      "metric",
       "sources"
     ],
-    "len": 10,
-    "created_ts": 1778205823
+    "len": 7,
+    "created_ts": 1778379534
   },
   {
     "id": "sources:architecture",
@@ -23988,7 +24675,7 @@
       "sources"
     ],
     "len": 5,
-    "created_ts": 1778205823
+    "created_ts": 1778379534
   },
   {
     "id": "sources:architecture-fixture",
@@ -24003,7 +24690,7 @@
       "sources"
     ],
     "len": 3,
-    "created_ts": 1778205823
+    "created_ts": 1778379534
   },
   {
     "id": "sources:codex-extraction-review-2026-05-01",
@@ -24037,7 +24724,7 @@
       "sources"
     ],
     "len": 22,
-    "created_ts": 1778205823
+    "created_ts": 1778379534
   },
   {
     "id": "sources:codex-graph-view-review-2026-05-04",
@@ -24060,7 +24747,7 @@
       "sources"
     ],
     "len": 11,
-    "created_ts": 1778205823
+    "created_ts": 1778379534
   },
   {
     "id": "sources:daily-feed-summary-2026-04-06",
@@ -24100,7 +24787,7 @@
       "sources"
     ],
     "len": 28,
-    "created_ts": 1778205823
+    "created_ts": 1778379534
   },
   {
     "id": "sources:daily-feed-summary-2026-04-07",
@@ -24119,7 +24806,7 @@
       "sources"
     ],
     "len": 7,
-    "created_ts": 1778205823
+    "created_ts": 1778379534
   },
   {
     "id": "sources:daily-feed-summary-2026-04-08",
@@ -24160,7 +24847,7 @@
       "sources"
     ],
     "len": 29,
-    "created_ts": 1778205823
+    "created_ts": 1778379534
   },
   {
     "id": "sources:daily-feed-summary-2026-04-09",
@@ -24201,7 +24888,7 @@
       "sources"
     ],
     "len": 29,
-    "created_ts": 1778205823
+    "created_ts": 1778379534
   },
   {
     "id": "sources:daily-feed-summary-2026-04-10",
@@ -24241,7 +24928,7 @@
       "sources"
     ],
     "len": 28,
-    "created_ts": 1778205823
+    "created_ts": 1778379534
   },
   {
     "id": "sources:daily-feed-summary-2026-04-11",
@@ -24274,7 +24961,7 @@
       "sources"
     ],
     "len": 21,
-    "created_ts": 1778205823
+    "created_ts": 1778379534
   },
   {
     "id": "sources:daily-feed-summary-2026-04-12",
@@ -24306,7 +24993,7 @@
       "sources"
     ],
     "len": 20,
-    "created_ts": 1778205823
+    "created_ts": 1778379534
   },
   {
     "id": "sources:daily-feed-summary-2026-04-13",
@@ -24334,7 +25021,7 @@
       "sources"
     ],
     "len": 16,
-    "created_ts": 1778205823
+    "created_ts": 1778379534
   },
   {
     "id": "sources:daily-feed-summary-2026-04-14",
@@ -24356,7 +25043,7 @@
       "sources"
     ],
     "len": 10,
-    "created_ts": 1778205823
+    "created_ts": 1778379534
   },
   {
     "id": "sources:daily-feed-summary-2026-04-15",
@@ -24390,7 +25077,7 @@
       "sources"
     ],
     "len": 22,
-    "created_ts": 1778205823
+    "created_ts": 1778379534
   },
   {
     "id": "sources:daily-feed-summary-2026-04-16",
@@ -24432,7 +25119,7 @@
       "sources"
     ],
     "len": 30,
-    "created_ts": 1778205823
+    "created_ts": 1778379534
   },
   {
     "id": "sources:daily-feed-summary-2026-04-18",
@@ -24451,7 +25138,7 @@
       "sources"
     ],
     "len": 7,
-    "created_ts": 1778205823
+    "created_ts": 1778379534
   },
   {
     "id": "sources:daily-feed-summary-2026-04-22",
@@ -24491,7 +25178,7 @@
       "sources"
     ],
     "len": 28,
-    "created_ts": 1778205823
+    "created_ts": 1778379534
   },
   {
     "id": "sources:daily-feed-summary-2026-04-23",
@@ -24532,7 +25219,7 @@
       "sources"
     ],
     "len": 29,
-    "created_ts": 1778205823
+    "created_ts": 1778379534
   },
   {
     "id": "sources:daily-feed-summary-2026-04-24",
@@ -24572,7 +25259,7 @@
       "sources"
     ],
     "len": 28,
-    "created_ts": 1778205823
+    "created_ts": 1778379534
   },
   {
     "id": "sources:daily-feed-summary-2026-04-25",
@@ -24610,7 +25297,7 @@
       "sources"
     ],
     "len": 26,
-    "created_ts": 1778205823
+    "created_ts": 1778379534
   },
   {
     "id": "sources:daily-feed-summary-2026-04-26",
@@ -24651,7 +25338,7 @@
       "sources"
     ],
     "len": 29,
-    "created_ts": 1778205823
+    "created_ts": 1778379534
   },
   {
     "id": "sources:daily-feed-summary-2026-04-27",
@@ -24688,7 +25375,7 @@
       "sources"
     ],
     "len": 25,
-    "created_ts": 1778205823
+    "created_ts": 1778379534
   },
   {
     "id": "sources:daily-feed-summary-2026-04-28",
@@ -24731,7 +25418,7 @@
       "sources"
     ],
     "len": 31,
-    "created_ts": 1778205823
+    "created_ts": 1778379534
   },
   {
     "id": "sources:daily-feed-summary-2026-04-29",
@@ -24769,7 +25456,7 @@
       "sources"
     ],
     "len": 26,
-    "created_ts": 1778205823
+    "created_ts": 1778379534
   },
   {
     "id": "sources:daily-feed-summary-2026-04-30",
@@ -24807,7 +25494,7 @@
       "sources"
     ],
     "len": 26,
-    "created_ts": 1778205823
+    "created_ts": 1778379534
   },
   {
     "id": "sources:daily-feed-summary-2026-05-01",
@@ -24845,7 +25532,7 @@
       "sources"
     ],
     "len": 26,
-    "created_ts": 1778205823
+    "created_ts": 1778379534
   },
   {
     "id": "sources:daily-feed-summary-2026-05-02",
@@ -24882,7 +25569,7 @@
       "sources"
     ],
     "len": 25,
-    "created_ts": 1778205823
+    "created_ts": 1778379534
   },
   {
     "id": "sources:daily-feed-summary-2026-05-03",
@@ -24921,7 +25608,7 @@
       "sources"
     ],
     "len": 27,
-    "created_ts": 1778205823
+    "created_ts": 1778379534
   },
   {
     "id": "sources:daily-feed-summary-2026-05-04",
@@ -24960,7 +25647,7 @@
       "sources"
     ],
     "len": 27,
-    "created_ts": 1778205823
+    "created_ts": 1778379534
   },
   {
     "id": "sources:daily-feed-summary-2026-05-05",
@@ -24999,7 +25686,7 @@
       "sources"
     ],
     "len": 27,
-    "created_ts": 1778205823
+    "created_ts": 1778379534
   },
   {
     "id": "sources:daily-feed-summary-2026-05-06",
@@ -25042,7 +25729,7 @@
       "sources"
     ],
     "len": 31,
-    "created_ts": 1778205823
+    "created_ts": 1778379534
   },
   {
     "id": "sources:daily-feed-summary-2026-05-07",
@@ -25061,7 +25748,7 @@
       "sources"
     ],
     "len": 7,
-    "created_ts": 1778205823
+    "created_ts": 1778379534
   },
   {
     "id": "sources:daily-feed-summary-2026-05-08",
@@ -25086,7 +25773,82 @@
       "sources"
     ],
     "len": 13,
-    "created_ts": 1778205823
+    "created_ts": 1778379534
+  },
+  {
+    "id": "sources:daily-feed-summary-2026-05-09",
+    "title": "Daily Feed Summary — 2026-05-09",
+    "kind": "sources",
+    "href": "sources/daily-feed-summary-2026-05-09.html",
+    "summary": "- **mentioned_in** → GTA: A Geometry-Aware Attention Mechanism for Multi-View Transformers _(Paper)_ - **mentioned_in** → Geometry-Grounded Gaussian Splatting _(Paper)_ - **mentioned_in** → Velox: Le…",
+    "source_path": "/Users/neo/Developer/Projects/LLM-Wiki/data/research/daily/2026-05-09/raw.md",
+    "tokens": [
+      "daily",
+      "feed",
+      "summary",
+      "2026",
+      "05",
+      "09",
+      "mentioned_in",
+      "gta",
+      "geometry",
+      "aware",
+      "attention",
+      "mechanism",
+      "multi",
+      "view",
+      "transformers",
+      "paper",
+      "mentioned_in",
+      "geometry",
+      "grounded",
+      "gaussian",
+      "splatting",
+      "paper",
+      "mentioned_in",
+      "velox",
+      "le",
+      "sources"
+    ],
+    "len": 26,
+    "created_ts": 1778379534
+  },
+  {
+    "id": "sources:daily-feed-summary-2026-05-10",
+    "title": "Daily Feed Summary — 2026-05-10",
+    "kind": "sources",
+    "href": "sources/daily-feed-summary-2026-05-10.html",
+    "summary": "- **mentioned_in** → GTA: A Geometry-Aware Attention Mechanism for Multi-View Transformers _(Paper)_ - **mentioned_in** → Geometry-Grounded Gaussian Splatting _(Paper)_ - **mentioned_in** → SelfRefle…",
+    "source_path": "/Users/neo/Developer/Projects/LLM-Wiki/data/research/daily/2026-05-10/raw.md",
+    "tokens": [
+      "daily",
+      "feed",
+      "summary",
+      "2026",
+      "05",
+      "10",
+      "mentioned_in",
+      "gta",
+      "geometry",
+      "aware",
+      "attention",
+      "mechanism",
+      "multi",
+      "view",
+      "transformers",
+      "paper",
+      "mentioned_in",
+      "geometry",
+      "grounded",
+      "gaussian",
+      "splatting",
+      "paper",
+      "mentioned_in",
+      "selfrefle",
+      "sources"
+    ],
+    "len": 25,
+    "created_ts": 1778379534
   },
   {
     "id": "sources:digest",
@@ -25100,7 +25862,7 @@
       "sources"
     ],
     "len": 2,
-    "created_ts": 1778205823
+    "created_ts": 1778379534
   },
   {
     "id": "sources:feature-map",
@@ -25118,7 +25880,7 @@
       "sources"
     ],
     "len": 6,
-    "created_ts": 1778205823
+    "created_ts": 1778379534
   },
   {
     "id": "sources:frontend-redesign-annotated-route-walkthrough",
@@ -25139,7 +25901,7 @@
       "sources"
     ],
     "len": 9,
-    "created_ts": 1778205823
+    "created_ts": 1778379534
   },
   {
     "id": "sources:geometry-grounded-gaussian-splatting",
@@ -25173,7 +25935,7 @@
       "sources"
     ],
     "len": 22,
-    "created_ts": 1778205823
+    "created_ts": 1778379534
   },
   {
     "id": "sources:harness-session-history",
@@ -25189,7 +25951,7 @@
       "sources"
     ],
     "len": 4,
-    "created_ts": 1778205823
+    "created_ts": 1778379534
   },
   {
     "id": "sources:installation",
@@ -25203,7 +25965,7 @@
       "sources"
     ],
     "len": 2,
-    "created_ts": 1778205823
+    "created_ts": 1778379534
   },
   {
     "id": "sources:karpathy-alignment-plan",
@@ -25219,7 +25981,7 @@
       "sources"
     ],
     "len": 4,
-    "created_ts": 1778205823
+    "created_ts": 1778379534
   },
   {
     "id": "sources:llm-backed-synthesis-prose",
@@ -25236,7 +25998,7 @@
       "sources"
     ],
     "len": 5,
-    "created_ts": 1778205823
+    "created_ts": 1778379534
   },
   {
     "id": "sources:llm-wiki-frontend-redesign-design-spec",
@@ -25255,7 +26017,7 @@
       "sources"
     ],
     "len": 7,
-    "created_ts": 1778205823
+    "created_ts": 1778379534
   },
   {
     "id": "sources:llm-wiki-frontend-redesign-implementation-plan",
@@ -25277,7 +26039,7 @@
       "sources"
     ],
     "len": 10,
-    "created_ts": 1778205823
+    "created_ts": 1778379534
   },
   {
     "id": "sources:publishing-checklist",
@@ -25295,7 +26057,7 @@
       "sources"
     ],
     "len": 6,
-    "created_ts": 1778205823
+    "created_ts": 1778379534
   },
   {
     "id": "sources:quickstart",
@@ -25312,7 +26074,7 @@
       "sources"
     ],
     "len": 5,
-    "created_ts": 1778205823
+    "created_ts": 1778379534
   },
   {
     "id": "sources:quickstart-fixture",
@@ -25327,7 +26089,7 @@
       "sources"
     ],
     "len": 3,
-    "created_ts": 1778205823
+    "created_ts": 1778379534
   },
   {
     "id": "sources:self-dogfood-demo",
@@ -25343,7 +26105,7 @@
       "sources"
     ],
     "len": 4,
-    "created_ts": 1778205823
+    "created_ts": 1778379534
   },
   {
     "id": "sources:synthesis-fixtures",
@@ -25358,7 +26120,7 @@
       "sources"
     ],
     "len": 3,
-    "created_ts": 1778205823
+    "created_ts": 1778379534
   },
   {
     "id": "sources:understand-anything-companion-workflow",
@@ -25378,7 +26140,7 @@
       "sources"
     ],
     "len": 8,
-    "created_ts": 1778205823
+    "created_ts": 1778379534
   },
   {
     "id": "sources:weekly-research-digest-2026-w17",
@@ -25403,7 +26165,7 @@
       "sources"
     ],
     "len": 13,
-    "created_ts": 1778205823
+    "created_ts": 1778379534
   },
   {
     "id": "sources:worldcompass-reinforcement-learning-for-long-horizon-world-models",
@@ -25444,7 +26206,7 @@
       "sources"
     ],
     "len": 29,
-    "created_ts": 1778205823
+    "created_ts": 1778379534
   },
   {
     "id": "sources:주간-논문-분석-2026-w15-2026-04-06-2026-04-12",
@@ -25487,7 +26249,7 @@
       "sources"
     ],
     "len": 31,
-    "created_ts": 1778205823
+    "created_ts": 1778379534
   },
   {
     "id": "sources:파일에서-몇-가지-규칙-위반이-있습니다-수정하겠습니다",
@@ -25507,7 +26269,7 @@
       "sources"
     ],
     "len": 8,
-    "created_ts": 1778205823
+    "created_ts": 1778379534
   },
   {
     "id": "sources:주간-리서치-다이제스트-2026-w15",
@@ -25543,7 +26305,7 @@
       "sources"
     ],
     "len": 24,
-    "created_ts": 1778205823
+    "created_ts": 1778379534
   },
   {
     "id": "sources:주간-리서치-다이제스트-2026-w17",
@@ -25582,7 +26344,7 @@
       "sources"
     ],
     "len": 27,
-    "created_ts": 1778205823
+    "created_ts": 1778379534
   },
   {
     "id": "sources:daily-research-digest-2026-04-08",
@@ -25623,7 +26385,7 @@
       "sources"
     ],
     "len": 29,
-    "created_ts": 1778205823
+    "created_ts": 1778379534
   },
   {
     "id": "sources:daily-research-digest-2026-04-15",
@@ -25657,7 +26419,7 @@
       "sources"
     ],
     "len": 22,
-    "created_ts": 1778205823
+    "created_ts": 1778379534
   },
   {
     "id": "sources:daily-research-digest-2026-04-18",
@@ -25679,7 +26441,7 @@
       "sources"
     ],
     "len": 10,
-    "created_ts": 1778205823
+    "created_ts": 1778379534
   },
   {
     "id": "sources:daily-research-digest-2026-04-22",
@@ -25717,7 +26479,7 @@
       "sources"
     ],
     "len": 26,
-    "created_ts": 1778205823
+    "created_ts": 1778379534
   },
   {
     "id": "sources:daily-research-digest-2026-04-23",
@@ -25758,7 +26520,7 @@
       "sources"
     ],
     "len": 29,
-    "created_ts": 1778205823
+    "created_ts": 1778379534
   },
   {
     "id": "sources:daily-research-digest-2026-04-24",
@@ -25798,7 +26560,7 @@
       "sources"
     ],
     "len": 28,
-    "created_ts": 1778205823
+    "created_ts": 1778379534
   },
   {
     "id": "sources:daily-research-digest-2026-04-25",
@@ -25836,7 +26598,7 @@
       "sources"
     ],
     "len": 26,
-    "created_ts": 1778205823
+    "created_ts": 1778379534
   },
   {
     "id": "sources:daily-research-digest-2026-04-26",
@@ -25877,7 +26639,7 @@
       "sources"
     ],
     "len": 29,
-    "created_ts": 1778205823
+    "created_ts": 1778379534
   },
   {
     "id": "sources:daily-research-digest-2026-04-27",
@@ -25912,7 +26674,7 @@
       "sources"
     ],
     "len": 23,
-    "created_ts": 1778205823
+    "created_ts": 1778379534
   },
   {
     "id": "sources:daily-research-digest-2026-04-28",
@@ -25948,7 +26710,7 @@
       "sources"
     ],
     "len": 24,
-    "created_ts": 1778205823
+    "created_ts": 1778379534
   },
   {
     "id": "sources:daily-research-digest-2026-04-29",
@@ -25987,7 +26749,7 @@
       "sources"
     ],
     "len": 27,
-    "created_ts": 1778205823
+    "created_ts": 1778379534
   },
   {
     "id": "sources:daily-research-digest-2026-04-30",
@@ -26025,7 +26787,7 @@
       "sources"
     ],
     "len": 26,
-    "created_ts": 1778205823
+    "created_ts": 1778379534
   },
   {
     "id": "sources:daily-research-digest-2026-05-01",
@@ -26063,7 +26825,7 @@
       "sources"
     ],
     "len": 26,
-    "created_ts": 1778205823
+    "created_ts": 1778379534
   },
   {
     "id": "sources:daily-research-digest-2026-05-02",
@@ -26100,7 +26862,7 @@
       "sources"
     ],
     "len": 25,
-    "created_ts": 1778205823
+    "created_ts": 1778379534
   },
   {
     "id": "sources:daily-research-digest-2026-05-03",
@@ -26139,7 +26901,7 @@
       "sources"
     ],
     "len": 27,
-    "created_ts": 1778205823
+    "created_ts": 1778379534
   },
   {
     "id": "sources:daily-research-digest-2026-05-04",
@@ -26178,7 +26940,7 @@
       "sources"
     ],
     "len": 27,
-    "created_ts": 1778205823
+    "created_ts": 1778379534
   },
   {
     "id": "sources:daily-research-digest-2026-05-05",
@@ -26217,7 +26979,7 @@
       "sources"
     ],
     "len": 27,
-    "created_ts": 1778205823
+    "created_ts": 1778379534
   },
   {
     "id": "sources:daily-research-digest-2026-05-06",
@@ -26260,7 +27022,77 @@
       "sources"
     ],
     "len": 31,
-    "created_ts": 1778205823
+    "created_ts": 1778379534
+  },
+  {
+    "id": "sources:daily-research-digest-2026-05-09",
+    "title": "📬 Daily Research Digest — 2026-05-09",
+    "kind": "sources",
+    "href": "sources/daily-research-digest-2026-05-09.html",
+    "summary": "- **mentioned_in** → Geometry-Grounded Gaussian Splatting _(Paper)_ - **mentioned_in** → Velox: Learning Representations of 4D Geometry and Appearance _(Paper)_",
+    "source_path": "/Users/neo/Developer/Projects/LLM-Wiki/data/research/daily/2026-05-09/digest.md",
+    "tokens": [
+      "daily",
+      "research",
+      "digest",
+      "2026",
+      "05",
+      "09",
+      "mentioned_in",
+      "geometry",
+      "grounded",
+      "gaussian",
+      "splatting",
+      "paper",
+      "mentioned_in",
+      "velox",
+      "learning",
+      "representations",
+      "4d",
+      "geometry",
+      "appearance",
+      "paper",
+      "sources"
+    ],
+    "len": 21,
+    "created_ts": 1778379534
+  },
+  {
+    "id": "sources:daily-research-digest-2026-05-10",
+    "title": "📬 Daily Research Digest — 2026-05-10",
+    "kind": "sources",
+    "href": "sources/daily-research-digest-2026-05-10.html",
+    "summary": "- **mentioned_in** → GTA: A Geometry-Aware Attention Mechanism for Multi-View Transformers _(Paper)_ - **mentioned_in** → Geometry-Grounded Gaussian Splatting _(Paper)_ - **mentioned_in** → SelfRefle…",
+    "source_path": "/Users/neo/Developer/Projects/LLM-Wiki/data/research/daily/2026-05-10/digest.md",
+    "tokens": [
+      "daily",
+      "research",
+      "digest",
+      "2026",
+      "05",
+      "10",
+      "mentioned_in",
+      "gta",
+      "geometry",
+      "aware",
+      "attention",
+      "mechanism",
+      "multi",
+      "view",
+      "transformers",
+      "paper",
+      "mentioned_in",
+      "geometry",
+      "grounded",
+      "gaussian",
+      "splatting",
+      "paper",
+      "mentioned_in",
+      "selfrefle",
+      "sources"
+    ],
+    "len": 25,
+    "created_ts": 1778379534
   },
   {
     "id": "syntheses:compare-gaussian-splatting-reconstruction-vs-geometry-grounded-gaussian-splatting",
@@ -26326,7 +27158,7 @@
       "synthesis"
     ],
     "len": 54,
-    "created_ts": 1778205823
+    "created_ts": 1778379534
   },
   {
     "id": "Synthesis:compare-gaussian-splatting-reconstruction-vs-geo:c2ca13133909",
@@ -26598,7 +27430,7 @@
       "trainingparadigm"
     ],
     "len": 227,
-    "created_ts": 1778205823
+    "created_ts": 1778379534
   },
   {
     "id": "Synthesis:daily-2026-04-06:c88b003b6f9c",
@@ -26902,7 +27734,7 @@
       "methodologicalconcept"
     ],
     "len": 269,
-    "created_ts": 1778205823
+    "created_ts": 1778379534
   },
   {
     "id": "Synthesis:daily-2026-04-07:623a8f282b9f",
@@ -27224,7 +28056,7 @@
       "extracted"
     ],
     "len": 287,
-    "created_ts": 1778205823
+    "created_ts": 1778379534
   },
   {
     "id": "Synthesis:daily-2026-04-08:93d38c0e06be",
@@ -27333,7 +28165,7 @@
       "extracted"
     ],
     "len": 74,
-    "created_ts": 1778205823
+    "created_ts": 1778379534
   },
   {
     "id": "Synthesis:daily-2026-04-09:3fa630a7115b",
@@ -27569,7 +28401,7 @@
       "extracted"
     ],
     "len": 201,
-    "created_ts": 1778205823
+    "created_ts": 1778379534
   },
   {
     "id": "Synthesis:daily-2026-04-10:472b8bcc7402",
@@ -27769,7 +28601,7 @@
       "extracted"
     ],
     "len": 165,
-    "created_ts": 1778205823
+    "created_ts": 1778379534
   },
   {
     "id": "Synthesis:daily-2026-04-11:6f6c8515bff1",
@@ -27900,7 +28732,7 @@
       "extracted"
     ],
     "len": 96,
-    "created_ts": 1778205823
+    "created_ts": 1778379534
   },
   {
     "id": "Synthesis:daily-2026-04-12:70fd80078cb1",
@@ -28074,7 +28906,7 @@
       "extracted"
     ],
     "len": 139,
-    "created_ts": 1778205823
+    "created_ts": 1778379534
   },
   {
     "id": "Synthesis:daily-2026-04-13:3ec0f1c31c54",
@@ -28222,7 +29054,7 @@
       "extracted"
     ],
     "len": 113,
-    "created_ts": 1778205823
+    "created_ts": 1778379534
   },
   {
     "id": "Synthesis:daily-2026-04-14:c4efef2ec371",
@@ -28420,7 +29252,7 @@
       "technicalterm"
     ],
     "len": 163,
-    "created_ts": 1778205823
+    "created_ts": 1778379534
   },
   {
     "id": "Synthesis:daily-2026-04-15:4690a629b650",
@@ -28581,7 +29413,7 @@
       "extracted"
     ],
     "len": 126,
-    "created_ts": 1778205823
+    "created_ts": 1778379534
   },
   {
     "id": "Synthesis:daily-2026-04-16:890318417910",
@@ -28709,7 +29541,7 @@
       "extracted"
     ],
     "len": 93,
-    "created_ts": 1778205823
+    "created_ts": 1778379534
   },
   {
     "id": "Synthesis:daily-2026-04-18:69d98bd415da",
@@ -28985,7 +29817,7 @@
       "trainingparadigm"
     ],
     "len": 241,
-    "created_ts": 1778205823
+    "created_ts": 1778379534
   },
   {
     "id": "Synthesis:daily-2026-04-22:d91e1ae7dfac",
@@ -29322,7 +30154,7 @@
       "extracted"
     ],
     "len": 302,
-    "created_ts": 1778205823
+    "created_ts": 1778379534
   },
   {
     "id": "Synthesis:daily-2026-04-23:afd8126f21a7",
@@ -29461,7 +30293,7 @@
       "trainingparadigm"
     ],
     "len": 104,
-    "created_ts": 1778205823
+    "created_ts": 1778379534
   },
   {
     "id": "Synthesis:daily-2026-04-24:d6e75dd67c2f",
@@ -29826,7 +30658,7 @@
       "methodologicalconcept"
     ],
     "len": 330,
-    "created_ts": 1778205823
+    "created_ts": 1778379534
   },
   {
     "id": "Synthesis:daily-2026-04-25:f589139dc806",
@@ -29999,7 +30831,7 @@
       "trainingparadigm"
     ],
     "len": 138,
-    "created_ts": 1778205823
+    "created_ts": 1778379534
   },
   {
     "id": "Synthesis:daily-2026-04-26:175a9bde94d7",
@@ -30118,7 +30950,7 @@
       "extracted"
     ],
     "len": 84,
-    "created_ts": 1778205823
+    "created_ts": 1778379534
   },
   {
     "id": "Synthesis:daily-2026-04-27:330c7f94ffd8",
@@ -30282,7 +31114,7 @@
       "trainingparadigm"
     ],
     "len": 129,
-    "created_ts": 1778205823
+    "created_ts": 1778379534
   },
   {
     "id": "Synthesis:daily-2026-04-28:a0e5e09b2746",
@@ -30472,7 +31304,7 @@
       "task"
     ],
     "len": 155,
-    "created_ts": 1778205823
+    "created_ts": 1778379534
   },
   {
     "id": "Synthesis:daily-2026-04-29:811a1a5f7211",
@@ -30713,7 +31545,7 @@
       "methodologicalconcept"
     ],
     "len": 206,
-    "created_ts": 1778205823
+    "created_ts": 1778379534
   },
   {
     "id": "Synthesis:daily-2026-04-30:0e2dd47363e5",
@@ -30824,7 +31656,7 @@
       "extracted"
     ],
     "len": 76,
-    "created_ts": 1778205823
+    "created_ts": 1778379534
   },
   {
     "id": "Synthesis:daily-2026-05-01:cc1f607f3bbe",
@@ -31003,7 +31835,7 @@
       "extracted"
     ],
     "len": 144,
-    "created_ts": 1778205823
+    "created_ts": 1778379534
   },
   {
     "id": "Synthesis:daily-2026-05-02:f4efec031284",
@@ -31183,7 +32015,7 @@
       "extracted"
     ],
     "len": 145,
-    "created_ts": 1778205823
+    "created_ts": 1778379534
   },
   {
     "id": "Synthesis:daily-2026-05-03:c73e169cdf41",
@@ -31374,7 +32206,7 @@
       "methodologicalconcept"
     ],
     "len": 156,
-    "created_ts": 1778205823
+    "created_ts": 1778379534
   },
   {
     "id": "Synthesis:daily-2026-05-04:6f5f8e2695c5",
@@ -31545,7 +32377,7 @@
       "extracted"
     ],
     "len": 136,
-    "created_ts": 1778205823
+    "created_ts": 1778379534
   },
   {
     "id": "Synthesis:daily-2026-05-05:d8cac75ed48c",
@@ -31690,7 +32522,7 @@
       "extracted"
     ],
     "len": 110,
-    "created_ts": 1778205823
+    "created_ts": 1778379534
   },
   {
     "id": "Synthesis:daily-2026-05-06:e515cf2a8272",
@@ -31799,7 +32631,7 @@
       "extracted"
     ],
     "len": 74,
-    "created_ts": 1778205823
+    "created_ts": 1778379534
   },
   {
     "id": "Synthesis:daily-2026-05-07:d7edf2697dad",
@@ -31919,7 +32751,7 @@
       "extracted"
     ],
     "len": 85,
-    "created_ts": 1778205823
+    "created_ts": 1778379534
   },
   {
     "id": "Synthesis:daily-2026-05-08:a3c0c00299c9",
@@ -31938,6 +32770,326 @@
       "2026",
       "05",
       "08",
+      "ingest",
+      "syntheses"
+    ],
+    "len": 11,
+    "created_ts": null
+  },
+  {
+    "id": "syntheses:daily-2026-05-09",
+    "title": "Daily Digest — 2026-05-09",
+    "kind": "syntheses",
+    "href": "syntheses/daily-2026-05-09.html",
+    "summary": "Sources ingested under `data/research/daily/2026-05-09/`.",
+    "source_path": "/Users/neo/Developer/Projects/LLM-Wiki/.llm-wiki/wiki/syntheses/daily-2026-05-09.md",
+    "tokens": [
+      "daily",
+      "digest",
+      "2026",
+      "05",
+      "09",
+      "sources",
+      "ingested",
+      "under",
+      "data",
+      "research",
+      "daily",
+      "2026",
+      "05",
+      "09",
+      "syntheses",
+      "daily",
+      "digest",
+      "2026",
+      "05",
+      "09",
+      "sources",
+      "ingested",
+      "under",
+      "data",
+      "research",
+      "daily",
+      "2026",
+      "05",
+      "09",
+      "papers",
+      "repos",
+      "gta",
+      "geometry",
+      "aware",
+      "attention",
+      "mechanism",
+      "multi",
+      "view",
+      "transformers",
+      "arxiv",
+      "2310",
+      "10375",
+      "papers",
+      "gta",
+      "geometry",
+      "aware",
+      "attention",
+      "mechanism",
+      "multi",
+      "view",
+      "transformers",
+      "md",
+      "paper",
+      "velox",
+      "learning",
+      "representations",
+      "4d",
+      "geometry",
+      "appearance",
+      "arxiv",
+      "2605",
+      "04527",
+      "papers",
+      "velox",
+      "learning",
+      "representations",
+      "4d",
+      "geometry",
+      "appearance",
+      "md",
+      "paper",
+      "github",
+      "분석",
+      "199",
+      "biotechnologies",
+      "claude",
+      "deep",
+      "research",
+      "skill",
+      "repos",
+      "github",
+      "분석",
+      "199",
+      "biotechnologies",
+      "claude",
+      "deep",
+      "research",
+      "skill",
+      "md",
+      "repository",
+      "github",
+      "분석",
+      "ashishps1",
+      "awesome",
+      "engineering",
+      "articles",
+      "repos",
+      "github",
+      "분석",
+      "ashishps1",
+      "awesome",
+      "engineering",
+      "articles",
+      "md",
+      "repository",
+      "github",
+      "분석",
+      "rui314",
+      "chibicc",
+      "repos",
+      "github",
+      "분석",
+      "rui314",
+      "chibicc",
+      "md",
+      "repository",
+      "daily",
+      "feed",
+      "summary",
+      "2026",
+      "05",
+      "09",
+      "sources",
+      "daily",
+      "feed",
+      "summary",
+      "2026",
+      "05",
+      "09",
+      "md",
+      "sourcedocument",
+      "daily",
+      "research",
+      "digest",
+      "2026",
+      "05",
+      "09",
+      "sources",
+      "daily",
+      "research",
+      "digest",
+      "2026",
+      "05",
+      "09",
+      "md",
+      "sourcedocument",
+      "extracted",
+      "concepts",
+      "novel",
+      "view",
+      "synthesis",
+      "task"
+    ],
+    "len": 152,
+    "created_ts": 1778379534
+  },
+  {
+    "id": "Synthesis:daily-2026-05-09:ad66b3d4e644",
+    "title": "Daily Digest — 2026-05-09",
+    "kind": "syntheses",
+    "href": "syntheses/daily-digest-2026-05-09.html",
+    "summary": "Digest of 2026-05-09 ingest.",
+    "source_path": "",
+    "tokens": [
+      "daily",
+      "digest",
+      "2026",
+      "05",
+      "09",
+      "digest",
+      "2026",
+      "05",
+      "09",
+      "ingest",
+      "syntheses"
+    ],
+    "len": 11,
+    "created_ts": null
+  },
+  {
+    "id": "syntheses:daily-2026-05-10",
+    "title": "Daily Digest — 2026-05-10",
+    "kind": "syntheses",
+    "href": "syntheses/daily-2026-05-10.html",
+    "summary": "Sources ingested under `data/research/daily/2026-05-10/`.",
+    "source_path": "/Users/neo/Developer/Projects/LLM-Wiki/.llm-wiki/wiki/syntheses/daily-2026-05-10.md",
+    "tokens": [
+      "daily",
+      "digest",
+      "2026",
+      "05",
+      "10",
+      "sources",
+      "ingested",
+      "under",
+      "data",
+      "research",
+      "daily",
+      "2026",
+      "05",
+      "10",
+      "syntheses",
+      "daily",
+      "digest",
+      "2026",
+      "05",
+      "10",
+      "sources",
+      "ingested",
+      "under",
+      "data",
+      "research",
+      "daily",
+      "2026",
+      "05",
+      "10",
+      "papers",
+      "repos",
+      "selfreflect",
+      "llms",
+      "communicate",
+      "their",
+      "internal",
+      "answer",
+      "distribution",
+      "arxiv",
+      "2505",
+      "20295",
+      "papers",
+      "selfreflect",
+      "llms",
+      "communicate",
+      "their",
+      "internal",
+      "answer",
+      "distribution",
+      "md",
+      "paper",
+      "github",
+      "분석",
+      "apple",
+      "ml",
+      "lito",
+      "repos",
+      "github",
+      "분석",
+      "apple",
+      "ml",
+      "lito",
+      "md",
+      "repository",
+      "daily",
+      "feed",
+      "summary",
+      "2026",
+      "05",
+      "10",
+      "sources",
+      "daily",
+      "feed",
+      "summary",
+      "2026",
+      "05",
+      "10",
+      "md",
+      "sourcedocument",
+      "daily",
+      "research",
+      "digest",
+      "2026",
+      "05",
+      "10",
+      "sources",
+      "daily",
+      "research",
+      "digest",
+      "2026",
+      "05",
+      "10",
+      "md",
+      "sourcedocument",
+      "extracted",
+      "concepts",
+      "none",
+      "extracted"
+    ],
+    "len": 98,
+    "created_ts": 1778379534
+  },
+  {
+    "id": "Synthesis:daily-2026-05-10:495b5ecf37a7",
+    "title": "Daily Digest — 2026-05-10",
+    "kind": "syntheses",
+    "href": "syntheses/daily-digest-2026-05-10.html",
+    "summary": "Digest of 2026-05-10 ingest.",
+    "source_path": "",
+    "tokens": [
+      "daily",
+      "digest",
+      "2026",
+      "05",
+      "10",
+      "digest",
+      "2026",
+      "05",
+      "10",
       "ingest",
       "syntheses"
     ],
@@ -32080,7 +33232,7 @@
       "trainingparadigm"
     ],
     "len": 126,
-    "created_ts": 1778205823
+    "created_ts": 1778379534
   },
   {
     "id": "Synthesis:field-3d-4d-vision-and-reconstruction:853e9a0e999f",
@@ -32136,7 +33288,7 @@
       "none"
     ],
     "len": 18,
-    "created_ts": 1778205823
+    "created_ts": 1778379534
   },
   {
     "id": "Synthesis:field-llm-reasoning:da77b4549704",
@@ -32214,7 +33366,7 @@
       "trainingparadigm"
     ],
     "len": 44,
-    "created_ts": 1778205823
+    "created_ts": 1778379534
   },
   {
     "id": "Synthesis:field-research-literature:f50377e69d49",
@@ -32271,7 +33423,7 @@
       "causalclaim",
       "7",
       "claim",
-      "21",
+      "24",
       "codeclass",
       "111",
       "codefunction",
@@ -32281,7 +33433,7 @@
       "comparisonclaim",
       "18",
       "contributionclaim",
-      "20",
+      "21",
       "dataset",
       "4",
       "dependency",
@@ -32289,11 +33441,11 @@
       "evaluationprotocol",
       "1",
       "evidencespan",
-      "119",
+      "128",
       "inferencestrategy",
       "1",
       "limitationclaim",
-      "5",
+      "6",
       "mathematicalconcept",
       "1",
       "methodologicalconcept",
@@ -32305,15 +33457,15 @@
       "openquestion",
       "4",
       "organization",
-      "40",
+      "41",
       "paper",
-      "100",
+      "109",
       "performanceclaim",
-      "70",
+      "77",
       "person",
-      "292",
+      "308",
       "repository",
-      "133",
+      "137",
       "researchfield",
       "3",
       "researchtopic",
@@ -32321,7 +33473,7 @@
       "result",
       "3",
       "sourcedocument",
-      "76",
+      "80",
       "sourcefile",
       "116",
       "task",
@@ -32332,32 +33484,38 @@
       "6",
       "recently",
       "added",
+      "selfreflect",
+      "llms",
+      "communicate",
+      "their",
+      "internal",
+      "answer",
+      "distribution",
+      "paper",
       "github",
       "분석",
-      "naver",
-      "multi",
-      "hmr",
+      "apple",
+      "ml",
+      "lito",
+      "repository",
+      "velox",
+      "learning",
+      "representations",
+      "4d",
+      "geometry",
+      "appearance",
+      "paper",
+      "github",
+      "분석",
+      "rui314",
+      "chibicc",
       "repository",
       "github",
       "분석",
-      "bolixinyu",
-      "lca",
-      "repository",
-      "github",
-      "분석",
-      "cintellifusion",
-      "multiworld",
-      "repository",
-      "github",
-      "분석",
-      "honojs",
-      "middleware",
-      "repository",
-      "github",
-      "분석",
-      "davian",
-      "robotics",
-      "egox",
+      "ashishps1",
+      "awesome",
+      "engineering",
+      "articles",
       "repository",
       "top",
       "fields",
@@ -32365,7 +33523,7 @@
       "4d",
       "vision",
       "reconstruction",
-      "36",
+      "39",
       "linked",
       "artifacts",
       "research",
@@ -32386,8 +33544,8 @@
       "research",
       "notebook"
     ],
-    "len": 139,
-    "created_ts": 1778205823
+    "len": 145,
+    "created_ts": 1778379534
   },
   {
     "id": "Synthesis:pulse:6ffe96c09f0f",
@@ -32614,7 +33772,7 @@
       "none"
     ],
     "len": 194,
-    "created_ts": 1778205823
+    "created_ts": 1778379534
   },
   {
     "id": "syntheses:topic-world-model",
@@ -32709,7 +33867,7 @@
       "none"
     ],
     "len": 83,
-    "created_ts": 1778205823
+    "created_ts": 1778379534
   },
   {
     "id": "syntheses:weekly-2026-W15",
@@ -32786,7 +33944,7 @@
       "none"
     ],
     "len": 65,
-    "created_ts": 1778205823
+    "created_ts": 1778379534
   },
   {
     "id": "Synthesis:weekly-2026-w15:647fc9c2753d",
@@ -32889,7 +34047,7 @@
       "none"
     ],
     "len": 70,
-    "created_ts": 1778205823
+    "created_ts": 1778379534
   },
   {
     "id": "Synthesis:weekly-2026-w17:6a318811a3d9",
@@ -32960,7 +34118,7 @@
       "none"
     ],
     "len": 38,
-    "created_ts": 1778205823
+    "created_ts": 1778379534
   },
   {
     "id": "Synthesis:weekly-2026-w18:b52b35042365",
@@ -33018,7 +34176,7 @@
       "topics"
     ],
     "len": 25,
-    "created_ts": 1778205823
+    "created_ts": 1778379534
   },
   {
     "id": "topics:dynamic-gaussian-splatting",
@@ -33039,7 +34197,7 @@
       "topics"
     ],
     "len": 9,
-    "created_ts": 1778205823
+    "created_ts": 1778379534
   },
   {
     "id": "topics:gaussian-splatting-reconstruction",
@@ -33059,7 +34217,7 @@
       "topics"
     ],
     "len": 8,
-    "created_ts": 1778205823
+    "created_ts": 1778379534
   },
   {
     "id": "topics:geometry-grounded-gaussian-splatting",
@@ -33089,7 +34247,7 @@
       "gs"
     ],
     "len": 18,
-    "created_ts": 1778205823
+    "created_ts": 1778379534
   },
   {
     "id": "topics:llm-reasoning",
@@ -33116,7 +34274,7 @@
       "topics"
     ],
     "len": 15,
-    "created_ts": 1778205823
+    "created_ts": 1778379534
   },
   {
     "id": "topics:research-literature",
@@ -33154,7 +34312,7 @@
       "topics"
     ],
     "len": 26,
-    "created_ts": 1778205823
+    "created_ts": 1778379534
   },
   {
     "id": "topics:visual-slam",
@@ -33197,7 +34355,7 @@
       "slam"
     ],
     "len": 31,
-    "created_ts": 1778205823
+    "created_ts": 1778379534
   },
   {
     "id": "topics:world-model",
@@ -33236,6 +34394,6 @@
       "models"
     ],
     "len": 27,
-    "created_ts": 1778205823
+    "created_ts": 1778379534
   }
 ]

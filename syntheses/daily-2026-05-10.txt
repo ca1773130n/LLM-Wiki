@@ -1,0 +1,15 @@
+Daily Digest — 2026-05-10
+=========================
+
+# Daily Digest — 2026-05-10
+
+Sources ingested under `data/research/daily/2026-05-10/`.
+
+## Papers and repos
+- [SelfReflect: Can LLMs Communicate Their Internal Answer Distribution? (arXiv:2505.20295)](../papers/selfreflect-can-llms-communicate-their-internal-answer-distribution.md) (Paper)
+- [GitHub 분석: apple/ml-lito](../repos/github-분석-apple-ml-lito.md) (Repository)
+- [Daily Feed Summary — 2026-05-10](../sources/daily-feed-summary-2026-05-10.md) (SourceDocument)
+- [📬 Daily Research Digest — 2026-05-10](../sources/daily-research-digest-2026-05-10.md) (SourceDocument)
+
+## Extracted concepts
+- (none extracted)

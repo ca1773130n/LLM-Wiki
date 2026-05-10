@@ -1,0 +1,77 @@
+paper.md
+========
+
+# 논문 분석: 2605.04527
+
+> - arxiv: https://arxiv.org/abs/2605.04527
+> - papers.cool: https://papers.cool/arxiv/2605.04527
+> - 분석일: 2026-05-09
+
+Velox: Learning Representations of 4D Geometry and Appearance | Cool Papers - 몰입형 논문 탐색
+
+## 2605.04527
+
+총계: 1
+
+## #1
+
+# Velox: Learning Representations of 4D Geometry and Appearance
+
+[PDF5] [Copy] [Kimi3] [REL]
+
+저자:
+Anagh Malik,  
+Dorian Chan,  
+Xiaoming Zhao,  
+David B. Lindell,  
+Oncel Tuzel,  
+Jen-Hao Rick Chang
+
+우리는 4D 객체의 잠재 표현을 학습하기 위한 프레임워크를 소개한다. 이 표현은 서술력이 높아 객체의 기하와 외형을 충실히 포착하고, 압축적이어서 다운스트림 효율을 높이며, 최소한의 입력, 즉 비정형 동적 포인트 클라우드만으로도 구축 가능하다는 점에서 접근성이 높다. 구체적으로 Velox는 시공간적 컬러 포인트 클라우드를 동적 shape token 집합으로 압축하도록 encoder를 학습한다. 이 token들은 상호 보완적인 두 decoder를 통해 supervision을 받는다. 하나는 기하를 포착하는 시간 가변적 표면 분포를 모델링하는 4D surface decoder이고, 다른 하나는 token을 3D Gaussians로 매핑하여 외형 학습을 돕는 Gaussian decoder이다. 우리의 표현의 유용성을 입증하기 위해 video-to-4D generation, 3D tracking, 그리고 image-to-4D generation을 통한 cloth simulation의 세 가지 다운스트림 작업에서 평가했으며, 모든 설정에서 강한 성능을 확인했다.
+
+주제:
+
+Computer Vision and Pattern Recognition
+
+게시: 2026-05-06 06:12:19 UTC
+
+Designed by kexue.fm | Powered by kimi.ai
+
+Include(OR):
+
+Exclude:
+
+Search
+
+Filter
+
+Highlight
+
+Stared Paper(s):
+
+#1  
+Velox: Learning Representations of 4D Geometry and Appearance
+
+Export
+
+Magic Token:
+
+Kimi Language:
+
+中文  
+English
+
+Desc Language:
+
+中文  
+English
+
+Save
+
+버그 신고? 이슈 제출? 다음을 방문하세요:
+
+Github: https://github.com/bojone/papers.cool
+
+진행하기 전에 Disclaimer를 읽어주세요.
+
+더 흥미로운 기능은 kexue.fm 및 kimi.ai를 방문하세요.

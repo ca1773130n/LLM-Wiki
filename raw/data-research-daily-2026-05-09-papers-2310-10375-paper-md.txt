@@ -1,0 +1,77 @@
+paper.md
+========
+
+# 논문 분석: 2310.10375
+
+> - arxiv: https://arxiv.org/abs/2310.10375
+> - papers.cool: https://papers.cool/arxiv/2310.10375
+> - 분석일: 2026-05-09
+
+# GTA: A Geometry-Aware Attention Mechanism for Multi-View Transformers | Cool Papers - 몰입형 논문 탐색
+
+## 2310.10375
+
+총계: 1
+
+## #1
+# GTA: A Geometry-Aware Attention Mechanism for Multi-View Transformers
+
+[PDF1]  
+[Copy]  
+[Kimi3]  
+[REL]
+
+저자:  
+Takeru Miyato,  
+Bernhard Jaeger,  
+Max Welling,  
+Andreas Geiger
+
+Transformer는 입력 토큰의 순열에 대해 equivariant하므로, 많은 작업에서 토큰의 위치 정보를 인코딩하는 것이 필요하다. 그러나 기존 위치 인코딩 방식은 원래 NLP 작업을 위해 설계되었기 때문에, 일반적으로 서로 다른 구조적 특성을 갖는 비전 작업에 적합한지는 의문이다. 저자들은 기존 위치 인코딩 방식이 3D 비전 작업의 기저에 있는 3D 기하 구조를 존중하지 않기 때문에 최적이 아니라고 주장한다. 이 가설을 바탕으로, query와 key-value 쌍 사이의 기하학적 관계에 의해 결정되는 상대 변환으로 토큰의 기하 구조를 인코딩하는 geometry-aware attention 메커니즘을 제안한다. 희소한 wide-baseline multi-view 설정에서 여러 novel view synthesis, NVS 데이터셋으로 평가한 결과, Geometric Transform Attention, GTA라고 부르는 이 attention이 추가적인 학습 파라미터 없이도, 그리고 계산 오버헤드는 소폭만 증가시키면서, 최신 transformer 기반 NVS 모델의 학습 효율과 성능을 향상시킴을 보인다.
+
+주제:  
+Computer Vision and Pattern Recognition,  
+Artificial Intelligence,  
+Machine Learning,  
+Machine Learning
+
+게시일: 2023-10-16 13:16:09 UTC
+
+Designed by kexue.fm | Powered by kimi.ai
+
+포함 OR:
+
+제외:
+
+검색
+
+필터
+
+강조 표시
+
+표시한 논문:
+
+#1  
+GTA: A Geometry-Aware Attention Mechanism for Multi-View Transformers
+
+내보내기
+
+Magic Token:
+
+Kimi 언어:  
+중문  
+English
+
+설명 언어:  
+중문  
+English
+
+저장
+
+버그 제보나 이슈 제출은 다음을 방문하세요:
+
+Github: https://github.com/bojone/papers.cool
+
+진행하기 전에 면책 조항을 읽어 주세요.
+
+더 흥미로운 기능은 kexue.fm 및 kimi.ai를 방문하세요.

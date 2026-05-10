@@ -1,0 +1,55 @@
+repo.md
+=======
+
+# GitHub 분석: apple/ml-lito
+
+> - URL: https://github.com/apple/ml-lito
+> - 분석일: 2026-05-10
+
+## 개요
+
+- **설명**: [ICLR 2026] LiTo: Surface Light Field Tokenizatio
+- **Stars**: ⭐ 80 | Forks: 5
+- **라이선스**: NOASSERTION
+- **주 언어**: Python
+
+## 실행 가능 상태: 모델 다운로드 스크립트 있음 (다운로드 후 실행 가능)
+
+| 항목 | 상태 |
+|------|------|
+| README | Y |
+| 소스 코드 (3개) | Y |
+| 의존성 파일 | Y |
+| 모델/체크포인트 | script |
+| Docker | N |
+
+## 파일 구조
+
+```
+ACKNOWLEDGEMENTS
+CODE_OF_CONDUCT.md
+configs/default_config.yaml
+CONTRIBUTING.md
+docs/repo-structure.md
+exclude.txt
+.gitattributes
+.git/config
+.git/description
+.git/HEAD
+.gitignore
+.git/index
+.gitmodules
+.git/packed-refs
+.git/shallow
+LICENSE
+LICENSE_generated_samples
+LICENSE_MODEL
+notebooks/demo_tokenizer.ipynb
+notebooks/render_data.ipynb
+pixi.lock
+.pre-commit-config.yaml
+pyproject.toml
+README.md
+run_ruff.sh
+scripts/train.py
+```

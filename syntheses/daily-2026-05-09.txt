@@ -1,0 +1,18 @@
+Daily Digest — 2026-05-09
+=========================
+
+# Daily Digest — 2026-05-09
+
+Sources ingested under `data/research/daily/2026-05-09/`.
+
+## Papers and repos
+- [GTA: A Geometry-Aware Attention Mechanism for Multi-View Transformers (arXiv:2310.10375)](../papers/gta-a-geometry-aware-attention-mechanism-for-multi-view-transformers.md) (Paper)
+- [Velox: Learning Representations of 4D Geometry and Appearance (arXiv:2605.04527)](../papers/velox-learning-representations-of-4d-geometry-and-appearance.md) (Paper)
+- [GitHub 분석: 199-biotechnologies/claude-deep-research-skill](../repos/github-분석-199-biotechnologies-claude-deep-research-skill.md) (Repository)
+- [GitHub 분석: ashishps1/awesome-engineering-articles](../repos/github-분석-ashishps1-awesome-engineering-articles.md) (Repository)
+- [GitHub 분석: rui314/chibicc](../repos/github-분석-rui314-chibicc.md) (Repository)
+- [Daily Feed Summary — 2026-05-09](../sources/daily-feed-summary-2026-05-09.md) (SourceDocument)
+- [📬 Daily Research Digest — 2026-05-09](../sources/daily-research-digest-2026-05-09.md) (SourceDocument)
+
+## Extracted concepts
+- Novel View Synthesis (Task)

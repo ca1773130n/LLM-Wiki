@@ -1,0 +1,12 @@
+GitHub 분석: rui314/chibicc
+=========================
+
+# GitHub 분석: rui314/chibicc
+
+## Incoming relations
+
+- **implemented_in** → GTA: A Geometry-Aware Attention Mechanism for Multi-View Transformers _(Paper)_
+
+## Connected node types
+
+- Paper: 1

@@ -10,46 +10,46 @@ Snapshot of the wiki at the most recent compile.
 - ApproachFamily: 3
 - Benchmark: 7
 - CausalClaim: 7
-- Claim: 21
+- Claim: 24
 - CodeClass: 111
 - CodeFunction: 1985
 - CodeProject: 1
 - ComparisonClaim: 18
-- ContributionClaim: 20
+- ContributionClaim: 21
 - Dataset: 4
 - Dependency: 97
 - EvaluationProtocol: 1
-- EvidenceSpan: 119
+- EvidenceSpan: 128
 - InferenceStrategy: 1
-- LimitationClaim: 5
+- LimitationClaim: 6
 - MathematicalConcept: 1
 - MethodologicalConcept: 4
 - Metric: 6
 - Model: 3
 - OpenQuestion: 4
-- Organization: 40
-- Paper: 100
-- PerformanceClaim: 70
-- Person: 292
-- Repository: 133
+- Organization: 41
+- Paper: 109
+- PerformanceClaim: 77
+- Person: 308
+- Repository: 137
 - ResearchField: 3
 - ResearchTopic: 2
 - Result: 3
-- SourceDocument: 76
+- SourceDocument: 80
 - SourceFile: 116
 - Task: 2
 - TechnicalTerm: 2
 - TrainingParadigm: 6
 
 ## Recently added
-- GitHub 분석: naver/multi-hmr (Repository)
-- GitHub 분석: bolixinyu/LCA (Repository)
-- GitHub 분석: CIntellifusion/MultiWorld (Repository)
-- GitHub 분석: honojs/middleware (Repository)
-- GitHub 분석: DAVIAN-Robotics/EgoX (Repository)
+- SelfReflect: Can LLMs Communicate Their Internal Answer Distribution? (Paper)
+- GitHub 분석: apple/ml-lito (Repository)
+- Velox: Learning Representations of 4D Geometry and Appearance (Paper)
+- GitHub 분석: rui314/chibicc (Repository)
+- GitHub 분석: ashishps1/awesome-engineering-articles (Repository)
 
 ## Top fields
-- 3D/4D Vision and Reconstruction — 36 linked artifacts
+- 3D/4D Vision and Reconstruction — 39 linked artifacts
 - Research Literature — 14 linked artifacts
 - LLM Reasoning — 1 linked artifacts
 

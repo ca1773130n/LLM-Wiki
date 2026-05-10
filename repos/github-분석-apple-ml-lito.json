@@ -1,0 +1,19 @@
+{
+  "title": "GitHub 분석: apple/ml-lito",
+  "kind": "repos",
+  "body_text": "# GitHub 분석: apple/ml-lito\n\n## Outgoing relations\n\n- **released_by** → apple _(Organization)_\n\n## Incoming relations\n\n- **implemented_in** → SelfReflect: Can LLMs Communicate Their Internal Answer Distribution? _(Paper)_\n\n## Connected node types\n\n- Organization: 1\n- Paper: 1",
+  "source_path": "/Users/neo/Developer/Projects/LLM-Wiki/data/research/daily/2026-05-10/papers/2505.20295/repo.md",
+  "links": [],
+  "body": "# GitHub 분석: apple/ml-lito\n\n## Outgoing relations\n\n- **released_by** → apple _(Organization)_\n\n## Incoming relations\n\n- **implemented_in** → SelfReflect: Can LLMs Communicate Their Internal Answer Distribution? _(Paper)_\n\n## Connected node types\n\n- Organization: 1\n- Paper: 1",
+  "frontmatter": {
+    "aliases": [
+      "apple/ml-lito",
+      "https://github.com/apple/ml-lito"
+    ],
+    "kind": "repos",
+    "node_id": "Repository:github-apple-ml-lito:1a1a85249564",
+    "node_type": "Repository",
+    "source_path": "/Users/neo/Developer/Projects/LLM-Wiki/data/research/daily/2026-05-10/papers/2505.20295/repo.md",
+    "title": "GitHub 분석: apple/ml-lito"
+  }
+}

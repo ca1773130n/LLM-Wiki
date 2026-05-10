@@ -1,0 +1,12 @@
+David B. Lindell
+================
+
+# David B. Lindell
+
+## Incoming relations
+
+- **authored_by** → Velox: Learning Representations of 4D Geometry and Appearance _(Paper)_
+
+## Connected node types
+
+- Paper: 1

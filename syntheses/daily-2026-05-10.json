@@ -1,0 +1,32 @@
+{
+  "title": "Daily Digest — 2026-05-10",
+  "kind": "syntheses",
+  "body_text": "# Daily Digest — 2026-05-10\n\nSources ingested under `data/research/daily/2026-05-10/`.\n\n## Papers and repos\n- [SelfReflect: Can LLMs Communicate Their Internal Answer Distribution? (arXiv:2505.20295)](../papers/selfreflect-can-llms-communicate-their-internal-answer-distribution.md) (Paper)\n- [GitHub 분석: apple/ml-lito](../repos/github-분석-apple-ml-lito.md) (Repository)\n- [Daily Feed Summary — 2026-05-10](../sources/daily-feed-summary-2026-05-10.md) (SourceDocument)\n- [📬 Daily Research Digest — 2026-05-10](../sources/daily-research-digest-2026-05-10.md) (SourceDocument)\n\n## Extracted concepts\n- (none extracted)",
+  "source_path": "",
+  "links": [
+    "../papers/selfreflect-can-llms-communicate-their-internal-answer-distribution.md",
+    "../repos/github-분석-apple-ml-lito.md",
+    "../sources/daily-feed-summary-2026-05-10.md",
+    "../sources/daily-research-digest-2026-05-10.md"
+  ],
+  "body": "# Daily Digest — 2026-05-10\n\nSources ingested under `data/research/daily/2026-05-10/`.\n\n## Papers and repos\n- [SelfReflect: Can LLMs Communicate Their Internal Answer Distribution? (arXiv:2505.20295)](../papers/selfreflect-can-llms-communicate-their-internal-answer-distribution.md) (Paper)\n- [GitHub 분석: apple/ml-lito](../repos/github-분석-apple-ml-lito.md) (Repository)\n- [Daily Feed Summary — 2026-05-10](../sources/daily-feed-summary-2026-05-10.md) (SourceDocument)\n- [📬 Daily Research Digest — 2026-05-10](../sources/daily-research-digest-2026-05-10.md) (SourceDocument)\n\n## Extracted concepts\n- (none extracted)",
+  "frontmatter": {
+    "content_hash": "sha256-c63844166cee92e3eadafb0f37539f70df6c4fda4790a9150b42e2e1071fbd6b",
+    "generator": "heuristic-v1",
+    "inputs": [
+      "Paper:arxiv-2505-20295:aa977a72ab3f",
+      "Repository:github-apple-ml-lito:1a1a85249564",
+      "SourceDocument:daily-feed-summary-2026-05-10:24cb5a57cce0",
+      "SourceDocument:daily-research-digest-2026-05-10:155440063bd6"
+    ],
+    "slug": "daily-2026-05-10",
+    "sources": [
+      "data/research/daily/2026-05-10/digest.md",
+      "data/research/daily/2026-05-10/papers/2505.20295/paper.md",
+      "data/research/daily/2026-05-10/papers/2505.20295/repo.md",
+      "data/research/daily/2026-05-10/raw.md"
+    ],
+    "synthesis_kind": "daily_digest",
+    "title": "Daily Digest — 2026-05-10"
+  }
+}

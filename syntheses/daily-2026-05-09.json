@@ -1,0 +1,42 @@
+{
+  "title": "Daily Digest — 2026-05-09",
+  "kind": "syntheses",
+  "body_text": "# Daily Digest — 2026-05-09\n\nSources ingested under `data/research/daily/2026-05-09/`.\n\n## Papers and repos\n- [GTA: A Geometry-Aware Attention Mechanism for Multi-View Transformers (arXiv:2310.10375)](../papers/gta-a-geometry-aware-attention-mechanism-for-multi-view-transformers.md) (Paper)\n- [Velox: Learning Representations of 4D Geometry and Appearance (arXiv:2605.04527)](../papers/velox-learning-representations-of-4d-geometry-and-appearance.md) (Paper)\n- [GitHub 분석: 199-biotechnologies/claude-deep-research-skill](../repos/github-분석-199-biotechnologies-claude-deep-research-skill.md) (Repository)\n- [GitHub 분석: ashishps1/awesome-engineering-articles](../repos/github-분석-ashishps1-awesome-engineering-articles.md) (Repository)\n- [GitHub 분석: rui314/chibicc](../repos/github-분석-rui314-chibicc.md) (Repository)\n- [Daily Feed Summary — 2026-05-09](../sources/daily-feed-summary-2026-05-09.md) (SourceDocument)\n- [📬 Daily Research Digest — 2026-05-09](../sources/daily-research-digest-2026-05-09.md) (SourceDocument)\n\n## Extracted concepts\n- Novel View Synthesis (Task)",
+  "source_path": "",
+  "links": [
+    "../papers/gta-a-geometry-aware-attention-mechanism-for-multi-view-transformers.md",
+    "../papers/velox-learning-representations-of-4d-geometry-and-appearance.md",
+    "../repos/github-분석-199-biotechnologies-claude-deep-research-skill.md",
+    "../repos/github-분석-ashishps1-awesome-engineering-articles.md",
+    "../repos/github-분석-rui314-chibicc.md",
+    "../sources/daily-feed-summary-2026-05-09.md",
+    "../sources/daily-research-digest-2026-05-09.md"
+  ],
+  "body": "# Daily Digest — 2026-05-09\n\nSources ingested under `data/research/daily/2026-05-09/`.\n\n## Papers and repos\n- [GTA: A Geometry-Aware Attention Mechanism for Multi-View Transformers (arXiv:2310.10375)](../papers/gta-a-geometry-aware-attention-mechanism-for-multi-view-transformers.md) (Paper)\n- [Velox: Learning Representations of 4D Geometry and Appearance (arXiv:2605.04527)](../papers/velox-learning-representations-of-4d-geometry-and-appearance.md) (Paper)\n- [GitHub 분석: 199-biotechnologies/claude-deep-research-skill](../repos/github-분석-199-biotechnologies-claude-deep-research-skill.md) (Repository)\n- [GitHub 분석: ashishps1/awesome-engineering-articles](../repos/github-분석-ashishps1-awesome-engineering-articles.md) (Repository)\n- [GitHub 분석: rui314/chibicc](../repos/github-분석-rui314-chibicc.md) (Repository)\n- [Daily Feed Summary — 2026-05-09](../sources/daily-feed-summary-2026-05-09.md) (SourceDocument)\n- [📬 Daily Research Digest — 2026-05-09](../sources/daily-research-digest-2026-05-09.md) (SourceDocument)\n\n## Extracted concepts\n- Novel View Synthesis (Task)",
+  "frontmatter": {
+    "content_hash": "sha256-c8ae2ab771bde1f5ee81352507eeab3daf7c223fd613a1acbb2b0aa5db1856e1",
+    "generator": "heuristic-v1",
+    "inputs": [
+      "Paper:arxiv-2310-10375:382b0d986ec5",
+      "Paper:arxiv-2605-04527:c0faca348771",
+      "Repository:github-199-biotechnologies-claude-deep-research-:3e191fab3bf4",
+      "Repository:github-ashishps1-awesome-engineering-articles:8c171b4992b2",
+      "Repository:github-rui314-chibicc:50809d928929",
+      "SourceDocument:daily-feed-summary-2026-05-09:bbad7e1d0cc2",
+      "SourceDocument:daily-research-digest-2026-05-09:117d1d46b37d",
+      "Task:novel-view-synthesis:19d55dfb9b83"
+    ],
+    "slug": "daily-2026-05-09",
+    "sources": [
+      "data/research/daily/2026-05-09/digest.md",
+      "data/research/daily/2026-05-09/papers/2310.10375/paper.md",
+      "data/research/daily/2026-05-09/papers/2310.10375/repo.md",
+      "data/research/daily/2026-05-09/papers/2605.04527/paper.md",
+      "data/research/daily/2026-05-09/raw.md",
+      "data/research/daily/2026-05-09/repos/199-biotechnologies_claude-deep-research-skill.md",
+      "data/research/daily/2026-05-09/repos/ashishps1_awesome-engineering-articles.md"
+    ],
+    "synthesis_kind": "daily_digest",
+    "title": "Daily Digest — 2026-05-09"
+  }
+}

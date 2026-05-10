@@ -1,10 +1,10 @@
 {
   "title": "Novel View Synthesis",
   "kind": "concepts",
-  "body_text": "# Novel View Synthesis\n\n## Incoming relations\n\n- **addresses** → Distance Field Rasterization for End-to-End Mesh Reconstruction _(Paper)_\n- **addresses** → Geometry-Grounded Gaussian Splatting _(Paper)_\n\n## Connected node types\n\n- Paper: 2",
+  "body_text": "# Novel View Synthesis\n\n## Incoming relations\n\n- **addresses** → Distance Field Rasterization for End-to-End Mesh Reconstruction _(Paper)_\n- **addresses** → GTA: A Geometry-Aware Attention Mechanism for Multi-View Transformers _(Paper)_\n- **addresses** → Geometry-Grounded Gaussian Splatting _(Paper)_\n\n## Connected node types\n\n- Paper: 3",
   "source_path": "/Users/neo/Developer/Projects/LLM-Wiki/data/research/daily/2026-04-26/papers/2601.17835/paper.md",
   "links": [],
-  "body": "# Novel View Synthesis\n\n## Incoming relations\n\n- **addresses** → Distance Field Rasterization for End-to-End Mesh Reconstruction _(Paper)_\n- **addresses** → Geometry-Grounded Gaussian Splatting _(Paper)_\n\n## Connected node types\n\n- Paper: 2",
+  "body": "# Novel View Synthesis\n\n## Incoming relations\n\n- **addresses** → Distance Field Rasterization for End-to-End Mesh Reconstruction _(Paper)_\n- **addresses** → GTA: A Geometry-Aware Attention Mechanism for Multi-View Transformers _(Paper)_\n- **addresses** → Geometry-Grounded Gaussian Splatting _(Paper)_\n\n## Connected node types\n\n- Paper: 3",
   "frontmatter": {
     "aliases": [
       "new view synthesis",

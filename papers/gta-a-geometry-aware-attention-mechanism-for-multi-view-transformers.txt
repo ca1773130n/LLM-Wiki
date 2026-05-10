@@ -1,0 +1,28 @@
+GTA: A Geometry-Aware Attention Mechanism for Multi-View Transformers
+=====================================================================
+
+# GTA: A Geometry-Aware Attention Mechanism for Multi-View Transformers
+
+## Outgoing relations
+
+- **addresses** → Novel View Synthesis _(Task)_
+- **authored_by** → Andreas Geiger _(Person)_
+- **authored_by** → Bernhard Jaeger _(Person)_
+- **authored_by** → Max Welling _(Person)_
+- **authored_by** → Takeru Miyato _(Person)_
+- **implemented_in** → GitHub 분석: rui314/chibicc _(Repository)_
+- **part_of** → 3D/4D Vision and Reconstruction _(ResearchField)_
+
+## Incoming relations
+
+- **mentioned_in** → Daily Feed Summary — 2026-05-09 _(SourceDocument)_
+- **mentioned_in** → Daily Feed Summary — 2026-05-10 _(SourceDocument)_
+- **mentioned_in** → 📬 Daily Research Digest — 2026-05-10 _(SourceDocument)_
+
+## Connected node types
+
+- Person: 4
+- SourceDocument: 3
+- Repository: 1
+- ResearchField: 1
+- Task: 1

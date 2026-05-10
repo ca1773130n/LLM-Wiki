@@ -1,0 +1,18 @@
+{
+  "title": "Velox: Learning Representations of 4D Geometry and Appearance",
+  "kind": "papers",
+  "body_text": "# Velox: Learning Representations of 4D Geometry and Appearance\n\n## Outgoing relations\n\n- **authored_by** → Anagh Malik _(Person)_\n- **authored_by** → David B. Lindell _(Person)_\n- **authored_by** → Dorian Chan _(Person)_\n- **authored_by** → Jen-Hao Rick Chang _(Person)_\n- **authored_by** → Oncel Tuzel _(Person)_\n- **authored_by** → Xiaoming Zhao _(Person)_\n- **part_of** → 3D/4D Vision and Reconstruction _(ResearchField)_\n\n## Incoming relations\n\n- **mentioned_in** → Daily Feed Summary — 2026-05-09 _(SourceDocument)_\n- **mentioned_in** → 📬 Daily Research Digest — 2026-05-09 _(SourceDocument)_\n\n## Connected node types\n\n- Person: 6\n- SourceDocument: 2\n- ResearchField: 1",
+  "source_path": "/Users/neo/Developer/Projects/LLM-Wiki/data/research/daily/2026-05-09/papers/2605.04527/paper.md",
+  "links": [],
+  "body": "# Velox: Learning Representations of 4D Geometry and Appearance\n\n## Outgoing relations\n\n- **authored_by** → Anagh Malik _(Person)_\n- **authored_by** → David B. Lindell _(Person)_\n- **authored_by** → Dorian Chan _(Person)_\n- **authored_by** → Jen-Hao Rick Chang _(Person)_\n- **authored_by** → Oncel Tuzel _(Person)_\n- **authored_by** → Xiaoming Zhao _(Person)_\n- **part_of** → 3D/4D Vision and Reconstruction _(ResearchField)_\n\n## Incoming relations\n\n- **mentioned_in** → Daily Feed Summary — 2026-05-09 _(SourceDocument)_\n- **mentioned_in** → 📬 Daily Research Digest — 2026-05-09 _(SourceDocument)_\n\n## Connected node types\n\n- Person: 6\n- SourceDocument: 2\n- ResearchField: 1",
+  "frontmatter": {
+    "aliases": [
+      "arXiv:2605.04527"
+    ],
+    "kind": "papers",
+    "node_id": "Paper:arxiv-2605-04527:c0faca348771",
+    "node_type": "Paper",
+    "source_path": "/Users/neo/Developer/Projects/LLM-Wiki/data/research/daily/2026-05-09/papers/2605.04527/paper.md",
+    "title": "Velox: Learning Representations of 4D Geometry and Appearance"
+  }
+}

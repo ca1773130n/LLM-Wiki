@@ -9,18 +9,18 @@
   },
   "@graph": [
     {
-      "@id": "#Metric:map:592bcbe13f80",
-      "@type": "PropertyValue",
-      "name": "mAP",
-      "url": "entities/map.html",
-      "additionalType": "Metric"
-    },
-    {
       "@id": "#SourceDocument:h1-align-center-llm-wiki-h1:b60a072f7da3",
       "@type": "CreativeWork",
       "name": "<h1 align=\"center\">LLM-Wiki</h1>",
       "url": "sources/h1-align-center-llm-wiki-h1.html",
       "additionalType": "SourceDocument"
+    },
+    {
+      "@id": "#Metric:map:592bcbe13f80",
+      "@type": "PropertyValue",
+      "name": "mAP",
+      "url": "entities/map.html",
+      "additionalType": "Metric"
     },
     {
       "@id": "#SourceDocument:architecture:32ae01205996",
@@ -7798,6 +7798,352 @@
       ]
     },
     {
+      "@id": "#SourceDocument:daily-research-digest-2026-05-09:117d1d46b37d",
+      "@type": "CreativeWork",
+      "name": "📬 Daily Research Digest — 2026-05-09",
+      "url": "sources/daily-research-digest-2026-05-09.html",
+      "additionalType": "SourceDocument"
+    },
+    {
+      "@id": "#Paper:arxiv-2605-04527:c0faca348771",
+      "@type": "ScholarlyArticle",
+      "name": "Velox: Learning Representations of 4D Geometry and Appearance",
+      "alternateName": [
+        "arXiv:2605.04527"
+      ],
+      "url": "papers/velox-learning-representations-of-4d-geometry-and-appearance.html",
+      "additionalType": "Paper",
+      "headline": "Velox: Learning Representations of 4D Geometry and Appearance",
+      "identifier": "2605.04527",
+      "sameAs": [
+        "https://arxiv.org/abs/2605.04527"
+      ],
+      "datePublished": "2026-05",
+      "author": [
+        {
+          "@type": "Person",
+          "@id": "#Person:anagh-malik:f8d5a9950bdc",
+          "name": "Anagh Malik"
+        },
+        {
+          "@type": "Person",
+          "@id": "#Person:david-b-lindell:2331c9344ef8",
+          "name": "David B. Lindell"
+        },
+        {
+          "@type": "Person",
+          "@id": "#Person:dorian-chan:cbad5f02c883",
+          "name": "Dorian Chan"
+        },
+        {
+          "@type": "Person",
+          "@id": "#Person:jen-hao-rick-chang:700cdf71f324",
+          "name": "Jen-Hao Rick Chang"
+        },
+        {
+          "@type": "Person",
+          "@id": "#Person:oncel-tuzel:10327564139a",
+          "name": "Oncel Tuzel"
+        },
+        {
+          "@type": "Person",
+          "@id": "#Person:xiaoming-zhao:b98de4be83b0",
+          "name": "Xiaoming Zhao"
+        }
+      ]
+    },
+    {
+      "@id": "#Person:bernhard-jaeger:b2b4ff190abd",
+      "@type": "Person",
+      "name": "Bernhard Jaeger",
+      "url": "entities/bernhard-jaeger.html",
+      "additionalType": "Person"
+    },
+    {
+      "@id": "#Person:max-welling:dcadb971272c",
+      "@type": "Person",
+      "name": "Max Welling",
+      "url": "entities/max-welling.html",
+      "additionalType": "Person"
+    },
+    {
+      "@id": "#Person:takeru-miyato:143f796cc9be",
+      "@type": "Person",
+      "name": "Takeru Miyato",
+      "url": "entities/takeru-miyato.html",
+      "additionalType": "Person"
+    },
+    {
+      "@id": "#Paper:arxiv-2310-10375:382b0d986ec5",
+      "@type": "ScholarlyArticle",
+      "name": "GTA: A Geometry-Aware Attention Mechanism for Multi-View Transformers",
+      "alternateName": [
+        "arXiv:2310.10375"
+      ],
+      "url": "papers/gta-a-geometry-aware-attention-mechanism-for-multi-view-transformers.html",
+      "additionalType": "Paper",
+      "headline": "GTA: A Geometry-Aware Attention Mechanism for Multi-View Transformers",
+      "identifier": "2310.10375",
+      "sameAs": [
+        "https://arxiv.org/abs/2310.10375"
+      ],
+      "datePublished": "2023-10",
+      "author": [
+        {
+          "@type": "Person",
+          "@id": "#Person:andreas-geiger:ed5cc3fb8d8d",
+          "name": "Andreas Geiger"
+        },
+        {
+          "@type": "Person",
+          "@id": "#Person:bernhard-jaeger:b2b4ff190abd",
+          "name": "Bernhard Jaeger"
+        },
+        {
+          "@type": "Person",
+          "@id": "#Person:max-welling:dcadb971272c",
+          "name": "Max Welling"
+        },
+        {
+          "@type": "Person",
+          "@id": "#Person:takeru-miyato:143f796cc9be",
+          "name": "Takeru Miyato"
+        }
+      ]
+    },
+    {
+      "@id": "#Repository:github-rui314-chibicc:50809d928929",
+      "@type": "SoftwareSourceCode",
+      "name": "GitHub 분석: rui314/chibicc",
+      "alternateName": [
+        "https://github.com/rui314/chibicc",
+        "rui314/chibicc"
+      ],
+      "url": "repos/github-분석-rui314-chibicc.html",
+      "additionalType": "Repository",
+      "codeRepository": "https://github.com/rui314/chibicc",
+      "sameAs": [
+        "https://github.com/rui314/chibicc"
+      ]
+    },
+    {
+      "@id": "#Person:anagh-malik:f8d5a9950bdc",
+      "@type": "Person",
+      "name": "Anagh Malik",
+      "url": "entities/anagh-malik.html",
+      "additionalType": "Person"
+    },
+    {
+      "@id": "#Person:david-b-lindell:2331c9344ef8",
+      "@type": "Person",
+      "name": "David B. Lindell",
+      "url": "entities/david-b-lindell.html",
+      "additionalType": "Person"
+    },
+    {
+      "@id": "#Person:dorian-chan:cbad5f02c883",
+      "@type": "Person",
+      "name": "Dorian Chan",
+      "url": "entities/dorian-chan.html",
+      "additionalType": "Person"
+    },
+    {
+      "@id": "#Person:jen-hao-rick-chang:700cdf71f324",
+      "@type": "Person",
+      "name": "Jen-Hao Rick Chang",
+      "url": "entities/jen-hao-rick-chang.html",
+      "additionalType": "Person"
+    },
+    {
+      "@id": "#Person:oncel-tuzel:10327564139a",
+      "@type": "Person",
+      "name": "Oncel Tuzel",
+      "url": "entities/oncel-tuzel.html",
+      "additionalType": "Person"
+    },
+    {
+      "@id": "#Person:xiaoming-zhao:b98de4be83b0",
+      "@type": "Person",
+      "name": "Xiaoming Zhao",
+      "url": "entities/xiaoming-zhao.html",
+      "additionalType": "Person"
+    },
+    {
+      "@id": "#SourceDocument:daily-feed-summary-2026-05-09:bbad7e1d0cc2",
+      "@type": "CreativeWork",
+      "name": "Daily Feed Summary — 2026-05-09",
+      "url": "sources/daily-feed-summary-2026-05-09.html",
+      "additionalType": "SourceDocument"
+    },
+    {
+      "@id": "#Organization:199-biotechnologies:b7609722f8dd",
+      "@type": "Organization",
+      "name": "199-biotechnologies",
+      "url": "entities/199-biotechnologies.html",
+      "additionalType": "Organization"
+    },
+    {
+      "@id": "#Repository:github-199-biotechnologies-claude-deep-research-:3e191fab3bf4",
+      "@type": "SoftwareSourceCode",
+      "name": "GitHub 분석: 199-biotechnologies/claude-deep-research-skill",
+      "alternateName": [
+        "199-biotechnologies/claude-deep-research-skill",
+        "https://github.com/199-biotechnologies/claude-deep-research-skill"
+      ],
+      "url": "repos/github-분석-199-biotechnologies-claude-deep-research-skill.html",
+      "additionalType": "Repository",
+      "codeRepository": "https://github.com/199-biotechnologies/claude-deep-research-skill",
+      "sameAs": [
+        "https://github.com/199-biotechnologies/claude-deep-research-skill"
+      ]
+    },
+    {
+      "@id": "#Repository:github-ashishps1-awesome-engineering-articles:8c171b4992b2",
+      "@type": "SoftwareSourceCode",
+      "name": "GitHub 분석: ashishps1/awesome-engineering-articles",
+      "alternateName": [
+        "ashishps1/awesome-engineering-articles",
+        "https://github.com/ashishps1/awesome-engineering-articles"
+      ],
+      "url": "repos/github-분석-ashishps1-awesome-engineering-articles.html",
+      "additionalType": "Repository",
+      "codeRepository": "https://github.com/ashishps1/awesome-engineering-articles",
+      "sameAs": [
+        "https://github.com/ashishps1/awesome-engineering-articles"
+      ]
+    },
+    {
+      "@id": "#SourceDocument:daily-research-digest-2026-05-10:155440063bd6",
+      "@type": "CreativeWork",
+      "name": "📬 Daily Research Digest — 2026-05-10",
+      "url": "sources/daily-research-digest-2026-05-10.html",
+      "additionalType": "SourceDocument"
+    },
+    {
+      "@id": "#Paper:arxiv-2505-20295:aa977a72ab3f",
+      "@type": "ScholarlyArticle",
+      "name": "SelfReflect: Can LLMs Communicate Their Internal Answer Distribution?",
+      "alternateName": [
+        "arXiv:2505.20295"
+      ],
+      "url": "papers/selfreflect-can-llms-communicate-their-internal-answer-distribution.html",
+      "additionalType": "Paper",
+      "headline": "SelfReflect: Can LLMs Communicate Their Internal Answer Distribution?",
+      "identifier": "2505.20295",
+      "sameAs": [
+        "https://arxiv.org/abs/2505.20295"
+      ],
+      "datePublished": "2025-05",
+      "author": [
+        {
+          "@type": "Person",
+          "@id": "#Person:adam-goli-ski:41ed351b1073",
+          "name": "Adam Goliński"
+        },
+        {
+          "@type": "Person",
+          "@id": "#Person:arno-blaas:2e73a2067005",
+          "name": "Arno Blaas"
+        },
+        {
+          "@type": "Person",
+          "@id": "#Person:eeshan-gunesh-dhekane:16b5799973f1",
+          "name": "Eeshan Gunesh Dhekane"
+        },
+        {
+          "@type": "Person",
+          "@id": "#Person:luca-f-ger:c412bed93696",
+          "name": "Luca Füger"
+        },
+        {
+          "@type": "Person",
+          "@id": "#Person:michael-kirchhof:9e7a0b7c0c02",
+          "name": "Michael Kirchhof"
+        },
+        {
+          "@type": "Person",
+          "@id": "#Person:seong-joon-oh:82ffb1b17eac",
+          "name": "Seong Joon Oh"
+        },
+        {
+          "@type": "Person",
+          "@id": "#Person:sinead-williamson:35cdd59c7af4",
+          "name": "Sinead Williamson"
+        }
+      ]
+    },
+    {
+      "@id": "#Person:adam-goli-ski:41ed351b1073",
+      "@type": "Person",
+      "name": "Adam Goliński",
+      "url": "entities/adam-goliński.html",
+      "additionalType": "Person"
+    },
+    {
+      "@id": "#Person:arno-blaas:2e73a2067005",
+      "@type": "Person",
+      "name": "Arno Blaas",
+      "url": "entities/arno-blaas.html",
+      "additionalType": "Person"
+    },
+    {
+      "@id": "#Person:eeshan-gunesh-dhekane:16b5799973f1",
+      "@type": "Person",
+      "name": "Eeshan Gunesh Dhekane",
+      "url": "entities/eeshan-gunesh-dhekane.html",
+      "additionalType": "Person"
+    },
+    {
+      "@id": "#Person:luca-f-ger:c412bed93696",
+      "@type": "Person",
+      "name": "Luca Füger",
+      "url": "entities/luca-füger.html",
+      "additionalType": "Person"
+    },
+    {
+      "@id": "#Person:michael-kirchhof:9e7a0b7c0c02",
+      "@type": "Person",
+      "name": "Michael Kirchhof",
+      "url": "entities/michael-kirchhof.html",
+      "additionalType": "Person"
+    },
+    {
+      "@id": "#Person:seong-joon-oh:82ffb1b17eac",
+      "@type": "Person",
+      "name": "Seong Joon Oh",
+      "url": "entities/seong-joon-oh.html",
+      "additionalType": "Person"
+    },
+    {
+      "@id": "#Person:sinead-williamson:35cdd59c7af4",
+      "@type": "Person",
+      "name": "Sinead Williamson",
+      "url": "entities/sinead-williamson.html",
+      "additionalType": "Person"
+    },
+    {
+      "@id": "#Repository:github-apple-ml-lito:1a1a85249564",
+      "@type": "SoftwareSourceCode",
+      "name": "GitHub 분석: apple/ml-lito",
+      "alternateName": [
+        "apple/ml-lito",
+        "https://github.com/apple/ml-lito"
+      ],
+      "url": "repos/github-분석-apple-ml-lito.html",
+      "additionalType": "Repository",
+      "codeRepository": "https://github.com/apple/ml-lito",
+      "sameAs": [
+        "https://github.com/apple/ml-lito"
+      ]
+    },
+    {
+      "@id": "#SourceDocument:daily-feed-summary-2026-05-10:24cb5a57cce0",
+      "@type": "CreativeWork",
+      "name": "Daily Feed Summary — 2026-05-10",
+      "url": "sources/daily-feed-summary-2026-05-10.html",
+      "additionalType": "SourceDocument"
+    },
+    {
       "@id": "#SourceDocument:2026-w15:76b20547149e",
       "@type": "CreativeWork",
       "name": "📊 주간 리서치 다이제스트 — 2026-W15",
@@ -7843,28 +8189,28 @@
       "mentions": [
         {
           "@type": "Thing",
-          "@id": "#Repository:github-bolixinyu-lca:8c7eebeca3fb",
-          "name": "GitHub 분석: bolixinyu/LCA"
+          "@id": "#Paper:arxiv-2505-20295:aa977a72ab3f",
+          "name": "SelfReflect: Can LLMs Communicate Their Internal Answer Distribution?"
         },
         {
           "@type": "Thing",
-          "@id": "#Repository:github-cintellifusion-multiworld:dc2f4000b99e",
-          "name": "GitHub 분석: CIntellifusion/MultiWorld"
+          "@id": "#Paper:arxiv-2605-04527:c0faca348771",
+          "name": "Velox: Learning Representations of 4D Geometry and Appearance"
         },
         {
           "@type": "Thing",
-          "@id": "#Repository:github-davian-robotics-egox:9b4553672351",
-          "name": "GitHub 분석: DAVIAN-Robotics/EgoX"
+          "@id": "#Repository:github-apple-ml-lito:1a1a85249564",
+          "name": "GitHub 분석: apple/ml-lito"
         },
         {
           "@type": "Thing",
-          "@id": "#Repository:github-honojs-middleware:a7a511baa3fc",
-          "name": "GitHub 분석: honojs/middleware"
+          "@id": "#Repository:github-ashishps1-awesome-engineering-articles:8c171b4992b2",
+          "name": "GitHub 분석: ashishps1/awesome-engineering-articles"
         },
         {
           "@type": "Thing",
-          "@id": "#Repository:github-naver-multi-hmr:5a705a090a24",
-          "name": "GitHub 분석: naver/multi-hmr"
+          "@id": "#Repository:github-rui314-chibicc:50809d928929",
+          "name": "GitHub 분석: rui314/chibicc"
         }
       ]
     },
@@ -9498,6 +9844,88 @@
       ]
     },
     {
+      "@id": "#Synthesis:daily-2026-05-09:ad66b3d4e644",
+      "@type": "Article",
+      "name": "Daily Digest — 2026-05-09",
+      "description": "Digest of 2026-05-09 ingest.",
+      "url": "syntheses/daily-digest-2026-05-09.html",
+      "additionalType": "Synthesis",
+      "articleSection": "daily_digest",
+      "mentions": [
+        {
+          "@type": "Thing",
+          "@id": "#Paper:arxiv-2310-10375:382b0d986ec5",
+          "name": "GTA: A Geometry-Aware Attention Mechanism for Multi-View Transformers"
+        },
+        {
+          "@type": "Thing",
+          "@id": "#Paper:arxiv-2605-04527:c0faca348771",
+          "name": "Velox: Learning Representations of 4D Geometry and Appearance"
+        },
+        {
+          "@type": "Thing",
+          "@id": "#Repository:github-199-biotechnologies-claude-deep-research-:3e191fab3bf4",
+          "name": "GitHub 분석: 199-biotechnologies/claude-deep-research-skill"
+        },
+        {
+          "@type": "Thing",
+          "@id": "#Repository:github-ashishps1-awesome-engineering-articles:8c171b4992b2",
+          "name": "GitHub 분석: ashishps1/awesome-engineering-articles"
+        },
+        {
+          "@type": "Thing",
+          "@id": "#Repository:github-rui314-chibicc:50809d928929",
+          "name": "GitHub 분석: rui314/chibicc"
+        },
+        {
+          "@type": "Thing",
+          "@id": "#SourceDocument:daily-feed-summary-2026-05-09:bbad7e1d0cc2",
+          "name": "Daily Feed Summary — 2026-05-09"
+        },
+        {
+          "@type": "Thing",
+          "@id": "#SourceDocument:daily-research-digest-2026-05-09:117d1d46b37d",
+          "name": "📬 Daily Research Digest — 2026-05-09"
+        },
+        {
+          "@type": "Thing",
+          "@id": "#Task:novel-view-synthesis:19d55dfb9b83",
+          "name": "Novel View Synthesis"
+        }
+      ]
+    },
+    {
+      "@id": "#Synthesis:daily-2026-05-10:495b5ecf37a7",
+      "@type": "Article",
+      "name": "Daily Digest — 2026-05-10",
+      "description": "Digest of 2026-05-10 ingest.",
+      "url": "syntheses/daily-digest-2026-05-10.html",
+      "additionalType": "Synthesis",
+      "articleSection": "daily_digest",
+      "mentions": [
+        {
+          "@type": "Thing",
+          "@id": "#Paper:arxiv-2505-20295:aa977a72ab3f",
+          "name": "SelfReflect: Can LLMs Communicate Their Internal Answer Distribution?"
+        },
+        {
+          "@type": "Thing",
+          "@id": "#Repository:github-apple-ml-lito:1a1a85249564",
+          "name": "GitHub 분석: apple/ml-lito"
+        },
+        {
+          "@type": "Thing",
+          "@id": "#SourceDocument:daily-feed-summary-2026-05-10:24cb5a57cce0",
+          "name": "Daily Feed Summary — 2026-05-10"
+        },
+        {
+          "@type": "Thing",
+          "@id": "#SourceDocument:daily-research-digest-2026-05-10:155440063bd6",
+          "name": "📬 Daily Research Digest — 2026-05-10"
+        }
+      ]
+    },
+    {
       "@id": "#Synthesis:weekly-2026-w15:647fc9c2753d",
       "@type": "Article",
       "name": "Weekly Synthesis — 2026-W15",
@@ -9947,5 +10375,5 @@
       ]
     }
   ],
-  "dateModified": "2026-05-08T02:03:43Z"
+  "dateModified": "2026-05-10T02:18:54Z"
 }

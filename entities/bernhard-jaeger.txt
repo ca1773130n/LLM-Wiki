@@ -1,0 +1,12 @@
+Bernhard Jaeger
+===============
+
+# Bernhard Jaeger
+
+## Incoming relations
+
+- **authored_by** → GTA: A Geometry-Aware Attention Mechanism for Multi-View Transformers _(Paper)_
+
+## Connected node types
+
+- Paper: 1

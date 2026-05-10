@@ -421,6 +421,18 @@
     <priority>0.6</priority>
   </url>
   <url>
+    <loc>timeline/2026-05-09.html</loc>
+    <lastmod>2024-10-02T00:00:00Z</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.6</priority>
+  </url>
+  <url>
+    <loc>timeline/2026-05-10.html</loc>
+    <lastmod>2024-07-29T00:00:00Z</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.6</priority>
+  </url>
+  <url>
     <loc>graph/index.html</loc>
     <lastmod>2024-12-13T00:00:00Z</lastmod>
     <changefreq>weekly</changefreq>
@@ -631,6 +643,18 @@
     <priority>0.6</priority>
   </url>
   <url>
+    <loc>sources/daily-feed-summary-2026-05-09.html</loc>
+    <lastmod>2024-10-06T00:00:00Z</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.6</priority>
+  </url>
+  <url>
+    <loc>sources/daily-feed-summary-2026-05-10.html</loc>
+    <lastmod>2024-10-27T00:00:00Z</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.6</priority>
+  </url>
+  <url>
     <loc>sources/daily-research-digest-2026-04-08.html</loc>
     <lastmod>2024-12-05T00:00:00Z</lastmod>
     <changefreq>weekly</changefreq>
@@ -735,6 +759,18 @@
   <url>
     <loc>sources/daily-research-digest-2026-05-06.html</loc>
     <lastmod>2024-05-20T00:00:00Z</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.6</priority>
+  </url>
+  <url>
+    <loc>sources/daily-research-digest-2026-05-09.html</loc>
+    <lastmod>2024-05-29T00:00:00Z</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.6</priority>
+  </url>
+  <url>
+    <loc>sources/daily-research-digest-2026-05-10.html</loc>
+    <lastmod>2024-07-08T00:00:00Z</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.6</priority>
   </url>
@@ -1003,6 +1039,12 @@
     <priority>0.9</priority>
   </url>
   <url>
+    <loc>entities/199-biotechnologies.html</loc>
+    <lastmod>2024-12-24T00:00:00Z</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.6</priority>
+  </url>
+  <url>
     <loc>entities/accuracy.html</loc>
     <lastmod>2024-01-13T00:00:00Z</lastmod>
     <changefreq>weekly</changefreq>
@@ -1011,6 +1053,12 @@
   <url>
     <loc>entities/accuracy-90.html</loc>
     <lastmod>2024-10-12T00:00:00Z</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.6</priority>
+  </url>
+  <url>
+    <loc>entities/adam-goliński.html</loc>
+    <lastmod>2024-08-28T00:00:00Z</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.6</priority>
   </url>
@@ -1059,6 +1107,12 @@
   <url>
     <loc>entities/allenai.html</loc>
     <lastmod>2024-09-21T00:00:00Z</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.6</priority>
+  </url>
+  <url>
+    <loc>entities/anagh-malik.html</loc>
+    <lastmod>2024-01-21T00:00:00Z</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.6</priority>
   </url>
@@ -1135,6 +1189,12 @@
     <priority>0.6</priority>
   </url>
   <url>
+    <loc>entities/arno-blaas.html</loc>
+    <lastmod>2024-06-30T00:00:00Z</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.6</priority>
+  </url>
+  <url>
     <loc>entities/ate.html</loc>
     <lastmod>2024-04-18T00:00:00Z</lastmod>
     <changefreq>weekly</changefreq>
@@ -1161,6 +1221,12 @@
   <url>
     <loc>entities/baoxiong-jia.html</loc>
     <lastmod>2024-12-02T00:00:00Z</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.6</priority>
+  </url>
+  <url>
+    <loc>entities/bernhard-jaeger.html</loc>
+    <lastmod>2024-07-02T00:00:00Z</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.6</priority>
   </url>
@@ -1303,6 +1369,12 @@
     <priority>0.6</priority>
   </url>
   <url>
+    <loc>entities/david-b-lindell.html</loc>
+    <lastmod>2024-06-19T00:00:00Z</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.6</priority>
+  </url>
+  <url>
     <loc>entities/david-j-fleet.html</loc>
     <lastmod>2024-02-27T00:00:00Z</lastmod>
     <changefreq>weekly</changefreq>
@@ -1357,6 +1429,12 @@
     <priority>0.6</priority>
   </url>
   <url>
+    <loc>entities/dorian-chan.html</loc>
+    <lastmod>2024-10-23T00:00:00Z</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.6</priority>
+  </url>
+  <url>
     <loc>entities/dotan-ankri.html</loc>
     <lastmod>2024-04-11T00:00:00Z</lastmod>
     <changefreq>weekly</changefreq>
@@ -1365,6 +1443,12 @@
   <url>
     <loc>entities/dtu.html</loc>
     <lastmod>2024-11-30T00:00:00Z</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.6</priority>
+  </url>
+  <url>
+    <loc>entities/eeshan-gunesh-dhekane.html</loc>
+    <lastmod>2024-04-02T00:00:00Z</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.6</priority>
   </url>
@@ -1717,6 +1801,12 @@
     <priority>0.6</priority>
   </url>
   <url>
+    <loc>entities/jen-hao-rick-chang.html</loc>
+    <lastmod>2024-04-12T00:00:00Z</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.6</priority>
+  </url>
+  <url>
     <loc>entities/jia-wang-bian.html</loc>
     <lastmod>2024-11-20T00:00:00Z</lastmod>
     <changefreq>weekly</changefreq>
@@ -1987,6 +2077,12 @@
     <priority>0.6</priority>
   </url>
   <url>
+    <loc>entities/luca-füger.html</loc>
+    <lastmod>2024-04-23T00:00:00Z</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.6</priority>
+  </url>
+  <url>
     <loc>entities/lucas-yunkyu-lee.html</loc>
     <lastmod>2024-12-10T00:00:00Z</lastmod>
     <changefreq>weekly</changefreq>
@@ -2083,8 +2179,20 @@
     <priority>0.6</priority>
   </url>
   <url>
+    <loc>entities/max-welling.html</loc>
+    <lastmod>2024-10-10T00:00:00Z</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.6</priority>
+  </url>
+  <url>
     <loc>entities/maxime-oquab.html</loc>
     <lastmod>2024-12-13T00:00:00Z</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.6</priority>
+  </url>
+  <url>
+    <loc>entities/michael-kirchhof.html</loc>
+    <lastmod>2024-12-14T00:00:00Z</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.6</priority>
   </url>
@@ -2223,6 +2331,12 @@
   <url>
     <loc>entities/omar-alama.html</loc>
     <lastmod>2024-10-23T00:00:00Z</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.6</priority>
+  </url>
+  <url>
+    <loc>entities/oncel-tuzel.html</loc>
+    <lastmod>2024-09-29T00:00:00Z</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.6</priority>
   </url>
@@ -2437,6 +2551,12 @@
     <priority>0.6</priority>
   </url>
   <url>
+    <loc>entities/seong-joon-oh.html</loc>
+    <lastmod>2024-02-19T00:00:00Z</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.6</priority>
+  </url>
+  <url>
     <loc>entities/seth-nabarro.html</loc>
     <lastmod>2024-01-01T00:00:00Z</lastmod>
     <changefreq>weekly</changefreq>
@@ -2545,6 +2665,12 @@
     <priority>0.6</priority>
   </url>
   <url>
+    <loc>entities/sinead-williamson.html</loc>
+    <lastmod>2024-05-10T00:00:00Z</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.6</priority>
+  </url>
+  <url>
     <loc>entities/siyuan-huang.html</loc>
     <lastmod>2024-08-06T00:00:00Z</lastmod>
     <changefreq>weekly</changefreq>
@@ -2625,6 +2751,12 @@
   <url>
     <loc>entities/sv-pp.html</loc>
     <lastmod>2024-03-31T00:00:00Z</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.6</priority>
+  </url>
+  <url>
+    <loc>entities/takeru-miyato.html</loc>
+    <lastmod>2024-06-23T00:00:00Z</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.6</priority>
   </url>
@@ -2799,6 +2931,12 @@
   <url>
     <loc>entities/xiaoji-niu.html</loc>
     <lastmod>2024-04-16T00:00:00Z</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.6</priority>
+  </url>
+  <url>
+    <loc>entities/xiaoming-zhao.html</loc>
+    <lastmod>2024-10-22T00:00:00Z</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.6</priority>
   </url>
@@ -3241,6 +3379,12 @@
     <priority>0.8</priority>
   </url>
   <url>
+    <loc>papers/gta-a-geometry-aware-attention-mechanism-for-multi-view-transformers.html</loc>
+    <lastmod>2024-06-19T00:00:00Z</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.8</priority>
+  </url>
+  <url>
     <loc>papers/holo360d-파노라마-3d-재구성과-그-이상을-발전시키기-위한-연-96474e5d.html</loc>
     <lastmod>2024-11-09T00:00:00Z</lastmod>
     <changefreq>weekly</changefreq>
@@ -3361,6 +3505,12 @@
     <priority>0.8</priority>
   </url>
   <url>
+    <loc>papers/selfreflect-can-llms-communicate-their-internal-answer-distribution.html</loc>
+    <lastmod>2024-08-28T00:00:00Z</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.8</priority>
+  </url>
+  <url>
     <loc>papers/stable-part-diffusion-4d-multi-view-rgb-and-kinematic-parts-video-generation.html</loc>
     <lastmod>2024-03-11T00:00:00Z</lastmod>
     <changefreq>weekly</changefreq>
@@ -3397,6 +3547,12 @@
     <priority>0.8</priority>
   </url>
   <url>
+    <loc>papers/velox-learning-representations-of-4d-geometry-and-appearance.html</loc>
+    <lastmod>2024-07-15T00:00:00Z</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.8</priority>
+  </url>
+  <url>
     <loc>papers/viba-implicit-bundle-adjustment-with-geometric-and-temporal-consistency-for-robu-4e9b6754.html</loc>
     <lastmod>2024-01-27T00:00:00Z</lastmod>
     <changefreq>weekly</changefreq>
@@ -3425,6 +3581,12 @@
     <lastmod>2024-03-25T00:00:00Z</lastmod>
     <changefreq>daily</changefreq>
     <priority>0.9</priority>
+  </url>
+  <url>
+    <loc>repos/github-분석-199-biotechnologies-claude-deep-research-skill.html</loc>
+    <lastmod>2024-12-25T00:00:00Z</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.8</priority>
   </url>
   <url>
     <loc>repos/github-분석-addyosmani-agent-skills.html</loc>
@@ -3517,6 +3679,12 @@
     <priority>0.8</priority>
   </url>
   <url>
+    <loc>repos/github-분석-apple-ml-lito.html</loc>
+    <lastmod>2024-04-26T00:00:00Z</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.8</priority>
+  </url>
+  <url>
     <loc>repos/github-분석-apple-ml-mobileclip.html</loc>
     <lastmod>2024-06-06T00:00:00Z</lastmod>
     <changefreq>weekly</changefreq>
@@ -3537,6 +3705,12 @@
   <url>
     <loc>repos/github-분석-asherikov-shoggoth.html</loc>
     <lastmod>2024-05-04T00:00:00Z</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.8</priority>
+  </url>
+  <url>
+    <loc>repos/github-분석-ashishps1-awesome-engineering-articles.html</loc>
+    <lastmod>2024-08-27T00:00:00Z</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.8</priority>
   </url>
@@ -4069,6 +4243,12 @@
     <priority>0.8</priority>
   </url>
   <url>
+    <loc>repos/github-분석-rui314-chibicc.html</loc>
+    <lastmod>2024-09-27T00:00:00Z</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.8</priority>
+  </url>
+  <url>
     <loc>repos/github-분석-safishamsi-graphify.html</loc>
     <lastmod>2024-01-16T00:00:00Z</lastmod>
     <changefreq>weekly</changefreq>
@@ -4461,6 +4641,18 @@
   <url>
     <loc>syntheses/daily-2026-05-08.html</loc>
     <lastmod>2024-05-11T00:00:00Z</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.8</priority>
+  </url>
+  <url>
+    <loc>syntheses/daily-2026-05-09.html</loc>
+    <lastmod>2024-05-01T00:00:00Z</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.8</priority>
+  </url>
+  <url>
+    <loc>syntheses/daily-2026-05-10.html</loc>
+    <lastmod>2024-02-23T00:00:00Z</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.8</priority>
   </url>
@@ -6039,6 +6231,90 @@
   <url>
     <loc>raw/data-research-daily-2026-05-08-repos-naver-multi-hmr-md.html</loc>
     <lastmod>2024-06-06T00:00:00Z</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.4</priority>
+  </url>
+  <url>
+    <loc>raw/data-research-daily-2026-05-09-digest-md.html</loc>
+    <lastmod>2024-03-21T00:00:00Z</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.4</priority>
+  </url>
+  <url>
+    <loc>raw/data-research-daily-2026-05-09-papers-2310-10375-paper-md.html</loc>
+    <lastmod>2024-01-15T00:00:00Z</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.4</priority>
+  </url>
+  <url>
+    <loc>raw/data-research-daily-2026-05-09-papers-2310-10375-repo-md.html</loc>
+    <lastmod>2024-12-23T00:00:00Z</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.4</priority>
+  </url>
+  <url>
+    <loc>raw/data-research-daily-2026-05-09-papers-2601-17835-paper-md.html</loc>
+    <lastmod>2024-06-22T00:00:00Z</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.4</priority>
+  </url>
+  <url>
+    <loc>raw/data-research-daily-2026-05-09-papers-2605-04527-paper-md.html</loc>
+    <lastmod>2024-05-04T00:00:00Z</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.4</priority>
+  </url>
+  <url>
+    <loc>raw/data-research-daily-2026-05-09-raw-md.html</loc>
+    <lastmod>2024-09-18T00:00:00Z</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.4</priority>
+  </url>
+  <url>
+    <loc>raw/data-research-daily-2026-05-09-repos-199-biotechnologies-claude-deep-research-skill-md.html</loc>
+    <lastmod>2024-02-09T00:00:00Z</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.4</priority>
+  </url>
+  <url>
+    <loc>raw/data-research-daily-2026-05-09-repos-ashishps1-awesome-engineering-articles-md.html</loc>
+    <lastmod>2024-11-15T00:00:00Z</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.4</priority>
+  </url>
+  <url>
+    <loc>raw/data-research-daily-2026-05-10-digest-md.html</loc>
+    <lastmod>2024-02-10T00:00:00Z</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.4</priority>
+  </url>
+  <url>
+    <loc>raw/data-research-daily-2026-05-10-papers-2310-10375-paper-md.html</loc>
+    <lastmod>2024-12-03T00:00:00Z</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.4</priority>
+  </url>
+  <url>
+    <loc>raw/data-research-daily-2026-05-10-papers-2505-20295-paper-md.html</loc>
+    <lastmod>2024-03-01T00:00:00Z</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.4</priority>
+  </url>
+  <url>
+    <loc>raw/data-research-daily-2026-05-10-papers-2505-20295-repo-md.html</loc>
+    <lastmod>2024-11-23T00:00:00Z</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.4</priority>
+  </url>
+  <url>
+    <loc>raw/data-research-daily-2026-05-10-papers-2601-17835-paper-md.html</loc>
+    <lastmod>2024-12-28T00:00:00Z</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.4</priority>
+  </url>
+  <url>
+    <loc>raw/data-research-daily-2026-05-10-raw-md.html</loc>
+    <lastmod>2024-02-22T00:00:00Z</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.4</priority>
   </url>

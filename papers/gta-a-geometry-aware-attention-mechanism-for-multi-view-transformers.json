@@ -1,0 +1,18 @@
+{
+  "title": "GTA: A Geometry-Aware Attention Mechanism for Multi-View Transformers",
+  "kind": "papers",
+  "body_text": "# GTA: A Geometry-Aware Attention Mechanism for Multi-View Transformers\n\n## Outgoing relations\n\n- **addresses** → Novel View Synthesis _(Task)_\n- **authored_by** → Andreas Geiger _(Person)_\n- **authored_by** → Bernhard Jaeger _(Person)_\n- **authored_by** → Max Welling _(Person)_\n- **authored_by** → Takeru Miyato _(Person)_\n- **implemented_in** → GitHub 분석: rui314/chibicc _(Repository)_\n- **part_of** → 3D/4D Vision and Reconstruction _(ResearchField)_\n\n## Incoming relations\n\n- **mentioned_in** → Daily Feed Summary — 2026-05-09 _(SourceDocument)_\n- **mentioned_in** → Daily Feed Summary — 2026-05-10 _(SourceDocument)_\n- **mentioned_in** → 📬 Daily Research Digest — 2026-05-10 _(SourceDocument)_\n\n## Connected node types\n\n- Person: 4\n- SourceDocument: 3\n- Repository: 1\n- ResearchField: 1\n- Task: 1",
+  "source_path": "/Users/neo/Developer/Projects/LLM-Wiki/data/research/daily/2026-05-09/papers/2310.10375/paper.md",
+  "links": [],
+  "body": "# GTA: A Geometry-Aware Attention Mechanism for Multi-View Transformers\n\n## Outgoing relations\n\n- **addresses** → Novel View Synthesis _(Task)_\n- **authored_by** → Andreas Geiger _(Person)_\n- **authored_by** → Bernhard Jaeger _(Person)_\n- **authored_by** → Max Welling _(Person)_\n- **authored_by** → Takeru Miyato _(Person)_\n- **implemented_in** → GitHub 분석: rui314/chibicc _(Repository)_\n- **part_of** → 3D/4D Vision and Reconstruction _(ResearchField)_\n\n## Incoming relations\n\n- **mentioned_in** → Daily Feed Summary — 2026-05-09 _(SourceDocument)_\n- **mentioned_in** → Daily Feed Summary — 2026-05-10 _(SourceDocument)_\n- **mentioned_in** → 📬 Daily Research Digest — 2026-05-10 _(SourceDocument)_\n\n## Connected node types\n\n- Person: 4\n- SourceDocument: 3\n- Repository: 1\n- ResearchField: 1\n- Task: 1",
+  "frontmatter": {
+    "aliases": [
+      "arXiv:2310.10375"
+    ],
+    "kind": "papers",
+    "node_id": "Paper:arxiv-2310-10375:382b0d986ec5",
+    "node_type": "Paper",
+    "source_path": "/Users/neo/Developer/Projects/LLM-Wiki/data/research/daily/2026-05-09/papers/2310.10375/paper.md",
+    "title": "GTA: A Geometry-Aware Attention Mechanism for Multi-View Transformers"
+  }
+}

@@ -1,0 +1,19 @@
+{
+  "title": "GitHub 분석: rui314/chibicc",
+  "kind": "repos",
+  "body_text": "# GitHub 분석: rui314/chibicc\n\n## Incoming relations\n\n- **implemented_in** → GTA: A Geometry-Aware Attention Mechanism for Multi-View Transformers _(Paper)_\n\n## Connected node types\n\n- Paper: 1",
+  "source_path": "/Users/neo/Developer/Projects/LLM-Wiki/data/research/daily/2026-05-09/papers/2310.10375/repo.md",
+  "links": [],
+  "body": "# GitHub 분석: rui314/chibicc\n\n## Incoming relations\n\n- **implemented_in** → GTA: A Geometry-Aware Attention Mechanism for Multi-View Transformers _(Paper)_\n\n## Connected node types\n\n- Paper: 1",
+  "frontmatter": {
+    "aliases": [
+      "https://github.com/rui314/chibicc",
+      "rui314/chibicc"
+    ],
+    "kind": "repos",
+    "node_id": "Repository:github-rui314-chibicc:50809d928929",
+    "node_type": "Repository",
+    "source_path": "/Users/neo/Developer/Projects/LLM-Wiki/data/research/daily/2026-05-09/papers/2310.10375/repo.md",
+    "title": "GitHub 분석: rui314/chibicc"
+  }
+}

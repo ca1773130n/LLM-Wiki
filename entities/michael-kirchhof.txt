@@ -1,0 +1,12 @@
+Michael Kirchhof
+================
+
+# Michael Kirchhof
+
+## Incoming relations
+
+- **authored_by** → SelfReflect: Can LLMs Communicate Their Internal Answer Distribution? _(Paper)_
+
+## Connected node types
+
+- Paper: 1

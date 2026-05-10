@@ -1,0 +1,15 @@
+{
+  "title": "📬 Daily Research Digest — 2026-05-10",
+  "kind": "sources",
+  "body_text": "# 📬 Daily Research Digest — 2026-05-10\n\n## Outgoing relations\n\n- **mentioned_in** → GTA: A Geometry-Aware Attention Mechanism for Multi-View Transformers _(Paper)_\n- **mentioned_in** → Geometry-Grounded Gaussian Splatting _(Paper)_\n- **mentioned_in** → SelfReflect: Can LLMs Communicate Their Internal Answer Distribution? _(Paper)_\n\n## Connected node types\n\n- Paper: 3",
+  "source_path": "/Users/neo/Developer/Projects/LLM-Wiki/data/research/daily/2026-05-10/digest.md",
+  "links": [],
+  "body": "# 📬 Daily Research Digest — 2026-05-10\n\n## Outgoing relations\n\n- **mentioned_in** → GTA: A Geometry-Aware Attention Mechanism for Multi-View Transformers _(Paper)_\n- **mentioned_in** → Geometry-Grounded Gaussian Splatting _(Paper)_\n- **mentioned_in** → SelfReflect: Can LLMs Communicate Their Internal Answer Distribution? _(Paper)_\n\n## Connected node types\n\n- Paper: 3",
+  "frontmatter": {
+    "kind": "sources",
+    "node_id": "SourceDocument:daily-research-digest-2026-05-10:155440063bd6",
+    "node_type": "SourceDocument",
+    "source_path": "/Users/neo/Developer/Projects/LLM-Wiki/data/research/daily/2026-05-10/digest.md",
+    "title": "📬 Daily Research Digest — 2026-05-10"
+  }
+}

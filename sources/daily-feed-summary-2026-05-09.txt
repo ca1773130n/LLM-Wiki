@@ -1,0 +1,14 @@
+Daily Feed Summary — 2026-05-09
+===============================
+
+# Daily Feed Summary — 2026-05-09
+
+## Outgoing relations
+
+- **mentioned_in** → GTA: A Geometry-Aware Attention Mechanism for Multi-View Transformers _(Paper)_
+- **mentioned_in** → Geometry-Grounded Gaussian Splatting _(Paper)_
+- **mentioned_in** → Velox: Learning Representations of 4D Geometry and Appearance _(Paper)_
+
+## Connected node types
+
+- Paper: 3

@@ -14,6 +14,7 @@
 - **part_of** → Feed-Forward 3D Scene Modeling: A Problem-Driven Perspective _(Paper)_
 - **part_of** → Free-Range Gaussians: Non-Grid-Aligned Generative 3D Gaussian Reconstruction _(Paper)_
 - **part_of** → FullCircle: Casual한 360° 촬영으로 손쉬운 3D 재구성 _(Paper)_
+- **part_of** → GTA: A Geometry-Aware Attention Mechanism for Multi-View Transformers _(Paper)_
 - **part_of** → GaussianFlow SLAM: Monocular Gaussian Splatting SLAM Guided by GaussianFlow _(Paper)_
 - **part_of** → Geometry-Grounded Gaussian Splatting _(Paper)_
 - **part_of** → Holo360D: 파노라마 3D 재구성과 그 이상을 발전시키기 위한 연속 궤적을 갖춘 대규모 실제 세계 데이터셋 _(Paper)_
@@ -29,8 +30,7 @@
 - **part_of** → Neural Gabor Splatting: Enhanced Gaussian Splatting with Neural Gabor for High-frequency Surface Reconstruction _(Paper)_
 - **part_of** → Power Foam: Unifying Real-Time Differentiable Ray Tracing and Rasterization _(Paper)_
 - **part_of** → RAVEN: Resilient Aerial Navigation via Open-Set Semantic Memory and Behavior Adaptation _(Paper)_
-- **part_of** → Rays as Pixels: 비디오와 카메라 궤적의 결합 분포 학습 _(Paper)_
 
 ## Connected node types
 
-- Paper: 36
+- Paper: 39

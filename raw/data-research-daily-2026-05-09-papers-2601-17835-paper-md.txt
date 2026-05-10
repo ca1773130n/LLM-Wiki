@@ -1,0 +1,77 @@
+paper.md
+========
+
+# 논문 분석: 2601.17835
+
+> - arxiv: https://arxiv.org/abs/2601.17835
+> - papers.cool: https://papers.cool/arxiv/2601.17835
+> - 분석일: 2026-05-09
+
+Geometry-Grounded Gaussian Splatting | Cool Papers - 몰입형 논문 탐색
+
+## 2601.17835
+
+총계: 1
+
+## 
+#1  
+Geometry-Grounded Gaussian Splatting  
+[PDF15]  
+[Copy]  
+[Kimi6]  
+[REL]
+
+저자:  
+Baowen Zhang,  
+Chenxing Jiang,  
+Heng Li,  
+Shaojie Shen,  
+Ping Tan
+
+Gaussian Splatting GS는 새로운 시점 합성에서 인상적인 품질과 효율성을 보여주었다. 그러나 Gaussian primitive로부터 형상을 추출하는 문제는 여전히 미해결 과제로 남아 있다. 기하 파라미터화와 근사가 충분하지 않기 때문에, 기존 형상 재구성 방법은 다중 시점 일관성이 낮고 floaters에 민감하다는 문제가 있다. 본 논문에서는 Gaussian primitive를 특정한 종류의 stochastic solids로 정립하는 엄밀한 이론적 유도를 제시한다. 이 이론적 프레임워크는 Gaussian primitive를 명시적 기하 표현으로 직접 다룰 수 있게 함으로써 Geometry-Grounded Gaussian Splatting을 위한 원리적인 기반을 제공한다. stochastic solids의 체적 특성을 활용하여, 우리의 방법은 고품질 깊이 맵을 효율적으로 렌더링하고 이를 통해 세밀한 기하 추출을 가능하게 한다. 실험 결과, 우리의 방법은 공개 데이터셋에서 모든 Gaussian Splatting 기반 방법들 가운데 가장 우수한 형상 재구성 성능을 달성했다.
+
+주제:  
+Computer Vision and Pattern Recognition
+
+게시: 2026-01-25 13:32:53 UTC
+
+kexue.fm에서 설계 | kimi.ai로 구동
+
+포함 OR:
+
+제외:
+
+검색
+
+필터
+
+강조
+
+표시한 논문:
+
+#1  
+Geometry-Grounded Gaussian Splatting
+
+내보내기
+
+Magic Token:
+
+Kimi 언어:
+
+中文  
+English
+
+설명 언어:
+
+中文  
+English
+
+저장
+
+버그 신고 또는 이슈 제출은 다음을 방문하세요:
+
+Github: https://github.com/bojone/papers.cool
+
+계속 진행하기 전에 면책 조항을 읽어주세요.
+
+더 흥미로운 기능은 kexue.fm 및 kimi.ai를 방문하세요.

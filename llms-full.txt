@@ -37,6 +37,8 @@
 - [Daily Feed Summary — 2026-05-06](sources/daily-feed-summary-2026-05-06.html): - **mentioned_in** → Match-Any-Events: Zero-Shot Motion-Robust Feature Matching Across Wide Baselines for Event Cameras _(Paper)_ - **mentioned_in** → Power Foam: Unifying Real-Time Differentiable Ray Tracing and Rasterization _(Paper)_ -…
 - [Daily Feed Summary — 2026-05-07](sources/daily-feed-summary-2026-05-07.html)
 - [Daily Feed Summary — 2026-05-08](sources/daily-feed-summary-2026-05-08.html): - **mentioned_in** → Geometry-Grounded Gaussian Splatting _(Paper)_
+- [Daily Feed Summary — 2026-05-09](sources/daily-feed-summary-2026-05-09.html): - **mentioned_in** → GTA: A Geometry-Aware Attention Mechanism for Multi-View Transformers _(Paper)_ - **mentioned_in** → Geometry-Grounded Gaussian Splatting _(Paper)_ - **mentioned_in** → Velox: Learning Representations of 4D Geometry an…
+- [Daily Feed Summary — 2026-05-10](sources/daily-feed-summary-2026-05-10.html): - **mentioned_in** → GTA: A Geometry-Aware Attention Mechanism for Multi-View Transformers _(Paper)_ - **mentioned_in** → Geometry-Grounded Gaussian Splatting _(Paper)_ - **mentioned_in** → SelfReflect: Can LLMs Communicate Their Internal…
 - [📬 Daily Research Digest — 2026-04-08](sources/daily-research-digest-2026-04-08.html): - **mentioned_in** → Follow-Your-Emoji: Fine-Controllable and Expressive Freestyle Portrait Animation _(Paper)_ - **mentioned_in** → Free-Range Gaussians: Non-Grid-Aligned Generative 3D Gaussian Reconstruction _(Paper)_ - **mentioned_in**…
 - [📬 Daily Research Digest — 2026-04-15](sources/daily-research-digest-2026-04-15.html): - **mentioned_in** → FullCircle: Casual한 360° 촬영으로 손쉬운 3D 재구성 _(Paper)_ - **mentioned_in** → Geometry-Grounded Gaussian Splatting _(Paper)_
 - [📬 Daily Research Digest — 2026-04-18](sources/daily-research-digest-2026-04-18.html): - **uses_metric** → mAP _(Metric)_
@@ -55,11 +57,13 @@
 - [📬 Daily Research Digest — 2026-05-04](sources/daily-research-digest-2026-05-04.html): - **mentioned_in** → ArchSym: Detecting 3D-Grounded Architectural Symmetries in the Wild _(Paper)_ - **mentioned_in** → Inference-Time Text-to-Video Alignment with Diffusion Latent Beam Search _(Paper)_
 - [📬 Daily Research Digest — 2026-05-05](sources/daily-research-digest-2026-05-05.html): - **mentioned_in** → Ego-EXTRA: EXpert-TRAinee 지원을 위한 video-language Egocentric Dataset _(Paper)_ - **mentioned_in** → Extreme Rotation Estimation in the Wild _(Paper)_ - **mentioned_in** → Stepper: Stepwise Immersive Scene Generation with…
 - [📬 Daily Research Digest — 2026-05-06](sources/daily-research-digest-2026-05-06.html): - **mentioned_in** → Match-Any-Events: Zero-Shot Motion-Robust Feature Matching Across Wide Baselines for Event Cameras _(Paper)_ - **mentioned_in** → Power Foam: Unifying Real-Time Differentiable Ray Tracing and Rasterization _(Paper)_ -…
+- [📬 Daily Research Digest — 2026-05-09](sources/daily-research-digest-2026-05-09.html): - **mentioned_in** → Geometry-Grounded Gaussian Splatting _(Paper)_ - **mentioned_in** → Velox: Learning Representations of 4D Geometry and Appearance _(Paper)_
+- [📬 Daily Research Digest — 2026-05-10](sources/daily-research-digest-2026-05-10.html): - **mentioned_in** → GTA: A Geometry-Aware Attention Mechanism for Multi-View Transformers _(Paper)_ - **mentioned_in** → Geometry-Grounded Gaussian Splatting _(Paper)_ - **mentioned_in** → SelfReflect: Can LLMs Communicate Their Internal…
 - [digest](sources/digest.html)
 - [Feature Map](sources/feature-map.html): - **uses_metric** → mAP _(Metric)_
 - [Frontend redesign — annotated route walkthrough](sources/frontend-redesign-annotated-route-walkthrough.html): - **uses_metric** → mAP _(Metric)_
 - [Geometry-Grounded Gaussian Splatting](sources/geometry-grounded-gaussian-splatting.html): - **evaluated_on** → DTU _(Benchmark)_ - **evaluated_on** → Tanks and Temples _(Benchmark)_ - **mentioned_in** → ArchSym: Detecting 3D-Grounded Architectural Symmetries in the Wild _(Paper)_ - **mentioned_in** → Confidence-Based Mesh Extra…
-- [<h1 align="center">LLM-Wiki</h1>](sources/h1-align-center-llm-wiki-h1.html): - **uses_metric** → mAP _(Metric)_
+- [<h1 align="center">LLM-Wiki</h1>](sources/h1-align-center-llm-wiki-h1.html)
 - [Harness session history](sources/harness-session-history.html)
 - [Installation](sources/installation.html)
 - [Karpathy alignment — plan](sources/karpathy-alignment-plan.html)
@@ -99,6 +103,7 @@
 - [FullCircle: Casual한 360° 촬영으로 손쉬운 3D 재구성](papers/fullcircle-casual한-360-촬영으로-손쉬운-3d-재구성.html): - **authored_by** → Andrea Tagliasacchi _(Person)_ - **authored_by** → Aysegul Dundar _(Person)_ - **authored_by** → Daniel Rebain _(Person)_ - **authored_by** → Ipek Oztas _(Person)_ - **authored_by** → Kwang Moo Yi _(Person)_ - **authore…
 - [GaussianFlow SLAM: Monocular Gaussian Splatting SLAM Guided by GaussianFlow](papers/gaussianflow-slam-monocular-gaussian-splatting-slam-guided-by-gaussianflow.html): - **addresses** → Visual SLAM _(ResearchTopic)_ - **authored_by** → Dong-Uk Seo _(Person)_ - **authored_by** → Eungchang Mason Lee _(Person)_ - **authored_by** → Hyun Myung _(Person)_ - **authored_by** → Jinwoo Jeon _(Person)_ - **belongs_…
 - [Geometry-Grounded Gaussian Splatting](papers/geometry-grounded-gaussian-splatting.html): - **addresses** → Novel View Synthesis _(Task)_ - **addresses** → Shape Reconstruction _(Task)_ - **authored_by** → Baowen Zhang _(Person)_ - **authored_by** → Chenxing Jiang _(Person)_ - **authored_by** → Heng Li _(Person)_ - **authored_b…
+- [GTA: A Geometry-Aware Attention Mechanism for Multi-View Transformers](papers/gta-a-geometry-aware-attention-mechanism-for-multi-view-transformers.html): - **addresses** → Novel View Synthesis _(Task)_ - **authored_by** → Andreas Geiger _(Person)_ - **authored_by** → Bernhard Jaeger _(Person)_ - **authored_by** → Max Welling _(Person)_ - **authored_by** → Takeru Miyato _(Person)_ - **implem…
 - [Holo360D: 파노라마 3D 재구성과 그 이상을 발전시키기 위한 연속 궤적을 갖춘 대규모 실제 세계 데이터셋](papers/holo360d-파노라마-3d-재구성과-그-이상을-발전시키기-위한-연-96474e5d.html): - **addresses** → Visual SLAM _(ResearchTopic)_ - **authored_by** → Hui Xiong _(Person)_ - **authored_by** → Jing Ou _(Person)_ - **authored_by** → Jinjing Zhu _(Person)_ - **authored_by** → Shuai Zhang _(Person)_ - **authored_by** → Tongy…
 - [Human-in-the-Loop Local Corrections of 3D Scene Layouts via Infilling](papers/human-in-the-loop-local-corrections-of-3d-scene-layouts-via-infilling.html): - **authored_by** → Armen Avetisyan _(Person)_ - **authored_by** → Christopher Xie _(Person)_ - **authored_by** → Henry Howard-Jenkins _(Person)_ - **authored_by** → Jakob Engel _(Person)_ - **authored_by** → Julian Straub _(Person)_ - **a…
 - [Image Generators are Generalist Vision Learners](papers/image-generators-are-generalist-vision-learners.html): - **authored_by** → Howard Zhou _(Person)_ - **authored_by** → Huizhong Chen _(Person)_ - **authored_by** → Jean-Baptiste Alayrac _(Person)_ - **authored_by** → Jonathan T. Barron _(Person)_ - **authored_by** → Kaiming He _(Person)_ - **au…
@@ -119,12 +124,14 @@
 - [Sapiens2](papers/sapiens2.html): - **authored_by** → He Wen _(Person)_ - **authored_by** → Julieta Martinez _(Person)_ - **authored_by** → Rawal Khirodkar _(Person)_ - **authored_by** → Shunsuke Saito _(Person)_ - **authored_by** → Su Zhaoen _(Person)_ - **authored_by** →…
 - [Scaling 4D Representations](papers/scaling-4d-representations.html): - **evaluated_on** → ImageNet _(Benchmark)_ - **implemented_in** → GitHub 분석: google-deepmind/representations4d _(Repository)_ - **part_of** → 3D/4D Vision and Reconstruction _(ResearchField)_
 - [Scaling Sequence-to-Sequence Generative Neural Rendering](papers/scaling-sequence-to-sequence-generative-neural-rendering.html): - **authored_by** → Chi Phung _(Person)_ - **authored_by** → Haozhe Liu _(Person)_ - **authored_by** → Jiadong Guo _(Person)_ - **authored_by** → Juan C. Pérez _(Person)_ - **authored_by** → Juan-Manuel Pérez-Rúa _(Person)_ - **authored_by…
+- [SelfReflect: Can LLMs Communicate Their Internal Answer Distribution?](papers/selfreflect-can-llms-communicate-their-internal-answer-distribution.html): - **authored_by** → Adam Goliński _(Person)_ - **authored_by** → Arno Blaas _(Person)_ - **authored_by** → Eeshan Gunesh Dhekane _(Person)_ - **authored_by** → Luca Füger _(Person)_ - **authored_by** → Michael Kirchhof _(Person)_ - **autho…
 - [Stable Part Diffusion 4D: Multi-View RGB and Kinematic Parts Video Generation](papers/stable-part-diffusion-4d-multi-view-rgb-and-kinematic-parts-video-generation.html): - **authored_by** → Chun-Han Yao _(Person)_ - **authored_by** → Hao Zhang _(Person)_ - **authored_by** → Narendra Ahuja _(Person)_ - **authored_by** → Simon Donné _(Person)_ - **authored_by** → Varun Jampani _(Person)_ - **implemented_in**…
 - [Stepper: Stepwise Immersive Scene Generation with Multiview Panoramas](papers/stepper-stepwise-immersive-scene-generation-with-multiview-panoramas.html): - **addresses** → World Model _(ResearchTopic)_ - **authored_by** → Christian Rupprecht _(Person)_ - **authored_by** → Daniel Cremers _(Person)_ - **authored_by** → Fabian Manhardt _(Person)_ - **authored_by** → Federico Tombari _(Person)_…
 - [T(R,O) Grasp: Cross-Embodiment Dexterous Grasping을 위한 Robot-Object Spatial Transformation의 효율적 Graph Diffusion](papers/t-r-o-grasp-cross-embodiment-dexterous-grasping을-위한-robot-object-spatial-t-e5dccb3a.html): - **authored_by** → Huaicong Fang _(Person)_ - **authored_by** → Lin Shao _(Person)_ - **authored_by** → Tianrui Zhang _(Person)_ - **authored_by** → Xin Fei _(Person)_ - **authored_by** → Zhixuan Xu _(Person)_ - **implemented_in** → GitHu…
 - [Towards Depth Foundation Model: Recent Trends in Vision-Based Depth Estimation](papers/towards-depth-foundation-model-recent-trends-in-vision-based-depth-estimation.html): - **authored_by** → Haotong Lin _(Person)_ - **authored_by** → Haoyu Guo _(Person)_ - **authored_by** → Hongyu Zhou _(Person)_ - **authored_by** → Hujun Bao _(Person)_ - **authored_by** → Jiahao Shao _(Person)_ - **authored_by** → Peishan…
 - [Triangulation of Points Constrained to a Plane](papers/triangulation-of-points-constrained-to-a-plane.html): - **authored_by** → Elima Shehu _(Person)_ - **authored_by** → Petr Hrubý _(Person)_ - **part_of** → Research Literature _(ResearchField)_
 - [TRiGS: Temporal Rigid-Body Motion for Scalable 4D Gaussian Splatting](papers/trigs-temporal-rigid-body-motion-for-scalable-4d-gaussian-splatting.html): - **authored_by** → Jaesik Park _(Person)_ - **authored_by** → Joonsik Nam _(Person)_ - **authored_by** → Joonsoo Kim _(Person)_ - **authored_by** → Kugjin Yun _(Person)_ - **authored_by** → Kyeongbo Kong _(Person)_ - **authored_by** → Luc…
+- [Velox: Learning Representations of 4D Geometry and Appearance](papers/velox-learning-representations-of-4d-geometry-and-appearance.html): - **authored_by** → Anagh Malik _(Person)_ - **authored_by** → David B. Lindell _(Person)_ - **authored_by** → Dorian Chan _(Person)_ - **authored_by** → Jen-Hao Rick Chang _(Person)_ - **authored_by** → Oncel Tuzel _(Person)_ - **authored…
 - [ViBA: Implicit Bundle Adjustment with Geometric and Temporal Consistency for Robust Visual Matching](papers/viba-implicit-bundle-adjustment-with-geometric-and-temporal-consistency-for-robu-4e9b6754.html): - **authored_by** → Hailiang Tang _(Person)_ - **authored_by** → Tisheng Zhang _(Person)_ - **authored_by** → Xiaoji Niu _(Person)_ - **authored_by** → Yan Wang _(Person)_ - **authored_by** → Yuqing Wang _(Person)_ - **part_of** → 3D/4D Vi…
 - [Video4Spatial: Context-Guided Video Generation을 통한 시각-공간 지능을 향하여](papers/video4spatial-context-guided-video-generation을-통한-시각-공간-지능을-향하여.html): - **authored_by** → Lingxiao Li _(Person)_ - **authored_by** → Mohammad H. Taghavi _(Person)_ - **authored_by** → Rahul Garg _(Person)_ - **authored_by** → Roshni Cooper _(Person)_ - **authored_by** → Xingang Pan _(Person)_ - **authored_by…
 - [WorldCompass: Reinforcement Learning for Long-Horizon World Models](papers/worldcompass-reinforcement-learning-for-long-horizon-world-models.html): - **addresses** → World Model _(ResearchTopic)_ - **authored_by** → Chenjie Cao _(Person)_ - **authored_by** → Chunchao Guo _(Person)_ - **authored_by** → Haiyu Zhang _(Person)_ - **authored_by** → Haoyuan Wang _(Person)_ - **authored_by**…
@@ -132,6 +139,7 @@
 
 ## Repos
 
+- [GitHub 분석: 199-biotechnologies/claude-deep-research-skill](repos/github-분석-199-biotechnologies-claude-deep-research-skill.html): - **released_by** → 199-biotechnologies _(Organization)_
 - [GitHub 분석: addyosmani/agent-skills](repos/github-분석-addyosmani-agent-skills.html)
 - [GitHub 분석: Aero-Ex/ComfyUI-SegviGen](repos/github-분석-aero-ex-comfyui-segvigen.html): - **released_by** → aero-ex _(Organization)_
 - [GitHub 분석: affaan-m/everything-claude-code](repos/github-분석-affaan-m-everything-claude-code.html): - **released_by** → affaan-m _(Organization)_
@@ -147,10 +155,12 @@
 - [GitHub 분석: anthropics/claude-code](repos/github-분석-anthropics-claude-code.html)
 - [GitHub 분석: apinanaivot/IKEA-3D-Model-Download-Button](repos/github-분석-apinanaivot-ikea-3d-model-download-button.html)
 - [GitHub 분석: apple/ml-4m](repos/github-분석-apple-ml-4m.html): - **released_by** → apple _(Organization)_
+- [GitHub 분석: apple/ml-lito](repos/github-분석-apple-ml-lito.html): - **released_by** → apple _(Organization)_
 - [GitHub 분석: apple/ml-mobileclip](repos/github-분석-apple-ml-mobileclip.html): - **released_by** → apple _(Organization)_
 - [GitHub 분석: aree6/LiftShift](repos/github-분석-aree6-liftshift.html)
 - [GitHub 분석: ArthurBrussee/brush](repos/github-분석-arthurbrussee-brush.html)
 - [GitHub 분석: asherikov/shoggoth](repos/github-분석-asherikov-shoggoth.html)
+- [GitHub 분석: ashishps1/awesome-engineering-articles](repos/github-분석-ashishps1-awesome-engineering-articles.html)
 - [GitHub 분석: asimovinc/asimov-v1](repos/github-분석-asimovinc-asimov-v1.html)
 - [GitHub 분석: autowarefoundation/autoware](repos/github-분석-autowarefoundation-autoware.html)
 - [GitHub 분석: awesome-opencode/awesome-opencode](repos/github-분석-awesome-opencode-awesome-opencode.html): - **released_by** → awesome-opencode _(Organization)_
@@ -239,6 +249,7 @@
 - [GitHub 분석: Robbyant/lingbot-va](repos/github-분석-robbyant-lingbot-va.html)
 - [GitHub 분석: roboflow/rf-detr](repos/github-분석-roboflow-rf-detr.html): - **evaluated_on** → COCO _(Benchmark)_
 - [GitHub 분석: RPL-CS-UCL/SDS](repos/github-분석-rpl-cs-ucl-sds.html): - **released_by** → rpl-cs-ucl _(Organization)_
+- [GitHub 분석: rui314/chibicc](repos/github-분석-rui314-chibicc.html): - **implemented_in** → GTA: A Geometry-Aware Attention Mechanism for Multi-View Transformers _(Paper)_
 - [GitHub 분석: safishamsi/graphify](repos/github-분석-safishamsi-graphify.html)
 - [GitHub 분석: santifer/career-ops](repos/github-분석-santifer-career-ops.html)
 - [GitHub 분석: Seeed-Projects/reBot-DevArm](repos/github-분석-seeed-projects-rebot-devarm.html): - **released_by** → seeed-projects _(Organization)_
@@ -275,7 +286,7 @@
 - [Gaussian Splatting](concepts/gaussian-splatting.html): - **uses** → Confidence-Based Mesh Extraction from 3D Gaussians _(Paper)_ - **uses** → FullCircle: Casual한 360° 촬영으로 손쉬운 3D 재구성 _(Paper)_ - **uses** → Gaussian Splatting Reconstruction _(ApproachFamily)_ - **uses** → GaussianFlow SLAM: Mon…
 - [GaussianFlow SLAM](concepts/gaussianflow-slam.html): - **introduces** → GaussianFlow SLAM: Monocular Gaussian Splatting SLAM Guided by GaussianFlow _(Paper)_
 - [Multi-View Consistency](concepts/multi-view-consistency.html): - **uses** → Geometry-Grounded Gaussian Splatting _(Paper)_
-- [Novel View Synthesis](concepts/novel-view-synthesis.html): - **addresses** → Distance Field Rasterization for End-to-End Mesh Reconstruction _(Paper)_ - **addresses** → Geometry-Grounded Gaussian Splatting _(Paper)_
+- [Novel View Synthesis](concepts/novel-view-synthesis.html): - **addresses** → Distance Field Rasterization for End-to-End Mesh Reconstruction _(Paper)_ - **addresses** → GTA: A Geometry-Aware Attention Mechanism for Multi-View Transformers _(Paper)_ - **addresses** → Geometry-Grounded Gaussian Spla…
 - [Point Cloud](concepts/point-cloud.html): - **uses** → Holo360D: 파노라마 3D 재구성과 그 이상을 발전시키기 위한 연속 궤적을 갖춘 대규모 실제 세계 데이터셋 _(Paper)_
 - [Pre-training](concepts/pre-training.html): - **uses** → Scaling Sequence-to-Sequence Generative Neural Rendering _(Paper)_
 - [Pretraining](concepts/pretraining.html): - **uses** → Image Generators are Generalist Vision Learners _(Paper)_
@@ -290,8 +301,10 @@
 
 ## Entities
 
+- [199-biotechnologies](entities/199-biotechnologies.html): - **released_by** → GitHub 분석: 199-biotechnologies/claude-deep-research-skill _(Repository)_
 - [Accuracy](entities/accuracy.html): - **uses_metric** → Daily Feed Summary — 2026-04-27 _(SourceDocument)_ - **uses_metric** → Daily Feed Summary — 2026-04-28 _(SourceDocument)_ - **uses_metric** → Efficient Multi-Camera Tokenization with Triplanes for End-to-End Driving _(P…
 - [accuracy=90](entities/accuracy-90.html): 90% accuracy
+- [Adam Goliński](entities/adam-goliński.html): - **authored_by** → SelfReflect: Can LLMs Communicate Their Internal Answer Distribution? _(Paper)_
 - [ADE20K](entities/ade20k.html): - **uses_dataset** → GitHub 분석: ClaudiaCuttano/SANSA _(Repository)_
 - [aero-ex](entities/aero-ex.html): - **released_by** → GitHub 분석: Aero-Ex/ComfyUI-SegviGen _(Repository)_
 - [affaan-m](entities/affaan-m.html): - **released_by** → GitHub 분석: affaan-m/everything-claude-code _(Repository)_
@@ -300,23 +313,26 @@
 - [ai-search-guru](entities/ai-search-guru.html): - **released_by** → GitHub 분석: ai-search-guru/getcito-worlds-first-open-source-aio-aeo-or-geo-tool _(Repository)_
 - [Alec Jacobson](entities/alec-jacobson.html): - **authored_by** → RoMo: Robust Motion Segmentation Improves Structure from Motion _(Paper)_
 - [allenai](entities/allenai.html): - **released_by** → GitHub 분석: allenai/molmoact _(Repository)_
+- [Anagh Malik](entities/anagh-malik.html): - **authored_by** → Velox: Learning Representations of 4D Geometry and Appearance _(Paper)_
 - [Andrea Tagliasacchi](entities/andrea-tagliasacchi.html): - **authored_by** → Free-Range Gaussians: Non-Grid-Aligned Generative 3D Gaussian Reconstruction _(Paper)_ - **authored_by** → FullCircle: Casual한 360° 촬영으로 손쉬운 3D 재구성 _(Paper)_ - **authored_by** → Power Foam: Unifying Real-Time Differenti…
 - [Andrea Vedaldi](entities/andrea-vedaldi.html): - **authored_by** → Free-Range Gaussians: Non-Grid-Aligned Generative 3D Gaussian Reconstruction _(Paper)_
-- [Andreas Geiger](entities/andreas-geiger.html): - **authored_by** → Feed-Forward 3D Scene Modeling: A Problem-Driven Perspective _(Paper)_
+- [Andreas Geiger](entities/andreas-geiger.html): - **authored_by** → Feed-Forward 3D Scene Modeling: A Problem-Driven Perspective _(Paper)_ - **authored_by** → GTA: A Geometry-Aware Attention Mechanism for Multi-View Transformers _(Paper)_
 - [Andreas Kurz](entities/andreas-kurz.html): - **authored_by** → Confidence-Based Mesh Extraction from 3D Gaussians _(Paper)_
 - [Andrew J Davison](entities/andrew-j-davison.html): - **authored_by** → Learning in Deep Factor Graphs with Gaussian Belief Propagation _(Paper)_
 - [Andrzej Odrzywołek](entities/andrzej-odrzywołek.html): - **authored_by** → All elementary functions from a single binary operator _(Paper)_
 - [anil-matcha](entities/anil-matcha.html): - **released_by** → GitHub 분석: Anil-matcha/Open-Higgsfield-AI _(Repository)_
 - [Anish Prabhu](entities/anish-prabhu.html): - **authored_by** → Power Foam: Unifying Real-Time Differentiable Ray Tracing and Rasterization _(Paper)_
 - [Antonino Furnari](entities/antonino-furnari.html): - **authored_by** → An Outlook into the Future of Egocentric Vision _(Paper)_ - **authored_by** → Ego-EXTRA: EXpert-TRAinee 지원을 위한 video-language Egocentric Dataset _(Paper)_
-- [apple](entities/apple.html): - **released_by** → GitHub 분석: apple/ml-4m _(Repository)_ - **released_by** → GitHub 분석: apple/ml-mobileclip _(Repository)_
+- [apple](entities/apple.html): - **released_by** → GitHub 분석: apple/ml-4m _(Repository)_ - **released_by** → GitHub 분석: apple/ml-lito _(Repository)_ - **released_by** → GitHub 분석: apple/ml-mobileclip _(Repository)_
 - [ARC Prize Foundation](entities/arc-prize-foundation.html): - **authored_by** → ARC-AGI-3: Frontier Agentic Intelligence를 위한 새로운 도전 _(Paper)_
 - [Armen Avetisyan](entities/armen-avetisyan.html): - **authored_by** → Human-in-the-Loop Local Corrections of 3D Scene Layouts via Infilling _(Paper)_
+- [Arno Blaas](entities/arno-blaas.html): - **authored_by** → SelfReflect: Can LLMs Communicate Their Internal Answer Distribution? _(Paper)_
 - [ATE](entities/ate.html): - **uses_metric** → ViBA: Implicit Bundle Adjustment with Geometric and Temporal Consistency for Robust Visual Matching _(Paper)_
 - [awesome-opencode](entities/awesome-opencode.html): - **released_by** → GitHub 분석: awesome-opencode/awesome-opencode _(Repository)_
 - [Aysegul Dundar](entities/aysegul-dundar.html): - **authored_by** → FullCircle: Casual한 360° 촬영으로 손쉬운 3D 재구성 _(Paper)_
 - [Baowen Zhang](entities/baowen-zhang.html): - **authored_by** → Geometry-Grounded Gaussian Splatting _(Paper)_
 - [Baoxiong Jia](entities/baoxiong-jia.html): - **authored_by** → Lifting Unlabeled Internet-level Data for 3D Scene Understanding _(Paper)_ - **authored_by** → OmniXtreme: Breaking the Generality Barrier in High-Dynamic Humanoid Control _(Paper)_
+- [Bernhard Jaeger](entities/bernhard-jaeger.html): - **authored_by** → GTA: A Geometry-Aware Attention Mechanism for Multi-View Transformers _(Paper)_
 - [Blender](entities/blender.html): - **uses_dataset** → Daily Feed Summary — 2026-04-11 _(SourceDocument)_ - **uses_dataset** → GitHub 분석: ahujasid/blender-mcp _(Repository)_
 - [Bo Zhu](entities/bo-zhu.html): - **authored_by** → Free-Range Gaussians: Non-Grid-Aligned Generative 3D Gaussian Reconstruction _(Paper)_
 - [Bohan Zhuang](entities/bohan-zhuang.html): - **authored_by** → Feed-Forward 3D Scene Modeling: A Problem-Driven Perspective _(Paper)_
@@ -340,6 +356,7 @@
 - [Daniel Cremers](entities/daniel-cremers.html): - **authored_by** → Stepper: Stepwise Immersive Scene Generation with Multiview Panoramas _(Paper)_
 - [Daniel Rebain](entities/daniel-rebain.html): - **authored_by** → FullCircle: Casual한 360° 촬영으로 손쉬운 3D 재구성 _(Paper)_ - **authored_by** → Power Foam: Unifying Real-Time Differentiable Ray Tracing and Rasterization _(Paper)_
 - [davian-robotics](entities/davian-robotics.html): - **released_by** → GitHub 분석: DAVIAN-Robotics/EgoX _(Repository)_
+- [David B. Lindell](entities/david-b-lindell.html): - **authored_by** → Velox: Learning Representations of 4D Geometry and Appearance _(Paper)_
 - [David J. Fleet](entities/david-j-fleet.html): - **authored_by** → RoMo: Robust Motion Segmentation Improves Structure from Motion _(Paper)_
 - [deepseek-ai](entities/deepseek-ai.html): - **released_by** → GitHub 분석: deepseek-ai/TileKernels _(Repository)_
 - [Denis Rozumny](entities/denis-rozumny.html): - **authored_by** → Free-Range Gaussians: Non-Grid-Aligned Generative 3D Gaussian Reconstruction _(Paper)_
@@ -349,8 +366,10 @@
 - [Dong-Uk Seo](entities/dong-uk-seo.html): - **authored_by** → GaussianFlow SLAM: Monocular Gaussian Splatting SLAM Guided by GaussianFlow _(Paper)_
 - [Donny Y. Chen](entities/donny-y-chen.html): - **authored_by** → Feed-Forward 3D Scene Modeling: A Problem-Driven Perspective _(Paper)_
 - [Dor Verbin](entities/dor-verbin.html): - **authored_by** → Power Foam: Unifying Real-Time Differentiable Ray Tracing and Rasterization _(Paper)_
+- [Dorian Chan](entities/dorian-chan.html): - **authored_by** → Velox: Learning Representations of 4D Geometry and Appearance _(Paper)_
 - [Dotan Ankri](entities/dotan-ankri.html): - **authored_by** → Extreme Rotation Estimation in the Wild _(Paper)_
 - [DTU](entities/dtu.html): - **evaluated_on** → Codex extraction review (2026-05-01) _(SourceDocument)_ - **evaluated_on** → Distance Field Rasterization for End-to-End Mesh Reconstruction _(Paper)_ - **evaluated_on** → Geometry-Grounded Gaussian Splatting _(SourceD…
+- [Eeshan Gunesh Dhekane](entities/eeshan-gunesh-dhekane.html): - **authored_by** → SelfReflect: Can LLMs Communicate Their Internal Answer Distribution? _(Paper)_
 - [Elima Shehu](entities/elima-shehu.html): - **authored_by** → Triangulation of Points Constrained to a Plane _(Paper)_
 - [eth-ait](entities/eth-ait.html): - **released_by** → GitHub 분석: eth-ait/Gaussian-Garments _(Repository)_
 - [Ethan Weber](entities/ethan-weber.html): - **authored_by** → Free-Range Gaussians: Non-Grid-Aligned Generative 3D Gaussian Reconstruction _(Paper)_
@@ -409,6 +428,7 @@
 - [James Fort](entities/james-fort.html): - **authored_by** → Ego-EXTRA: EXpert-TRAinee 지원을 위한 video-language Egocentric Dataset _(Paper)_
 - [Javier Civera](entities/javier-civera.html): - **authored_by** → Cross-Attentive Multiview Fusion of Vision-Language Embeddings _(Paper)_
 - [Jean-Baptiste Alayrac](entities/jean-baptiste-alayrac.html): - **authored_by** → Image Generators are Generalist Vision Learners _(Paper)_
+- [Jen-Hao Rick Chang](entities/jen-hao-rick-chang.html): - **authored_by** → Velox: Learning Representations of 4D Geometry and Appearance _(Paper)_
 - [Jia-Wang Bian](entities/jia-wang-bian.html): - **authored_by** → Feed-Forward 3D Scene Modeling: A Problem-Driven Perspective _(Paper)_
 - [Jiadong Guo](entities/jiadong-guo.html): - **authored_by** → Scaling Sequence-to-Sequence Generative Neural Rendering _(Paper)_
 - [Jiahao Shao](entities/jiahao-shao.html): - **authored_by** → Towards Depth Foundation Model: Recent Trends in Vision-Based Depth Estimation _(Paper)_
@@ -454,11 +474,12 @@
 - [Linfeng Zhao](entities/linfeng-zhao.html): - **authored_by** → Integrating Symmetry into Differentiable Planning with Steerable Convolutions _(Paper)_
 - [Lingxiao Li](entities/lingxiao-li.html): - **authored_by** → Video4Spatial: Context-Guided Video Generation을 통한 시각-공간 지능을 향하여 _(Paper)_
 - [Lingzhi Kong](entities/lingzhi-kong.html): - **authored_by** → Integrating Symmetry into Differentiable Planning with Steerable Convolutions _(Paper)_
+- [Luca Füger](entities/luca-füger.html): - **authored_by** → SelfReflect: Can LLMs Communicate Their Internal Answer Distribution? _(Paper)_
 - [Lucas Yunkyu Lee](entities/lucas-yunkyu-lee.html): - **authored_by** → TRiGS: Temporal Rigid-Body Motion for Scalable 4D Gaussian Splatting _(Paper)_
 - [Lukas Radl](entities/lukas-radl.html): - **authored_by** → Confidence-Based Mesh Extraction from 3D Gaussians _(Paper)_
 - [m-schuetz](entities/m-schuetz.html): - **released_by** → GitHub 분석: m-schuetz/CuRast _(Repository)_
 - [Mandy Guo](entities/mandy-guo.html): - **authored_by** → Image Generators are Generalist Vision Learners _(Paper)_
-- [mAP](entities/map.html): - **uses_metric** → <h1 align="center">LLM-Wiki</h1> _(SourceDocument)_ - **uses_metric** → ArchSym: Detecting 3D-Grounded Architectural Symmetries in the Wild _(Paper)_ - **uses_metric** → Architecture _(SourceDocument)_ - **uses_metric**…
+- [mAP](entities/map.html): - **uses_metric** → ArchSym: Detecting 3D-Grounded Architectural Symmetries in the Wild _(Paper)_ - **uses_metric** → Architecture _(SourceDocument)_ - **uses_metric** → Codex extraction review (2026-05-01) _(SourceDocument)_ - **uses_metr…
 - [mAP=4](entities/map-4.html): 4 mAP
 - [Marc Szafraniec](entities/marc-szafraniec.html): - **authored_by** → Efficient Universal Perception Encoder _(Paper)_
 - [Marco Pavone](entities/marco-pavone.html): - **authored_by** → Efficient Multi-Camera Tokenization with Triplanes for End-to-End Driving _(Paper)_
@@ -470,7 +491,9 @@
 - [Masahiro Suzuki](entities/masahiro-suzuki.html): - **authored_by** → Inference-Time Text-to-Video Alignment with Diffusion Latent Beam Search _(Paper)_
 - [Masayoshi Tomizuka](entities/masayoshi-tomizuka.html): - **authored_by** → CLAW: Composable Language-Annotated Whole-body Motion Generation _(Paper)_
 - [MATH](entities/math.html): - **evaluated_on** → Codex graph-view review (2026-05-04) _(SourceDocument)_
+- [Max Welling](entities/max-welling.html): - **authored_by** → GTA: A Geometry-Aware Attention Mechanism for Multi-View Transformers _(Paper)_
 - [Maxime Oquab](entities/maxime-oquab.html): - **authored_by** → Efficient Universal Perception Encoder _(Paper)_
+- [Michael Kirchhof](entities/michael-kirchhof.html): - **authored_by** → SelfReflect: Can LLMs Communicate Their Internal Answer Distribution? _(Paper)_
 - [Michael Oechsle](entities/michael-oechsle.html): - **authored_by** → Stepper: Stepwise Immersive Scene Generation with Multiview Panoramas _(Paper)_
 - [Michael Steiner](entities/michael-steiner.html): - **authored_by** → Confidence-Based Mesh Extraction from 3D Gaussians _(Paper)_
 - [Michele Mazzamuto](entities/michele-mazzamuto.html): - **authored_by** → Ego-EXTRA: EXpert-TRAinee 지원을 위한 video-language Egocentric Dataset _(Paper)_
@@ -494,6 +517,7 @@
 - [Objaverse](entities/objaverse.html): - **uses_dataset** → Free-Range Gaussians: Non-Grid-Aligned Generative 3D Gaussian Reconstruction _(Paper)_ - **uses_dataset** → Stable Part Diffusion 4D: Multi-View RGB and Kinematic Parts Video Generation _(Paper)_ - **uses_dataset** → W…
 - [Oliver Wang](entities/oliver-wang.html): - **authored_by** → Image Generators are Generalist Vision Learners _(Paper)_
 - [Omar Alama](entities/omar-alama.html): - **authored_by** → RAVEN: Resilient Aerial Navigation via Open-Set Semantic Memory and Behavior Adaptation _(Paper)_
+- [Oncel Tuzel](entities/oncel-tuzel.html): - **authored_by** → Velox: Learning Representations of 4D Geometry and Appearance _(Paper)_
 - [opsiclear-4dgs](entities/opsiclear-4dgs.html): - **released_by** → GitHub 분석: OpsiClear-4DGS/TriGSVanilla _(Repository)_
 - [Patrick Labatut](entities/patrick-labatut.html): - **authored_by** → Efficient Universal Perception Encoder _(Paper)_
 - [Paul Voigtlaender](entities/paul-voigtlaender.html): - **authored_by** → Image Generators are Generalist Vision Learners _(Paper)_
@@ -529,6 +553,7 @@
 - [seeed-projects](entities/seeed-projects.html): - **released_by** → GitHub 분석: Seeed-Projects/reBot-DevArm _(Repository)_
 - [Segment Anything](entities/segment-anything.html): - **uses** → Image Generators are Generalist Vision Learners _(Paper)_
 - [Sensen Gao](entities/sensen-gao.html): - **authored_by** → Feed-Forward 3D Scene Modeling: A Problem-Driven Perspective _(Paper)_
+- [Seong Joon Oh](entities/seong-joon-oh.html): - **authored_by** → SelfReflect: Can LLMs Communicate Their Internal Answer Distribution? _(Paper)_
 - [Seth Nabarro](entities/seth-nabarro.html): - **authored_by** → Learning in Deep Factor Graphs with Gaussian Belief Propagation _(Paper)_
 - [Seungchan Kim](entities/seungchan-kim.html): - **authored_by** → RAVEN: Resilient Aerial Navigation via Open-Set Semantic Memory and Behavior Adaptation _(Paper)_
 - [Seunggyu Choi](entities/seunggyu-choi.html): - **authored_by** → TRiGS: Temporal Rigid-Body Motion for Scalable 4D Gaussian Splatting _(Paper)_
@@ -547,6 +572,7 @@
 - [Sida Peng](entities/sida-peng.html): - **authored_by** → Towards Depth Foundation Model: Recent Trends in Vision-Based Depth Estimation _(Paper)_
 - [Siddhant Bansal](entities/siddhant-bansal.html): - **authored_by** → An Outlook into the Future of Egocentric Vision _(Paper)_
 - [Simon Donné](entities/simon-donné.html): - **authored_by** → Stable Part Diffusion 4D: Multi-View RGB and Kinematic Parts Video Generation _(Paper)_
+- [Sinead Williamson](entities/sinead-williamson.html): - **authored_by** → SelfReflect: Can LLMs Communicate Their Internal Answer Distribution? _(Paper)_
 - [Siyuan Huang](entities/siyuan-huang.html): - **authored_by** → Lifting Unlabeled Internet-level Data for 3D Scene Understanding _(Paper)_ - **authored_by** → OmniXtreme: Breaking the Generality Barrier in High-Dynamic Humanoid Control _(Paper)_
 - [skalskip](entities/skalskip.html): - **released_by** → GitHub 분석: SkalskiP/top-cvpr-2026-papers _(Repository)_
 - [skyworkai](entities/skyworkai.html): - **released_by** → GitHub 분석: SkyworkAI/Matrix-3D _(Repository)_
@@ -561,6 +587,7 @@
 - [Suwoong Yeom](entities/suwoong-yeom.html): - **authored_by** → TRiGS: Temporal Rigid-Body Motion for Scalable 4D Gaussian Splatting _(Paper)_
 - [Suya You](entities/suya-you.html): - **authored_by** → Img2CAD: VLM-Assisted Conditional Factorization을 통한 이미지로부터의 3D CAD 모델 리버스 엔지니어링 _(Paper)_
 - [sv-pp](entities/sv-pp.html): - **released_by** → GitHub 분석: sv-pp/SceneVersepp _(Repository)_
+- [Takeru Miyato](entities/takeru-miyato.html): - **authored_by** → GTA: A Geometry-Aware Attention Mechanism for Multi-View Transformers _(Paper)_
 - [Tanks and Temples](entities/tanks-and-temples.html): - **evaluated_on** → Codex extraction review (2026-05-01) _(SourceDocument)_ - **evaluated_on** → Distance Field Rasterization for End-to-End Mesh Reconstruction _(Paper)_ - **evaluated_on** → Geometry-Grounded Gaussian Splatting _(SourceD…
 - [Tao Xiang](entities/tao-xiang.html): - **authored_by** → Scaling Sequence-to-Sequence Generative Neural Rendering _(Paper)_
 - [Tat-Jen Cham](entities/tat-jen-cham.html): - **authored_by** → Feed-Forward 3D Scene Modeling: A Problem-Driven Perspective _(Paper)_
@@ -590,6 +617,7 @@
 - [world-in-world](entities/world-in-world.html): - **released_by** → GitHub 분석: World-In-World/world-in-world _(Repository)_
 - [Wufan Zhao](entities/wufan-zhao.html): - **authored_by** → Holo360D: 파노라마 3D 재구성과 그 이상을 발전시키기 위한 연속 궤적을 갖춘 대규모 실제 세계 데이터셋 _(Paper)_
 - [Xiaoji Niu](entities/xiaoji-niu.html): - **authored_by** → ViBA: Implicit Bundle Adjustment with Geometric and Temporal Consistency for Robust Visual Matching _(Paper)_
+- [Xiaoming Zhao](entities/xiaoming-zhao.html): - **authored_by** → Velox: Learning Representations of 4D Geometry and Appearance _(Paper)_
 - [Xiaowei Zhou](entities/xiaowei-zhou.html): - **authored_by** → Towards Depth Foundation Model: Recent Trends in Vision-Based Depth Estimation _(Paper)_
 - [Xin Fei](entities/xin-fei.html): - **authored_by** → T(R,O) Grasp: Cross-Embodiment Dexterous Grasping을 위한 Robot-Object Spatial Transformation의 효율적 Graph Diffusion _(Paper)_
 - [Xingang Pan](entities/xingang-pan.html): - **authored_by** → Video4Spatial: Context-Guided Video Generation을 통한 시각-공간 지능을 향하여 _(Paper)_
@@ -688,6 +716,8 @@
 - [Daily Digest — 2026-05-06](syntheses/daily-2026-05-06.html): Sources ingested under `data/research/daily/2026-05-06/`.
 - [Daily Digest — 2026-05-07](syntheses/daily-2026-05-07.html): Sources ingested under `data/research/daily/2026-05-07/`.
 - [Daily Digest — 2026-05-08](syntheses/daily-2026-05-08.html): Sources ingested under `data/research/daily/2026-05-08/`.
+- [Daily Digest — 2026-05-09](syntheses/daily-2026-05-09.html): Sources ingested under `data/research/daily/2026-05-09/`.
+- [Daily Digest — 2026-05-10](syntheses/daily-2026-05-10.html): Sources ingested under `data/research/daily/2026-05-10/`.
 - [Field Overview — 3D/4D Vision and Reconstruction](syntheses/field-3d-4d-vision-and-reconstruction.html): Dynamic Gaussian Splatting (ApproachFamily) — 1 contributing paper(s) connect to this thread.
 - [Field Overview — LLM Reasoning](syntheses/field-llm-reasoning.html): No linked topics yet.
 - [Field Overview — Research Literature](syntheses/field-research-literature.html): World Model (ResearchTopic) — 3 contributing paper(s) connect to this thread.
@@ -1213,6 +1243,36 @@ _sources/daily-feed-summary-2026-05-08.html_
 
 - Paper: 1
 
+### Daily Feed Summary — 2026-05-09
+_sources/daily-feed-summary-2026-05-09.html_
+
+# Daily Feed Summary — 2026-05-09
+
+## Outgoing relations
+
+- **mentioned_in** → GTA: A Geometry-Aware Attention Mechanism for Multi-View Transformers _(Paper)_
+- **mentioned_in** → Geometry-Grounded Gaussian Splatting _(Paper)_
+- **mentioned_in** → Velox: Learning Representations of 4D Geometry and Appearance _(Paper)_
+
+## Connected node types
+
+- Paper: 3
+
+### Daily Feed Summary — 2026-05-10
+_sources/daily-feed-summary-2026-05-10.html_
+
+# Daily Feed Summary — 2026-05-10
+
+## Outgoing relations
+
+- **mentioned_in** → GTA: A Geometry-Aware Attention Mechanism for Multi-View Transformers _(Paper)_
+- **mentioned_in** → Geometry-Grounded Gaussian Splatting _(Paper)_
+- **mentioned_in** → SelfReflect: Can LLMs Communicate Their Internal Answer Distribution? _(Paper)_
+
+## Connected node types
+
+- Paper: 3
+
 ### 📬 Daily Research Digest — 2026-04-08
 _sources/daily-research-digest-2026-04-08.html_
 
@@ -1502,6 +1562,35 @@ _sources/daily-research-digest-2026-05-06.html_
 
 - Paper: 3
 
+### 📬 Daily Research Digest — 2026-05-09
+_sources/daily-research-digest-2026-05-09.html_
+
+# 📬 Daily Research Digest — 2026-05-09
+
+## Outgoing relations
+
+- **mentioned_in** → Geometry-Grounded Gaussian Splatting _(Paper)_
+- **mentioned_in** → Velox: Learning Representations of 4D Geometry and Appearance _(Paper)_
+
+## Connected node types
+
+- Paper: 2
+
+### 📬 Daily Research Digest — 2026-05-10
+_sources/daily-research-digest-2026-05-10.html_
+
+# 📬 Daily Research Digest — 2026-05-10
+
+## Outgoing relations
+
+- **mentioned_in** → GTA: A Geometry-Aware Attention Mechanism for Multi-View Transformers _(Paper)_
+- **mentioned_in** → Geometry-Grounded Gaussian Splatting _(Paper)_
+- **mentioned_in** → SelfReflect: Can LLMs Communicate Their Internal Answer Distribution? _(Paper)_
+
+## Connected node types
+
+- Paper: 3
+
 ### digest
 _sources/digest.html_
 
@@ -1575,14 +1664,6 @@ _sources/geometry-grounded-gaussian-splatting.html_
 _sources/h1-align-center-llm-wiki-h1.html_
 
 # <h1 align="center">LLM-Wiki</h1>
-
-## Outgoing relations
-
-- **uses_metric** → mAP _(Metric)_
-
-## Connected node types
-
-- Metric: 1
 
 ### Harness session history
 _sources/harness-session-history.html_
@@ -2369,16 +2450,20 @@ _papers/geometry-grounded-gaussian-splatting.html_
 - **mentioned_in** → Daily Feed Summary — 2026-04-26 _(SourceDocument)_
 - **mentioned_in** → Daily Feed Summary — 2026-04-27 _(SourceDocument)_
 - **mentioned_in** → Daily Feed Summary — 2026-05-08 _(SourceDocument)_
+- **mentioned_in** → Daily Feed Summary — 2026-05-09 _(SourceDocument)_
+- **mentioned_in** → Daily Feed Summary — 2026-05-10 _(SourceDocument)_
 - **mentioned_in** → Geometry-Grounded Gaussian Splatting _(SourceDocument)_
 - **mentioned_in** → WorldCompass: Reinforcement Learning for Long-Horizon World Models _(SourceDocument)_
 - **mentioned_in** → 📬 Daily Research Digest — 2026-04-15 _(SourceDocument)_
 - **mentioned_in** → 📬 Daily Research Digest — 2026-04-23 _(SourceDocument)_
 - **mentioned_in** → 📬 Daily Research Digest — 2026-04-26 _(SourceDocument)_
 - **mentioned_in** → 📬 Daily Research Digest — 2026-04-27 _(SourceDocument)_
+- **mentioned_in** → 📬 Daily Research Digest — 2026-05-09 _(SourceDocument)_
+- **mentioned_in** → 📬 Daily Research Digest — 2026-05-10 _(SourceDocument)_
 
 ## Connected node types
 
-- SourceDocument: 13
+- SourceDocument: 17
 - Person: 5
 - ApproachFamily: 2
 - MethodologicalConcept: 2
@@ -2390,6 +2475,35 @@ _papers/geometry-grounded-gaussian-splatting.html_
 - Metric: 1
 - ResearchField: 1
 - TechnicalTerm: 1
+
+### GTA: A Geometry-Aware Attention Mechanism for Multi-View Transformers
+_papers/gta-a-geometry-aware-attention-mechanism-for-multi-view-transformers.html_
+
+# GTA: A Geometry-Aware Attention Mechanism for Multi-View Transformers
+
+## Outgoing relations
+
+- **addresses** → Novel View Synthesis _(Task)_
+- **authored_by** → Andreas Geiger _(Person)_
+- **authored_by** → Bernhard Jaeger _(Person)_
+- **authored_by** → Max Welling _(Person)_
+- **authored_by** → Takeru Miyato _(Person)_
+- **implemented_in** → GitHub 분석: rui314/chibicc _(Repository)_
+- **part_of** → 3D/4D Vision and Reconstruction _(ResearchField)_
+
+## Incoming relations
+
+- **mentioned_in** → Daily Feed Summary — 2026-05-09 _(SourceDocument)_
+- **mentioned_in** → Daily Feed Summary — 2026-05-10 _(SourceDocument)_
+- **mentioned_in** → 📬 Daily Research Digest — 2026-05-10 _(SourceDocument)_
+
+## Connected node types
+
+- Person: 4
+- SourceDocument: 3
+- Repository: 1
+- ResearchField: 1
+- Task: 1
 
 ### Holo360D: 파노라마 3D 재구성과 그 이상을 발전시키기 위한 연속 궤적을 갖춘 대규모 실제 세계 데이터셋
 _papers/holo360d-파노라마-3d-재구성과-그-이상을-발전시키기-위한-연-96474e5d.html_
@@ -3049,6 +3163,35 @@ _papers/scaling-sequence-to-sequence-generative-neural-rendering.html_
 - ResearchField: 1
 - TrainingParadigm: 1
 
+### SelfReflect: Can LLMs Communicate Their Internal Answer Distribution?
+_papers/selfreflect-can-llms-communicate-their-internal-answer-distribution.html_
+
+# SelfReflect: Can LLMs Communicate Their Internal Answer Distribution?
+
+## Outgoing relations
+
+- **authored_by** → Adam Goliński _(Person)_
+- **authored_by** → Arno Blaas _(Person)_
+- **authored_by** → Eeshan Gunesh Dhekane _(Person)_
+- **authored_by** → Luca Füger _(Person)_
+- **authored_by** → Michael Kirchhof _(Person)_
+- **authored_by** → Seong Joon Oh _(Person)_
+- **authored_by** → Sinead Williamson _(Person)_
+- **implemented_in** → GitHub 분석: apple/ml-lito _(Repository)_
+- **part_of** → 3D/4D Vision and Reconstruction _(ResearchField)_
+
+## Incoming relations
+
+- **mentioned_in** → Daily Feed Summary — 2026-05-10 _(SourceDocument)_
+- **mentioned_in** → 📬 Daily Research Digest — 2026-05-10 _(SourceDocument)_
+
+## Connected node types
+
+- Person: 7
+- SourceDocument: 2
+- Repository: 1
+- ResearchField: 1
+
 ### Stable Part Diffusion 4D: Multi-View RGB and Kinematic Parts Video Generation
 _papers/stable-part-diffusion-4d-multi-view-rgb-and-kinematic-parts-video-generation.html_
 
@@ -3245,6 +3388,32 @@ _papers/trigs-temporal-rigid-body-motion-for-scalable-4d-gaussian-splatting.html
 - Repository: 1
 - ResearchField: 1
 
+### Velox: Learning Representations of 4D Geometry and Appearance
+_papers/velox-learning-representations-of-4d-geometry-and-appearance.html_
+
+# Velox: Learning Representations of 4D Geometry and Appearance
+
+## Outgoing relations
+
+- **authored_by** → Anagh Malik _(Person)_
+- **authored_by** → David B. Lindell _(Person)_
+- **authored_by** → Dorian Chan _(Person)_
+- **authored_by** → Jen-Hao Rick Chang _(Person)_
+- **authored_by** → Oncel Tuzel _(Person)_
+- **authored_by** → Xiaoming Zhao _(Person)_
+- **part_of** → 3D/4D Vision and Reconstruction _(ResearchField)_
+
+## Incoming relations
+
+- **mentioned_in** → Daily Feed Summary — 2026-05-09 _(SourceDocument)_
+- **mentioned_in** → 📬 Daily Research Digest — 2026-05-09 _(SourceDocument)_
+
+## Connected node types
+
+- Person: 6
+- SourceDocument: 2
+- ResearchField: 1
+
 ### ViBA: Implicit Bundle Adjustment with Geometric and Temporal Consistency for Robust Visual Matching
 _papers/viba-implicit-bundle-adjustment-with-geometric-and-temporal-consistency-for-robu-4e9b6754.html_
 
@@ -3379,6 +3548,19 @@ _papers/자기지도학습-요리책.html_
 - ResearchField: 1
 
 ## Repos
+
+### GitHub 분석: 199-biotechnologies/claude-deep-research-skill
+_repos/github-분석-199-biotechnologies-claude-deep-research-skill.html_
+
+# GitHub 분석: 199-biotechnologies/claude-deep-research-skill
+
+## Outgoing relations
+
+- **released_by** → 199-biotechnologies _(Organization)_
+
+## Connected node types
+
+- Organization: 1
 
 ### GitHub 분석: addyosmani/agent-skills
 _repos/github-분석-addyosmani-agent-skills.html_
@@ -3524,6 +3706,24 @@ _repos/github-분석-apple-ml-4m.html_
 
 - Organization: 1
 
+### GitHub 분석: apple/ml-lito
+_repos/github-분석-apple-ml-lito.html_
+
+# GitHub 분석: apple/ml-lito
+
+## Outgoing relations
+
+- **released_by** → apple _(Organization)_
+
+## Incoming relations
+
+- **implemented_in** → SelfReflect: Can LLMs Communicate Their Internal Answer Distribution? _(Paper)_
+
+## Connected node types
+
+- Organization: 1
+- Paper: 1
+
 ### GitHub 분석: apple/ml-mobileclip
 _repos/github-분석-apple-ml-mobileclip.html_
 
@@ -3551,6 +3751,11 @@ _repos/github-분석-arthurbrussee-brush.html_
 _repos/github-분석-asherikov-shoggoth.html_
 
 # GitHub 분석: asherikov/shoggoth
+
+### GitHub 분석: ashishps1/awesome-engineering-articles
+_repos/github-분석-ashishps1-awesome-engineering-articles.html_
+
+# GitHub 분석: ashishps1/awesome-engineering-articles
 
 ### GitHub 분석: asimovinc/asimov-v1
 _repos/github-분석-asimovinc-asimov-v1.html_
@@ -4428,6 +4633,19 @@ _repos/github-분석-rpl-cs-ucl-sds.html_
 
 - Organization: 1
 
+### GitHub 분석: rui314/chibicc
+_repos/github-분석-rui314-chibicc.html_
+
+# GitHub 분석: rui314/chibicc
+
+## Incoming relations
+
+- **implemented_in** → GTA: A Geometry-Aware Attention Mechanism for Multi-View Transformers _(Paper)_
+
+## Connected node types
+
+- Paper: 1
+
 ### GitHub 분석: safishamsi/graphify
 _repos/github-분석-safishamsi-graphify.html_
 
@@ -4806,11 +5024,12 @@ _concepts/novel-view-synthesis.html_
 ## Incoming relations
 
 - **addresses** → Distance Field Rasterization for End-to-End Mesh Reconstruction _(Paper)_
+- **addresses** → GTA: A Geometry-Aware Attention Mechanism for Multi-View Transformers _(Paper)_
 - **addresses** → Geometry-Grounded Gaussian Splatting _(Paper)_
 
 ## Connected node types
 
-- Paper: 2
+- Paper: 3
 
 ### Point Cloud
 _concepts/point-cloud.html_
@@ -4965,6 +5184,19 @@ _concepts/volumetric-rendering.html_
 
 ## Entities
 
+### 199-biotechnologies
+_entities/199-biotechnologies.html_
+
+# 199-biotechnologies
+
+## Incoming relations
+
+- **released_by** → GitHub 분석: 199-biotechnologies/claude-deep-research-skill _(Repository)_
+
+## Connected node types
+
+- Repository: 1
+
 ### Accuracy
 _entities/accuracy.html_
 
@@ -5005,6 +5237,19 @@ _entities/accuracy-90.html_
 
 - SourceDocument: 2
 - Metric: 1
+
+### Adam Goliński
+_entities/adam-goliński.html_
+
+# Adam Goliński
+
+## Incoming relations
+
+- **authored_by** → SelfReflect: Can LLMs Communicate Their Internal Answer Distribution? _(Paper)_
+
+## Connected node types
+
+- Paper: 1
 
 ### ADE20K
 _entities/ade20k.html_
@@ -5110,6 +5355,19 @@ _entities/allenai.html_
 
 - Repository: 1
 
+### Anagh Malik
+_entities/anagh-malik.html_
+
+# Anagh Malik
+
+## Incoming relations
+
+- **authored_by** → Velox: Learning Representations of 4D Geometry and Appearance _(Paper)_
+
+## Connected node types
+
+- Paper: 1
+
 ### Andrea Tagliasacchi
 _entities/andrea-tagliasacchi.html_
 
@@ -5147,10 +5405,11 @@ _entities/andreas-geiger.html_
 ## Incoming relations
 
 - **authored_by** → Feed-Forward 3D Scene Modeling: A Problem-Driven Perspective _(Paper)_
+- **authored_by** → GTA: A Geometry-Aware Attention Mechanism for Multi-View Transformers _(Paper)_
 
 ## Connected node types
 
-- Paper: 1
+- Paper: 2
 
 ### Andreas Kurz
 _entities/andreas-kurz.html_
@@ -5239,11 +5498,12 @@ _entities/apple.html_
 ## Incoming relations
 
 - **released_by** → GitHub 분석: apple/ml-4m _(Repository)_
+- **released_by** → GitHub 분석: apple/ml-lito _(Repository)_
 - **released_by** → GitHub 분석: apple/ml-mobileclip _(Repository)_
 
 ## Connected node types
 
-- Repository: 2
+- Repository: 3
 
 ### ARC Prize Foundation
 _entities/arc-prize-foundation.html_
@@ -5266,6 +5526,19 @@ _entities/armen-avetisyan.html_
 ## Incoming relations
 
 - **authored_by** → Human-in-the-Loop Local Corrections of 3D Scene Layouts via Infilling _(Paper)_
+
+## Connected node types
+
+- Paper: 1
+
+### Arno Blaas
+_entities/arno-blaas.html_
+
+# Arno Blaas
+
+## Incoming relations
+
+- **authored_by** → SelfReflect: Can LLMs Communicate Their Internal Answer Distribution? _(Paper)_
 
 ## Connected node types
 
@@ -5336,6 +5609,19 @@ _entities/baoxiong-jia.html_
 ## Connected node types
 
 - Paper: 2
+
+### Bernhard Jaeger
+_entities/bernhard-jaeger.html_
+
+# Bernhard Jaeger
+
+## Incoming relations
+
+- **authored_by** → GTA: A Geometry-Aware Attention Mechanism for Multi-View Transformers _(Paper)_
+
+## Connected node types
+
+- Paper: 1
 
 ### Blender
 _entities/blender.html_
@@ -5641,6 +5927,19 @@ _entities/davian-robotics.html_
 
 - Repository: 1
 
+### David B. Lindell
+_entities/david-b-lindell.html_
+
+# David B. Lindell
+
+## Incoming relations
+
+- **authored_by** → Velox: Learning Representations of 4D Geometry and Appearance _(Paper)_
+
+## Connected node types
+
+- Paper: 1
+
 ### David J. Fleet
 _entities/david-j-fleet.html_
 
@@ -5758,6 +6057,19 @@ _entities/dor-verbin.html_
 
 - Paper: 1
 
+### Dorian Chan
+_entities/dorian-chan.html_
+
+# Dorian Chan
+
+## Incoming relations
+
+- **authored_by** → Velox: Learning Representations of 4D Geometry and Appearance _(Paper)_
+
+## Connected node types
+
+- Paper: 1
+
 ### Dotan Ankri
 _entities/dotan-ankri.html_
 
@@ -5785,6 +6097,19 @@ _entities/dtu.html_
 ## Connected node types
 
 - SourceDocument: 2
+- Paper: 1
+
+### Eeshan Gunesh Dhekane
+_entities/eeshan-gunesh-dhekane.html_
+
+# Eeshan Gunesh Dhekane
+
+## Incoming relations
+
+- **authored_by** → SelfReflect: Can LLMs Communicate Their Internal Answer Distribution? _(Paper)_
+
+## Connected node types
+
 - Paper: 1
 
 ### Elima Shehu
@@ -6553,6 +6878,19 @@ _entities/jean-baptiste-alayrac.html_
 
 - Paper: 1
 
+### Jen-Hao Rick Chang
+_entities/jen-hao-rick-chang.html_
+
+# Jen-Hao Rick Chang
+
+## Incoming relations
+
+- **authored_by** → Velox: Learning Representations of 4D Geometry and Appearance _(Paper)_
+
+## Connected node types
+
+- Paper: 1
+
 ### Jia-Wang Bian
 _entities/jia-wang-bian.html_
 
@@ -7141,6 +7479,19 @@ _entities/lingzhi-kong.html_
 
 - Paper: 1
 
+### Luca Füger
+_entities/luca-füger.html_
+
+# Luca Füger
+
+## Incoming relations
+
+- **authored_by** → SelfReflect: Can LLMs Communicate Their Internal Answer Distribution? _(Paper)_
+
+## Connected node types
+
+- Paper: 1
+
 ### Lucas Yunkyu Lee
 _entities/lucas-yunkyu-lee.html_
 
@@ -7200,7 +7551,6 @@ _entities/map.html_
 
 ## Incoming relations
 
-- **uses_metric** → <h1 align="center">LLM-Wiki</h1> _(SourceDocument)_
 - **uses_metric** → ArchSym: Detecting 3D-Grounded Architectural Symmetries in the Wild _(Paper)_
 - **uses_metric** → Architecture _(SourceDocument)_
 - **uses_metric** → Codex extraction review (2026-05-01) _(SourceDocument)_
@@ -7225,10 +7575,11 @@ _entities/map.html_
 - **uses_metric** → Stable Part Diffusion 4D: Multi-View RGB and Kinematic Parts Video Generation _(Paper)_
 - **uses_metric** → Understand Anything companion workflow _(SourceDocument)_
 - **uses_metric** → WorldCompass: Reinforcement Learning for Long-Horizon World Models _(SourceDocument)_
+- **uses_metric** → mAP=4 _(Result)_
 
 ## Connected node types
 
-- SourceDocument: 24
+- SourceDocument: 23
 - Paper: 6
 - Repository: 2
 - Result: 1
@@ -7385,6 +7736,19 @@ _entities/math.html_
 
 - SourceDocument: 1
 
+### Max Welling
+_entities/max-welling.html_
+
+# Max Welling
+
+## Incoming relations
+
+- **authored_by** → GTA: A Geometry-Aware Attention Mechanism for Multi-View Transformers _(Paper)_
+
+## Connected node types
+
+- Paper: 1
+
 ### Maxime Oquab
 _entities/maxime-oquab.html_
 
@@ -7393,6 +7757,19 @@ _entities/maxime-oquab.html_
 ## Incoming relations
 
 - **authored_by** → Efficient Universal Perception Encoder _(Paper)_
+
+## Connected node types
+
+- Paper: 1
+
+### Michael Kirchhof
+_entities/michael-kirchhof.html_
+
+# Michael Kirchhof
+
+## Incoming relations
+
+- **authored_by** → SelfReflect: Can LLMs Communicate Their Internal Answer Distribution? _(Paper)_
 
 ## Connected node types
 
@@ -7714,6 +8091,19 @@ _entities/omar-alama.html_
 ## Incoming relations
 
 - **authored_by** → RAVEN: Resilient Aerial Navigation via Open-Set Semantic Memory and Behavior Adaptation _(Paper)_
+
+## Connected node types
+
+- Paper: 1
+
+### Oncel Tuzel
+_entities/oncel-tuzel.html_
+
+# Oncel Tuzel
+
+## Incoming relations
+
+- **authored_by** → Velox: Learning Representations of 4D Geometry and Appearance _(Paper)_
 
 ## Connected node types
 
@@ -8176,6 +8566,19 @@ _entities/sensen-gao.html_
 
 - Paper: 1
 
+### Seong Joon Oh
+_entities/seong-joon-oh.html_
+
+# Seong Joon Oh
+
+## Incoming relations
+
+- **authored_by** → SelfReflect: Can LLMs Communicate Their Internal Answer Distribution? _(Paper)_
+
+## Connected node types
+
+- Paper: 1
+
 ### Seth Nabarro
 _entities/seth-nabarro.html_
 
@@ -8410,6 +8813,19 @@ _entities/simon-donné.html_
 
 - Paper: 1
 
+### Sinead Williamson
+_entities/sinead-williamson.html_
+
+# Sinead Williamson
+
+## Incoming relations
+
+- **authored_by** → SelfReflect: Can LLMs Communicate Their Internal Answer Distribution? _(Paper)_
+
+## Connected node types
+
+- Paper: 1
+
 ### Siyuan Huang
 _entities/siyuan-huang.html_
 
@@ -8596,6 +9012,19 @@ _entities/sv-pp.html_
 ## Connected node types
 
 - Repository: 1
+
+### Takeru Miyato
+_entities/takeru-miyato.html_
+
+# Takeru Miyato
+
+## Incoming relations
+
+- **authored_by** → GTA: A Geometry-Aware Attention Mechanism for Multi-View Transformers _(Paper)_
+
+## Connected node types
+
+- Paper: 1
 
 ### Tanks and Temples
 _entities/tanks-and-temples.html_
@@ -8972,6 +9401,19 @@ _entities/xiaoji-niu.html_
 ## Incoming relations
 
 - **authored_by** → ViBA: Implicit Bundle Adjustment with Geometric and Temporal Consistency for Robust Visual Matching _(Paper)_
+
+## Connected node types
+
+- Paper: 1
+
+### Xiaoming Zhao
+_entities/xiaoming-zhao.html_
+
+# Xiaoming Zhao
+
+## Incoming relations
+
+- **authored_by** → Velox: Learning Representations of 4D Geometry and Appearance _(Paper)_
 
 ## Connected node types
 
@@ -9699,6 +10141,7 @@ _topics/3d-4d-vision-and-reconstruction.html_
 - **part_of** → Feed-Forward 3D Scene Modeling: A Problem-Driven Perspective _(Paper)_
 - **part_of** → Free-Range Gaussians: Non-Grid-Aligned Generative 3D Gaussian Reconstruction _(Paper)_
 - **part_of** → FullCircle: Casual한 360° 촬영으로 손쉬운 3D 재구성 _(Paper)_
+- **part_of** → GTA: A Geometry-Aware Attention Mechanism for Multi-View Transformers _(Paper)_
 - **part_of** → GaussianFlow SLAM: Monocular Gaussian Splatting SLAM Guided by GaussianFlow _(Paper)_
 - **part_of** → Geometry-Grounded Gaussian Splatting _(Paper)_
 - **part_of** → Holo360D: 파노라마 3D 재구성과 그 이상을 발전시키기 위한 연속 궤적을 갖춘 대규모 실제 세계 데이터셋 _(Paper)_
@@ -9714,11 +10157,10 @@ _topics/3d-4d-vision-and-reconstruction.html_
 - **part_of** → Neural Gabor Splatting: Enhanced Gaussian Splatting with Neural Gabor for High-frequency Surface Reconstruction _(Paper)_
 - **part_of** → Power Foam: Unifying Real-Time Differentiable Ray Tracing and Rasterization _(Paper)_
 - **part_of** → RAVEN: Resilient Aerial Navigation via Open-Set Semantic Memory and Behavior Adaptation _(Paper)_
-- **part_of** → Rays as Pixels: 비디오와 카메라 궤적의 결합 분포 학습 _(Paper)_
 
 ## Connected node types
 
-- Paper: 36
+- Paper: 39
 
 ### Dynamic Gaussian Splatting
 _topics/dynamic-gaussian-splatting.html_
@@ -10465,6 +10907,41 @@ Sources ingested under `data/research/daily/2026-05-08/`.
 ## Extracted concepts
 - (none extracted)
 
+### Daily Digest — 2026-05-09
+_syntheses/daily-2026-05-09.html_
+
+# Daily Digest — 2026-05-09
+
+Sources ingested under `data/research/daily/2026-05-09/`.
+
+## Papers and repos
+- [GTA: A Geometry-Aware Attention Mechanism for Multi-View Transformers (arXiv:2310.10375)](../papers/gta-a-geometry-aware-attention-mechanism-for-multi-view-transformers.md) (Paper)
+- [Velox: Learning Representations of 4D Geometry and Appearance (arXiv:2605.04527)](../papers/velox-learning-representations-of-4d-geometry-and-appearance.md) (Paper)
+- [GitHub 분석: 199-biotechnologies/claude-deep-research-skill](../repos/github-분석-199-biotechnologies-claude-deep-research-skill.md) (Repository)
+- [GitHub 분석: ashishps1/awesome-engineering-articles](../repos/github-분석-ashishps1-awesome-engineering-articles.md) (Repository)
+- [GitHub 분석: rui314/chibicc](../repos/github-분석-rui314-chibicc.md) (Repository)
+- [Daily Feed Summary — 2026-05-09](../sources/daily-feed-summary-2026-05-09.md) (SourceDocument)
+- [📬 Daily Research Digest — 2026-05-09](../sources/daily-research-digest-2026-05-09.md) (SourceDocument)
+
+## Extracted concepts
+- Novel View Synthesis (Task)
+
+### Daily Digest — 2026-05-10
+_syntheses/daily-2026-05-10.html_
+
+# Daily Digest — 2026-05-10
+
+Sources ingested under `data/research/daily/2026-05-10/`.
+
+## Papers and repos
+- [SelfReflect: Can LLMs Communicate Their Internal Answer Distribution? (arXiv:2505.20295)](../papers/selfreflect-can-llms-communicate-their-internal-answer-distribution.md) (Paper)
+- [GitHub 분석: apple/ml-lito](../repos/github-분석-apple-ml-lito.md) (Repository)
+- [Daily Feed Summary — 2026-05-10](../sources/daily-feed-summary-2026-05-10.md) (SourceDocument)
+- [📬 Daily Research Digest — 2026-05-10](../sources/daily-research-digest-2026-05-10.md) (SourceDocument)
+
+## Extracted concepts
+- (none extracted)
+
 ### Field Overview — 3D/4D Vision and Reconstruction
 _syntheses/field-3d-4d-vision-and-reconstruction.html_
 
@@ -10535,46 +11012,46 @@ Snapshot of the wiki at the most recent compile.
 - ApproachFamily: 3
 - Benchmark: 7
 - CausalClaim: 7
-- Claim: 21
+- Claim: 24
 - CodeClass: 111
 - CodeFunction: 1985
 - CodeProject: 1
 - ComparisonClaim: 18
-- ContributionClaim: 20
+- ContributionClaim: 21
 - Dataset: 4
 - Dependency: 97
 - EvaluationProtocol: 1
-- EvidenceSpan: 119
+- EvidenceSpan: 128
 - InferenceStrategy: 1
-- LimitationClaim: 5
+- LimitationClaim: 6
 - MathematicalConcept: 1
 - MethodologicalConcept: 4
 - Metric: 6
 - Model: 3
 - OpenQuestion: 4
-- Organization: 40
-- Paper: 100
-- PerformanceClaim: 70
-- Person: 292
-- Repository: 133
+- Organization: 41
+- Paper: 109
+- PerformanceClaim: 77
+- Person: 308
+- Repository: 137
 - ResearchField: 3
 - ResearchTopic: 2
 - Result: 3
-- SourceDocument: 76
+- SourceDocument: 80
 - SourceFile: 116
 - Task: 2
 - TechnicalTerm: 2
 - TrainingParadigm: 6
 
 ## Recently added
-- GitHub 분석: naver/multi-hmr (Repository)
-- GitHub 분석: bolixinyu/LCA (Repository)
-- GitHub 분석: CIntellifusion/MultiWorld (Repository)
-- GitHub 분석: honojs/middleware (Repository)
-- GitHub 분석: DAVIAN-Robotics/EgoX (Repository)
+- SelfReflect: Can LLMs Communicate Their Internal Answer Distribution? (Paper)
+- GitHub 분석: apple/ml-lito (Repository)
+- Velox: Learning Representations of 4D Geometry and Appearance (Paper)
+- GitHub 분석: rui314/chibicc (Repository)
+- GitHub 분석: ashishps1/awesome-engineering-articles (Repository)
 
 ## Top fields
-- 3D/4D Vision and Reconstruction — 36 linked artifacts
+- 3D/4D Vision and Reconstruction — 39 linked artifacts
 - Research Literature — 14 linked artifacts
 - LLM Reasoning — 1 linked artifacts
 

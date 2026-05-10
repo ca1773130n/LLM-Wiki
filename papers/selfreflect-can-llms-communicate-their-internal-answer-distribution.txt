@@ -1,0 +1,28 @@
+SelfReflect: Can LLMs Communicate Their Internal Answer Distribution?
+=====================================================================
+
+# SelfReflect: Can LLMs Communicate Their Internal Answer Distribution?
+
+## Outgoing relations
+
+- **authored_by** → Adam Goliński _(Person)_
+- **authored_by** → Arno Blaas _(Person)_
+- **authored_by** → Eeshan Gunesh Dhekane _(Person)_
+- **authored_by** → Luca Füger _(Person)_
+- **authored_by** → Michael Kirchhof _(Person)_
+- **authored_by** → Seong Joon Oh _(Person)_
+- **authored_by** → Sinead Williamson _(Person)_
+- **implemented_in** → GitHub 분석: apple/ml-lito _(Repository)_
+- **part_of** → 3D/4D Vision and Reconstruction _(ResearchField)_
+
+## Incoming relations
+
+- **mentioned_in** → Daily Feed Summary — 2026-05-10 _(SourceDocument)_
+- **mentioned_in** → 📬 Daily Research Digest — 2026-05-10 _(SourceDocument)_
+
+## Connected node types
+
+- Person: 7
+- SourceDocument: 2
+- Repository: 1
+- ResearchField: 1

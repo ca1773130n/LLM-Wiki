@@ -1,0 +1,13 @@
+📬 Daily Research Digest — 2026-05-09
+====================================
+
+# 📬 Daily Research Digest — 2026-05-09
+
+## Outgoing relations
+
+- **mentioned_in** → Geometry-Grounded Gaussian Splatting _(Paper)_
+- **mentioned_in** → Velox: Learning Representations of 4D Geometry and Appearance _(Paper)_
+
+## Connected node types
+
+- Paper: 2

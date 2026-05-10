@@ -1,0 +1,25 @@
+Velox: Learning Representations of 4D Geometry and Appearance
+=============================================================
+
+# Velox: Learning Representations of 4D Geometry and Appearance
+
+## Outgoing relations
+
+- **authored_by** → Anagh Malik _(Person)_
+- **authored_by** → David B. Lindell _(Person)_
+- **authored_by** → Dorian Chan _(Person)_
+- **authored_by** → Jen-Hao Rick Chang _(Person)_
+- **authored_by** → Oncel Tuzel _(Person)_
+- **authored_by** → Xiaoming Zhao _(Person)_
+- **part_of** → 3D/4D Vision and Reconstruction _(ResearchField)_
+
+## Incoming relations
+
+- **mentioned_in** → Daily Feed Summary — 2026-05-09 _(SourceDocument)_
+- **mentioned_in** → 📬 Daily Research Digest — 2026-05-09 _(SourceDocument)_
+
+## Connected node types
+
+- Person: 6
+- SourceDocument: 2
+- ResearchField: 1

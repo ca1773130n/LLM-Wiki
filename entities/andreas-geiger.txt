@@ -6,7 +6,8 @@ Andreas Geiger
 ## Incoming relations
 
 - **authored_by** → Feed-Forward 3D Scene Modeling: A Problem-Driven Perspective _(Paper)_
+- **authored_by** → GTA: A Geometry-Aware Attention Mechanism for Multi-View Transformers _(Paper)_
 
 ## Connected node types
 
-- Paper: 1
+- Paper: 2

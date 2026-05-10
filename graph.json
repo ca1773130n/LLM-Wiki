@@ -3,13 +3,6 @@
     {
       "evidence": null,
       "metadata": {},
-      "source": "SourceDocument:h1-align-center-llm-wiki-h1:b60a072f7da3",
-      "target": "Metric:map:592bcbe13f80",
-      "type": "uses_metric"
-    },
-    {
-      "evidence": null,
-      "metadata": {},
       "source": "SourceDocument:architecture:32ae01205996",
       "target": "Metric:map:592bcbe13f80",
       "type": "uses_metric"
@@ -414,7 +407,7 @@
       "type": "belongs_to_approach_family"
     },
     {
-      "evidence": "이러한 기여를 통해, 제안하는 표현은 최첨단 ray tracing 효율성을 유지하면서도 현세대 3DGS와 경쟁 가능한 rasterization 성능을 달성하며, 통합된 실시간 미분 가능 rendering을 향한 실용적인 경로를 제공한다.",
+      "evidence": "# Geometry-Grounded Gaussian Splatting | Cool Papers - 몰입형 논문 탐색 총계: 1 ## Geometry-Grounded Gaussian Splatting [PDF15] [Copy] [Kimi6] [REL] Baowen Zhang, Chenxing Jiang, Heng Li, Shaojie Shen, Ping Tan Gaussian Splatting GS는 novel view synthesis에서 인상적인 품질과 효율성을 보여주었다.",
       "metadata": {},
       "source": "ApproachFamily:gaussian-splatting-reconstruction:84097d3185ea",
       "target": "MethodologicalConcept:gaussian-splatting:4f4b246c6522",
@@ -1912,7 +1905,7 @@
       "type": "part_of"
     },
     {
-      "evidence": "# Geometry-Grounded Gaussian Splatting | Cool Papers - 몰입형 논문 탐색 총계: 1 # Geometry-Grounded Gaussian Splatting [PDF15] [Copy] [Kimi6] [REL] Baowen Zhang, Chenxing Jiang, Heng Li, Shaojie Shen, Ping Tan Gaussian Splatting, GS는 novel view synthesis에서 인상적인 품질과 효율성을 보여주었다.",
+      "evidence": "# Geometry-Grounded Gaussian Splatting | Cool Papers - 몰입형 논문 탐색 총계: 1 ## Geometry-Grounded Gaussian Splatting [PDF15] [Copy] [Kimi6] [REL] Baowen Zhang, Chenxing Jiang, Heng Li, Shaojie Shen, Ping Tan Gaussian Splatting GS는 novel view synthesis에서 인상적인 품질과 효율성을 보여주었다.",
       "metadata": {},
       "source": "Paper:arxiv-2601-17835:46d524dd9e5e",
       "target": "MethodologicalConcept:gaussian-splatting:4f4b246c6522",
@@ -1954,14 +1947,14 @@
       "type": "mentioned_in"
     },
     {
-      "evidence": "# Geometry-Grounded Gaussian Splatting | Cool Papers - 몰입형 논문 탐색 총계: 1 # Geometry-Grounded Gaussian Splatting [PDF15] [Copy] [Kimi6] [REL] Baowen Zhang, Chenxing Jiang, Heng Li, Shaojie Shen, Ping Tan Gaussian Splatting, GS는 novel view synthesis에서 인상적인 품질과 효율성을 보여주었다.",
+      "evidence": "# Geometry-Grounded Gaussian Splatting | Cool Papers - 몰입형 논문 탐색 총계: 1 ## Geometry-Grounded Gaussian Splatting [PDF15] [Copy] [Kimi6] [REL] Baowen Zhang, Chenxing Jiang, Heng Li, Shaojie Shen, Ping Tan Gaussian Splatting GS는 novel view synthesis에서 인상적인 품질과 효율성을 보여주었다.",
       "metadata": {},
       "source": "Paper:arxiv-2601-17835:46d524dd9e5e",
       "target": "ApproachFamily:gaussian-splatting-reconstruction:84097d3185ea",
       "type": "belongs_to_approach_family"
     },
     {
-      "evidence": "# Geometry-Grounded Gaussian Splatting | Cool Papers - 몰입형 논문 탐색 총계: 1 # Geometry-Grounded Gaussian Splatting [PDF15] [Copy] [Kimi6] [REL] Baowen Zhang, Chenxing Jiang, Heng Li, Shaojie Shen, Ping Tan Gaussian Splatting, GS는 novel view synthesis에서 인상적인 품질과 효율성을 보여주었다.",
+      "evidence": "# Geometry-Grounded Gaussian Splatting | Cool Papers - 몰입형 논문 탐색 총계: 1 ## Geometry-Grounded Gaussian Splatting [PDF15] [Copy] [Kimi6] [REL] Baowen Zhang, Chenxing Jiang, Heng Li, Shaojie Shen, Ping Tan Gaussian Splatting GS는 novel view synthesis에서 인상적인 품질과 효율성을 보여주었다.",
       "metadata": {},
       "source": "Paper:arxiv-2601-17835:46d524dd9e5e",
       "target": "ApproachFamily:geometry-grounded-gaussian-splatting:0ba271d39ba0",
@@ -1975,7 +1968,7 @@
       "type": "uses"
     },
     {
-      "evidence": "기하 파라미터화와 근사가 충분하지 않기 때문에, 기존 shape reconstruction 방법은 multi-view consistency가 떨어지고 floaters에 민감하다는 문제가 있다.",
+      "evidence": "기하 파라미터화와 근사가 충분하지 않기 때문에, 기존 형상 재구성 방법은 multi-view consistency가 낮고 floaters에 민감하다는 문제가 있다.",
       "metadata": {},
       "source": "Paper:arxiv-2601-17835:46d524dd9e5e",
       "target": "Task:shape-reconstruction:b86872dcc192",
@@ -2017,7 +2010,7 @@
       "type": "mentioned_in"
     },
     {
-      "evidence": "본 논문에서는 Gaussian primitives를 특정한 유형의 stochastic solids로 정립하는 엄밀한 이론적 유도를 제시한다.",
+      "evidence": "본 논문에서는 Gaussian primitive를 특정한 유형의 stochastic solid로 정립하는 엄밀한 이론적 유도를 제시한다.",
       "metadata": {},
       "source": "Paper:arxiv-2601-17835:46d524dd9e5e",
       "target": "MathematicalConcept:stochastic-solid:935f4dd3e32e",
@@ -2059,7 +2052,7 @@
       "type": "mentioned_in"
     },
     {
-      "evidence": "stochastic solids의 volumetric 특성을 활용하여, 우리의 방법은 세밀한 geometry 추출을 위한 고품질 depth maps를 효율적으로 렌더링한다.",
+      "evidence": "stochastic solid의 volumetric 특성을 활용하여, 우리 방법은 세밀한 기하 추출을 위한 고품질 depth map을 효율적으로 렌더링한다.",
       "metadata": {},
       "source": "Paper:arxiv-2601-17835:46d524dd9e5e",
       "target": "TechnicalTerm:depth-map:349c240dc3dc",
@@ -2101,7 +2094,7 @@
       "type": "mentioned_in"
     },
     {
-      "evidence": "기하 파라미터화와 근사가 충분하지 않기 때문에, 기존 shape reconstruction 방법은 multi-view consistency가 떨어지고 floaters에 민감하다는 문제가 있다.",
+      "evidence": "기하 파라미터화와 근사가 충분하지 않기 때문에, 기존 형상 재구성 방법은 multi-view consistency가 낮고 floaters에 민감하다는 문제가 있다.",
       "metadata": {},
       "source": "Paper:arxiv-2601-17835:46d524dd9e5e",
       "target": "LimitationClaim:floaters:edb1205f03c7",
@@ -5496,7 +5489,7 @@
       "type": "uses"
     },
     {
-      "evidence": "# Geometry-Grounded Gaussian Splatting | Cool Papers - 몰입형 논문 탐색 총계: 1 # Geometry-Grounded Gaussian Splatting [PDF15] [Copy] [Kimi6] [REL] Baowen Zhang, Chenxing Jiang, Heng Li, Shaojie Shen, Ping Tan Gaussian Splatting, GS는 novel view synthesis에서 인상적인 품질과 효율성을 보여주었다.",
+      "evidence": "# Geometry-Grounded Gaussian Splatting | Cool Papers - 몰입형 논문 탐색 총계: 1 ## Geometry-Grounded Gaussian Splatting [PDF15] [Copy] [Kimi6] [REL] Baowen Zhang, Chenxing Jiang, Heng Li, Shaojie Shen, Ping Tan Gaussian Splatting GS는 novel view synthesis에서 인상적인 품질과 효율성을 보여주었다.",
       "metadata": {},
       "source": "Paper:arxiv-2601-17835:46d524dd9e5e",
       "target": "Task:novel-view-synthesis:19d55dfb9b83",
@@ -5580,7 +5573,7 @@
       "type": "mentioned_in"
     },
     {
-      "evidence": "stochastic solids의 volumetric 특성을 활용하여, 우리의 방법은 세밀한 geometry 추출을 위한 고품질 depth maps를 효율적으로 렌더링한다.",
+      "evidence": "stochastic solid의 volumetric 특성을 활용하여, 우리 방법은 세밀한 기하 추출을 위한 고품질 depth map을 효율적으로 렌더링한다.",
       "metadata": {},
       "source": "Paper:arxiv-2601-17835:46d524dd9e5e",
       "target": "MethodologicalConcept:volumetric-rendering:7527b301d064",
@@ -5629,7 +5622,7 @@
       "type": "uses"
     },
     {
-      "evidence": "기하 파라미터화와 근사가 충분하지 않기 때문에, 기존 shape reconstruction 방법은 multi-view consistency가 떨어지고 floaters에 민감하다는 문제가 있다.",
+      "evidence": "기하 파라미터화와 근사가 충분하지 않기 때문에, 기존 형상 재구성 방법은 multi-view consistency가 낮고 floaters에 민감하다는 문제가 있다.",
       "metadata": {},
       "source": "Paper:arxiv-2601-17835:46d524dd9e5e",
       "target": "EvaluationProtocol:multi-view-consistency:77bea1e95667",
@@ -5909,7 +5902,7 @@
       "type": "mentioned_in"
     },
     {
-      "evidence": "# Geometry-Grounded Gaussian Splatting | Cool Papers - 몰입형 논문 탐색 총계: 1 # Geometry-Grounded Gaussian Splatting [PDF15] [Copy] [Kimi6] [REL] Baowen Zhang, Chenxing Jiang, Heng Li, Shaojie Shen, Ping Tan Gaussian Splatting, GS는 novel view synthesis에서 인상적인 품질과 효율성을 보여주었다.",
+      "evidence": "# Geometry-Grounded Gaussian Splatting | Cool Papers - 몰입형 논문 탐색 총계: 1 ## Geometry-Grounded Gaussian Splatting [PDF15] [Copy] [Kimi6] [REL] Baowen Zhang, Chenxing Jiang, Heng Li, Shaojie Shen, Ping Tan Gaussian Splatting GS는 novel view synthesis에서 인상적인 품질과 효율성을 보여주었다.",
       "metadata": {},
       "source": "EvidenceSpan:evidence-geometry-grounded-gaussian-splatting-co:66551e0176c4",
       "target": "Paper:arxiv-2601-17835:46d524dd9e5e",
@@ -9012,6 +9005,643 @@
     {
       "evidence": null,
       "metadata": {},
+      "source": "SourceDocument:daily-research-digest-2026-05-09:117d1d46b37d",
+      "target": "Paper:arxiv-2605-05664:57e93426925e",
+      "type": "mentioned_in"
+    },
+    {
+      "evidence": null,
+      "metadata": {},
+      "source": "SourceDocument:daily-research-digest-2026-05-09:117d1d46b37d",
+      "target": "Paper:arxiv-2605-04730:f14f0e184679",
+      "type": "mentioned_in"
+    },
+    {
+      "evidence": null,
+      "metadata": {},
+      "source": "SourceDocument:daily-research-digest-2026-05-09:117d1d46b37d",
+      "target": "Paper:arxiv-2601-17835:46d524dd9e5e",
+      "type": "mentioned_in"
+    },
+    {
+      "evidence": null,
+      "metadata": {},
+      "source": "SourceDocument:daily-research-digest-2026-05-09:117d1d46b37d",
+      "target": "Paper:arxiv-2605-05749:9121764f3807",
+      "type": "mentioned_in"
+    },
+    {
+      "evidence": null,
+      "metadata": {},
+      "source": "SourceDocument:daily-research-digest-2026-05-09:117d1d46b37d",
+      "target": "Paper:arxiv-2605-06270:64362fbc49c4",
+      "type": "mentioned_in"
+    },
+    {
+      "evidence": null,
+      "metadata": {},
+      "source": "SourceDocument:daily-research-digest-2026-05-09:117d1d46b37d",
+      "target": "Paper:arxiv-2605-04017:57a9273184c4",
+      "type": "mentioned_in"
+    },
+    {
+      "evidence": null,
+      "metadata": {},
+      "source": "SourceDocument:daily-research-digest-2026-05-09:117d1d46b37d",
+      "target": "Paper:arxiv-2605-04527:c0faca348771",
+      "type": "mentioned_in"
+    },
+    {
+      "evidence": null,
+      "metadata": {},
+      "source": "Paper:arxiv-2310-10375:382b0d986ec5",
+      "target": "ResearchField:3d-4d-vision-and-reconstruction:4273d84d58f1",
+      "type": "part_of"
+    },
+    {
+      "evidence": "희소하고 wide-baseline인 multi-view 설정에서 여러 novel view synthesis, NVS 데이터셋으로 평가한 결과, Geometric Transform Attention, GTA라고 부르는 이 attention이 추가 학습 파라미터 없이, 그리고 계산 오버헤드는 매우 작게 유지하면서, 최신 transformer 기반 NVS 모델의 학습 효율과 성능을 향상시킴을 보인다.",
+      "metadata": {},
+      "source": "Paper:arxiv-2310-10375:382b0d986ec5",
+      "target": "Task:novel-view-synthesis:19d55dfb9b83",
+      "type": "addresses"
+    },
+    {
+      "evidence": "희소한 wide-baseline multi-view 설정에서 여러 novel view synthesis, NVS 데이터셋으로 평가한 결과, Geometric Transform Attention, GTA라고 부르는 이 attention이 추가적인 학습 파라미터 없이도, 그리고 계산 오버헤드는 소폭만 증가시키면서, 최신 transformer 기반 NVS 모델의 학습 효율과 성능을 향상시킴을 보인다.",
+      "metadata": {},
+      "source": "EvidenceSpan:evidence-wide-baseline-multi-view-novel-view-syn:144a443c45fc",
+      "target": "Paper:arxiv-2310-10375:382b0d986ec5",
+      "type": "part_of"
+    },
+    {
+      "evidence": "희소한 wide-baseline multi-view 설정에서 여러 novel view synthesis, NVS 데이터셋으로 평가한 결과, Geometric Transform Attention, GTA라고 부르는 이 attention이 추가적인 학습 파라미터 없이도, 그리고 계산 오버헤드는 소폭만 증가시키면서, 최신 transformer 기반 NVS 모델의 학습 효율과 성능을 향상시킴을 보인다.",
+      "metadata": {},
+      "source": "Paper:arxiv-2310-10375:382b0d986ec5",
+      "target": "PerformanceClaim:claim-wide-baseline-multi-view-novel-view-synthe:c65f40ca1a7d",
+      "type": "supports_claim"
+    },
+    {
+      "evidence": "희소한 wide-baseline multi-view 설정에서 여러 novel view synthesis, NVS 데이터셋으로 평가한 결과, Geometric Transform Attention, GTA라고 부르는 이 attention이 추가적인 학습 파라미터 없이도, 그리고 계산 오버헤드는 소폭만 증가시키면서, 최신 transformer 기반 NVS 모델의 학습 효율과 성능을 향상시킴을 보인다.",
+      "metadata": {},
+      "source": "PerformanceClaim:claim-wide-baseline-multi-view-novel-view-synthe:c65f40ca1a7d",
+      "target": "Task:novel-view-synthesis:19d55dfb9b83",
+      "type": "addresses"
+    },
+    {
+      "evidence": "희소한 wide-baseline multi-view 설정에서 여러 novel view synthesis, NVS 데이터셋으로 평가한 결과, Geometric Transform Attention, GTA라고 부르는 이 attention이 추가적인 학습 파라미터 없이도, 그리고 계산 오버헤드는 소폭만 증가시키면서, 최신 transformer 기반 NVS 모델의 학습 효율과 성능을 향상시킴을 보인다.",
+      "metadata": {},
+      "source": "PerformanceClaim:claim-wide-baseline-multi-view-novel-view-synthe:c65f40ca1a7d",
+      "target": "EvidenceSpan:evidence-wide-baseline-multi-view-novel-view-syn:144a443c45fc",
+      "type": "evidenced_by"
+    },
+    {
+      "evidence": "희소한 wide-baseline multi-view 설정에서 여러 novel view synthesis, NVS 데이터셋으로 평가한 결과, Geometric Transform Attention, GTA라고 부르는 이 attention이 추가적인 학습 파라미터 없이도, 그리고 계산 오버헤드는 소폭만 증가시키면서, 최신 transformer 기반 NVS 모델의 학습 효율과 성능을 향상시킴을 보인다.",
+      "metadata": {},
+      "source": "PerformanceClaim:claim-wide-baseline-multi-view-novel-view-synthe:c65f40ca1a7d",
+      "target": "Paper:arxiv-2310-10375:382b0d986ec5",
+      "type": "mentioned_in"
+    },
+    {
+      "evidence": null,
+      "metadata": {},
+      "source": "Paper:arxiv-2310-10375:382b0d986ec5",
+      "target": "Person:andreas-geiger:ed5cc3fb8d8d",
+      "type": "authored_by"
+    },
+    {
+      "evidence": null,
+      "metadata": {},
+      "source": "Paper:arxiv-2310-10375:382b0d986ec5",
+      "target": "Person:bernhard-jaeger:b2b4ff190abd",
+      "type": "authored_by"
+    },
+    {
+      "evidence": null,
+      "metadata": {},
+      "source": "Paper:arxiv-2310-10375:382b0d986ec5",
+      "target": "Person:max-welling:dcadb971272c",
+      "type": "authored_by"
+    },
+    {
+      "evidence": null,
+      "metadata": {},
+      "source": "Paper:arxiv-2310-10375:382b0d986ec5",
+      "target": "Person:takeru-miyato:143f796cc9be",
+      "type": "authored_by"
+    },
+    {
+      "evidence": "희소한 wide-baseline multi-view 설정에서 여러 novel view synthesis, NVS 데이터셋으로 평가한 결과, Geometric Transform Attention, GTA라고 부르는 이 attention이 추가적인 학습 파라미터 없이도, 그리고 계산 오버헤드는 소폭만 증가시키면서, 최신 transformer 기반 NVS 모델의 학습 효율과 성능을 향상시킴을 보인다.",
+      "metadata": {},
+      "source": "Paper:arxiv-2310-10375:382b0d986ec5",
+      "target": "PerformanceClaim:performance-claim-wide-baseline-multi-view-novel:3ce6eaf8f995",
+      "type": "supports_claim"
+    },
+    {
+      "evidence": "희소한 wide-baseline multi-view 설정에서 여러 novel view synthesis, NVS 데이터셋으로 평가한 결과, Geometric Transform Attention, GTA라고 부르는 이 attention이 추가적인 학습 파라미터 없이도, 그리고 계산 오버헤드는 소폭만 증가시키면서, 최신 transformer 기반 NVS 모델의 학습 효율과 성능을 향상시킴을 보인다.",
+      "metadata": {},
+      "source": "PerformanceClaim:performance-claim-wide-baseline-multi-view-novel:3ce6eaf8f995",
+      "target": "EvidenceSpan:evidence-wide-baseline-multi-view-novel-view-syn:144a443c45fc",
+      "type": "evidenced_by"
+    },
+    {
+      "evidence": null,
+      "metadata": {},
+      "source": "Paper:arxiv-2310-10375:382b0d986ec5",
+      "target": "Repository:github-rui314-chibicc:50809d928929",
+      "type": "implemented_in"
+    },
+    {
+      "evidence": "Geometry-Grounded Gaussian Splatting | Cool Papers - 몰입형 논문 탐색 총계: 1 ## Geometry-Grounded Gaussian Splatting [PDF15] [Copy] [Kimi6] [REL] Baowen Zhang, Chenxing Jiang, Heng Li, Shaojie Shen, Ping Tan Gaussian Splatting GS는 새로운 시점 합성에서 인상적인 품질과 효율성을 보여주었다.",
+      "metadata": {},
+      "source": "EvidenceSpan:evidence-geometry-grounded-gaussian-splatting-co:76f448226fc5",
+      "target": "Paper:arxiv-2601-17835:46d524dd9e5e",
+      "type": "part_of"
+    },
+    {
+      "evidence": "Geometry-Grounded Gaussian Splatting | Cool Papers - 몰입형 논문 탐색 총계: 1 ## Geometry-Grounded Gaussian Splatting [PDF15] [Copy] [Kimi6] [REL] Baowen Zhang, Chenxing Jiang, Heng Li, Shaojie Shen, Ping Tan Gaussian Splatting GS는 새로운 시점 합성에서 인상적인 품질과 효율성을 보여주었다.",
+      "metadata": {},
+      "source": "Paper:arxiv-2601-17835:46d524dd9e5e",
+      "target": "Claim:claim-geometry-grounded-gaussian-splatting-cool-:a11918e07297",
+      "type": "supports_claim"
+    },
+    {
+      "evidence": "Geometry-Grounded Gaussian Splatting | Cool Papers - 몰입형 논문 탐색 총계: 1 ## Geometry-Grounded Gaussian Splatting [PDF15] [Copy] [Kimi6] [REL] Baowen Zhang, Chenxing Jiang, Heng Li, Shaojie Shen, Ping Tan Gaussian Splatting GS는 새로운 시점 합성에서 인상적인 품질과 효율성을 보여주었다.",
+      "metadata": {},
+      "source": "Claim:claim-geometry-grounded-gaussian-splatting-cool-:a11918e07297",
+      "target": "MethodologicalConcept:gaussian-splatting:4f4b246c6522",
+      "type": "uses"
+    },
+    {
+      "evidence": "Geometry-Grounded Gaussian Splatting | Cool Papers - 몰입형 논문 탐색 총계: 1 ## Geometry-Grounded Gaussian Splatting [PDF15] [Copy] [Kimi6] [REL] Baowen Zhang, Chenxing Jiang, Heng Li, Shaojie Shen, Ping Tan Gaussian Splatting GS는 새로운 시점 합성에서 인상적인 품질과 효율성을 보여주었다.",
+      "metadata": {},
+      "source": "Claim:claim-geometry-grounded-gaussian-splatting-cool-:a11918e07297",
+      "target": "EvidenceSpan:evidence-geometry-grounded-gaussian-splatting-co:76f448226fc5",
+      "type": "evidenced_by"
+    },
+    {
+      "evidence": "Geometry-Grounded Gaussian Splatting | Cool Papers - 몰입형 논문 탐색 총계: 1 ## Geometry-Grounded Gaussian Splatting [PDF15] [Copy] [Kimi6] [REL] Baowen Zhang, Chenxing Jiang, Heng Li, Shaojie Shen, Ping Tan Gaussian Splatting GS는 새로운 시점 합성에서 인상적인 품질과 효율성을 보여주었다.",
+      "metadata": {},
+      "source": "Claim:claim-geometry-grounded-gaussian-splatting-cool-:a11918e07297",
+      "target": "Paper:arxiv-2601-17835:46d524dd9e5e",
+      "type": "mentioned_in"
+    },
+    {
+      "evidence": "Geometry-Grounded Gaussian Splatting | Cool Papers - 몰입형 논문 탐색 총계: 1 ## Geometry-Grounded Gaussian Splatting [PDF15] [Copy] [Kimi6] [REL] Baowen Zhang, Chenxing Jiang, Heng Li, Shaojie Shen, Ping Tan Gaussian Splatting GS는 새로운 시점 합성에서 인상적인 품질과 효율성을 보여주었다.",
+      "metadata": {},
+      "source": "Claim:claim-geometry-grounded-gaussian-splatting-cool-:a11918e07297",
+      "target": "ApproachFamily:geometry-grounded-gaussian-splatting:0ba271d39ba0",
+      "type": "uses"
+    },
+    {
+      "evidence": "기하 파라미터화와 근사가 충분하지 않기 때문에, 기존 형상 재구성 방법은 다중 시점 일관성이 낮고 floaters에 민감하다는 문제가 있다.",
+      "metadata": {},
+      "source": "EvidenceSpan:evidence-floaters:ce47464487f5",
+      "target": "Paper:arxiv-2601-17835:46d524dd9e5e",
+      "type": "part_of"
+    },
+    {
+      "evidence": "기하 파라미터화와 근사가 충분하지 않기 때문에, 기존 형상 재구성 방법은 다중 시점 일관성이 낮고 floaters에 민감하다는 문제가 있다.",
+      "metadata": {},
+      "source": "Paper:arxiv-2601-17835:46d524dd9e5e",
+      "target": "LimitationClaim:claim-floaters:7d5677832fb5",
+      "type": "supports_claim"
+    },
+    {
+      "evidence": "기하 파라미터화와 근사가 충분하지 않기 때문에, 기존 형상 재구성 방법은 다중 시점 일관성이 낮고 floaters에 민감하다는 문제가 있다.",
+      "metadata": {},
+      "source": "LimitationClaim:claim-floaters:7d5677832fb5",
+      "target": "Task:shape-reconstruction:b86872dcc192",
+      "type": "addresses"
+    },
+    {
+      "evidence": "기하 파라미터화와 근사가 충분하지 않기 때문에, 기존 형상 재구성 방법은 다중 시점 일관성이 낮고 floaters에 민감하다는 문제가 있다.",
+      "metadata": {},
+      "source": "LimitationClaim:claim-floaters:7d5677832fb5",
+      "target": "EvidenceSpan:evidence-floaters:ce47464487f5",
+      "type": "evidenced_by"
+    },
+    {
+      "evidence": "기하 파라미터화와 근사가 충분하지 않기 때문에, 기존 형상 재구성 방법은 다중 시점 일관성이 낮고 floaters에 민감하다는 문제가 있다.",
+      "metadata": {},
+      "source": "LimitationClaim:claim-floaters:7d5677832fb5",
+      "target": "Paper:arxiv-2601-17835:46d524dd9e5e",
+      "type": "mentioned_in"
+    },
+    {
+      "evidence": "본 논문에서는 Gaussian primitive를 특정한 종류의 stochastic solids로 정립하는 엄밀한 이론적 유도를 제시한다.",
+      "metadata": {},
+      "source": "EvidenceSpan:evidence-gaussian-primitive-stochastic-solids:0b679f552927",
+      "target": "Paper:arxiv-2601-17835:46d524dd9e5e",
+      "type": "part_of"
+    },
+    {
+      "evidence": "본 논문에서는 Gaussian primitive를 특정한 종류의 stochastic solids로 정립하는 엄밀한 이론적 유도를 제시한다.",
+      "metadata": {},
+      "source": "Paper:arxiv-2601-17835:46d524dd9e5e",
+      "target": "Claim:claim-gaussian-primitive-stochastic-solids:d2268ca08f14",
+      "type": "supports_claim"
+    },
+    {
+      "evidence": "본 논문에서는 Gaussian primitive를 특정한 종류의 stochastic solids로 정립하는 엄밀한 이론적 유도를 제시한다.",
+      "metadata": {},
+      "source": "Claim:claim-gaussian-primitive-stochastic-solids:d2268ca08f14",
+      "target": "MathematicalConcept:stochastic-solid:935f4dd3e32e",
+      "type": "uses"
+    },
+    {
+      "evidence": "본 논문에서는 Gaussian primitive를 특정한 종류의 stochastic solids로 정립하는 엄밀한 이론적 유도를 제시한다.",
+      "metadata": {},
+      "source": "Claim:claim-gaussian-primitive-stochastic-solids:d2268ca08f14",
+      "target": "EvidenceSpan:evidence-gaussian-primitive-stochastic-solids:0b679f552927",
+      "type": "evidenced_by"
+    },
+    {
+      "evidence": "본 논문에서는 Gaussian primitive를 특정한 종류의 stochastic solids로 정립하는 엄밀한 이론적 유도를 제시한다.",
+      "metadata": {},
+      "source": "Claim:claim-gaussian-primitive-stochastic-solids:d2268ca08f14",
+      "target": "Paper:arxiv-2601-17835:46d524dd9e5e",
+      "type": "mentioned_in"
+    },
+    {
+      "evidence": "기하 파라미터화와 근사가 충분하지 않기 때문에, 기존 형상 재구성 방법은 다중 시점 일관성이 낮고 floaters에 민감하다는 문제가 있다.",
+      "metadata": {},
+      "source": "LimitationClaim:claim-floaters:7d5677832fb5",
+      "target": "LimitationClaim:floaters:edb1205f03c7",
+      "type": "uses"
+    },
+    {
+      "evidence": "실험 결과, 우리의 방법은 공개 데이터셋에서 모든 Gaussian Splatting 기반 방법들 가운데 가장 우수한 형상 재구성 성능을 달성했다.",
+      "metadata": {},
+      "source": "EvidenceSpan:evidence-gaussian-splatting:1fd4e1a2bfe4",
+      "target": "Paper:arxiv-2601-17835:46d524dd9e5e",
+      "type": "part_of"
+    },
+    {
+      "evidence": "실험 결과, 우리의 방법은 공개 데이터셋에서 모든 Gaussian Splatting 기반 방법들 가운데 가장 우수한 형상 재구성 성능을 달성했다.",
+      "metadata": {},
+      "source": "Paper:arxiv-2601-17835:46d524dd9e5e",
+      "target": "PerformanceClaim:performance-claim-gaussian-splatting:1bd5f5993145",
+      "type": "supports_claim"
+    },
+    {
+      "evidence": "실험 결과, 우리의 방법은 공개 데이터셋에서 모든 Gaussian Splatting 기반 방법들 가운데 가장 우수한 형상 재구성 성능을 달성했다.",
+      "metadata": {},
+      "source": "PerformanceClaim:performance-claim-gaussian-splatting:1bd5f5993145",
+      "target": "EvidenceSpan:evidence-gaussian-splatting:1fd4e1a2bfe4",
+      "type": "evidenced_by"
+    },
+    {
+      "evidence": null,
+      "metadata": {},
+      "source": "Paper:arxiv-2605-04527:c0faca348771",
+      "target": "ResearchField:3d-4d-vision-and-reconstruction:4273d84d58f1",
+      "type": "part_of"
+    },
+    {
+      "evidence": null,
+      "metadata": {},
+      "source": "Paper:arxiv-2605-04527:c0faca348771",
+      "target": "Person:anagh-malik:f8d5a9950bdc",
+      "type": "authored_by"
+    },
+    {
+      "evidence": null,
+      "metadata": {},
+      "source": "Paper:arxiv-2605-04527:c0faca348771",
+      "target": "Person:david-b-lindell:2331c9344ef8",
+      "type": "authored_by"
+    },
+    {
+      "evidence": null,
+      "metadata": {},
+      "source": "Paper:arxiv-2605-04527:c0faca348771",
+      "target": "Person:dorian-chan:cbad5f02c883",
+      "type": "authored_by"
+    },
+    {
+      "evidence": null,
+      "metadata": {},
+      "source": "Paper:arxiv-2605-04527:c0faca348771",
+      "target": "Person:jen-hao-rick-chang:700cdf71f324",
+      "type": "authored_by"
+    },
+    {
+      "evidence": null,
+      "metadata": {},
+      "source": "Paper:arxiv-2605-04527:c0faca348771",
+      "target": "Person:oncel-tuzel:10327564139a",
+      "type": "authored_by"
+    },
+    {
+      "evidence": null,
+      "metadata": {},
+      "source": "Paper:arxiv-2605-04527:c0faca348771",
+      "target": "Person:xiaoming-zhao:b98de4be83b0",
+      "type": "authored_by"
+    },
+    {
+      "evidence": "Lindell, Oncel Tuzel, Jen-Hao Rick Chang 우리는 4D 객체의 잠재 표현을 학습하기 위한 프레임워크를 소개한다.",
+      "metadata": {},
+      "source": "EvidenceSpan:evidence-lindell-oncel-tuzel-jen-hao-rick-chang-:1d12df502bb9",
+      "target": "Paper:arxiv-2605-04527:c0faca348771",
+      "type": "part_of"
+    },
+    {
+      "evidence": "Lindell, Oncel Tuzel, Jen-Hao Rick Chang 우리는 4D 객체의 잠재 표현을 학습하기 위한 프레임워크를 소개한다.",
+      "metadata": {},
+      "source": "Paper:arxiv-2605-04527:c0faca348771",
+      "target": "ContributionClaim:contribution-lindell-oncel-tuzel-jen-hao-rick-ch:bc0ac03952c7",
+      "type": "supports_claim"
+    },
+    {
+      "evidence": "Lindell, Oncel Tuzel, Jen-Hao Rick Chang 우리는 4D 객체의 잠재 표현을 학습하기 위한 프레임워크를 소개한다.",
+      "metadata": {},
+      "source": "ContributionClaim:contribution-lindell-oncel-tuzel-jen-hao-rick-ch:bc0ac03952c7",
+      "target": "EvidenceSpan:evidence-lindell-oncel-tuzel-jen-hao-rick-chang-:1d12df502bb9",
+      "type": "evidenced_by"
+    },
+    {
+      "evidence": "우리의 표현의 유용성을 입증하기 위해 video-to-4D generation, 3D tracking, 그리고 image-to-4D generation을 통한 cloth simulation의 세 가지 다운스트림 작업에서 평가했으며, 모든 설정에서 강한 성능을 확인했다.",
+      "metadata": {},
+      "source": "EvidenceSpan:evidence-video-to-4d-generation-3d-tracking-imag:3cff3cc76ea9",
+      "target": "Paper:arxiv-2605-04527:c0faca348771",
+      "type": "part_of"
+    },
+    {
+      "evidence": "우리의 표현의 유용성을 입증하기 위해 video-to-4D generation, 3D tracking, 그리고 image-to-4D generation을 통한 cloth simulation의 세 가지 다운스트림 작업에서 평가했으며, 모든 설정에서 강한 성능을 확인했다.",
+      "metadata": {},
+      "source": "Paper:arxiv-2605-04527:c0faca348771",
+      "target": "PerformanceClaim:performance-claim-video-to-4d-generation-3d-trac:a1b95ba108be",
+      "type": "supports_claim"
+    },
+    {
+      "evidence": "우리의 표현의 유용성을 입증하기 위해 video-to-4D generation, 3D tracking, 그리고 image-to-4D generation을 통한 cloth simulation의 세 가지 다운스트림 작업에서 평가했으며, 모든 설정에서 강한 성능을 확인했다.",
+      "metadata": {},
+      "source": "PerformanceClaim:performance-claim-video-to-4d-generation-3d-trac:a1b95ba108be",
+      "target": "EvidenceSpan:evidence-video-to-4d-generation-3d-tracking-imag:3cff3cc76ea9",
+      "type": "evidenced_by"
+    },
+    {
+      "evidence": null,
+      "metadata": {},
+      "source": "SourceDocument:daily-feed-summary-2026-05-09:bbad7e1d0cc2",
+      "target": "Paper:arxiv-2601-17835:46d524dd9e5e",
+      "type": "mentioned_in"
+    },
+    {
+      "evidence": null,
+      "metadata": {},
+      "source": "SourceDocument:daily-feed-summary-2026-05-09:bbad7e1d0cc2",
+      "target": "Paper:arxiv-2310-10375:382b0d986ec5",
+      "type": "mentioned_in"
+    },
+    {
+      "evidence": null,
+      "metadata": {},
+      "source": "SourceDocument:daily-feed-summary-2026-05-09:bbad7e1d0cc2",
+      "target": "Paper:arxiv-2605-04527:c0faca348771",
+      "type": "mentioned_in"
+    },
+    {
+      "evidence": null,
+      "metadata": {},
+      "source": "Repository:github-199-biotechnologies-claude-deep-research-:3e191fab3bf4",
+      "target": "Organization:199-biotechnologies:b7609722f8dd",
+      "type": "released_by"
+    },
+    {
+      "evidence": null,
+      "metadata": {},
+      "source": "SourceDocument:daily-research-digest-2026-05-10:155440063bd6",
+      "target": "Paper:arxiv-2603-11047:379d716442fb",
+      "type": "mentioned_in"
+    },
+    {
+      "evidence": null,
+      "metadata": {},
+      "source": "SourceDocument:daily-research-digest-2026-05-10:155440063bd6",
+      "target": "Paper:arxiv-2601-17835:46d524dd9e5e",
+      "type": "mentioned_in"
+    },
+    {
+      "evidence": null,
+      "metadata": {},
+      "source": "SourceDocument:daily-research-digest-2026-05-10:155440063bd6",
+      "target": "Paper:arxiv-2310-10375:382b0d986ec5",
+      "type": "mentioned_in"
+    },
+    {
+      "evidence": null,
+      "metadata": {},
+      "source": "SourceDocument:daily-research-digest-2026-05-10:155440063bd6",
+      "target": "Paper:arxiv-2505-20295:aa977a72ab3f",
+      "type": "mentioned_in"
+    },
+    {
+      "evidence": "희소하고 wide-baseline인 multi-view 설정에서 여러 novel view synthesis, NVS 데이터셋으로 평가한 결과, Geometric Transform Attention, GTA라고 부르는 이 attention이 추가 학습 파라미터 없이, 그리고 계산 오버헤드는 매우 작게 유지하면서, 최신 transformer 기반 NVS 모델의 학습 효율과 성능을 향상시킴을 보인다.",
+      "metadata": {},
+      "source": "EvidenceSpan:evidence-wide-baseline-multi-view-novel-view-syn:9b5808e14384",
+      "target": "Paper:arxiv-2310-10375:382b0d986ec5",
+      "type": "part_of"
+    },
+    {
+      "evidence": "희소하고 wide-baseline인 multi-view 설정에서 여러 novel view synthesis, NVS 데이터셋으로 평가한 결과, Geometric Transform Attention, GTA라고 부르는 이 attention이 추가 학습 파라미터 없이, 그리고 계산 오버헤드는 매우 작게 유지하면서, 최신 transformer 기반 NVS 모델의 학습 효율과 성능을 향상시킴을 보인다.",
+      "metadata": {},
+      "source": "Paper:arxiv-2310-10375:382b0d986ec5",
+      "target": "PerformanceClaim:claim-wide-baseline-multi-view-novel-view-synthe:4c42031eba8f",
+      "type": "supports_claim"
+    },
+    {
+      "evidence": "희소하고 wide-baseline인 multi-view 설정에서 여러 novel view synthesis, NVS 데이터셋으로 평가한 결과, Geometric Transform Attention, GTA라고 부르는 이 attention이 추가 학습 파라미터 없이, 그리고 계산 오버헤드는 매우 작게 유지하면서, 최신 transformer 기반 NVS 모델의 학습 효율과 성능을 향상시킴을 보인다.",
+      "metadata": {},
+      "source": "PerformanceClaim:claim-wide-baseline-multi-view-novel-view-synthe:4c42031eba8f",
+      "target": "Task:novel-view-synthesis:19d55dfb9b83",
+      "type": "addresses"
+    },
+    {
+      "evidence": "희소하고 wide-baseline인 multi-view 설정에서 여러 novel view synthesis, NVS 데이터셋으로 평가한 결과, Geometric Transform Attention, GTA라고 부르는 이 attention이 추가 학습 파라미터 없이, 그리고 계산 오버헤드는 매우 작게 유지하면서, 최신 transformer 기반 NVS 모델의 학습 효율과 성능을 향상시킴을 보인다.",
+      "metadata": {},
+      "source": "PerformanceClaim:claim-wide-baseline-multi-view-novel-view-synthe:4c42031eba8f",
+      "target": "EvidenceSpan:evidence-wide-baseline-multi-view-novel-view-syn:9b5808e14384",
+      "type": "evidenced_by"
+    },
+    {
+      "evidence": "희소하고 wide-baseline인 multi-view 설정에서 여러 novel view synthesis, NVS 데이터셋으로 평가한 결과, Geometric Transform Attention, GTA라고 부르는 이 attention이 추가 학습 파라미터 없이, 그리고 계산 오버헤드는 매우 작게 유지하면서, 최신 transformer 기반 NVS 모델의 학습 효율과 성능을 향상시킴을 보인다.",
+      "metadata": {},
+      "source": "PerformanceClaim:claim-wide-baseline-multi-view-novel-view-synthe:4c42031eba8f",
+      "target": "Paper:arxiv-2310-10375:382b0d986ec5",
+      "type": "mentioned_in"
+    },
+    {
+      "evidence": "희소하고 wide-baseline인 multi-view 설정에서 여러 novel view synthesis, NVS 데이터셋으로 평가한 결과, Geometric Transform Attention, GTA라고 부르는 이 attention이 추가 학습 파라미터 없이, 그리고 계산 오버헤드는 매우 작게 유지하면서, 최신 transformer 기반 NVS 모델의 학습 효율과 성능을 향상시킴을 보인다.",
+      "metadata": {},
+      "source": "Paper:arxiv-2310-10375:382b0d986ec5",
+      "target": "PerformanceClaim:performance-claim-wide-baseline-multi-view-novel:8d01474ba6f8",
+      "type": "supports_claim"
+    },
+    {
+      "evidence": "희소하고 wide-baseline인 multi-view 설정에서 여러 novel view synthesis, NVS 데이터셋으로 평가한 결과, Geometric Transform Attention, GTA라고 부르는 이 attention이 추가 학습 파라미터 없이, 그리고 계산 오버헤드는 매우 작게 유지하면서, 최신 transformer 기반 NVS 모델의 학습 효율과 성능을 향상시킴을 보인다.",
+      "metadata": {},
+      "source": "PerformanceClaim:performance-claim-wide-baseline-multi-view-novel:8d01474ba6f8",
+      "target": "EvidenceSpan:evidence-wide-baseline-multi-view-novel-view-syn:9b5808e14384",
+      "type": "evidenced_by"
+    },
+    {
+      "evidence": null,
+      "metadata": {},
+      "source": "Paper:arxiv-2505-20295:aa977a72ab3f",
+      "target": "ResearchField:3d-4d-vision-and-reconstruction:4273d84d58f1",
+      "type": "part_of"
+    },
+    {
+      "evidence": null,
+      "metadata": {},
+      "source": "Paper:arxiv-2505-20295:aa977a72ab3f",
+      "target": "Person:adam-goli-ski:41ed351b1073",
+      "type": "authored_by"
+    },
+    {
+      "evidence": null,
+      "metadata": {},
+      "source": "Paper:arxiv-2505-20295:aa977a72ab3f",
+      "target": "Person:arno-blaas:2e73a2067005",
+      "type": "authored_by"
+    },
+    {
+      "evidence": null,
+      "metadata": {},
+      "source": "Paper:arxiv-2505-20295:aa977a72ab3f",
+      "target": "Person:eeshan-gunesh-dhekane:16b5799973f1",
+      "type": "authored_by"
+    },
+    {
+      "evidence": null,
+      "metadata": {},
+      "source": "Paper:arxiv-2505-20295:aa977a72ab3f",
+      "target": "Person:luca-f-ger:c412bed93696",
+      "type": "authored_by"
+    },
+    {
+      "evidence": null,
+      "metadata": {},
+      "source": "Paper:arxiv-2505-20295:aa977a72ab3f",
+      "target": "Person:michael-kirchhof:9e7a0b7c0c02",
+      "type": "authored_by"
+    },
+    {
+      "evidence": null,
+      "metadata": {},
+      "source": "Paper:arxiv-2505-20295:aa977a72ab3f",
+      "target": "Person:seong-joon-oh:82ffb1b17eac",
+      "type": "authored_by"
+    },
+    {
+      "evidence": null,
+      "metadata": {},
+      "source": "Paper:arxiv-2505-20295:aa977a72ab3f",
+      "target": "Person:sinead-williamson:35cdd59c7af4",
+      "type": "authored_by"
+    },
+    {
+      "evidence": null,
+      "metadata": {},
+      "source": "Paper:arxiv-2505-20295:aa977a72ab3f",
+      "target": "Repository:github-apple-ml-lito:1a1a85249564",
+      "type": "implemented_in"
+    },
+    {
+      "evidence": null,
+      "metadata": {},
+      "source": "Repository:github-apple-ml-lito:1a1a85249564",
+      "target": "Organization:apple:19576e16c6d5",
+      "type": "released_by"
+    },
+    {
+      "evidence": "# Geometry-Grounded Gaussian Splatting | Cool Papers - 몰입형 논문 탐색 총계: 1 ## Geometry-Grounded Gaussian Splatting [PDF15] [Copy] [Kimi6] [REL] Baowen Zhang, Chenxing Jiang, Heng Li, Shaojie Shen, Ping Tan Gaussian Splatting GS는 novel view synthesis에서 인상적인 품질과 효율성을 보여주었다.",
+      "metadata": {},
+      "source": "Paper:arxiv-2601-17835:46d524dd9e5e",
+      "target": "Claim:claim-geometry-grounded-gaussian-splatting-cool-:58ca1037d579",
+      "type": "supports_claim"
+    },
+    {
+      "evidence": "# Geometry-Grounded Gaussian Splatting | Cool Papers - 몰입형 논문 탐색 총계: 1 ## Geometry-Grounded Gaussian Splatting [PDF15] [Copy] [Kimi6] [REL] Baowen Zhang, Chenxing Jiang, Heng Li, Shaojie Shen, Ping Tan Gaussian Splatting GS는 novel view synthesis에서 인상적인 품질과 효율성을 보여주었다.",
+      "metadata": {},
+      "source": "Claim:claim-geometry-grounded-gaussian-splatting-cool-:58ca1037d579",
+      "target": "MethodologicalConcept:gaussian-splatting:4f4b246c6522",
+      "type": "uses"
+    },
+    {
+      "evidence": "# Geometry-Grounded Gaussian Splatting | Cool Papers - 몰입형 논문 탐색 총계: 1 ## Geometry-Grounded Gaussian Splatting [PDF15] [Copy] [Kimi6] [REL] Baowen Zhang, Chenxing Jiang, Heng Li, Shaojie Shen, Ping Tan Gaussian Splatting GS는 novel view synthesis에서 인상적인 품질과 효율성을 보여주었다.",
+      "metadata": {},
+      "source": "Claim:claim-geometry-grounded-gaussian-splatting-cool-:58ca1037d579",
+      "target": "EvidenceSpan:evidence-geometry-grounded-gaussian-splatting-co:66551e0176c4",
+      "type": "evidenced_by"
+    },
+    {
+      "evidence": "# Geometry-Grounded Gaussian Splatting | Cool Papers - 몰입형 논문 탐색 총계: 1 ## Geometry-Grounded Gaussian Splatting [PDF15] [Copy] [Kimi6] [REL] Baowen Zhang, Chenxing Jiang, Heng Li, Shaojie Shen, Ping Tan Gaussian Splatting GS는 novel view synthesis에서 인상적인 품질과 효율성을 보여주었다.",
+      "metadata": {},
+      "source": "Claim:claim-geometry-grounded-gaussian-splatting-cool-:58ca1037d579",
+      "target": "Paper:arxiv-2601-17835:46d524dd9e5e",
+      "type": "mentioned_in"
+    },
+    {
+      "evidence": "# Geometry-Grounded Gaussian Splatting | Cool Papers - 몰입형 논문 탐색 총계: 1 ## Geometry-Grounded Gaussian Splatting [PDF15] [Copy] [Kimi6] [REL] Baowen Zhang, Chenxing Jiang, Heng Li, Shaojie Shen, Ping Tan Gaussian Splatting GS는 novel view synthesis에서 인상적인 품질과 효율성을 보여주었다.",
+      "metadata": {},
+      "source": "Claim:claim-geometry-grounded-gaussian-splatting-cool-:58ca1037d579",
+      "target": "ApproachFamily:geometry-grounded-gaussian-splatting:0ba271d39ba0",
+      "type": "uses"
+    },
+    {
+      "evidence": "# Geometry-Grounded Gaussian Splatting | Cool Papers - 몰입형 논문 탐색 총계: 1 ## Geometry-Grounded Gaussian Splatting [PDF15] [Copy] [Kimi6] [REL] Baowen Zhang, Chenxing Jiang, Heng Li, Shaojie Shen, Ping Tan Gaussian Splatting GS는 novel view synthesis에서 인상적인 품질과 효율성을 보여주었다.",
+      "metadata": {},
+      "source": "Claim:claim-geometry-grounded-gaussian-splatting-cool-:58ca1037d579",
+      "target": "Task:novel-view-synthesis:19d55dfb9b83",
+      "type": "addresses"
+    },
+    {
+      "evidence": "실험 결과, 우리 방법은 공개 데이터셋에서 모든 Gaussian Splatting 기반 방법 중 최고의 형상 재구성 결과를 달성한다.",
+      "metadata": {},
+      "source": "EvidenceSpan:evidence-gaussian-splatting:89794dc763c9",
+      "target": "Paper:arxiv-2601-17835:46d524dd9e5e",
+      "type": "part_of"
+    },
+    {
+      "evidence": "실험 결과, 우리 방법은 공개 데이터셋에서 모든 Gaussian Splatting 기반 방법 중 최고의 형상 재구성 결과를 달성한다.",
+      "metadata": {},
+      "source": "Paper:arxiv-2601-17835:46d524dd9e5e",
+      "target": "PerformanceClaim:performance-claim-gaussian-splatting:e097c9eaf085",
+      "type": "supports_claim"
+    },
+    {
+      "evidence": "실험 결과, 우리 방법은 공개 데이터셋에서 모든 Gaussian Splatting 기반 방법 중 최고의 형상 재구성 결과를 달성한다.",
+      "metadata": {},
+      "source": "PerformanceClaim:performance-claim-gaussian-splatting:e097c9eaf085",
+      "target": "EvidenceSpan:evidence-gaussian-splatting:89794dc763c9",
+      "type": "evidenced_by"
+    },
+    {
+      "evidence": null,
+      "metadata": {},
+      "source": "SourceDocument:daily-feed-summary-2026-05-10:24cb5a57cce0",
+      "target": "Paper:arxiv-2505-20295:aa977a72ab3f",
+      "type": "mentioned_in"
+    },
+    {
+      "evidence": null,
+      "metadata": {},
+      "source": "SourceDocument:daily-feed-summary-2026-05-10:24cb5a57cce0",
+      "target": "Paper:arxiv-2601-17835:46d524dd9e5e",
+      "type": "mentioned_in"
+    },
+    {
+      "evidence": null,
+      "metadata": {},
+      "source": "SourceDocument:daily-feed-summary-2026-05-10:24cb5a57cce0",
+      "target": "Paper:arxiv-2310-10375:382b0d986ec5",
+      "type": "mentioned_in"
+    },
+    {
+      "evidence": null,
+      "metadata": {},
       "source": "SourceDocument:2026-w15:76b20547149e",
       "target": "Paper:arxiv-2604-02996:14fc0d914a17",
       "type": "mentioned_in"
@@ -9769,35 +10399,35 @@
       "evidence": null,
       "metadata": {},
       "source": "Synthesis:pulse:6ffe96c09f0f",
-      "target": "Repository:github-bolixinyu-lca:8c7eebeca3fb",
+      "target": "Paper:arxiv-2505-20295:aa977a72ab3f",
       "type": "synthesizes"
     },
     {
       "evidence": null,
       "metadata": {},
       "source": "Synthesis:pulse:6ffe96c09f0f",
-      "target": "Repository:github-cintellifusion-multiworld:dc2f4000b99e",
+      "target": "Paper:arxiv-2605-04527:c0faca348771",
       "type": "synthesizes"
     },
     {
       "evidence": null,
       "metadata": {},
       "source": "Synthesis:pulse:6ffe96c09f0f",
-      "target": "Repository:github-davian-robotics-egox:9b4553672351",
+      "target": "Repository:github-apple-ml-lito:1a1a85249564",
       "type": "synthesizes"
     },
     {
       "evidence": null,
       "metadata": {},
       "source": "Synthesis:pulse:6ffe96c09f0f",
-      "target": "Repository:github-honojs-middleware:a7a511baa3fc",
+      "target": "Repository:github-ashishps1-awesome-engineering-articles:8c171b4992b2",
       "type": "synthesizes"
     },
     {
       "evidence": null,
       "metadata": {},
       "source": "Synthesis:pulse:6ffe96c09f0f",
-      "target": "Repository:github-naver-multi-hmr:5a705a090a24",
+      "target": "Repository:github-rui314-chibicc:50809d928929",
       "type": "synthesizes"
     },
     {
@@ -9833,6 +10463,13 @@
       "metadata": {},
       "source": "Synthesis:pulse:6ffe96c09f0f",
       "target": "Paper:arxiv-2308-07123:1e8192d4026d",
+      "type": "summarizes"
+    },
+    {
+      "evidence": null,
+      "metadata": {},
+      "source": "Synthesis:pulse:6ffe96c09f0f",
+      "target": "Paper:arxiv-2310-10375:382b0d986ec5",
       "type": "summarizes"
     },
     {
@@ -9966,6 +10603,13 @@
       "metadata": {},
       "source": "Synthesis:pulse:6ffe96c09f0f",
       "target": "Paper:arxiv-2504-07943:77ba7daa127a",
+      "type": "summarizes"
+    },
+    {
+      "evidence": null,
+      "metadata": {},
+      "source": "Synthesis:pulse:6ffe96c09f0f",
+      "target": "Paper:arxiv-2505-20295:aa977a72ab3f",
       "type": "summarizes"
     },
     {
@@ -10197,6 +10841,13 @@
       "metadata": {},
       "source": "Synthesis:pulse:6ffe96c09f0f",
       "target": "Paper:arxiv-2603-09936:bc6a5009f607",
+      "type": "summarizes"
+    },
+    {
+      "evidence": null,
+      "metadata": {},
+      "source": "Synthesis:pulse:6ffe96c09f0f",
+      "target": "Paper:arxiv-2603-11047:379d716442fb",
       "type": "summarizes"
     },
     {
@@ -10497,7 +11148,56 @@
       "evidence": null,
       "metadata": {},
       "source": "Synthesis:pulse:6ffe96c09f0f",
+      "target": "Paper:arxiv-2605-04017:57a9273184c4",
+      "type": "summarizes"
+    },
+    {
+      "evidence": null,
+      "metadata": {},
+      "source": "Synthesis:pulse:6ffe96c09f0f",
       "target": "Paper:arxiv-2605-04044:3c89fad1cce2",
+      "type": "summarizes"
+    },
+    {
+      "evidence": null,
+      "metadata": {},
+      "source": "Synthesis:pulse:6ffe96c09f0f",
+      "target": "Paper:arxiv-2605-04527:c0faca348771",
+      "type": "summarizes"
+    },
+    {
+      "evidence": null,
+      "metadata": {},
+      "source": "Synthesis:pulse:6ffe96c09f0f",
+      "target": "Paper:arxiv-2605-04730:f14f0e184679",
+      "type": "summarizes"
+    },
+    {
+      "evidence": null,
+      "metadata": {},
+      "source": "Synthesis:pulse:6ffe96c09f0f",
+      "target": "Paper:arxiv-2605-05664:57e93426925e",
+      "type": "summarizes"
+    },
+    {
+      "evidence": null,
+      "metadata": {},
+      "source": "Synthesis:pulse:6ffe96c09f0f",
+      "target": "Paper:arxiv-2605-05749:9121764f3807",
+      "type": "summarizes"
+    },
+    {
+      "evidence": null,
+      "metadata": {},
+      "source": "Synthesis:pulse:6ffe96c09f0f",
+      "target": "Paper:arxiv-2605-06270:64362fbc49c4",
+      "type": "summarizes"
+    },
+    {
+      "evidence": null,
+      "metadata": {},
+      "source": "Synthesis:pulse:6ffe96c09f0f",
+      "target": "Repository:github-199-biotechnologies-claude-deep-research-:3e191fab3bf4",
       "type": "summarizes"
     },
     {
@@ -10609,6 +11309,13 @@
       "evidence": null,
       "metadata": {},
       "source": "Synthesis:pulse:6ffe96c09f0f",
+      "target": "Repository:github-apple-ml-lito:1a1a85249564",
+      "type": "summarizes"
+    },
+    {
+      "evidence": null,
+      "metadata": {},
+      "source": "Synthesis:pulse:6ffe96c09f0f",
       "target": "Repository:github-apple-ml-mobileclip:3a2124454f6d",
       "type": "summarizes"
     },
@@ -10631,6 +11338,13 @@
       "metadata": {},
       "source": "Synthesis:pulse:6ffe96c09f0f",
       "target": "Repository:github-asherikov-shoggoth:c821cd1f4565",
+      "type": "summarizes"
+    },
+    {
+      "evidence": null,
+      "metadata": {},
+      "source": "Synthesis:pulse:6ffe96c09f0f",
+      "target": "Repository:github-ashishps1-awesome-engineering-articles:8c171b4992b2",
       "type": "summarizes"
     },
     {
@@ -11253,6 +11967,13 @@
       "evidence": null,
       "metadata": {},
       "source": "Synthesis:pulse:6ffe96c09f0f",
+      "target": "Repository:github-rui314-chibicc:50809d928929",
+      "type": "summarizes"
+    },
+    {
+      "evidence": null,
+      "metadata": {},
+      "source": "Synthesis:pulse:6ffe96c09f0f",
       "target": "Repository:github-safishamsi-graphify:15455037b646",
       "type": "summarizes"
     },
@@ -11687,6 +12408,20 @@
       "evidence": null,
       "metadata": {},
       "source": "Synthesis:pulse:6ffe96c09f0f",
+      "target": "SourceDocument:daily-feed-summary-2026-05-09:bbad7e1d0cc2",
+      "type": "summarizes"
+    },
+    {
+      "evidence": null,
+      "metadata": {},
+      "source": "Synthesis:pulse:6ffe96c09f0f",
+      "target": "SourceDocument:daily-feed-summary-2026-05-10:24cb5a57cce0",
+      "type": "summarizes"
+    },
+    {
+      "evidence": null,
+      "metadata": {},
+      "source": "Synthesis:pulse:6ffe96c09f0f",
       "target": "SourceDocument:daily-research-digest-2026-04-08:15e09365fdb3",
       "type": "summarizes"
     },
@@ -11821,6 +12556,20 @@
       "metadata": {},
       "source": "Synthesis:pulse:6ffe96c09f0f",
       "target": "SourceDocument:daily-research-digest-2026-05-06:bd3bac48d4bc",
+      "type": "summarizes"
+    },
+    {
+      "evidence": null,
+      "metadata": {},
+      "source": "Synthesis:pulse:6ffe96c09f0f",
+      "target": "SourceDocument:daily-research-digest-2026-05-09:117d1d46b37d",
+      "type": "summarizes"
+    },
+    {
+      "evidence": null,
+      "metadata": {},
+      "source": "Synthesis:pulse:6ffe96c09f0f",
+      "target": "SourceDocument:daily-research-digest-2026-05-10:155440063bd6",
       "type": "summarizes"
     },
     {
@@ -15424,6 +16173,167 @@
     {
       "evidence": null,
       "metadata": {},
+      "source": "Synthesis:daily-2026-05-09:ad66b3d4e644",
+      "target": "Paper:arxiv-2310-10375:382b0d986ec5",
+      "type": "synthesizes"
+    },
+    {
+      "evidence": null,
+      "metadata": {},
+      "source": "Synthesis:daily-2026-05-09:ad66b3d4e644",
+      "target": "Paper:arxiv-2605-04527:c0faca348771",
+      "type": "synthesizes"
+    },
+    {
+      "evidence": null,
+      "metadata": {},
+      "source": "Synthesis:daily-2026-05-09:ad66b3d4e644",
+      "target": "Repository:github-199-biotechnologies-claude-deep-research-:3e191fab3bf4",
+      "type": "synthesizes"
+    },
+    {
+      "evidence": null,
+      "metadata": {},
+      "source": "Synthesis:daily-2026-05-09:ad66b3d4e644",
+      "target": "Repository:github-ashishps1-awesome-engineering-articles:8c171b4992b2",
+      "type": "synthesizes"
+    },
+    {
+      "evidence": null,
+      "metadata": {},
+      "source": "Synthesis:daily-2026-05-09:ad66b3d4e644",
+      "target": "Repository:github-rui314-chibicc:50809d928929",
+      "type": "synthesizes"
+    },
+    {
+      "evidence": null,
+      "metadata": {},
+      "source": "Synthesis:daily-2026-05-09:ad66b3d4e644",
+      "target": "SourceDocument:daily-feed-summary-2026-05-09:bbad7e1d0cc2",
+      "type": "synthesizes"
+    },
+    {
+      "evidence": null,
+      "metadata": {},
+      "source": "Synthesis:daily-2026-05-09:ad66b3d4e644",
+      "target": "SourceDocument:daily-research-digest-2026-05-09:117d1d46b37d",
+      "type": "synthesizes"
+    },
+    {
+      "evidence": null,
+      "metadata": {},
+      "source": "Synthesis:daily-2026-05-09:ad66b3d4e644",
+      "target": "Task:novel-view-synthesis:19d55dfb9b83",
+      "type": "synthesizes"
+    },
+    {
+      "evidence": null,
+      "metadata": {},
+      "source": "Synthesis:daily-2026-05-09:ad66b3d4e644",
+      "target": "Paper:arxiv-2310-10375:382b0d986ec5",
+      "type": "summarizes"
+    },
+    {
+      "evidence": null,
+      "metadata": {},
+      "source": "Synthesis:daily-2026-05-09:ad66b3d4e644",
+      "target": "Paper:arxiv-2605-04527:c0faca348771",
+      "type": "summarizes"
+    },
+    {
+      "evidence": null,
+      "metadata": {},
+      "source": "Synthesis:daily-2026-05-09:ad66b3d4e644",
+      "target": "Repository:github-199-biotechnologies-claude-deep-research-:3e191fab3bf4",
+      "type": "summarizes"
+    },
+    {
+      "evidence": null,
+      "metadata": {},
+      "source": "Synthesis:daily-2026-05-09:ad66b3d4e644",
+      "target": "Repository:github-ashishps1-awesome-engineering-articles:8c171b4992b2",
+      "type": "summarizes"
+    },
+    {
+      "evidence": null,
+      "metadata": {},
+      "source": "Synthesis:daily-2026-05-09:ad66b3d4e644",
+      "target": "Repository:github-rui314-chibicc:50809d928929",
+      "type": "summarizes"
+    },
+    {
+      "evidence": null,
+      "metadata": {},
+      "source": "Synthesis:daily-2026-05-09:ad66b3d4e644",
+      "target": "SourceDocument:daily-feed-summary-2026-05-09:bbad7e1d0cc2",
+      "type": "summarizes"
+    },
+    {
+      "evidence": null,
+      "metadata": {},
+      "source": "Synthesis:daily-2026-05-09:ad66b3d4e644",
+      "target": "SourceDocument:daily-research-digest-2026-05-09:117d1d46b37d",
+      "type": "summarizes"
+    },
+    {
+      "evidence": null,
+      "metadata": {},
+      "source": "Synthesis:daily-2026-05-10:495b5ecf37a7",
+      "target": "Paper:arxiv-2505-20295:aa977a72ab3f",
+      "type": "synthesizes"
+    },
+    {
+      "evidence": null,
+      "metadata": {},
+      "source": "Synthesis:daily-2026-05-10:495b5ecf37a7",
+      "target": "Repository:github-apple-ml-lito:1a1a85249564",
+      "type": "synthesizes"
+    },
+    {
+      "evidence": null,
+      "metadata": {},
+      "source": "Synthesis:daily-2026-05-10:495b5ecf37a7",
+      "target": "SourceDocument:daily-feed-summary-2026-05-10:24cb5a57cce0",
+      "type": "synthesizes"
+    },
+    {
+      "evidence": null,
+      "metadata": {},
+      "source": "Synthesis:daily-2026-05-10:495b5ecf37a7",
+      "target": "SourceDocument:daily-research-digest-2026-05-10:155440063bd6",
+      "type": "synthesizes"
+    },
+    {
+      "evidence": null,
+      "metadata": {},
+      "source": "Synthesis:daily-2026-05-10:495b5ecf37a7",
+      "target": "Paper:arxiv-2505-20295:aa977a72ab3f",
+      "type": "summarizes"
+    },
+    {
+      "evidence": null,
+      "metadata": {},
+      "source": "Synthesis:daily-2026-05-10:495b5ecf37a7",
+      "target": "Repository:github-apple-ml-lito:1a1a85249564",
+      "type": "summarizes"
+    },
+    {
+      "evidence": null,
+      "metadata": {},
+      "source": "Synthesis:daily-2026-05-10:495b5ecf37a7",
+      "target": "SourceDocument:daily-feed-summary-2026-05-10:24cb5a57cce0",
+      "type": "summarizes"
+    },
+    {
+      "evidence": null,
+      "metadata": {},
+      "source": "Synthesis:daily-2026-05-10:495b5ecf37a7",
+      "target": "SourceDocument:daily-research-digest-2026-05-10:155440063bd6",
+      "type": "summarizes"
+    },
+    {
+      "evidence": null,
+      "metadata": {},
       "source": "Synthesis:weekly-2026-w15:647fc9c2753d",
       "target": "SourceDocument:2026-w15-2026-04-06-2026-04-12:e83791d72519",
       "type": "synthesizes"
@@ -16020,6 +16930,13 @@
       "evidence": null,
       "metadata": {},
       "source": "Synthesis:field-3d-4d-vision-and-reconstruction:853e9a0e999f",
+      "target": "Paper:arxiv-2310-10375:382b0d986ec5",
+      "type": "summarizes"
+    },
+    {
+      "evidence": null,
+      "metadata": {},
+      "source": "Synthesis:field-3d-4d-vision-and-reconstruction:853e9a0e999f",
       "target": "Paper:arxiv-2311-14649:e09bf5ce008b",
       "type": "summarizes"
     },
@@ -16063,6 +16980,13 @@
       "metadata": {},
       "source": "Synthesis:field-3d-4d-vision-and-reconstruction:853e9a0e999f",
       "target": "Paper:arxiv-2503-11806:173464363af2",
+      "type": "summarizes"
+    },
+    {
+      "evidence": null,
+      "metadata": {},
+      "source": "Synthesis:field-3d-4d-vision-and-reconstruction:853e9a0e999f",
+      "target": "Paper:arxiv-2505-20295:aa977a72ab3f",
       "type": "summarizes"
     },
     {
@@ -16271,6 +17195,13 @@
     {
       "evidence": null,
       "metadata": {},
+      "source": "Synthesis:field-3d-4d-vision-and-reconstruction:853e9a0e999f",
+      "target": "Paper:arxiv-2605-04527:c0faca348771",
+      "type": "summarizes"
+    },
+    {
+      "evidence": null,
+      "metadata": {},
       "source": "Synthesis:field-llm-reasoning:da77b4549704",
       "target": "ResearchField:llm-reasoning:530f2afb39c4",
       "type": "synthesizes"
@@ -16434,15 +17365,6 @@
     {
       "aliases": [],
       "description": "",
-      "id": "Metric:map:592bcbe13f80",
-      "metadata": {},
-      "name": "mAP",
-      "source_path": "/Users/neo/Developer/Projects/LLM-Wiki/README.md",
-      "type": "Metric"
-    },
-    {
-      "aliases": [],
-      "description": "",
       "id": "SourceDocument:h1-align-center-llm-wiki-h1:b60a072f7da3",
       "metadata": {
         "sections": [
@@ -16452,39 +17374,39 @@
             "text": "The pitch"
           },
           {
+            "anchor": "why-agents-use-it",
+            "level": 2,
+            "text": "Why agents use it"
+          },
+          {
+            "anchor": "memory-pipeline",
+            "level": 2,
+            "text": "Memory pipeline"
+          },
+          {
+            "anchor": "cognee-llm-wiki",
+            "level": 2,
+            "text": "Cognee + LLM-Wiki"
+          },
+          {
             "anchor": "quick-start",
             "level": 2,
             "text": "Quick start"
           },
           {
-            "anchor": "what-you-get",
+            "anchor": "what-it-exports",
             "level": 2,
-            "text": "What you get"
+            "text": "What it exports"
           },
           {
-            "anchor": "understand-anything-llm-wiki",
+            "anchor": "companion-tools-not-lock-in",
             "level": 2,
-            "text": "Understand Anything + LLM-Wiki"
+            "text": "Companion tools, not lock-in"
           },
           {
-            "anchor": "agent-first-outputs",
+            "anchor": "when-llm-wiki-is-the-right-tool",
             "level": 2,
-            "text": "Agent-first outputs"
-          },
-          {
-            "anchor": "import-local-agent-sessions",
-            "level": 2,
-            "text": "Import local agent sessions"
-          },
-          {
-            "anchor": "publish",
-            "level": 2,
-            "text": "Publish"
-          },
-          {
-            "anchor": "how-it-works",
-            "level": 2,
-            "text": "How it works"
+            "text": "When LLM-Wiki is the right tool"
           },
           {
             "anchor": "docs",
@@ -16497,6 +17419,15 @@
       "name": "<h1 align=\"center\">LLM-Wiki</h1>",
       "source_path": "/Users/neo/Developer/Projects/LLM-Wiki/README.md",
       "type": "SourceDocument"
+    },
+    {
+      "aliases": [],
+      "description": "",
+      "id": "Metric:map:592bcbe13f80",
+      "metadata": {},
+      "name": "mAP",
+      "source_path": "/Users/neo/Developer/Projects/LLM-Wiki/docs/architecture.md",
+      "type": "Metric"
     },
     {
       "aliases": [],
@@ -33998,6 +34929,925 @@
     {
       "aliases": [],
       "description": "",
+      "id": "SourceDocument:daily-research-digest-2026-05-09:117d1d46b37d",
+      "metadata": {
+        "analysis_date": "2026-05-09",
+        "arxiv_id": "2605.05664",
+        "candidate_paper_titles": [
+          "희소한 촬영만으로 완전한 3D 장면을 복원하는 Sparse-to-Complete",
+          "3D Gaussian Splatting 기반 Visual Localization의 편향을 정면으로 다룬 ULF-Loc",
+          "인터랙티브 월드를 위한 물리 일관형 3D 자산 생성, PhysForge"
+        ],
+        "github_repo": "eyeline-labs/vista4d",
+        "repo_url": "https://github.com/Eyeline-Labs/Vista4D",
+        "sections": [
+          {
+            "anchor": "daily-research-digest-2026-05-09",
+            "level": 1,
+            "text": "📬 Daily Research Digest — 2026-05-09"
+          },
+          {
+            "anchor": "오늘의-하이라이트",
+            "level": 2,
+            "text": "🔥 오늘의 하이라이트"
+          },
+          {
+            "anchor": "1-희소한-촬영만으로-완전한-3d-장면을-복원하는-sparse-to-complete",
+            "level": 3,
+            "text": "1. 희소한 촬영만으로 완전한 3D 장면을 복원하는 Sparse-to-Complete"
+          },
+          {
+            "anchor": "2-3d-gaussian-splatting-기반-visual-localization의-편향을-정면으로-다룬-ulf-loc",
+            "level": 3,
+            "text": "2. 3D Gaussian Splatting 기반 Visual Localization의 편향을 정면으로 다룬 ULF-Loc"
+          },
+          {
+            "anchor": "3-인터랙티브-월드를-위한-물리-일관형-3d-자산-생성-physforge",
+            "level": 3,
+            "text": "3. 인터랙티브 월드를 위한 물리 일관형 3D 자산 생성, PhysForge"
+          },
+          {
+            "anchor": "주목할-만한-피드",
+            "level": 2,
+            "text": "📋 주목할 만한 피드"
+          },
+          {
+            "anchor": "vista4d-오픈소스-공개로-모바일-3d-캡처-경쟁이-더-빨라졌다",
+            "level": 3,
+            "text": "▫️ Vista4D 오픈소스 공개로 모바일 3D 캡처 경쟁이 더 빨라졌다"
+          },
+          {
+            "anchor": "스트리밍-3d-재구성을-위한-ray-aware-pointer-memory",
+            "level": 3,
+            "text": "▫️ 스트리밍 3D 재구성을 위한 Ray-Aware Pointer Memory"
+          },
+          {
+            "anchor": "hermes-가-3d-scene-understanding과-future-geometry-prediction을-하나로-묶었다",
+            "level": 3,
+            "text": "▫️ HERMES++가 3D scene understanding과 future geometry prediction을 하나로 묶었다"
+          },
+          {
+            "anchor": "3d-gaussian-splatting용-경량-압축-흐름이-계속-구체화되고-있다",
+            "level": 3,
+            "text": "▫️ 3D Gaussian Splatting용 경량 압축 흐름이 계속 구체화되고 있다"
+          },
+          {
+            "anchor": "xgrids-lixel-k2는-포인트클라우드-기반-facade-캡처를-전면에-내세웠다",
+            "level": 3,
+            "text": "▫️ XGRIDS Lixel K2는 포인트클라우드 기반 facade 캡처를 전면에 내세웠다"
+          },
+          {
+            "anchor": "spark3r는-비대칭-토큰-축소로-빠른-feed-forward-3d-reconstruction을-노린다",
+            "level": 3,
+            "text": "▫️ Spark3R는 비대칭 토큰 축소로 빠른 feed-forward 3D reconstruction을 노린다"
+          },
+          {
+            "anchor": "복합-렌즈용-neural-model-preprint가-graphics-cv-경계에서-눈길을-끈다",
+            "level": 3,
+            "text": "▫️ 복합 렌즈용 neural model preprint가 Graphics-CV 경계에서 눈길을 끈다"
+          },
+          {
+            "anchor": "오늘의-숫자",
+            "level": 2,
+            "text": "📊 오늘의 숫자"
+          }
+        ],
+        "source_kind": "SourceDocument"
+      },
+      "name": "📬 Daily Research Digest — 2026-05-09",
+      "source_path": "/Users/neo/Developer/Projects/LLM-Wiki/data/research/daily/2026-05-09/digest.md",
+      "type": "SourceDocument"
+    },
+    {
+      "aliases": [
+        "arXiv:2605.05664"
+      ],
+      "description": "",
+      "id": "Paper:arxiv-2605-05664:57e93426925e",
+      "metadata": {
+        "arxiv_id": "2605.05664",
+        "discovered_in": "/Users/neo/Developer/Projects/LLM-Wiki/data/research/daily/2026-05-09/digest.md",
+        "source_kind": "Paper",
+        "title_quality": "arxiv_only"
+      },
+      "name": "arXiv:2605.05664",
+      "source_path": "/Users/neo/Developer/Projects/LLM-Wiki/data/research/daily/2026-05-09/digest.md",
+      "type": "Paper"
+    },
+    {
+      "aliases": [
+        "arXiv:2605.04730"
+      ],
+      "description": "",
+      "id": "Paper:arxiv-2605-04730:f14f0e184679",
+      "metadata": {
+        "arxiv_id": "2605.04730",
+        "discovered_in": "/Users/neo/Developer/Projects/LLM-Wiki/data/research/daily/2026-05-09/digest.md",
+        "source_kind": "Paper",
+        "title_quality": "arxiv_only"
+      },
+      "name": "arXiv:2605.04730",
+      "source_path": "/Users/neo/Developer/Projects/LLM-Wiki/data/research/daily/2026-05-09/digest.md",
+      "type": "Paper"
+    },
+    {
+      "aliases": [
+        "arXiv:2605.05749"
+      ],
+      "description": "",
+      "id": "Paper:arxiv-2605-05749:9121764f3807",
+      "metadata": {
+        "arxiv_id": "2605.05749",
+        "discovered_in": "/Users/neo/Developer/Projects/LLM-Wiki/data/research/daily/2026-05-09/digest.md",
+        "source_kind": "Paper",
+        "title_quality": "arxiv_only"
+      },
+      "name": "arXiv:2605.05749",
+      "source_path": "/Users/neo/Developer/Projects/LLM-Wiki/data/research/daily/2026-05-09/digest.md",
+      "type": "Paper"
+    },
+    {
+      "aliases": [
+        "arXiv:2605.06270"
+      ],
+      "description": "",
+      "id": "Paper:arxiv-2605-06270:64362fbc49c4",
+      "metadata": {
+        "arxiv_id": "2605.06270",
+        "discovered_in": "/Users/neo/Developer/Projects/LLM-Wiki/data/research/daily/2026-05-09/digest.md",
+        "source_kind": "Paper",
+        "title_quality": "arxiv_only"
+      },
+      "name": "arXiv:2605.06270",
+      "source_path": "/Users/neo/Developer/Projects/LLM-Wiki/data/research/daily/2026-05-09/digest.md",
+      "type": "Paper"
+    },
+    {
+      "aliases": [
+        "arXiv:2605.04017"
+      ],
+      "description": "",
+      "id": "Paper:arxiv-2605-04017:57a9273184c4",
+      "metadata": {
+        "arxiv_id": "2605.04017",
+        "discovered_in": "/Users/neo/Developer/Projects/LLM-Wiki/data/research/daily/2026-05-09/digest.md",
+        "source_kind": "Paper",
+        "title_quality": "arxiv_only"
+      },
+      "name": "arXiv:2605.04017",
+      "source_path": "/Users/neo/Developer/Projects/LLM-Wiki/data/research/daily/2026-05-09/digest.md",
+      "type": "Paper"
+    },
+    {
+      "aliases": [
+        "arXiv:2605.04527"
+      ],
+      "description": "",
+      "id": "Paper:arxiv-2605-04527:c0faca348771",
+      "metadata": {
+        "analysis_date": "2026-05-09",
+        "arxiv_id": "2605.04527",
+        "discovered_in": "/Users/neo/Developer/Projects/LLM-Wiki/data/research/daily/2026-05-09/digest.md",
+        "sections": [
+          {
+            "anchor": "논문-분석-2605-04527",
+            "level": 1,
+            "text": "논문 분석: 2605.04527"
+          },
+          {
+            "anchor": "2605-04527",
+            "level": 2,
+            "text": "2605.04527"
+          },
+          {
+            "anchor": "1",
+            "level": 2,
+            "text": "#1"
+          },
+          {
+            "anchor": "velox-learning-representations-of-4d-geometry-and-appearance",
+            "level": 1,
+            "text": "Velox: Learning Representations of 4D Geometry and Appearance"
+          }
+        ],
+        "source_kind": "SourceDocument",
+        "title_quality": "paper_file"
+      },
+      "name": "Velox: Learning Representations of 4D Geometry and Appearance",
+      "source_path": "/Users/neo/Developer/Projects/LLM-Wiki/data/research/daily/2026-05-09/papers/2605.04527/paper.md",
+      "type": "Paper"
+    },
+    {
+      "aliases": [],
+      "description": "희소한 wide-baseline multi-view 설정에서 여러 novel view synthesis, NVS 데이터셋으로 평가한 결과, Geometric Transform Attention, GTA라고 부르는 이 attention이 추가적인 학습 파라미터 없이도, 그리고 계산 오버헤드는 소폭만 증가시키면서, 최신 transformer 기반 NVS 모델의 학습 효율과 성능을 향상시킴을 보인다.",
+      "id": "EvidenceSpan:evidence-wide-baseline-multi-view-novel-view-syn:144a443c45fc",
+      "metadata": {},
+      "name": "Evidence: 희소한 wide-baseline multi-view 설정에서 여러 novel view synthesis, NVS 데이터셋으로 평…",
+      "source_path": "/Users/neo/Developer/Projects/LLM-Wiki/data/research/daily/2026-05-09/papers/2310.10375/paper.md",
+      "type": "EvidenceSpan"
+    },
+    {
+      "aliases": [],
+      "description": "희소한 wide-baseline multi-view 설정에서 여러 novel view synthesis, NVS 데이터셋으로 평가한 결과, Geometric Transform Attention, GTA라고 부르는 이 attention이 추가적인 학습 파라미터 없이도, 그리고 계산 오버헤드는 소폭만 증가시키면서, 최신 transformer 기반 NVS 모델의 학습 효율과 성능을 향상시킴을 보인다.",
+      "id": "PerformanceClaim:claim-wide-baseline-multi-view-novel-view-synthe:c65f40ca1a7d",
+      "metadata": {},
+      "name": "Claim: 희소한 wide-baseline multi-view 설정에서 여러 novel view synthesis, NVS 데이터셋으로 평가한 결과, Geometric Transfo…",
+      "source_path": "/Users/neo/Developer/Projects/LLM-Wiki/data/research/daily/2026-05-09/papers/2310.10375/paper.md",
+      "type": "PerformanceClaim"
+    },
+    {
+      "aliases": [],
+      "description": "",
+      "id": "Person:bernhard-jaeger:b2b4ff190abd",
+      "metadata": {},
+      "name": "Bernhard Jaeger",
+      "source_path": "/Users/neo/Developer/Projects/LLM-Wiki/data/research/daily/2026-05-09/papers/2310.10375/paper.md",
+      "type": "Person"
+    },
+    {
+      "aliases": [],
+      "description": "",
+      "id": "Person:max-welling:dcadb971272c",
+      "metadata": {},
+      "name": "Max Welling",
+      "source_path": "/Users/neo/Developer/Projects/LLM-Wiki/data/research/daily/2026-05-09/papers/2310.10375/paper.md",
+      "type": "Person"
+    },
+    {
+      "aliases": [],
+      "description": "",
+      "id": "Person:takeru-miyato:143f796cc9be",
+      "metadata": {},
+      "name": "Takeru Miyato",
+      "source_path": "/Users/neo/Developer/Projects/LLM-Wiki/data/research/daily/2026-05-09/papers/2310.10375/paper.md",
+      "type": "Person"
+    },
+    {
+      "aliases": [],
+      "description": "희소한 wide-baseline multi-view 설정에서 여러 novel view synthesis, NVS 데이터셋으로 평가한 결과, Geometric Transform Attention, GTA라고 부르는 이 attention이 추가적인 학습 파라미터 없이도, 그리고 계산 오버헤드는 소폭만 증가시키면서, 최신 transformer 기반 NVS 모델의 학습 효율과 성능을 향상시킴을 보인다.",
+      "id": "PerformanceClaim:performance-claim-wide-baseline-multi-view-novel:3ce6eaf8f995",
+      "metadata": {},
+      "name": "Performance claim: 희소한 wide-baseline multi-view 설정에서 여러 novel view synthesis, NVS 데이터셋으로 평가한 결과, Geometric Transfo…",
+      "source_path": "/Users/neo/Developer/Projects/LLM-Wiki/data/research/daily/2026-05-09/papers/2310.10375/paper.md",
+      "type": "PerformanceClaim"
+    },
+    {
+      "aliases": [
+        "arXiv:2310.10375"
+      ],
+      "description": "",
+      "id": "Paper:arxiv-2310-10375:382b0d986ec5",
+      "metadata": {
+        "analysis_date": "2026-05-09",
+        "arxiv_id": "2310.10375",
+        "discovered_in": "/Users/neo/Developer/Projects/LLM-Wiki/data/research/daily/2026-05-09/papers/2310.10375/repo.md",
+        "sections": [
+          {
+            "anchor": "논문-분석-2310-10375",
+            "level": 1,
+            "text": "논문 분석: 2310.10375"
+          },
+          {
+            "anchor": "gta-a-geometry-aware-attention-mechanism-for-multi-view-transformers-cool-papers",
+            "level": 1,
+            "text": "GTA: A Geometry-Aware Attention Mechanism for Multi-View Transformers | Cool Papers - 몰입형 논문 탐색"
+          },
+          {
+            "anchor": "2310-10375",
+            "level": 2,
+            "text": "2310.10375"
+          },
+          {
+            "anchor": "1",
+            "level": 2,
+            "text": "#1"
+          },
+          {
+            "anchor": "gta-a-geometry-aware-attention-mechanism-for-multi-view-transformers",
+            "level": 1,
+            "text": "GTA: A Geometry-Aware Attention Mechanism for Multi-View Transformers"
+          }
+        ],
+        "source_kind": "SourceDocument",
+        "title_quality": "paper_file"
+      },
+      "name": "GTA: A Geometry-Aware Attention Mechanism for Multi-View Transformers",
+      "source_path": "/Users/neo/Developer/Projects/LLM-Wiki/data/research/daily/2026-05-09/papers/2310.10375/paper.md",
+      "type": "Paper"
+    },
+    {
+      "aliases": [
+        "https://github.com/rui314/chibicc",
+        "rui314/chibicc"
+      ],
+      "description": "",
+      "id": "Repository:github-rui314-chibicc:50809d928929",
+      "metadata": {
+        "analysis_date": "2026-05-09",
+        "arxiv_id": "2310.10375",
+        "github_repo": "rui314/chibicc",
+        "repo_url": "https://github.com/rui314/chibicc",
+        "sections": [
+          {
+            "anchor": "github-분석-rui314-chibicc",
+            "level": 1,
+            "text": "GitHub 분석: rui314/chibicc"
+          },
+          {
+            "anchor": "개요",
+            "level": 2,
+            "text": "개요"
+          },
+          {
+            "anchor": "실행-가능-상태-코드-미공개-readme-asset만-존재",
+            "level": 2,
+            "text": "실행 가능 상태: 코드 미공개 (README/asset만 존재)"
+          },
+          {
+            "anchor": "파일-구조",
+            "level": 2,
+            "text": "파일 구조"
+          }
+        ],
+        "source_kind": "SourceDocument"
+      },
+      "name": "GitHub 분석: rui314/chibicc",
+      "source_path": "/Users/neo/Developer/Projects/LLM-Wiki/data/research/daily/2026-05-09/papers/2310.10375/repo.md",
+      "type": "Repository"
+    },
+    {
+      "aliases": [],
+      "description": "Geometry-Grounded Gaussian Splatting | Cool Papers - 몰입형 논문 탐색 총계: 1 ## Geometry-Grounded Gaussian Splatting [PDF15] [Copy] [Kimi6] [REL] Baowen Zhang, Chenxing Jiang, Heng Li, Shaojie Shen, Ping Tan Gaussian Splatting GS는 새로운 시점 합성에서 인상적인 품질과 효율성을 보여주었다.",
+      "id": "EvidenceSpan:evidence-geometry-grounded-gaussian-splatting-co:76f448226fc5",
+      "metadata": {},
+      "name": "Evidence: Geometry-Grounded Gaussian Splatting | Cool Papers - 몰입형 논문 탐색 총계: 1 ##…",
+      "source_path": "/Users/neo/Developer/Projects/LLM-Wiki/data/research/daily/2026-05-09/papers/2601.17835/paper.md",
+      "type": "EvidenceSpan"
+    },
+    {
+      "aliases": [],
+      "description": "Geometry-Grounded Gaussian Splatting | Cool Papers - 몰입형 논문 탐색 총계: 1 ## Geometry-Grounded Gaussian Splatting [PDF15] [Copy] [Kimi6] [REL] Baowen Zhang, Chenxing Jiang, Heng Li, Shaojie Shen, Ping Tan Gaussian Splatting GS는 새로운 시점 합성에서 인상적인 품질과 효율성을 보여주었다.",
+      "id": "Claim:claim-geometry-grounded-gaussian-splatting-cool-:a11918e07297",
+      "metadata": {},
+      "name": "Claim: Geometry-Grounded Gaussian Splatting | Cool Papers - 몰입형 논문 탐색 총계: 1 ## Geometry-Grounded Gauss…",
+      "source_path": "/Users/neo/Developer/Projects/LLM-Wiki/data/research/daily/2026-05-09/papers/2601.17835/paper.md",
+      "type": "Claim"
+    },
+    {
+      "aliases": [],
+      "description": "기하 파라미터화와 근사가 충분하지 않기 때문에, 기존 형상 재구성 방법은 다중 시점 일관성이 낮고 floaters에 민감하다는 문제가 있다.",
+      "id": "EvidenceSpan:evidence-floaters:ce47464487f5",
+      "metadata": {},
+      "name": "Evidence: 기하 파라미터화와 근사가 충분하지 않기 때문에, 기존 형상 재구성 방법은 다중 시점 일관성이 낮고 floaters에 민감하다는…",
+      "source_path": "/Users/neo/Developer/Projects/LLM-Wiki/data/research/daily/2026-05-09/papers/2601.17835/paper.md",
+      "type": "EvidenceSpan"
+    },
+    {
+      "aliases": [],
+      "description": "기하 파라미터화와 근사가 충분하지 않기 때문에, 기존 형상 재구성 방법은 다중 시점 일관성이 낮고 floaters에 민감하다는 문제가 있다.",
+      "id": "LimitationClaim:claim-floaters:7d5677832fb5",
+      "metadata": {},
+      "name": "Claim: 기하 파라미터화와 근사가 충분하지 않기 때문에, 기존 형상 재구성 방법은 다중 시점 일관성이 낮고 floaters에 민감하다는 문제가 있다.",
+      "source_path": "/Users/neo/Developer/Projects/LLM-Wiki/data/research/daily/2026-05-09/papers/2601.17835/paper.md",
+      "type": "LimitationClaim"
+    },
+    {
+      "aliases": [],
+      "description": "본 논문에서는 Gaussian primitive를 특정한 종류의 stochastic solids로 정립하는 엄밀한 이론적 유도를 제시한다.",
+      "id": "EvidenceSpan:evidence-gaussian-primitive-stochastic-solids:0b679f552927",
+      "metadata": {},
+      "name": "Evidence: 본 논문에서는 Gaussian primitive를 특정한 종류의 stochastic solids로 정립하는 엄밀한 이론적 유도를…",
+      "source_path": "/Users/neo/Developer/Projects/LLM-Wiki/data/research/daily/2026-05-09/papers/2601.17835/paper.md",
+      "type": "EvidenceSpan"
+    },
+    {
+      "aliases": [],
+      "description": "본 논문에서는 Gaussian primitive를 특정한 종류의 stochastic solids로 정립하는 엄밀한 이론적 유도를 제시한다.",
+      "id": "Claim:claim-gaussian-primitive-stochastic-solids:d2268ca08f14",
+      "metadata": {},
+      "name": "Claim: 본 논문에서는 Gaussian primitive를 특정한 종류의 stochastic solids로 정립하는 엄밀한 이론적 유도를 제시한다.",
+      "source_path": "/Users/neo/Developer/Projects/LLM-Wiki/data/research/daily/2026-05-09/papers/2601.17835/paper.md",
+      "type": "Claim"
+    },
+    {
+      "aliases": [],
+      "description": "실험 결과, 우리의 방법은 공개 데이터셋에서 모든 Gaussian Splatting 기반 방법들 가운데 가장 우수한 형상 재구성 성능을 달성했다.",
+      "id": "PerformanceClaim:performance-claim-gaussian-splatting:1bd5f5993145",
+      "metadata": {},
+      "name": "Performance claim: 실험 결과, 우리의 방법은 공개 데이터셋에서 모든 Gaussian Splatting 기반 방법들 가운데 가장 우수한 형상 재구성 성능을 달성했다.",
+      "source_path": "/Users/neo/Developer/Projects/LLM-Wiki/data/research/daily/2026-05-09/papers/2601.17835/paper.md",
+      "type": "PerformanceClaim"
+    },
+    {
+      "aliases": [],
+      "description": "실험 결과, 우리의 방법은 공개 데이터셋에서 모든 Gaussian Splatting 기반 방법들 가운데 가장 우수한 형상 재구성 성능을 달성했다.",
+      "id": "EvidenceSpan:evidence-gaussian-splatting:1fd4e1a2bfe4",
+      "metadata": {},
+      "name": "Evidence: 실험 결과, 우리의 방법은 공개 데이터셋에서 모든 Gaussian Splatting 기반 방법들 가운데 가장 우수한 형상 재구성…",
+      "source_path": "/Users/neo/Developer/Projects/LLM-Wiki/data/research/daily/2026-05-09/papers/2601.17835/paper.md",
+      "type": "EvidenceSpan"
+    },
+    {
+      "aliases": [],
+      "description": "",
+      "id": "Person:anagh-malik:f8d5a9950bdc",
+      "metadata": {},
+      "name": "Anagh Malik",
+      "source_path": "/Users/neo/Developer/Projects/LLM-Wiki/data/research/daily/2026-05-09/papers/2605.04527/paper.md",
+      "type": "Person"
+    },
+    {
+      "aliases": [],
+      "description": "",
+      "id": "Person:david-b-lindell:2331c9344ef8",
+      "metadata": {},
+      "name": "David B. Lindell",
+      "source_path": "/Users/neo/Developer/Projects/LLM-Wiki/data/research/daily/2026-05-09/papers/2605.04527/paper.md",
+      "type": "Person"
+    },
+    {
+      "aliases": [],
+      "description": "",
+      "id": "Person:dorian-chan:cbad5f02c883",
+      "metadata": {},
+      "name": "Dorian Chan",
+      "source_path": "/Users/neo/Developer/Projects/LLM-Wiki/data/research/daily/2026-05-09/papers/2605.04527/paper.md",
+      "type": "Person"
+    },
+    {
+      "aliases": [],
+      "description": "",
+      "id": "Person:jen-hao-rick-chang:700cdf71f324",
+      "metadata": {},
+      "name": "Jen-Hao Rick Chang",
+      "source_path": "/Users/neo/Developer/Projects/LLM-Wiki/data/research/daily/2026-05-09/papers/2605.04527/paper.md",
+      "type": "Person"
+    },
+    {
+      "aliases": [],
+      "description": "",
+      "id": "Person:oncel-tuzel:10327564139a",
+      "metadata": {},
+      "name": "Oncel Tuzel",
+      "source_path": "/Users/neo/Developer/Projects/LLM-Wiki/data/research/daily/2026-05-09/papers/2605.04527/paper.md",
+      "type": "Person"
+    },
+    {
+      "aliases": [],
+      "description": "",
+      "id": "Person:xiaoming-zhao:b98de4be83b0",
+      "metadata": {},
+      "name": "Xiaoming Zhao",
+      "source_path": "/Users/neo/Developer/Projects/LLM-Wiki/data/research/daily/2026-05-09/papers/2605.04527/paper.md",
+      "type": "Person"
+    },
+    {
+      "aliases": [],
+      "description": "Lindell, Oncel Tuzel, Jen-Hao Rick Chang 우리는 4D 객체의 잠재 표현을 학습하기 위한 프레임워크를 소개한다.",
+      "id": "ContributionClaim:contribution-lindell-oncel-tuzel-jen-hao-rick-ch:bc0ac03952c7",
+      "metadata": {},
+      "name": "Contribution: Lindell, Oncel Tuzel, Jen-Hao Rick Chang 우리는 4D 객체의 잠재 표현을 학습하기 위한 프레임워크를 소개한다.",
+      "source_path": "/Users/neo/Developer/Projects/LLM-Wiki/data/research/daily/2026-05-09/papers/2605.04527/paper.md",
+      "type": "ContributionClaim"
+    },
+    {
+      "aliases": [],
+      "description": "Lindell, Oncel Tuzel, Jen-Hao Rick Chang 우리는 4D 객체의 잠재 표현을 학습하기 위한 프레임워크를 소개한다.",
+      "id": "EvidenceSpan:evidence-lindell-oncel-tuzel-jen-hao-rick-chang-:1d12df502bb9",
+      "metadata": {},
+      "name": "Evidence: Lindell, Oncel Tuzel, Jen-Hao Rick Chang 우리는 4D 객체의 잠재 표현을 학습하기 위한 프레임워…",
+      "source_path": "/Users/neo/Developer/Projects/LLM-Wiki/data/research/daily/2026-05-09/papers/2605.04527/paper.md",
+      "type": "EvidenceSpan"
+    },
+    {
+      "aliases": [],
+      "description": "우리의 표현의 유용성을 입증하기 위해 video-to-4D generation, 3D tracking, 그리고 image-to-4D generation을 통한 cloth simulation의 세 가지 다운스트림 작업에서 평가했으며, 모든 설정에서 강한 성능을 확인했다.",
+      "id": "PerformanceClaim:performance-claim-video-to-4d-generation-3d-trac:a1b95ba108be",
+      "metadata": {},
+      "name": "Performance claim: 우리의 표현의 유용성을 입증하기 위해 video-to-4D generation, 3D tracking, 그리고 image-to-4D generation을 통한 cloth…",
+      "source_path": "/Users/neo/Developer/Projects/LLM-Wiki/data/research/daily/2026-05-09/papers/2605.04527/paper.md",
+      "type": "PerformanceClaim"
+    },
+    {
+      "aliases": [],
+      "description": "우리의 표현의 유용성을 입증하기 위해 video-to-4D generation, 3D tracking, 그리고 image-to-4D generation을 통한 cloth simulation의 세 가지 다운스트림 작업에서 평가했으며, 모든 설정에서 강한 성능을 확인했다.",
+      "id": "EvidenceSpan:evidence-video-to-4d-generation-3d-tracking-imag:3cff3cc76ea9",
+      "metadata": {},
+      "name": "Evidence: 우리의 표현의 유용성을 입증하기 위해 video-to-4D generation, 3D tracking, 그리고 image-to-…",
+      "source_path": "/Users/neo/Developer/Projects/LLM-Wiki/data/research/daily/2026-05-09/papers/2605.04527/paper.md",
+      "type": "EvidenceSpan"
+    },
+    {
+      "aliases": [],
+      "description": "",
+      "id": "SourceDocument:daily-feed-summary-2026-05-09:bbad7e1d0cc2",
+      "metadata": {
+        "analysis_date": "2026-05-09",
+        "github_repo": "eyeline-labs/vista4d",
+        "repo_url": "https://github.com/Eyeline-Labs/Vista4D",
+        "sections": [
+          {
+            "anchor": "daily-feed-summary-2026-05-09",
+            "level": 1,
+            "text": "Daily Feed Summary — 2026-05-09"
+          }
+        ],
+        "source_kind": "SourceDocument"
+      },
+      "name": "Daily Feed Summary — 2026-05-09",
+      "source_path": "/Users/neo/Developer/Projects/LLM-Wiki/data/research/daily/2026-05-09/raw.md",
+      "type": "SourceDocument"
+    },
+    {
+      "aliases": [],
+      "description": "",
+      "id": "Organization:199-biotechnologies:b7609722f8dd",
+      "metadata": {},
+      "name": "199-biotechnologies",
+      "source_path": "/Users/neo/Developer/Projects/LLM-Wiki/data/research/daily/2026-05-09/repos/199-biotechnologies_claude-deep-research-skill.md",
+      "type": "Organization"
+    },
+    {
+      "aliases": [
+        "199-biotechnologies/claude-deep-research-skill",
+        "https://github.com/199-biotechnologies/claude-deep-research-skill"
+      ],
+      "description": "",
+      "id": "Repository:github-199-biotechnologies-claude-deep-research-:3e191fab3bf4",
+      "metadata": {
+        "analysis_date": "2026-05-09",
+        "github_repo": "199-biotechnologies/claude-deep-research-skill",
+        "repo_url": "https://github.com/199-biotechnologies/claude-deep-research-skill",
+        "sections": [
+          {
+            "anchor": "github-분석-199-biotechnologies-claude-deep-research-skill",
+            "level": 1,
+            "text": "GitHub 분석: 199-biotechnologies/claude-deep-research-skill"
+          },
+          {
+            "anchor": "개요",
+            "level": 2,
+            "text": "개요"
+          },
+          {
+            "anchor": "실행-가능-상태-모델-체크포인트-미공개-추론-불가-가능성",
+            "level": 2,
+            "text": "실행 가능 상태: 모델 체크포인트 미공개 (추론 불가 가능성)"
+          },
+          {
+            "anchor": "파일-구조",
+            "level": 2,
+            "text": "파일 구조"
+          }
+        ],
+        "source_kind": "SourceDocument"
+      },
+      "name": "GitHub 분석: 199-biotechnologies/claude-deep-research-skill",
+      "source_path": "/Users/neo/Developer/Projects/LLM-Wiki/data/research/daily/2026-05-09/repos/199-biotechnologies_claude-deep-research-skill.md",
+      "type": "Repository"
+    },
+    {
+      "aliases": [
+        "ashishps1/awesome-engineering-articles",
+        "https://github.com/ashishps1/awesome-engineering-articles"
+      ],
+      "description": "",
+      "id": "Repository:github-ashishps1-awesome-engineering-articles:8c171b4992b2",
+      "metadata": {
+        "analysis_date": "2026-05-09",
+        "github_repo": "ashishps1/awesome-engineering-articles",
+        "repo_url": "https://github.com/ashishps1/awesome-engineering-articles",
+        "sections": [
+          {
+            "anchor": "github-분석-ashishps1-awesome-engineering-articles",
+            "level": 1,
+            "text": "GitHub 분석: ashishps1/awesome-engineering-articles"
+          },
+          {
+            "anchor": "개요",
+            "level": 2,
+            "text": "개요"
+          },
+          {
+            "anchor": "실행-가능-상태-코드-미공개-readme-asset만-존재",
+            "level": 2,
+            "text": "실행 가능 상태: 코드 미공개 (README/asset만 존재)"
+          },
+          {
+            "anchor": "파일-구조",
+            "level": 2,
+            "text": "파일 구조"
+          }
+        ],
+        "source_kind": "SourceDocument"
+      },
+      "name": "GitHub 분석: ashishps1/awesome-engineering-articles",
+      "source_path": "/Users/neo/Developer/Projects/LLM-Wiki/data/research/daily/2026-05-09/repos/ashishps1_awesome-engineering-articles.md",
+      "type": "Repository"
+    },
+    {
+      "aliases": [],
+      "description": "",
+      "id": "SourceDocument:daily-research-digest-2026-05-10:155440063bd6",
+      "metadata": {
+        "analysis_date": "2026-05-10",
+        "arxiv_id": "2603.11047",
+        "candidate_paper_titles": [
+          "단일 이미지에서 반사까지 담는 3D 생성, LiTo 공개",
+          "3DGS 배포 포맷 경쟁이 본격화, SPZ 4와 대규모 장면 처리 가속",
+          "비전 생성 모델에서 QK-only를 넘는 회전 위치 인코딩 실험 재조명"
+        ],
+        "github_repo": "apple/ml-lito",
+        "repo_url": "https://github.com/apple/ml-lito",
+        "sections": [
+          {
+            "anchor": "daily-research-digest-2026-05-10",
+            "level": 1,
+            "text": "📬 Daily Research Digest — 2026-05-10"
+          },
+          {
+            "anchor": "오늘의-하이라이트",
+            "level": 2,
+            "text": "🔥 오늘의 하이라이트"
+          },
+          {
+            "anchor": "1-단일-이미지에서-반사까지-담는-3d-생성-lito-공개",
+            "level": 3,
+            "text": "1. 단일 이미지에서 반사까지 담는 3D 생성, LiTo 공개"
+          },
+          {
+            "anchor": "2-3dgs-배포-포맷-경쟁이-본격화-spz-4와-대규모-장면-처리-가속",
+            "level": 3,
+            "text": "2. 3DGS 배포 포맷 경쟁이 본격화, SPZ 4와 대규모 장면 처리 가속"
+          },
+          {
+            "anchor": "3-비전-생성-모델에서-qk-only를-넘는-회전-위치-인코딩-실험-재조명",
+            "level": 3,
+            "text": "3. 비전 생성 모델에서 QK-only를 넘는 회전 위치 인코딩 실험 재조명"
+          },
+          {
+            "anchor": "주목할-만한-피드",
+            "level": 2,
+            "text": "📋 주목할 만한 피드"
+          },
+          {
+            "anchor": "3dgs용-경량-포맷-spz-4-업데이트",
+            "level": 3,
+            "text": "▫️ 3DGS용 경량 포맷 SPZ 4 업데이트"
+          },
+          {
+            "anchor": "vista4d-단안-비디오를-다른-시점으로-다시-촬영하듯-합성",
+            "level": 3,
+            "text": "▫️ Vista4D, 단안 비디오를 다른 시점으로 다시 촬영하듯 합성"
+          },
+          {
+            "anchor": "lito-geometry와-view-dependent-appearance를-하나의-3d-토큰화로-통합",
+            "level": 3,
+            "text": "▫️ LiTo, geometry와 view-dependent appearance를 하나의 3D 토큰화로 통합"
+          },
+          {
+            "anchor": "비전-생성-과제에서의-output-rotation-실험이-다시-소환됨",
+            "level": 3,
+            "text": "▫️ 비전 생성 과제에서의 output rotation 실험이 다시 소환됨"
+          },
+          {
+            "anchor": "오늘의-숫자",
+            "level": 2,
+            "text": "📊 오늘의 숫자"
+          }
+        ],
+        "source_kind": "SourceDocument"
+      },
+      "name": "📬 Daily Research Digest — 2026-05-10",
+      "source_path": "/Users/neo/Developer/Projects/LLM-Wiki/data/research/daily/2026-05-10/digest.md",
+      "type": "SourceDocument"
+    },
+    {
+      "aliases": [
+        "arXiv:2603.11047"
+      ],
+      "description": "",
+      "id": "Paper:arxiv-2603-11047:379d716442fb",
+      "metadata": {
+        "arxiv_id": "2603.11047",
+        "discovered_in": "/Users/neo/Developer/Projects/LLM-Wiki/data/research/daily/2026-05-10/digest.md",
+        "source_kind": "Paper",
+        "title_quality": "arxiv_only"
+      },
+      "name": "arXiv:2603.11047",
+      "source_path": "/Users/neo/Developer/Projects/LLM-Wiki/data/research/daily/2026-05-10/digest.md",
+      "type": "Paper"
+    },
+    {
+      "aliases": [
+        "arXiv:2505.20295"
+      ],
+      "description": "",
+      "id": "Paper:arxiv-2505-20295:aa977a72ab3f",
+      "metadata": {
+        "analysis_date": "2026-05-10",
+        "arxiv_id": "2505.20295",
+        "discovered_in": "/Users/neo/Developer/Projects/LLM-Wiki/data/research/daily/2026-05-10/digest.md",
+        "sections": [
+          {
+            "anchor": "논문-분석-2505-20295",
+            "level": 1,
+            "text": "논문 분석: 2505.20295"
+          },
+          {
+            "anchor": "2505-20295",
+            "level": 2,
+            "text": "2505.20295"
+          }
+        ],
+        "source_kind": "SourceDocument",
+        "title_quality": "paper_file"
+      },
+      "name": "SelfReflect: Can LLMs Communicate Their Internal Answer Distribution?",
+      "source_path": "/Users/neo/Developer/Projects/LLM-Wiki/data/research/daily/2026-05-10/papers/2505.20295/paper.md",
+      "type": "Paper"
+    },
+    {
+      "aliases": [],
+      "description": "희소하고 wide-baseline인 multi-view 설정에서 여러 novel view synthesis, NVS 데이터셋으로 평가한 결과, Geometric Transform Attention, GTA라고 부르는 이 attention이 추가 학습 파라미터 없이, 그리고 계산 오버헤드는 매우 작게 유지하면서, 최신 transformer 기반 NVS 모델의 학습 효율과 성능을 향상시킴을 보인다.",
+      "id": "EvidenceSpan:evidence-wide-baseline-multi-view-novel-view-syn:9b5808e14384",
+      "metadata": {},
+      "name": "Evidence: 희소하고 wide-baseline인 multi-view 설정에서 여러 novel view synthesis, NVS 데이터셋으로…",
+      "source_path": "/Users/neo/Developer/Projects/LLM-Wiki/data/research/daily/2026-05-10/papers/2310.10375/paper.md",
+      "type": "EvidenceSpan"
+    },
+    {
+      "aliases": [],
+      "description": "희소하고 wide-baseline인 multi-view 설정에서 여러 novel view synthesis, NVS 데이터셋으로 평가한 결과, Geometric Transform Attention, GTA라고 부르는 이 attention이 추가 학습 파라미터 없이, 그리고 계산 오버헤드는 매우 작게 유지하면서, 최신 transformer 기반 NVS 모델의 학습 효율과 성능을 향상시킴을 보인다.",
+      "id": "PerformanceClaim:claim-wide-baseline-multi-view-novel-view-synthe:4c42031eba8f",
+      "metadata": {},
+      "name": "Claim: 희소하고 wide-baseline인 multi-view 설정에서 여러 novel view synthesis, NVS 데이터셋으로 평가한 결과, Geometric Trans…",
+      "source_path": "/Users/neo/Developer/Projects/LLM-Wiki/data/research/daily/2026-05-10/papers/2310.10375/paper.md",
+      "type": "PerformanceClaim"
+    },
+    {
+      "aliases": [],
+      "description": "희소하고 wide-baseline인 multi-view 설정에서 여러 novel view synthesis, NVS 데이터셋으로 평가한 결과, Geometric Transform Attention, GTA라고 부르는 이 attention이 추가 학습 파라미터 없이, 그리고 계산 오버헤드는 매우 작게 유지하면서, 최신 transformer 기반 NVS 모델의 학습 효율과 성능을 향상시킴을 보인다.",
+      "id": "PerformanceClaim:performance-claim-wide-baseline-multi-view-novel:8d01474ba6f8",
+      "metadata": {},
+      "name": "Performance claim: 희소하고 wide-baseline인 multi-view 설정에서 여러 novel view synthesis, NVS 데이터셋으로 평가한 결과, Geometric Trans…",
+      "source_path": "/Users/neo/Developer/Projects/LLM-Wiki/data/research/daily/2026-05-10/papers/2310.10375/paper.md",
+      "type": "PerformanceClaim"
+    },
+    {
+      "aliases": [],
+      "description": "",
+      "id": "Person:adam-goli-ski:41ed351b1073",
+      "metadata": {},
+      "name": "Adam Goliński",
+      "source_path": "/Users/neo/Developer/Projects/LLM-Wiki/data/research/daily/2026-05-10/papers/2505.20295/paper.md",
+      "type": "Person"
+    },
+    {
+      "aliases": [],
+      "description": "",
+      "id": "Person:arno-blaas:2e73a2067005",
+      "metadata": {},
+      "name": "Arno Blaas",
+      "source_path": "/Users/neo/Developer/Projects/LLM-Wiki/data/research/daily/2026-05-10/papers/2505.20295/paper.md",
+      "type": "Person"
+    },
+    {
+      "aliases": [],
+      "description": "",
+      "id": "Person:eeshan-gunesh-dhekane:16b5799973f1",
+      "metadata": {},
+      "name": "Eeshan Gunesh Dhekane",
+      "source_path": "/Users/neo/Developer/Projects/LLM-Wiki/data/research/daily/2026-05-10/papers/2505.20295/paper.md",
+      "type": "Person"
+    },
+    {
+      "aliases": [],
+      "description": "",
+      "id": "Person:luca-f-ger:c412bed93696",
+      "metadata": {},
+      "name": "Luca Füger",
+      "source_path": "/Users/neo/Developer/Projects/LLM-Wiki/data/research/daily/2026-05-10/papers/2505.20295/paper.md",
+      "type": "Person"
+    },
+    {
+      "aliases": [],
+      "description": "",
+      "id": "Person:michael-kirchhof:9e7a0b7c0c02",
+      "metadata": {},
+      "name": "Michael Kirchhof",
+      "source_path": "/Users/neo/Developer/Projects/LLM-Wiki/data/research/daily/2026-05-10/papers/2505.20295/paper.md",
+      "type": "Person"
+    },
+    {
+      "aliases": [],
+      "description": "",
+      "id": "Person:seong-joon-oh:82ffb1b17eac",
+      "metadata": {},
+      "name": "Seong Joon Oh",
+      "source_path": "/Users/neo/Developer/Projects/LLM-Wiki/data/research/daily/2026-05-10/papers/2505.20295/paper.md",
+      "type": "Person"
+    },
+    {
+      "aliases": [],
+      "description": "",
+      "id": "Person:sinead-williamson:35cdd59c7af4",
+      "metadata": {},
+      "name": "Sinead Williamson",
+      "source_path": "/Users/neo/Developer/Projects/LLM-Wiki/data/research/daily/2026-05-10/papers/2505.20295/paper.md",
+      "type": "Person"
+    },
+    {
+      "aliases": [
+        "apple/ml-lito",
+        "https://github.com/apple/ml-lito"
+      ],
+      "description": "",
+      "id": "Repository:github-apple-ml-lito:1a1a85249564",
+      "metadata": {
+        "analysis_date": "2026-05-10",
+        "arxiv_id": "2505.20295",
+        "github_repo": "apple/ml-lito",
+        "repo_url": "https://github.com/apple/ml-lito",
+        "sections": [
+          {
+            "anchor": "github-분석-apple-ml-lito",
+            "level": 1,
+            "text": "GitHub 분석: apple/ml-lito"
+          },
+          {
+            "anchor": "개요",
+            "level": 2,
+            "text": "개요"
+          },
+          {
+            "anchor": "실행-가능-상태-모델-다운로드-스크립트-있음-다운로드-후-실행-가능",
+            "level": 2,
+            "text": "실행 가능 상태: 모델 다운로드 스크립트 있음 (다운로드 후 실행 가능)"
+          },
+          {
+            "anchor": "파일-구조",
+            "level": 2,
+            "text": "파일 구조"
+          }
+        ],
+        "source_kind": "SourceDocument"
+      },
+      "name": "GitHub 분석: apple/ml-lito",
+      "source_path": "/Users/neo/Developer/Projects/LLM-Wiki/data/research/daily/2026-05-10/papers/2505.20295/repo.md",
+      "type": "Repository"
+    },
+    {
+      "aliases": [],
+      "description": "# Geometry-Grounded Gaussian Splatting | Cool Papers - 몰입형 논문 탐색 총계: 1 ## Geometry-Grounded Gaussian Splatting [PDF15] [Copy] [Kimi6] [REL] Baowen Zhang, Chenxing Jiang, Heng Li, Shaojie Shen, Ping Tan Gaussian Splatting GS는 novel view synthesis에서 인상적인 품질과 효율성을 보여주었다.",
+      "id": "Claim:claim-geometry-grounded-gaussian-splatting-cool-:58ca1037d579",
+      "metadata": {},
+      "name": "Claim: # Geometry-Grounded Gaussian Splatting | Cool Papers - 몰입형 논문 탐색 총계: 1 ## Geometry-Grounded Gau…",
+      "source_path": "/Users/neo/Developer/Projects/LLM-Wiki/data/research/daily/2026-05-10/papers/2601.17835/paper.md",
+      "type": "Claim"
+    },
+    {
+      "aliases": [],
+      "description": "실험 결과, 우리 방법은 공개 데이터셋에서 모든 Gaussian Splatting 기반 방법 중 최고의 형상 재구성 결과를 달성한다.",
+      "id": "PerformanceClaim:performance-claim-gaussian-splatting:e097c9eaf085",
+      "metadata": {},
+      "name": "Performance claim: 실험 결과, 우리 방법은 공개 데이터셋에서 모든 Gaussian Splatting 기반 방법 중 최고의 형상 재구성 결과를 달성한다.",
+      "source_path": "/Users/neo/Developer/Projects/LLM-Wiki/data/research/daily/2026-05-10/papers/2601.17835/paper.md",
+      "type": "PerformanceClaim"
+    },
+    {
+      "aliases": [],
+      "description": "실험 결과, 우리 방법은 공개 데이터셋에서 모든 Gaussian Splatting 기반 방법 중 최고의 형상 재구성 결과를 달성한다.",
+      "id": "EvidenceSpan:evidence-gaussian-splatting:89794dc763c9",
+      "metadata": {},
+      "name": "Evidence: 실험 결과, 우리 방법은 공개 데이터셋에서 모든 Gaussian Splatting 기반 방법 중 최고의 형상 재구성 결과를 달성…",
+      "source_path": "/Users/neo/Developer/Projects/LLM-Wiki/data/research/daily/2026-05-10/papers/2601.17835/paper.md",
+      "type": "EvidenceSpan"
+    },
+    {
+      "aliases": [],
+      "description": "",
+      "id": "SourceDocument:daily-feed-summary-2026-05-10:24cb5a57cce0",
+      "metadata": {
+        "analysis_date": "2026-05-10",
+        "github_repo": "apple/ml-lito",
+        "repo_url": "https://github.com/apple/ml-lito",
+        "sections": [
+          {
+            "anchor": "daily-feed-summary-2026-05-10",
+            "level": 1,
+            "text": "Daily Feed Summary — 2026-05-10"
+          }
+        ],
+        "source_kind": "SourceDocument"
+      },
+      "name": "Daily Feed Summary — 2026-05-10",
+      "source_path": "/Users/neo/Developer/Projects/LLM-Wiki/data/research/daily/2026-05-10/raw.md",
+      "type": "SourceDocument"
+    },
+    {
+      "aliases": [],
+      "description": "",
       "id": "SourceDocument:2026-w15:76b20547149e",
       "metadata": {
         "arxiv_id": "2604.02996",
@@ -35556,13 +37406,13 @@
       "description": "Top-level snapshot of the wiki at compile time.",
       "id": "Synthesis:pulse:6ffe96c09f0f",
       "metadata": {
-        "content_hash": "sha256-ab5ea0ff9e1d002206f15321d8c379a12be452eea21e07aca650a5e4ebc58d94",
+        "content_hash": "sha256-865a357b0343f71838c421ff3254ede7fa16f8baac92765e95f8d18f895e2d2d",
         "input_ids": [
-          "Repository:github-bolixinyu-lca:8c7eebeca3fb",
-          "Repository:github-cintellifusion-multiworld:dc2f4000b99e",
-          "Repository:github-davian-robotics-egox:9b4553672351",
-          "Repository:github-honojs-middleware:a7a511baa3fc",
-          "Repository:github-naver-multi-hmr:5a705a090a24"
+          "Paper:arxiv-2505-20295:aa977a72ab3f",
+          "Paper:arxiv-2605-04527:c0faca348771",
+          "Repository:github-apple-ml-lito:1a1a85249564",
+          "Repository:github-ashishps1-awesome-engineering-articles:8c171b4992b2",
+          "Repository:github-rui314-chibicc:50809d928929"
         ],
         "synthesis_kind": "pulse"
       },
@@ -36235,6 +38085,46 @@
         "synthesis_kind": "daily_digest"
       },
       "name": "Daily Digest — 2026-05-08",
+      "source_path": null,
+      "type": "Synthesis"
+    },
+    {
+      "aliases": [],
+      "description": "Digest of 2026-05-09 ingest.",
+      "id": "Synthesis:daily-2026-05-09:ad66b3d4e644",
+      "metadata": {
+        "content_hash": "sha256-c8ae2ab771bde1f5ee81352507eeab3daf7c223fd613a1acbb2b0aa5db1856e1",
+        "input_ids": [
+          "Paper:arxiv-2310-10375:382b0d986ec5",
+          "Paper:arxiv-2605-04527:c0faca348771",
+          "Repository:github-199-biotechnologies-claude-deep-research-:3e191fab3bf4",
+          "Repository:github-ashishps1-awesome-engineering-articles:8c171b4992b2",
+          "Repository:github-rui314-chibicc:50809d928929",
+          "SourceDocument:daily-feed-summary-2026-05-09:bbad7e1d0cc2",
+          "SourceDocument:daily-research-digest-2026-05-09:117d1d46b37d",
+          "Task:novel-view-synthesis:19d55dfb9b83"
+        ],
+        "synthesis_kind": "daily_digest"
+      },
+      "name": "Daily Digest — 2026-05-09",
+      "source_path": null,
+      "type": "Synthesis"
+    },
+    {
+      "aliases": [],
+      "description": "Digest of 2026-05-10 ingest.",
+      "id": "Synthesis:daily-2026-05-10:495b5ecf37a7",
+      "metadata": {
+        "content_hash": "sha256-c63844166cee92e3eadafb0f37539f70df6c4fda4790a9150b42e2e1071fbd6b",
+        "input_ids": [
+          "Paper:arxiv-2505-20295:aa977a72ab3f",
+          "Repository:github-apple-ml-lito:1a1a85249564",
+          "SourceDocument:daily-feed-summary-2026-05-10:24cb5a57cce0",
+          "SourceDocument:daily-research-digest-2026-05-10:155440063bd6"
+        ],
+        "synthesis_kind": "daily_digest"
+      },
+      "name": "Daily Digest — 2026-05-10",
       "source_path": null,
       "type": "Synthesis"
     },

@@ -1,0 +1,19 @@
+{
+  "title": "GitHub 분석: 199-biotechnologies/claude-deep-research-skill",
+  "kind": "repos",
+  "body_text": "# GitHub 분석: 199-biotechnologies/claude-deep-research-skill\n\n## Outgoing relations\n\n- **released_by** → 199-biotechnologies _(Organization)_\n\n## Connected node types\n\n- Organization: 1",
+  "source_path": "/Users/neo/Developer/Projects/LLM-Wiki/data/research/daily/2026-05-09/repos/199-biotechnologies_claude-deep-research-skill.md",
+  "links": [],
+  "body": "# GitHub 분석: 199-biotechnologies/claude-deep-research-skill\n\n## Outgoing relations\n\n- **released_by** → 199-biotechnologies _(Organization)_\n\n## Connected node types\n\n- Organization: 1",
+  "frontmatter": {
+    "aliases": [
+      "199-biotechnologies/claude-deep-research-skill",
+      "https://github.com/199-biotechnologies/claude-deep-research-skill"
+    ],
+    "kind": "repos",
+    "node_id": "Repository:github-199-biotechnologies-claude-deep-research-:3e191fab3bf4",
+    "node_type": "Repository",
+    "source_path": "/Users/neo/Developer/Projects/LLM-Wiki/data/research/daily/2026-05-09/repos/199-biotechnologies_claude-deep-research-skill.md",
+    "title": "GitHub 분석: 199-biotechnologies/claude-deep-research-skill"
+  }
+}

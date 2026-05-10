@@ -1,10 +1,10 @@
 {
   "title": "Andreas Geiger",
   "kind": "entities",
-  "body_text": "# Andreas Geiger\n\n## Incoming relations\n\n- **authored_by** → Feed-Forward 3D Scene Modeling: A Problem-Driven Perspective _(Paper)_\n\n## Connected node types\n\n- Paper: 1",
+  "body_text": "# Andreas Geiger\n\n## Incoming relations\n\n- **authored_by** → Feed-Forward 3D Scene Modeling: A Problem-Driven Perspective _(Paper)_\n- **authored_by** → GTA: A Geometry-Aware Attention Mechanism for Multi-View Transformers _(Paper)_\n\n## Connected node types\n\n- Paper: 2",
   "source_path": "/Users/neo/Developer/Projects/LLM-Wiki/data/research/daily/2026-05-03/papers/2604.14025/paper.md",
   "links": [],
-  "body": "# Andreas Geiger\n\n## Incoming relations\n\n- **authored_by** → Feed-Forward 3D Scene Modeling: A Problem-Driven Perspective _(Paper)_\n\n## Connected node types\n\n- Paper: 1",
+  "body": "# Andreas Geiger\n\n## Incoming relations\n\n- **authored_by** → Feed-Forward 3D Scene Modeling: A Problem-Driven Perspective _(Paper)_\n- **authored_by** → GTA: A Geometry-Aware Attention Mechanism for Multi-View Transformers _(Paper)_\n\n## Connected node types\n\n- Paper: 2",
   "frontmatter": {
     "kind": "entities",
     "node_id": "Person:andreas-geiger:ed5cc3fb8d8d",

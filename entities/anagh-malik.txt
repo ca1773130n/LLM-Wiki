@@ -1,0 +1,12 @@
+Anagh Malik
+===========
+
+# Anagh Malik
+
+## Incoming relations
+
+- **authored_by** → Velox: Learning Representations of 4D Geometry and Appearance _(Paper)_
+
+## Connected node types
+
+- Paper: 1

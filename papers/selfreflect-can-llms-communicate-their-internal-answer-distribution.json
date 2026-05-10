@@ -1,0 +1,18 @@
+{
+  "title": "SelfReflect: Can LLMs Communicate Their Internal Answer Distribution?",
+  "kind": "papers",
+  "body_text": "# SelfReflect: Can LLMs Communicate Their Internal Answer Distribution?\n\n## Outgoing relations\n\n- **authored_by** → Adam Goliński _(Person)_\n- **authored_by** → Arno Blaas _(Person)_\n- **authored_by** → Eeshan Gunesh Dhekane _(Person)_\n- **authored_by** → Luca Füger _(Person)_\n- **authored_by** → Michael Kirchhof _(Person)_\n- **authored_by** → Seong Joon Oh _(Person)_\n- **authored_by** → Sinead Williamson _(Person)_\n- **implemented_in** → GitHub 분석: apple/ml-lito _(Repository)_\n- **part_of** → 3D/4D Vision and Reconstruction _(ResearchField)_\n\n## Incoming relations\n\n- **mentioned_in** → Daily Feed Summary — 2026-05-10 _(SourceDocument)_\n- **mentioned_in** → 📬 Daily Research Digest — 2026-05-10 _(SourceDocument)_\n\n## Connected node types\n\n- Person: 7\n- SourceDocument: 2\n- Repository: 1\n- ResearchField: 1",
+  "source_path": "/Users/neo/Developer/Projects/LLM-Wiki/data/research/daily/2026-05-10/papers/2505.20295/paper.md",
+  "links": [],
+  "body": "# SelfReflect: Can LLMs Communicate Their Internal Answer Distribution?\n\n## Outgoing relations\n\n- **authored_by** → Adam Goliński _(Person)_\n- **authored_by** → Arno Blaas _(Person)_\n- **authored_by** → Eeshan Gunesh Dhekane _(Person)_\n- **authored_by** → Luca Füger _(Person)_\n- **authored_by** → Michael Kirchhof _(Person)_\n- **authored_by** → Seong Joon Oh _(Person)_\n- **authored_by** → Sinead Williamson _(Person)_\n- **implemented_in** → GitHub 분석: apple/ml-lito _(Repository)_\n- **part_of** → 3D/4D Vision and Reconstruction _(ResearchField)_\n\n## Incoming relations\n\n- **mentioned_in** → Daily Feed Summary — 2026-05-10 _(SourceDocument)_\n- **mentioned_in** → 📬 Daily Research Digest — 2026-05-10 _(SourceDocument)_\n\n## Connected node types\n\n- Person: 7\n- SourceDocument: 2\n- Repository: 1\n- ResearchField: 1",
+  "frontmatter": {
+    "aliases": [
+      "arXiv:2505.20295"
+    ],
+    "kind": "papers",
+    "node_id": "Paper:arxiv-2505-20295:aa977a72ab3f",
+    "node_type": "Paper",
+    "source_path": "/Users/neo/Developer/Projects/LLM-Wiki/data/research/daily/2026-05-10/papers/2505.20295/paper.md",
+    "title": "SelfReflect: Can LLMs Communicate Their Internal Answer Distribution?"
+  }
+}

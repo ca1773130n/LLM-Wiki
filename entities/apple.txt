@@ -6,8 +6,9 @@ apple
 ## Incoming relations
 
 - **released_by** → GitHub 분석: apple/ml-4m _(Repository)_
+- **released_by** → GitHub 분석: apple/ml-lito _(Repository)_
 - **released_by** → GitHub 분석: apple/ml-mobileclip _(Repository)_
 
 ## Connected node types
 
-- Repository: 2
+- Repository: 3

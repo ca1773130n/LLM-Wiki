@@ -1,0 +1,20 @@
+{
+  "title": "2026-05-10",
+  "kind": "timeline_day",
+  "body_text": "Activity for 2026-05-10: 18 item(s) indexed.",
+  "source_path": "",
+  "links": [],
+  "body": "Activity for 2026-05-10",
+  "frontmatter": {
+    "date": "2026-05-10",
+    "activity": 18,
+    "sources": [
+      "/Users/neo/Developer/Projects/LLM-Wiki/data/research/daily/2026-05-10/digest.md",
+      "/Users/neo/Developer/Projects/LLM-Wiki/data/research/daily/2026-05-10/papers/2310.10375/paper.md",
+      "/Users/neo/Developer/Projects/LLM-Wiki/data/research/daily/2026-05-10/papers/2505.20295/paper.md",
+      "/Users/neo/Developer/Projects/LLM-Wiki/data/research/daily/2026-05-10/papers/2505.20295/repo.md",
+      "/Users/neo/Developer/Projects/LLM-Wiki/data/research/daily/2026-05-10/papers/2601.17835/paper.md",
+      "/Users/neo/Developer/Projects/LLM-Wiki/data/research/daily/2026-05-10/raw.md"
+    ]
+  }
+}

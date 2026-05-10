@@ -1,0 +1,14 @@
+Daily Feed Summary — 2026-05-10
+===============================
+
+# Daily Feed Summary — 2026-05-10
+
+## Outgoing relations
+
+- **mentioned_in** → GTA: A Geometry-Aware Attention Mechanism for Multi-View Transformers _(Paper)_
+- **mentioned_in** → Geometry-Grounded Gaussian Splatting _(Paper)_
+- **mentioned_in** → SelfReflect: Can LLMs Communicate Their Internal Answer Distribution? _(Paper)_
+
+## Connected node types
+
+- Paper: 3

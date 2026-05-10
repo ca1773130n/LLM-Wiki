@@ -1,0 +1,15 @@
+{
+  "title": "Michael Kirchhof",
+  "kind": "entities",
+  "body_text": "# Michael Kirchhof\n\n## Incoming relations\n\n- **authored_by** → SelfReflect: Can LLMs Communicate Their Internal Answer Distribution? _(Paper)_\n\n## Connected node types\n\n- Paper: 1",
+  "source_path": "/Users/neo/Developer/Projects/LLM-Wiki/data/research/daily/2026-05-10/papers/2505.20295/paper.md",
+  "links": [],
+  "body": "# Michael Kirchhof\n\n## Incoming relations\n\n- **authored_by** → SelfReflect: Can LLMs Communicate Their Internal Answer Distribution? _(Paper)_\n\n## Connected node types\n\n- Paper: 1",
+  "frontmatter": {
+    "kind": "entities",
+    "node_id": "Person:michael-kirchhof:9e7a0b7c0c02",
+    "node_type": "Person",
+    "source_path": "/Users/neo/Developer/Projects/LLM-Wiki/data/research/daily/2026-05-10/papers/2505.20295/paper.md",
+    "title": "Michael Kirchhof"
+  }
+}
