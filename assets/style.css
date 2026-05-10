@@ -208,15 +208,29 @@ pre code { background: transparent; padding: 0; border-radius: 0; }
   font-size: 13px;
   line-height: 1.4;
 }
+.mermaid[data-mermaid-source]:not([data-mermaid-rendered="true"]):not([data-mermaid-error="true"]) {
+  color: transparent;
+  position: relative;
+  min-height: 120px;
+}
+.mermaid[data-mermaid-source]:not([data-mermaid-rendered="true"]):not([data-mermaid-error="true"])::before {
+  content: "Rendering Mermaid diagram…";
+  color: var(--ink-muted);
+  font-family: var(--type-sans);
+  position: absolute;
+  inset: 50% auto auto 50%;
+  transform: translate(-50%, -50%);
+}
 .mermaid svg {
   display: block;
   max-width: 100%;
   height: auto;
   margin: 0 auto;
 }
-[data-mermaid-error] .mermaid {
+.mermaid[data-mermaid-error="true"] {
   text-align: left;
   white-space: pre;
+  color: var(--ink);
 }
 
 hr {

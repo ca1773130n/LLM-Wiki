@@ -13,8 +13,8 @@
     },
     {
       "path": "assets/app.js",
-      "sha256": "81af67bba7bd3931881dc3052bad606bde21d2fad1fd830d43f5b6b0a7df1052",
-      "size": 35980
+      "sha256": "07015d00e7786d9054883b5f1547352fadafe32c33a83813a2275eb93f552880",
+      "size": 36928
     },
     {
       "path": "assets/graph-d1e86f79e3.js",
@@ -28,8 +28,8 @@
     },
     {
       "path": "assets/style.css",
-      "sha256": "19e1d6cff06a173ec4f801e9bf62648debd1b959a1a0bde4122d40746a261a67",
-      "size": 92584
+      "sha256": "021c7de9778fbf6e5e09f03adfd2f178b00035b0dc02efd2ea9a8d8cac61cb3d",
+      "size": 93079
     },
     {
       "path": "concepts/4d-gaussian-splatting.html",
@@ -5938,7 +5938,7 @@
     },
     {
       "path": "graph.jsonld",
-      "sha256": "77329fc7ffb0f66bc7e616181b88f6637c5136a6a70011c6b7ae374167acf7fc",
+      "sha256": "a9fb0cff7f01cf1f1dad5404e75215ae04a6f3ffc63fb5c19be4d962c30d0d52",
       "size": 339166
     },
     {
@@ -11318,7 +11318,7 @@
     },
     {
       "path": "raw/llm-wiki-site-js-py.html",
-      "sha256": "42dc06d63e28548c8a495239d2df926fc636a9fea04db62c70f81fe871b1d109",
+      "sha256": "ab2876b9b934c6ad66316577986be451633a49677c6190b368c5d4944d8cdd54",
       "size": 142963
     },
     {
@@ -11353,7 +11353,7 @@
     },
     {
       "path": "raw/llm-wiki-site-tokens-py.html",
-      "sha256": "f954365f5f9e00a25ee1581e117a8f55940d6e5df006ec86e88461223b2beadc",
+      "sha256": "10124c5fc704e97183741eb69e692a83e02fd47ffa2ac4b362041043a890c536",
       "size": 142982
     },
     {
@@ -11783,7 +11783,7 @@
     },
     {
       "path": "raw/tests-test-site-js-py.html",
-      "sha256": "fe3fdcf9430491e7e0c9fa4c540ca9a45a90a37aa2b74e7a454dc5ed92b0556a",
+      "sha256": "f3d17695392cc9ccd4be21e7fa63ae49b2d071f0376afc65c93a55f71a43e868",
       "size": 142996
     },
     {
@@ -11818,7 +11818,7 @@
     },
     {
       "path": "raw/tests-test-site-tokens-py.html",
-      "sha256": "d6bfbc764306f5d6d79064db2ca04a2a6b1ff02e4d1ffe7a4135010e5d739f2c",
+      "sha256": "dcccc958e8073fa1ad6eee7dcfbb2c2b37488aecf4d095740179104b8b89e510",
       "size": 143016
     },
     {
@@ -13928,18 +13928,18 @@
     },
     {
       "path": "rss.xml",
-      "sha256": "de76ab25e8ee677f6f59b2436647c55d1e50f7f8c97c4507268fb5cd93e19ca9",
+      "sha256": "33478b124ad773749c4f99d02423f43723dac1e30b9531655704a23969a7b298",
       "size": 33660
     },
     {
       "path": "search-index.json",
-      "sha256": "1780e2f66e12a9da7ba1fb6918934bd58952ae2b6566749249056cf01c88e310",
+      "sha256": "2f8dc3b0e98d4e2e4721ed249037b4c7990c737bcf77bc1dd8244c7e2f6ba240",
       "size": 839244
     },
     {
       "path": "search-index.json.gz",
-      "sha256": "c033478d926a57fa25a1c15cddb7016aa9d12fd18e8d5e0768a23c278c851ffb",
-      "size": 95930
+      "sha256": "d7e94f52019b139e9f9d673621fbd6a696608853c912ef63d925c0487fb6fe61",
+      "size": 95924
     },
     {
       "path": "sessions/index.html",
