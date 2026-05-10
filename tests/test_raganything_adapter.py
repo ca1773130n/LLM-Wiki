@@ -50,3 +50,16 @@ def test_import_payload_creates_source_file_with_multimodal_blocks(tmp_path):
     assert refs[0]["id"] == "doc-abc123"
     assert manifest["artifact_sha256"] == "deadbeef"
     assert manifest["imported_documents"]["doc-abc123"] == src.id
+
+
+def test_import_artifact_reads_file_and_records_sha256(tmp_path):
+    from llm_wiki.raganything_adapter import RagAnythingGraphAdapter
+
+    artifact = tmp_path / ".llm-wiki" / "external" / "raganything" / "manifest.json"
+    artifact.parent.mkdir(parents=True)
+    artifact.write_text(json.dumps(_payload()), encoding="utf-8")
+
+    result = RagAnythingGraphAdapter(tmp_path).import_artifact(artifact)
+    assert result.manifest["artifact"].endswith("manifest.json")
+    assert len(result.manifest["artifact_sha256"]) == 64  # sha256 hex
+    assert result.graph.nodes  # at least one node
