@@ -22,6 +22,28 @@ def test_setup_enables_cognee_backend_by_default(tmp_path):
     assert cognee["system_root"] == ".llm-wiki/cognee_system"
     assert cognee["data_root"] == ".llm-wiki/cognee_data"
     assert cognee["fail_fast"] is False
+    assert cognee["install"]["enabled"] is True
+    assert cognee["install"]["auto_install"] is False
+    assert "pip" in cognee["install"]["command"]
+
+
+def test_setup_installs_cognee_when_requested(tmp_path, monkeypatch, capsys):
+    project = tmp_path / "demo"
+    project.mkdir()
+    (project / "README.md").write_text("# Demo\n", encoding="utf-8")
+    calls = []
+
+    def fake_install(self, options):
+        calls.append(options)
+        return {"status": "installed", "command": options.install_command}
+
+    monkeypatch.setattr(ProjectWiki, "_install_cognee", fake_install)
+
+    assert main(["project", "setup", "--project", str(project), "--yes", "--install-cognee", "--no-color"]) == 0
+
+    assert calls
+    assert calls[0].auto_install is True
+    assert "Cognee installed/updated" in capsys.readouterr().out
 
 
 def test_compile_uses_configured_cognee_when_auto_cognify_enabled(tmp_path, monkeypatch):
@@ -90,6 +112,18 @@ def test_legacy_project_config_gets_default_cognee_backend():
     assert cognee["enabled"] is True
     assert cognee["dataset"] == "legacy_demo_memory"
     assert cognee["auto_cognify"] is False
+    assert cognee["install"]["enabled"] is True
+
+
+def test_legacy_auto_cognify_config_auto_installs_cognee_if_missing():
+    options = cognify_options_from_config({
+        "name": "legacy_demo",
+        "memory_backends": {"cognee": {"enabled": True, "mode": "codex_cognify", "auto_cognify": True}},
+    })
+
+    assert options is not None
+    assert options.auto_install is True
+    assert "pip install cognee" in options.install_command
 
 
 def test_configured_cognee_failure_warns_and_compile_continues(tmp_path, monkeypatch, capsys):
@@ -112,6 +146,37 @@ def test_configured_cognee_failure_warns_and_compile_continues(tmp_path, monkeyp
     out = capsys.readouterr().out
     assert "Cognee cognify warning" in out
     assert "Compiled project wiki" in out
+
+
+def test_configured_cognee_missing_module_installs_then_retries(tmp_path, monkeypatch, capsys):
+    project = tmp_path / "demo"
+    project.mkdir()
+    (project / "README.md").write_text("# Demo\nGaussian Splatting supports novel view synthesis.\n", encoding="utf-8")
+    wiki = ProjectWiki.init(project, name="demo", source_kind="Repository", sources=["README.md"])
+    cfg = wiki.config()
+    cfg["memory_backends"]["cognee"]["auto_cognify"] = True
+    cfg["memory_backends"]["cognee"]["install"]["auto_install"] = True
+    wiki.paths.config.write_text(json.dumps(cfg, indent=2) + "\n", encoding="utf-8")
+    calls = {"cognify": 0, "install": 0}
+
+    def flaky_cognee(self, options):
+        calls["cognify"] += 1
+        if calls["cognify"] == 1:
+            raise ModuleNotFoundError("No module named 'cognee'")
+
+    def fake_install(self, options):
+        calls["install"] += 1
+        return {"status": "installed", "command": options.install_command}
+
+    monkeypatch.setattr(ProjectWiki, "_run_cognify", flaky_cognee)
+    monkeypatch.setattr(ProjectWiki, "_install_cognee", fake_install)
+
+    assert main(["project", "compile", "--project", str(project), "--limit", "1"]) == 0
+
+    assert calls == {"cognify": 2, "install": 1}
+    out = capsys.readouterr().out
+    assert "Cognee missing; installing" in out
+    assert "Cognee installed; retrying cognify" in out
 
 
 def test_project_ask_uses_configured_cognee_backend(tmp_path, monkeypatch, capsys):

@@ -9,7 +9,7 @@ from datetime import date
 from pathlib import Path
 from typing import Iterable, List, Optional, Sequence
 
-from .project import ProjectWiki, default_cognee_backend_config, sanitize_server_name
+from .project import ProjectWiki, CognifyOptions, default_cognee_backend_config, sanitize_server_name
 
 
 RESET = "\033[0m"
@@ -82,6 +82,7 @@ def build_setup_plan(
     enable_cognee: bool = True,
     cognee_mode: str = "codex_cognify",
     cognee_auto_cognify: bool = False,
+    install_cognee: Optional[bool] = None,
 ) -> SetupPlan:
     root = Path(project_root).resolve()
     source_list = [str(source) for source in sources] if sources is not None else discover_default_sources(root)
@@ -117,6 +118,7 @@ def build_setup_plan(
         cognee = default_cognee_backend_config(name or sanitize_server_name(root.name))
         cognee["mode"] = cognee_mode
         cognee["auto_cognify"] = bool(cognee_auto_cognify)
+        cognee["install"]["auto_install"] = bool(install_cognee) if install_cognee is not None else bool(cognee_auto_cognify)
         memory_backends["cognee"] = cognee
 
     return SetupPlan(
@@ -378,5 +380,13 @@ def apply_setup_plan(plan: SetupPlan) -> SetupResult:
     }
     cfg["external_tools"] = plan.external_tools
     cfg["memory_backends"] = plan.memory_backends or {"cognee": default_cognee_backend_config(plan.name)}
+    cognee = (cfg.get("memory_backends") or {}).get("cognee") or {}
+    install = cognee.get("install") or {}
+    if cognee.get("enabled") and install.get("enabled") and install.get("auto_install"):
+        try:
+            installed = wiki._install_cognee(CognifyOptions.from_mapping(cognee))
+            ran_tools.append({"id": "cognee", **installed})
+        except Exception as exc:
+            ran_tools.append({"id": "cognee", "status": "install_failed", "command": install.get("command"), "returncode": 1, "stderr": str(exc)})
     wiki.paths.config.write_text(json.dumps(cfg, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
     return SetupResult(wiki=wiki, config_path=wiki.paths.config, ran_tools=ran_tools)

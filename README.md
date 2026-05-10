@@ -126,6 +126,8 @@ llm_wiki project ask "Where is Mermaid rendering implemented?"
 
 ```bash
 llm_wiki project setup --run-cognee
+# install Cognee immediately without enabling compile-time cognify:
+llm_wiki project setup --install-cognee
 # or one-off:
 llm_wiki project compile --cognee-codex-cognify --cognee-dataset my_project_memory
 ```

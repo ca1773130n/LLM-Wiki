@@ -236,6 +236,8 @@ def project_main(argv: List[str] | None = None) -> int:
     setup_parser.add_argument("--skip-install-understand-anything", action="store_true", help="Do not auto-install Understand Anything even when selected")
     setup_parser.add_argument("--understand-anything-platform", default="codex", help="Understand Anything installer platform id (default: codex)")
     setup_parser.add_argument("--no-cognee", action="store_true", help="Do not enable Cognee as the default project memory backend")
+    setup_parser.add_argument("--install-cognee", action="store_true", help="Install Cognee during setup and allow compile to auto-install if missing")
+    setup_parser.add_argument("--skip-install-cognee", action="store_true", help="Do not auto-install Cognee even when --run-cognee is selected")
     setup_parser.add_argument("--cognee-mode", choices=["add", "cognify", "codex_cognify"], default="codex_cognify", help="Cognee mode saved in project config (default: codex_cognify)")
     setup_parser.add_argument("--run-cognee", action="store_true", help="Auto-add/cognify Cognee on every project compile using the saved safe config")
     setup_parser.add_argument("--yes", action="store_true", help="Accept detected defaults without interactive prompts")
@@ -419,6 +421,7 @@ def project_main(argv: List[str] | None = None) -> int:
                     enable_cognee=not args.no_cognee,
                     cognee_mode=args.cognee_mode,
                     cognee_auto_cognify=args.run_cognee,
+                    install_cognee=(False if args.skip_install_cognee else True if args.install_cognee else None),
                 )
                 print(render_setup_summary(plan, color=not args.no_color), end="")
             else:
@@ -435,8 +438,11 @@ def project_main(argv: List[str] | None = None) -> int:
         if result.ran_tools:
             failures = [row for row in result.ran_tools if row.get("status") in {"failed", "install_failed"}]
             installed = [row for row in result.ran_tools if row.get("status") == "installed"]
-            if installed:
+            installed_ids = {row.get("id") for row in installed}
+            if "understand-anything" in installed_ids:
                 print("Understand Anything installed/updated.")
+            if "cognee" in installed_ids:
+                print("Cognee installed/updated.")
             if failures:
                 print("External tool install/refresh had warnings; setup was saved anyway.")
                 for failure in failures:

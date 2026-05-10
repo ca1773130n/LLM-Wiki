@@ -11,6 +11,8 @@ import asyncio
 import json
 import os
 import shutil
+import subprocess
+import sys
 from dataclasses import dataclass, field
 from datetime import date
 from pathlib import Path
@@ -64,9 +66,14 @@ class CognifyOptions:
     system_root: Optional[str] = None
     data_root: Optional[str] = None
     fail_fast: bool = True
+    install_enabled: bool = True
+    auto_install: bool = False
+    install_command: str = "{python} -m pip install cognee"
 
     @classmethod
     def from_mapping(cls, data: dict) -> "CognifyOptions":
+        install = data.get("install") or {}
+        install_auto_default = bool(data.get("auto_cognify", False)) if "auto_install" not in install else bool(install.get("auto_install"))
         return cls(
             mode=str(data.get("mode") or "off"),
             dataset=str(data.get("dataset") or "llm_wiki_research_graph"),
@@ -80,6 +87,9 @@ class CognifyOptions:
             system_root=data.get("system_root"),
             data_root=data.get("data_root"),
             fail_fast=bool(data.get("fail_fast", False)),
+            install_enabled=bool(install.get("enabled", True)),
+            auto_install=install_auto_default,
+            install_command=str(install.get("command") or "{python} -m pip install cognee"),
         )
 
     @property
@@ -676,12 +686,7 @@ class ProjectWiki:
         GraphMarkdownProjector().write_projection(graph, self.paths.markdown_projection)
         CogneeResearchGraphAdapter().write_bundle(graph, self.paths.cognee_bundle)
         if cognify and cognify.is_active:
-            try:
-                self._run_cognify(cognify)
-            except Exception as exc:
-                if getattr(cognify, "fail_fast", True):
-                    raise
-                print(f"[llm-wiki] Cognee cognify warning; compile will continue: {exc}", flush=True)
+            self._run_cognify_best_effort(cognify)
         report = GraphReporter().render_markdown(GraphReporter().summarize(graph))
         self.paths.report.write_text(report, encoding="utf-8")
         TemporalFactProjector().write_jsonl(graph, self.paths.temporal_facts)
@@ -691,6 +696,54 @@ class ProjectWiki:
         self.build_site()
         self.paths.competitive_report.write_text(render_competitive_report(), encoding="utf-8")
         self._append_build_history(research_graph, code_graph)
+
+    def _run_cognify_best_effort(self, options: "CognifyOptions") -> None:
+        try:
+            self._run_cognify(options)
+            return
+        except ModuleNotFoundError as exc:
+            missing_name = getattr(exc, "name", "") or ""
+            message = str(exc)
+            is_cognee_missing = missing_name == "cognee" or "No module named 'cognee'" in message
+            if is_cognee_missing and options.install_enabled and options.auto_install:
+                print("[llm-wiki] Cognee missing; installing configured Cognee package...", flush=True)
+                try:
+                    self._install_cognee(options)
+                    print("[llm-wiki] Cognee installed; retrying cognify...", flush=True)
+                    self._run_cognify(options)
+                    return
+                except Exception as install_exc:
+                    if options.fail_fast:
+                        raise
+                    print(f"[llm-wiki] Cognee install/cognify warning; compile will continue: {install_exc}", flush=True)
+                    return
+            if options.fail_fast:
+                raise
+            print(f"[llm-wiki] Cognee cognify warning; compile will continue: {exc}", flush=True)
+        except Exception as exc:
+            if options.fail_fast:
+                raise
+            print(f"[llm-wiki] Cognee cognify warning; compile will continue: {exc}", flush=True)
+
+    def _install_cognee(self, options: "CognifyOptions") -> dict:
+        command = (options.install_command or "{python} -m pip install cognee").format(python=sys.executable)
+        completed = subprocess.run(
+            command,
+            shell=True,
+            cwd=self.project_root,
+            text=True,
+            capture_output=True,
+        )
+        if completed.returncode != 0:
+            tail = (completed.stderr or completed.stdout or "").strip().splitlines()
+            detail = f": {tail[-1]}" if tail else ""
+            raise RuntimeError(f"Cognee install failed ({completed.returncode}){detail}")
+        return {
+            "status": "installed",
+            "command": command,
+            "stdout": completed.stdout[-2000:],
+            "stderr": completed.stderr[-2000:],
+        }
 
     def _run_cognify(self, options: "CognifyOptions") -> None:
         """Invoke Cognee on the freshly written bundle.
@@ -781,14 +834,26 @@ def default_cognee_backend_config(name: str = "llm_wiki") -> dict:
         "embedding_provider": "deterministic",
         "local_embedding_dimensions": 128,
         "fail_fast": False,
+        "install": {
+            "enabled": True,
+            "auto_install": False,
+            "command": "{python} -m pip install cognee",
+        },
     }
 
 
 def cognee_backend_config(config: dict) -> dict:
+    defaults = default_cognee_backend_config(str(config.get("name") or "llm_wiki"))
     backends = config.get("memory_backends")
     if not isinstance(backends, dict) or "cognee" not in backends:
-        return default_cognee_backend_config(str(config.get("name") or "llm_wiki"))
-    return dict(backends.get("cognee") or {})
+        return defaults
+    configured = dict(backends.get("cognee") or {})
+    merged = {**defaults, **configured}
+    configured_install = configured.get("install")
+    merged["install"] = {**defaults.get("install", {}), **(configured_install or {})}
+    if configured_install is None and configured.get("auto_cognify"):
+        merged["install"]["auto_install"] = True
+    return merged
 
 
 def cognify_options_from_config(config: dict) -> Optional[CognifyOptions]:
