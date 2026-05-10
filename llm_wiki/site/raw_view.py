@@ -342,13 +342,14 @@ def iter_markdown_binary_assets(
     markdown_path: Path,
     project_root: Path,
 ) -> List[Tuple[str, str, Path]]:
-    """Find local binary assets referenced from a markdown source.
+    """Find local files referenced from a markdown source.
 
-    README-style source documents often embed screenshots with raw HTML such as
-    ``<img src=\"docs/assets/demo.png\">``. Raw pages live under ``raw/``, so
-    the literal path would resolve to ``raw/docs/assets/...`` and break on the
-    generated/deployed site. We collect those local binary dependencies and copy
-    them to ``raw-assets/`` just like first-class binary source files.
+    README-style source documents often link sibling docs and embed screenshots
+    with raw HTML such as ``<img src=\"docs/assets/demo.png\">``. Raw pages live
+    under ``raw/``, so literal targets would resolve under ``raw/`` and break on
+    the generated/deployed site unless the referenced files are emitted too.
+    We collect local dependencies so markdown links can land on raw pages and
+    binary assets can be copied to ``raw-assets/``.
     """
     try:
         text = markdown_path.read_text(encoding="utf-8", errors="replace")
@@ -366,9 +367,6 @@ def iter_markdown_binary_assets(
             resolved = (markdown_path.parent / rest).resolve()
             project_rel_path = resolved.relative_to(project_root)
         except (ValueError, OSError):
-            continue
-        suffix = resolved.suffix.lower()
-        if suffix not in _BINARY_EXTS:
             continue
         try:
             if not resolved.is_file():
