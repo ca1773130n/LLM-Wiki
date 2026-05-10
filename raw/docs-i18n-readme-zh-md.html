@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>test_raw_pages.py · LLM-Wiki</title>
+<title>README.zh.md · LLM-Wiki</title>
 <link rel="stylesheet" href="../assets/style.css">
 <script defer src="../assets/app.js"></script>
 
@@ -23,18 +23,141 @@
 <button class="toc-toggle" aria-controls="toc" aria-expanded="false" data-toggle-toc type="button">On this page</button>
 <article class="article">
 <header class="article-header">
-<nav class="breadcrumbs" aria-label="Breadcrumb"><a class="crumb" href="../index.html">Home</a><span class="sep" aria-hidden="true">/</span><span class="crumb">Raw</span><span class="sep" aria-hidden="true">/</span><span class="crumb crumb-current">test_raw_pages.py</span></nav>
+<nav class="breadcrumbs" aria-label="Breadcrumb"><a class="crumb" href="../index.html">Home</a><span class="sep" aria-hidden="true">/</span><span class="crumb">Raw</span><span class="sep" aria-hidden="true">/</span><span class="crumb crumb-current">README.zh.md</span></nav>
 </header>
-<div class="article-body"><p class="eyebrow raw-meta">22.3 KB · updated 2026-05-10 · py</p>
-<h1 class="raw-title" title="tests/test_raw_pages.py">test_raw_pages.py</h1>
-<p class="raw-path"><code>tests/test_raw_pages.py</code></p>
-<article class="raw-page"><div class="raw-asset raw-download"><p><a href="" download>Download original file</a></p><p class="muted small">binary or oversized — download to view</p></div></article></div>
+<div class="article-body"><p class="eyebrow raw-meta">8.3 KB · updated 2026-05-10 · md</p>
+<h1 class="raw-title" title="docs/i18n/README.zh.md">README.zh.md</h1>
+<p class="raw-path"><code>docs/i18n/README.zh.md</code></p>
+<article class="raw-page"><section class="markdown-body raw-markdown"><h1 align="center">LLM-Wiki</h1>
+<p align="center">
+  <strong>面向编码智能体的记忆编译器。</strong>
+  <br />
+  <em>将代码仓库、文档、研究笔记、Claude/Codex 会话以及配套图工具编译为经过验证的记忆，供 Cognee、MCP、Kuzu、SQLite、llms.txt 和静态文档使用。</em>
+</p>
+<p align="center">
+  <a href="../raw/readme-md.html">English</a> ·
+  <a href="../raw/docs-i18n-readme-ko-md.html">한국어</a> ·
+  <a href="../raw/docs-i18n-readme-zh-md.html">中文</a> ·
+  <a href="../raw/docs-i18n-readme-ja-md.html">日本語</a> ·
+  <a href="../raw/docs-i18n-readme-ru-md.html">Русский</a> ·
+  <a href="../raw/docs-i18n-readme-es-md.html">Español</a> ·
+  <a href="../raw/docs-i18n-readme-fr-md.html">Français</a>
+</p>
+<p align="center">
+  <a href="#快速开始"><img src="https://img.shields.io/badge/start-project_setup-blue" alt="项目设置" /></a>
+  <a href="#cognee--llm-wiki"><img src="https://img.shields.io/badge/Cognee-memory_backend-d4a574" alt="Cognee 记忆后端" /></a>
+  <a href="#智能体为什么使用它"><img src="https://img.shields.io/badge/agents-MCP%20%7C%20llms.txt%20%7C%20harness-38bdf8" alt="智能体导出" /></a>
+  <a href="#记忆流水线"><img src="https://img.shields.io/badge/graph-validated%20ontology-8A2BE2" alt="已验证图" /></a>
+  <a href="../../LICENSE"><img src="https://img.shields.io/github/license/ca1773130n/LLM-Wiki" alt="许可证" /></a>
+</p>
+<p align="center">
+  <img src="../raw-assets/docs-assets-wiki-graph-screenshot-png.png" alt="LLM-Wiki 静态站点，展示已编译的项目记忆图和源码浏览器" width="100%" />
+</p>
+<hr>
+<h2 id="section">核心卖点</h2>
+<p>大多数 LLM wiki 工具只是再生成一页笔记。</p>
+<p><strong>LLM-Wiki 构建的是下一个智能体启动时所依赖的记忆层。</strong> 它接收项目的复杂现实——源文件、Markdown 文档、研究笔记、本地 Claude/Codex 记录以及外部图谱工件——并将其编译为类型化、可移植的记忆系统。</p>
+<p>网站只是玻璃橱窗。产品本身是已编译的记忆工件。</p>
+<div class="table-scroll"><table>
+  <tr>
+    <td width="33%" valign="top">
+      <h3>🧬 验证记忆</h3>
+      <p>在节点和边进入检索之前约束它们。避免随机的 <code>related_to</code> 大杂烩、重复实体和漂移的 schema。</p>
+    </td>
+    <td width="33%" valign="top">
+      <h3>🧠 保留智能体工作</h3>
+      <p>将 Claude Code 和 Codex 会话转换为可搜索的项目记忆：决策、命令、文件、摘要和工具轨迹。</p>
+    </td>
+    <td width="33%" valign="top">
+      <h3>🔌 随处导出</h3>
+      <p>将同一份记忆交付给 Cognee、MCP、Kuzu、SQLite、Graphiti 风格的 episodes、<code>llms.txt</code>、Markdown 和静态网站。</p>
+    </td>
+  </tr>
+</table></div>
+<hr>
+<h2 id="section-2">智能体为什么使用它</h2>
+<div class="table-scroll"><table class="md-table"><thead><tr><th>如果你只有...</th><th>你的智能体仍然必须...</th><th>LLM-Wiki 为它提供...</th></tr></thead><tbody><tr><td>一个 README</td><td>重新发现架构和决策</td><td>类型化项目记忆 + 源头溯源</td></tr><tr><td>一个文档站点</td><td>像人类一样搜索页面</td><td>MCP 工具、<code>llms.txt</code>、JSON 图、逐页上下文</td></tr><tr><td>一个向量数据库</td><td>根据 chunks 猜测关系</td><td>已验证节点、边、别名、claims、证据</td></tr><tr><td>一个图可视化器</td><td>欣赏一张图片</td><td>检索系统可使用的可移植图工件</td></tr><tr><td>聊天历史</td><td>忘记之前的工作</td><td>作为持久记忆导入的智能体会话</td></tr></tbody></table></div>
+<hr>
+<h2 id="section-3">记忆流水线</h2>
+<pre><code class="language-mermaid">flowchart TB
+  A[&quot;Raw project sources&lt;br/&gt;README · docs · code · research notes&quot;]
+  B[&quot;Agent sessions&lt;br/&gt;Claude Code · Codex · subagents&quot;]
+  C[&quot;Companion artifacts&lt;br/&gt;Understand Anything · external graphs&quot;]
+  D[&quot;LLM-Wiki compiler&lt;br/&gt;detect · refresh · extract · validate&quot;]
+  E[&quot;Typed memory graph&lt;br/&gt;ontology · aliases · evidence · temporal facts&quot;]
+  F[&quot;Runtime memory backends&lt;br/&gt;Cognee · MCP · Kuzu · SQLite&quot;]
+  G[&quot;Agent context exports&lt;br/&gt;llms.txt · harness · JSON · markdown&quot;]
+  H[&quot;Inspectable projections&lt;br/&gt;static wiki · 2D/3D graph · source pages&quot;]
+
+  A --&gt; D
+  B --&gt; D
+  C --&gt; D
+  D --&gt; E
+  E --&gt; F
+  E --&gt; G
+  E --&gt; H</code></pre>
+<hr>
+<h2 id="cognee-llm-wiki">Cognee + LLM-Wiki</h2>
+<p><strong>LLM-Wiki 编译记忆。Cognee 检索它。</strong></p>
+<p>Cognee 是强大的 AI 记忆后端：图 + 向量检索、语义记忆以及具备本体感知能力的 hooks。但如果进入其中的记忆不受约束，原始仓库/文档摄取仍然可能变得嘈杂。</p>
+<p>LLM-Wiki 充当 Cognee 之前的构建步骤：</p>
+<div class="table-scroll"><table class="md-table"><thead><tr><th>层</th><th>LLM-Wiki 角色</th><th>Cognee 角色</th></tr></thead><tbody><tr><td>来源捕获</td><td>跟踪文档、代码、研究、会话和配套工件</td><td>可摄取多种数据类型</td></tr><tr><td>结构</td><td>验证节点/边类型、别名、证据和来源</td><td>存储并检索语义记忆</td></tr><tr><td>运行时</td><td>导出干净的 Cognee bundle 或 Codex/OAuth cognify 流程</td><td>为智能体提供混合图/向量记忆</td></tr><tr><td>安全性</td><td>保留确定性、本地优先的路径</td><td>在需要时增加更丰富的记忆检索</td></tr></tbody></table></div>
+<pre><code class="language-mermaid">flowchart LR
+  A[&quot;Messy project context&quot;] --&gt; B[&quot;LLM-Wiki&lt;br/&gt;validated memory graph&quot;]
+  B --&gt; C[&quot;Cognee&lt;br/&gt;hybrid graph + vector retrieval&quot;]
+  C --&gt; D[&quot;Coding agents&lt;br/&gt;ask better questions with durable context&quot;]</code></pre>
+<p>当你希望已编译记忆成为智能体的实时检索底座时，使用 Cognee。当你希望在记忆成为运行时上下文之前控制、验证、导出并检查它时，使用 LLM-Wiki。</p>
+<hr>
+<h2 id="section-4">快速开始</h2>
+<pre><code class="language-bash">pip install llm-wiki
+
+llm_wiki project setup
+llm_wiki project compile
+llm_wiki project build-site
+llm_wiki project serve --port 8765</code></pre>
+<p>打开：</p>
+<pre><code class="language-text">http://127.0.0.1:8765/</code></pre>
+<p>设置向导会检测常见来源，例如 <code>README.md</code>、<code>docs</code>、<code>src</code>、<code>data</code> 和配套工件。你选择哪些内容成为记忆；LLM-Wiki 会写入项目配置。</p>
+<pre><code class="language-text">◆ LLM-Wiki project setup
+Choose sources and companion tools. Press Enter to accept defaults.
+
+Sources
+  ✓ README.md
+  ✓ docs
+  ✓ src
+  ✓ .llm-wiki/external/understand-anything.md
+
+External tools
+  ◆ Understand Anything → .llm-wiki/external/understand-anything.md</code></pre>
+<hr>
+<h2 id="section-5">它会导出什么</h2>
+<div class="table-scroll"><table class="md-table"><thead><tr><th>输出</th><th>重要性</th></tr></thead><tbody><tr><td><code>cognee_bundle/</code></td><td>适用于 Cognee 风格记忆工作流的干净图工件</td></tr><tr><td><code>graph.json</code> / <code>graph.jsonld</code></td><td>可移植的类型化记忆图</td></tr><tr><td><code>sqlite.db</code> / Kuzu output</td><td>可查询的本地图存储</td></tr><tr><td><code>llms.txt</code> / <code>llms-full.txt</code></td><td>直接供智能体使用的上下文包</td></tr><tr><td>MCP server</td><td><code>search_nodes</code>、<code>node_context</code>、<code>timeline</code> 和图工具</td></tr><tr><td><code>agent_harness/</code></td><td>Claude Code、Codex、Gemini、Cursor、Kiro、OpenCode 设置</td></tr><tr><td><code>markdown_projection/</code></td><td>供人类和编辑器阅读的 wiki 文件</td></tr><tr><td><code>.llm-wiki/site/</code></td><td>用于检查、共享和调试的静态网站</td></tr></tbody></table></div>
+<hr>
+<h2 id="section-6">配套工具，而非锁定</h2>
+<p>LLM-Wiki 被设计为位于工具之间，而不是取代它们。</p>
+<div class="table-scroll"><table class="md-table"><thead><tr><th>工具</th><th>关系</th></tr></thead><tbody><tr><td>Understand Anything</td><td>独立代码图工件 → Markdown 投影 → 已编译记忆</td></tr><tr><td>Cognee</td><td>用于混合图/向量检索的记忆后端</td></tr><tr><td>Graphiti-style systems</td><td>时间 episode/fact 导出路径</td></tr><tr><td>Obsidian / markdown</td><td>可读投影，而非唯一事实来源</td></tr><tr><td>Claude Code / Codex</td><td>既是会话记忆的来源，也是已编译上下文的消费者</td></tr></tbody></table></div>
+<p>如果你的刷新命令是 shell alias/function，请显式包装它：</p>
+<pre><code class="language-bash">llm_wiki project setup \
+  --yes \
+  --with-understand-anything \
+  --understand-anything-command &quot;zsh -ic &#x27;reunderstand&#x27;&quot; \
+  --run-understand-anything</code></pre>
+<hr>
+<h2 id="llm-wiki">什么时候 LLM-Wiki 是合适的工具</h2>
+<div class="table-scroll"><table class="md-table"><thead><tr><th>你想要...</th><th>使用 LLM-Wiki，因为...</th></tr></thead><tbody><tr><td>更好的编码智能体连续性</td><td>旧的 Claude/Codex 会话会成为可搜索记忆</td></tr><tr><td>更安全的 GraphRAG 输入</td><td>schema 验证发生在检索之前</td></tr><tr><td>本地优先工作流</td><td>确定性抽取和 CLI/OAuth 路径避免强制 API key 支出</td></tr><tr><td>可移植项目记忆</td><td>一次编译即可生成 Cognee、MCP、SQLite、Kuzu、Markdown、JSON 和站点工件</td></tr><tr><td>人类检查</td><td>静态站点让你调试智能体将要检索的内容</td></tr></tbody></table></div>
+<hr>
+<h2 id="section-7">文档</h2>
+<div class="table-scroll"><table class="md-table"><thead><tr><th>指南</th><th>你将获得</th></tr></thead><tbody><tr><td><a href="../raw/docs-quickstart-md.html">Quickstart</a></td><td>第一次项目记忆编译</td></tr><tr><td><a href="../raw/docs-installation-md.html">Installation</a></td><td>安装选项和 wrappers</td></tr><tr><td><a href="../raw/docs-architecture-md.html">Architecture</a></td><td>流水线内部机制和图模型</td></tr><tr><td><a href="../raw/docs-session-history-md.html">Session history</a></td><td>Claude/Codex 转录导入</td></tr><tr><td><a href="../raw/docs-integrations-understand-anything-md.html">Understand Anything companion workflow</a></td><td>配套图刷新和投影</td></tr><tr><td><a href="../raw/docs-publishing-checklist-md.html">Publishing checklist</a></td><td>部署生成的静态站点</td></tr></tbody></table></div>
+<hr>
+<p align="center">
+  <strong>不要把一个空白仓库交给你的下一个智能体。给它已编译的记忆。</strong>
+</p></section></article></div>
 <footer class="article-footer">
 
 </footer>
 </article>
 </main>
-<aside class="toc-rail" id="toc" hidden></aside>
+<aside class="toc-rail" id="toc"><aside class="toc" role="doc-toc" aria-label="On this page"><h2>On this page</h2><ol><li data-toc-target="section"><a class="toc-l-2" href="#section">核心卖点</a></li><li data-toc-target="section-2"><a class="toc-l-2" href="#section-2">智能体为什么使用它</a></li><li data-toc-target="section-3"><a class="toc-l-2" href="#section-3">记忆流水线</a></li><li data-toc-target="cognee-llm-wiki"><a class="toc-l-2" href="#cognee-llm-wiki">Cognee + LLM-Wiki</a></li><li data-toc-target="section-4"><a class="toc-l-2" href="#section-4">快速开始</a></li><li data-toc-target="section-5"><a class="toc-l-2" href="#section-5">它会导出什么</a></li><li data-toc-target="section-6"><a class="toc-l-2" href="#section-6">配套工具，而非锁定</a></li><li data-toc-target="llm-wiki"><a class="toc-l-2" href="#llm-wiki">什么时候 LLM-Wiki 是合适的工具</a></li><li data-toc-target="section-7"><a class="toc-l-2" href="#section-7">文档</a></li></ol></aside></aside>
 </div>
 <nav class="mobile-bottom-nav" aria-label="Quick"><ul><li><a class="" href="../index.html" aria-label="Home"><span class="icon" aria-hidden="true">⌂</span><span class="label">Home</span></a></li><li><a class="" href="../concepts/index.html" aria-label="Concepts"><span class="icon" aria-hidden="true">◆</span><span class="label">Concepts</span></a></li><li><a class="" href="../papers/index.html" aria-label="Papers"><span class="icon" aria-hidden="true">¶</span><span class="label">Papers</span></a></li><li><a class="" href="../syntheses/index.html" aria-label="Syntheses"><span class="icon" aria-hidden="true">✱</span><span class="label">Syntheses</span></a></li><li><a class="" href="../sessions/index.html" aria-label="Sessions"><span class="icon" aria-hidden="true">◷</span><span class="label">Sessions</span></a></li><li><a class="" href="../graph/index.html" aria-label="Graph"><span class="icon" aria-hidden="true">⁂</span><span class="label">Graph</span></a></li></ul></nav>
 <div class="palette" id="palette" hidden role="dialog" aria-modal="true" aria-label="Search palette">

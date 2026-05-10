@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>test_raw_pages.py · LLM-Wiki</title>
+<title>README.es.md · LLM-Wiki</title>
 <link rel="stylesheet" href="../assets/style.css">
 <script defer src="../assets/app.js"></script>
 
@@ -23,18 +23,141 @@
 <button class="toc-toggle" aria-controls="toc" aria-expanded="false" data-toggle-toc type="button">On this page</button>
 <article class="article">
 <header class="article-header">
-<nav class="breadcrumbs" aria-label="Breadcrumb"><a class="crumb" href="../index.html">Home</a><span class="sep" aria-hidden="true">/</span><span class="crumb">Raw</span><span class="sep" aria-hidden="true">/</span><span class="crumb crumb-current">test_raw_pages.py</span></nav>
+<nav class="breadcrumbs" aria-label="Breadcrumb"><a class="crumb" href="../index.html">Home</a><span class="sep" aria-hidden="true">/</span><span class="crumb">Raw</span><span class="sep" aria-hidden="true">/</span><span class="crumb crumb-current">README.es.md</span></nav>
 </header>
-<div class="article-body"><p class="eyebrow raw-meta">22.3 KB · updated 2026-05-10 · py</p>
-<h1 class="raw-title" title="tests/test_raw_pages.py">test_raw_pages.py</h1>
-<p class="raw-path"><code>tests/test_raw_pages.py</code></p>
-<article class="raw-page"><div class="raw-asset raw-download"><p><a href="" download>Download original file</a></p><p class="muted small">binary or oversized — download to view</p></div></article></div>
+<div class="article-body"><p class="eyebrow raw-meta">9.6 KB · updated 2026-05-10 · md</p>
+<h1 class="raw-title" title="docs/i18n/README.es.md">README.es.md</h1>
+<p class="raw-path"><code>docs/i18n/README.es.md</code></p>
+<article class="raw-page"><section class="markdown-body raw-markdown"><h1 align="center">LLM-Wiki</h1>
+<p align="center">
+  <strong>El compilador de memoria para agentes de programación.</strong>
+  <br />
+  <em>Compila repositorios, documentación, notas de investigación, sesiones de Claude/Codex y herramientas gráficas complementarias en memoria validada para Cognee, MCP, Kuzu, SQLite, llms.txt y documentación estática.</em>
+</p>
+<p align="center">
+  <a href="../raw/readme-md.html">English</a> ·
+  <a href="../raw/docs-i18n-readme-ko-md.html">한국어</a> ·
+  <a href="../raw/docs-i18n-readme-zh-md.html">中文</a> ·
+  <a href="../raw/docs-i18n-readme-ja-md.html">日本語</a> ·
+  <a href="../raw/docs-i18n-readme-ru-md.html">Русский</a> ·
+  <a href="../raw/docs-i18n-readme-es-md.html">Español</a> ·
+  <a href="../raw/docs-i18n-readme-fr-md.html">Français</a>
+</p>
+<p align="center">
+  <a href="#inicio-rápido"><img src="https://img.shields.io/badge/start-project_setup-blue" alt="Configuración del proyecto" /></a>
+  <a href="#cognee--llm-wiki"><img src="https://img.shields.io/badge/Cognee-memory_backend-d4a574" alt="Backend de memoria Cognee" /></a>
+  <a href="#por-qué-lo-usan-los-agentes"><img src="https://img.shields.io/badge/agents-MCP%20%7C%20llms.txt%20%7C%20harness-38bdf8" alt="Exportaciones para agentes" /></a>
+  <a href="#canalización-de-memoria"><img src="https://img.shields.io/badge/graph-validated%20ontology-8A2BE2" alt="Grafo validado" /></a>
+  <a href="../../LICENSE"><img src="https://img.shields.io/github/license/ca1773130n/LLM-Wiki" alt="Licencia" /></a>
+</p>
+<p align="center">
+  <img src="../raw-assets/docs-assets-wiki-graph-screenshot-png.png" alt="Sitio estático de LLM-Wiki que muestra un grafo compilado de memoria del proyecto y un explorador de fuentes" width="100%" />
+</p>
+<hr>
+<h2 id="la-propuesta">La propuesta</h2>
+<p>La mayoría de las herramientas wiki para LLM crean otra página de notas generadas.</p>
+<p><strong>LLM-Wiki construye la capa de memoria desde la que empieza tu próximo agente.</strong> Toma la realidad desordenada de un proyecto — archivos fuente, documentación en Markdown, notas de investigación, transcripciones locales de Claude/Codex y artefactos gráficos externos — y la compila en un sistema de memoria tipado y portátil.</p>
+<p>El sitio web es solo la ventana de cristal. El producto es el artefacto de memoria compilada.</p>
+<div class="table-scroll"><table>
+  <tr>
+    <td width="33%" valign="top">
+      <h3>🧬 Validar la memoria</h3>
+      <p>Restringe nodos y aristas antes de que lleguen a la recuperación. Evita una sopa aleatoria de <code>related_to</code>, entidades duplicadas y esquemas que derivan.</p>
+    </td>
+    <td width="33%" valign="top">
+      <h3>🧠 Preservar el trabajo del agente</h3>
+      <p>Convierte sesiones de Claude Code y Codex en memoria de proyecto consultable: decisiones, comandos, archivos, resúmenes y trazas de herramientas.</p>
+    </td>
+    <td width="33%" valign="top">
+      <h3>🔌 Exportar a todas partes</h3>
+      <p>Envía la misma memoria a Cognee, MCP, Kuzu, SQLite, episodios estilo Graphiti, <code>llms.txt</code>, Markdown y un sitio web estático.</p>
+    </td>
+  </tr>
+</table></div>
+<hr>
+<h2 id="por-qu-lo-usan-los-agentes">Por qué lo usan los agentes</h2>
+<div class="table-scroll"><table class="md-table"><thead><tr><th>Si solo tienes...</th><th>Tu agente todavía tiene que...</th><th>LLM-Wiki le da...</th></tr></thead><tbody><tr><td>Un README</td><td>redescubrir la arquitectura y las decisiones</td><td>memoria de proyecto tipada + procedencia del código fuente</td></tr><tr><td>Un sitio de documentación</td><td>buscar páginas como una persona</td><td>herramientas MCP, <code>llms.txt</code>, grafo JSON, contexto por página</td></tr><tr><td>Una base de datos vectorial</td><td>adivinar relaciones a partir de fragmentos</td><td>nodos, aristas, alias, afirmaciones y evidencias validados</td></tr><tr><td>Un visualizador de grafos</td><td>admirar una imagen</td><td>artefactos de grafo portátiles que los sistemas de recuperación pueden usar</td></tr><tr><td>Historial de chat</td><td>olvidar el trabajo anterior</td><td>sesiones de agentes importadas como memoria duradera</td></tr></tbody></table></div>
+<hr>
+<h2 id="canalizaci-n-de-memoria">Canalización de memoria</h2>
+<pre><code class="language-mermaid">flowchart TB
+  A[&quot;Raw project sources&lt;br/&gt;README · docs · code · research notes&quot;]
+  B[&quot;Agent sessions&lt;br/&gt;Claude Code · Codex · subagents&quot;]
+  C[&quot;Companion artifacts&lt;br/&gt;Understand Anything · external graphs&quot;]
+  D[&quot;LLM-Wiki compiler&lt;br/&gt;detect · refresh · extract · validate&quot;]
+  E[&quot;Typed memory graph&lt;br/&gt;ontology · aliases · evidence · temporal facts&quot;]
+  F[&quot;Runtime memory backends&lt;br/&gt;Cognee · MCP · Kuzu · SQLite&quot;]
+  G[&quot;Agent context exports&lt;br/&gt;llms.txt · harness · JSON · markdown&quot;]
+  H[&quot;Inspectable projections&lt;br/&gt;static wiki · 2D/3D graph · source pages&quot;]
+
+  A --&gt; D
+  B --&gt; D
+  C --&gt; D
+  D --&gt; E
+  E --&gt; F
+  E --&gt; G
+  E --&gt; H</code></pre>
+<hr>
+<h2 id="cognee-llm-wiki">Cognee + LLM-Wiki</h2>
+<p><strong>LLM-Wiki compila memoria. Cognee la recupera.</strong></p>
+<p>Cognee es potente como backend de memoria de IA: recuperación por grafo + vectores, memoria semántica y hooks conscientes de la ontología. Pero la ingesta sin procesar de repositorios/documentación puede volverse ruidosa si la memoria que entra no está restringida.</p>
+<p>LLM-Wiki actúa como el paso de compilación antes de Cognee:</p>
+<div class="table-scroll"><table class="md-table"><thead><tr><th>Capa</th><th>Rol de LLM-Wiki</th><th>Rol de Cognee</th></tr></thead><tbody><tr><td>Captura de fuentes</td><td>rastrea documentación, código, investigación, sesiones y artefactos complementarios</td><td>puede ingerir muchos tipos de datos</td></tr><tr><td>Estructura</td><td>valida tipos de nodos/aristas, alias, evidencia y procedencia</td><td>almacena y recupera memoria semántica</td></tr><tr><td>Runtime</td><td>exporta paquetes Cognee limpios o flujos cognify de Codex/OAuth</td><td>sirve memoria híbrida grafo/vectorial a los agentes</td></tr><tr><td>Seguridad</td><td>mantiene disponibles rutas deterministas/local-first</td><td>añade recuperación de memoria más rica cuando se desea</td></tr></tbody></table></div>
+<pre><code class="language-mermaid">flowchart LR
+  A[&quot;Messy project context&quot;] --&gt; B[&quot;LLM-Wiki&lt;br/&gt;validated memory graph&quot;]
+  B --&gt; C[&quot;Cognee&lt;br/&gt;hybrid graph + vector retrieval&quot;]
+  C --&gt; D[&quot;Coding agents&lt;br/&gt;ask better questions with durable context&quot;]</code></pre>
+<p>Usa Cognee cuando quieras que la memoria compilada se convierta en un sustrato de recuperación en vivo para agentes. Usa LLM-Wiki cuando quieras controlar, validar, exportar e inspeccionar esa memoria antes de que se convierta en contexto de ejecución.</p>
+<hr>
+<h2 id="inicio-r-pido">Inicio rápido</h2>
+<pre><code class="language-bash">pip install llm-wiki
+
+llm_wiki project setup
+llm_wiki project compile
+llm_wiki project build-site
+llm_wiki project serve --port 8765</code></pre>
+<p>Abre:</p>
+<pre><code class="language-text">http://127.0.0.1:8765/</code></pre>
+<p>El asistente de configuración detecta fuentes comunes como <code>README.md</code>, <code>docs</code>, <code>src</code>, <code>data</code> y artefactos complementarios. Tú eliges qué se convierte en memoria; LLM-Wiki escribe la configuración del proyecto.</p>
+<pre><code class="language-text">◆ LLM-Wiki project setup
+Choose sources and companion tools. Press Enter to accept defaults.
+
+Sources
+  ✓ README.md
+  ✓ docs
+  ✓ src
+  ✓ .llm-wiki/external/understand-anything.md
+
+External tools
+  ◆ Understand Anything → .llm-wiki/external/understand-anything.md</code></pre>
+<hr>
+<h2 id="qu-exporta">Qué exporta</h2>
+<div class="table-scroll"><table class="md-table"><thead><tr><th>Salida</th><th>Por qué importa</th></tr></thead><tbody><tr><td><code>cognee_bundle/</code></td><td>artefactos de grafo limpios para flujos de trabajo de memoria estilo Cognee</td></tr><tr><td><code>graph.json</code> / <code>graph.jsonld</code></td><td>grafo de memoria tipado y portátil</td></tr><tr><td><code>sqlite.db</code> / salida Kuzu</td><td>almacenamiento local de grafos consultable</td></tr><tr><td><code>llms.txt</code> / <code>llms-full.txt</code></td><td>paquetes de contexto directos para agentes</td></tr><tr><td>Servidor MCP</td><td><code>search_nodes</code>, <code>node_context</code>, <code>timeline</code> y herramientas de grafo</td></tr><tr><td><code>agent_harness/</code></td><td>configuración para Claude Code, Codex, Gemini, Cursor, Kiro y OpenCode</td></tr><tr><td><code>markdown_projection/</code></td><td>archivos wiki legibles para personas y editores</td></tr><tr><td><code>.llm-wiki/site/</code></td><td>sitio web estático para inspección, uso compartido y depuración</td></tr></tbody></table></div>
+<hr>
+<h2 id="herramientas-complementarias-sin-dependencia-cautiva">Herramientas complementarias, sin dependencia cautiva</h2>
+<p>LLM-Wiki está diseñado para situarse entre herramientas, no para reemplazarlas.</p>
+<div class="table-scroll"><table class="md-table"><thead><tr><th>Herramienta</th><th>Relación</th></tr></thead><tbody><tr><td>Understand Anything</td><td>artefacto independiente de grafo de código → proyección Markdown → memoria compilada</td></tr><tr><td>Cognee</td><td>backend de memoria para recuperación híbrida grafo/vectorial</td></tr><tr><td>Sistemas estilo Graphiti</td><td>ruta de exportación de episodios/hechos temporales</td></tr><tr><td>Obsidian / Markdown</td><td>proyección legible, no la única fuente de verdad</td></tr><tr><td>Claude Code / Codex</td><td>tanto fuente de memoria de sesión como consumidores del contexto compilado</td></tr></tbody></table></div>
+<p>Si tu comando de actualización es un alias o función de shell, envuélvelo explícitamente:</p>
+<pre><code class="language-bash">llm_wiki project setup \
+  --yes \
+  --with-understand-anything \
+  --understand-anything-command &quot;zsh -ic &#x27;reunderstand&#x27;&quot; \
+  --run-understand-anything</code></pre>
+<hr>
+<h2 id="cu-ndo-llm-wiki-es-la-herramienta-adecuada">Cuándo LLM-Wiki es la herramienta adecuada</h2>
+<div class="table-scroll"><table class="md-table"><thead><tr><th>Quieres...</th><th>Usa LLM-Wiki porque...</th></tr></thead><tbody><tr><td>mejor continuidad para agentes de programación</td><td>las sesiones antiguas de Claude/Codex se convierten en memoria consultable</td></tr><tr><td>entradas GraphRAG más seguras</td><td>la validación de esquemas ocurre antes de la recuperación</td></tr><tr><td>flujos de trabajo local-first</td><td>la extracción determinista y las rutas CLI/OAuth evitan el gasto obligatorio en claves API</td></tr><tr><td>memoria de proyecto portátil</td><td>una compilación emite artefactos para Cognee, MCP, SQLite, Kuzu, Markdown, JSON y sitio web</td></tr><tr><td>inspección humana</td><td>el sitio estático te permite depurar lo que recuperarán los agentes</td></tr></tbody></table></div>
+<hr>
+<h2 id="documentaci-n">Documentación</h2>
+<div class="table-scroll"><table class="md-table"><thead><tr><th>Guía</th><th>Qué obtienes</th></tr></thead><tbody><tr><td><a href="../raw/docs-quickstart-md.html">Inicio rápido</a></td><td>primera compilación de memoria de proyecto</td></tr><tr><td><a href="../raw/docs-installation-md.html">Instalación</a></td><td>opciones de instalación y wrappers</td></tr><tr><td><a href="../raw/docs-architecture-md.html">Arquitectura</a></td><td>detalles internos de la canalización y modelo de grafo</td></tr><tr><td><a href="../raw/docs-session-history-md.html">Historial de sesiones</a></td><td>importación de transcripciones de Claude/Codex</td></tr><tr><td><a href="../raw/docs-integrations-understand-anything-md.html">Flujo de trabajo complementario de Understand Anything</a></td><td>actualización y proyección del grafo complementario</td></tr><tr><td><a href="../raw/docs-publishing-checklist-md.html">Lista de verificación de publicación</a></td><td>despliega el sitio estático generado</td></tr></tbody></table></div>
+<hr>
+<p align="center">
+  <strong>No le des a tu próximo agente un repositorio en blanco. Dale memoria compilada.</strong>
+</p></section></article></div>
 <footer class="article-footer">
 
 </footer>
 </article>
 </main>
-<aside class="toc-rail" id="toc" hidden></aside>
+<aside class="toc-rail" id="toc"><aside class="toc" role="doc-toc" aria-label="On this page"><h2>On this page</h2><ol><li data-toc-target="la-propuesta"><a class="toc-l-2" href="#la-propuesta">La propuesta</a></li><li data-toc-target="por-qu-lo-usan-los-agentes"><a class="toc-l-2" href="#por-qu-lo-usan-los-agentes">Por qué lo usan los agentes</a></li><li data-toc-target="canalizaci-n-de-memoria"><a class="toc-l-2" href="#canalizaci-n-de-memoria">Canalización de memoria</a></li><li data-toc-target="cognee-llm-wiki"><a class="toc-l-2" href="#cognee-llm-wiki">Cognee + LLM-Wiki</a></li><li data-toc-target="inicio-r-pido"><a class="toc-l-2" href="#inicio-r-pido">Inicio rápido</a></li><li data-toc-target="qu-exporta"><a class="toc-l-2" href="#qu-exporta">Qué exporta</a></li><li data-toc-target="herramientas-complementarias-sin-dependencia-cautiva"><a class="toc-l-2" href="#herramientas-complementarias-sin-dependencia-cautiva">Herramientas complementarias, sin dependencia cautiva</a></li><li data-toc-target="cu-ndo-llm-wiki-es-la-herramienta-adecuada"><a class="toc-l-2" href="#cu-ndo-llm-wiki-es-la-herramienta-adecuada">Cuándo LLM-Wiki es la herramienta adecuada</a></li><li data-toc-target="documentaci-n"><a class="toc-l-2" href="#documentaci-n">Documentación</a></li></ol></aside></aside>
 </div>
 <nav class="mobile-bottom-nav" aria-label="Quick"><ul><li><a class="" href="../index.html" aria-label="Home"><span class="icon" aria-hidden="true">⌂</span><span class="label">Home</span></a></li><li><a class="" href="../concepts/index.html" aria-label="Concepts"><span class="icon" aria-hidden="true">◆</span><span class="label">Concepts</span></a></li><li><a class="" href="../papers/index.html" aria-label="Papers"><span class="icon" aria-hidden="true">¶</span><span class="label">Papers</span></a></li><li><a class="" href="../syntheses/index.html" aria-label="Syntheses"><span class="icon" aria-hidden="true">✱</span><span class="label">Syntheses</span></a></li><li><a class="" href="../sessions/index.html" aria-label="Sessions"><span class="icon" aria-hidden="true">◷</span><span class="label">Sessions</span></a></li><li><a class="" href="../graph/index.html" aria-label="Graph"><span class="icon" aria-hidden="true">⁂</span><span class="label">Graph</span></a></li></ul></nav>
 <div class="palette" id="palette" hidden role="dialog" aria-modal="true" aria-label="Search palette">

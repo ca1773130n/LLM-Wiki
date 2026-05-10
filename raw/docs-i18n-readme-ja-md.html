@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>test_raw_pages.py · LLM-Wiki</title>
+<title>README.ja.md · LLM-Wiki</title>
 <link rel="stylesheet" href="../assets/style.css">
 <script defer src="../assets/app.js"></script>
 
@@ -23,18 +23,141 @@
 <button class="toc-toggle" aria-controls="toc" aria-expanded="false" data-toggle-toc type="button">On this page</button>
 <article class="article">
 <header class="article-header">
-<nav class="breadcrumbs" aria-label="Breadcrumb"><a class="crumb" href="../index.html">Home</a><span class="sep" aria-hidden="true">/</span><span class="crumb">Raw</span><span class="sep" aria-hidden="true">/</span><span class="crumb crumb-current">test_raw_pages.py</span></nav>
+<nav class="breadcrumbs" aria-label="Breadcrumb"><a class="crumb" href="../index.html">Home</a><span class="sep" aria-hidden="true">/</span><span class="crumb">Raw</span><span class="sep" aria-hidden="true">/</span><span class="crumb crumb-current">README.ja.md</span></nav>
 </header>
-<div class="article-body"><p class="eyebrow raw-meta">22.3 KB · updated 2026-05-10 · py</p>
-<h1 class="raw-title" title="tests/test_raw_pages.py">test_raw_pages.py</h1>
-<p class="raw-path"><code>tests/test_raw_pages.py</code></p>
-<article class="raw-page"><div class="raw-asset raw-download"><p><a href="" download>Download original file</a></p><p class="muted small">binary or oversized — download to view</p></div></article></div>
+<div class="article-body"><p class="eyebrow raw-meta">11.0 KB · updated 2026-05-10 · md</p>
+<h1 class="raw-title" title="docs/i18n/README.ja.md">README.ja.md</h1>
+<p class="raw-path"><code>docs/i18n/README.ja.md</code></p>
+<article class="raw-page"><section class="markdown-body raw-markdown"><h1 align="center">LLM-Wiki</h1>
+<p align="center">
+  <strong>コーディングエージェントのためのメモリコンパイラ。</strong>
+  <br />
+  <em>リポジトリ、ドキュメント、調査メモ、Claude/Codex セッション、補助グラフツールを、Cognee、MCP、Kuzu、SQLite、llms.txt、静的ドキュメント向けの検証済みメモリにコンパイルします。</em>
+</p>
+<p align="center">
+  <a href="../raw/readme-md.html">English</a> ·
+  <a href="../raw/docs-i18n-readme-ko-md.html">한국어</a> ·
+  <a href="../raw/docs-i18n-readme-zh-md.html">中文</a> ·
+  <a href="../raw/docs-i18n-readme-ja-md.html">日本語</a> ·
+  <a href="../raw/docs-i18n-readme-ru-md.html">Русский</a> ·
+  <a href="../raw/docs-i18n-readme-es-md.html">Español</a> ·
+  <a href="../raw/docs-i18n-readme-fr-md.html">Français</a>
+</p>
+<p align="center">
+  <a href="#クイックスタート"><img src="https://img.shields.io/badge/start-project_setup-blue" alt="プロジェクト設定" /></a>
+  <a href="#cognee--llm-wiki"><img src="https://img.shields.io/badge/Cognee-memory_backend-d4a574" alt="Cognee メモリバックエンド" /></a>
+  <a href="#エージェントが使う理由"><img src="https://img.shields.io/badge/agents-MCP%20%7C%20llms.txt%20%7C%20harness-38bdf8" alt="エージェント向けエクスポート" /></a>
+  <a href="#メモリパイプライン"><img src="https://img.shields.io/badge/graph-validated%20ontology-8A2BE2" alt="検証済みグラフ" /></a>
+  <a href="../../LICENSE"><img src="https://img.shields.io/github/license/ca1773130n/LLM-Wiki" alt="ライセンス" /></a>
+</p>
+<p align="center">
+  <img src="../raw-assets/docs-assets-wiki-graph-screenshot-png.png" alt="コンパイル済みプロジェクトメモリグラフとソースエクスプローラーを表示する LLM-Wiki 静的サイト" width="100%" />
+</p>
+<hr>
+<h2 id="section">提案</h2>
+<p>ほとんどの LLM wiki ツールは、生成されたノートページをもう 1 つ作るだけです。</p>
+<p><strong>LLM-Wiki は、次のエージェントが出発点にできるメモリレイヤーを構築します。</strong> ソースファイル、Markdown ドキュメント、調査メモ、ローカルの Claude/Codex トランスクリプト、外部グラフアーティファクトといったプロジェクトの雑多な現実を取り込み、型付きでポータブルなメモリシステムへコンパイルします。</p>
+<p>Web サイトは単なるガラス窓です。製品の本体は、コンパイルされたメモリアーティファクトです。</p>
+<div class="table-scroll"><table>
+  <tr>
+    <td width="33%" valign="top">
+      <h3>🧬 メモリを検証</h3>
+      <p>検索に届く前にノードとエッジを制約します。ランダムな <code>related_to</code> の寄せ集め、重複エンティティ、漂流するスキーマを避けられます。</p>
+    </td>
+    <td width="33%" valign="top">
+      <h3>🧠 エージェント作業を保持</h3>
+      <p>Claude Code と Codex のセッションを、意思決定、コマンド、ファイル、要約、ツールトレースを含む検索可能なプロジェクトメモリに変換します。</p>
+    </td>
+    <td width="33%" valign="top">
+      <h3>🔌 どこへでもエクスポート</h3>
+      <p>同じメモリを Cognee、MCP、Kuzu、SQLite、Graphiti 風エピソード、<code>llms.txt</code>、Markdown、静的 Web サイトへ出力します。</p>
+    </td>
+  </tr>
+</table></div>
+<hr>
+<h2 id="section-2">エージェントが使う理由</h2>
+<div class="table-scroll"><table class="md-table"><thead><tr><th>もし持っているものが...</th><th>エージェントはまだ...</th><th>LLM-Wiki が与えるもの...</th></tr></thead><tbody><tr><td>README</td><td>アーキテクチャと意思決定を再発見する必要があります</td><td>型付きプロジェクトメモリ + ソース来歴</td></tr><tr><td>ドキュメントサイト</td><td>人間のようにページを探す必要があります</td><td>MCP ツール、<code>llms.txt</code>、JSON グラフ、ページごとのコンテキスト</td></tr><tr><td>ベクター DB</td><td>チャンクから関係を推測する必要があります</td><td>検証済みノード、エッジ、エイリアス、主張、証拠</td></tr><tr><td>グラフ可視化ツール</td><td>図を眺めるだけです</td><td>検索システムが使えるポータブルなグラフアーティファクト</td></tr><tr><td>チャット履歴</td><td>過去の作業を忘れてしまいます</td><td>インポートされたエージェントセッションを永続的なメモリとして保存</td></tr></tbody></table></div>
+<hr>
+<h2 id="section-3">メモリパイプライン</h2>
+<pre><code class="language-mermaid">flowchart TB
+  A[&quot;Raw project sources&lt;br/&gt;README · docs · code · research notes&quot;]
+  B[&quot;Agent sessions&lt;br/&gt;Claude Code · Codex · subagents&quot;]
+  C[&quot;Companion artifacts&lt;br/&gt;Understand Anything · external graphs&quot;]
+  D[&quot;LLM-Wiki compiler&lt;br/&gt;detect · refresh · extract · validate&quot;]
+  E[&quot;Typed memory graph&lt;br/&gt;ontology · aliases · evidence · temporal facts&quot;]
+  F[&quot;Runtime memory backends&lt;br/&gt;Cognee · MCP · Kuzu · SQLite&quot;]
+  G[&quot;Agent context exports&lt;br/&gt;llms.txt · harness · JSON · markdown&quot;]
+  H[&quot;Inspectable projections&lt;br/&gt;static wiki · 2D/3D graph · source pages&quot;]
+
+  A --&gt; D
+  B --&gt; D
+  C --&gt; D
+  D --&gt; E
+  E --&gt; F
+  E --&gt; G
+  E --&gt; H</code></pre>
+<hr>
+<h2 id="cognee-llm-wiki">Cognee + LLM-Wiki</h2>
+<p><strong>LLM-Wiki はメモリをコンパイルします。Cognee はそれを検索します。</strong></p>
+<p>Cognee は AI メモリバックエンドとして強力です。グラフ + ベクター検索、セマンティックメモリ、オントロジーを意識したフックを備えています。しかし、取り込むメモリに制約がなければ、生のリポジトリ/ドキュメント取り込みは依然としてノイズが多くなり得ます。</p>
+<p>LLM-Wiki は Cognee の前段のビルドステップとして機能します:</p>
+<div class="table-scroll"><table class="md-table"><thead><tr><th>レイヤー</th><th>LLM-Wiki の役割</th><th>Cognee の役割</th></tr></thead><tbody><tr><td>ソース取得</td><td>ドキュメント、コード、調査、セッション、補助アーティファクトを追跡</td><td>多様なデータ型を取り込める</td></tr><tr><td>構造</td><td>ノード/エッジ型、エイリアス、証拠、来歴を検証</td><td>セマンティックメモリを保存・検索</td></tr><tr><td>ランタイム</td><td>クリーンな Cognee バンドル、または Codex/OAuth cognify フローをエクスポート</td><td>ハイブリッドなグラフ/ベクターメモリをエージェントに提供</td></tr><tr><td>安全性</td><td>決定論的でローカルファーストな経路を維持</td><td>必要に応じてより豊かなメモリ検索を追加</td></tr></tbody></table></div>
+<pre><code class="language-mermaid">flowchart LR
+  A[&quot;Messy project context&quot;] --&gt; B[&quot;LLM-Wiki&lt;br/&gt;validated memory graph&quot;]
+  B --&gt; C[&quot;Cognee&lt;br/&gt;hybrid graph + vector retrieval&quot;]
+  C --&gt; D[&quot;Coding agents&lt;br/&gt;ask better questions with durable context&quot;]</code></pre>
+<p>コンパイル済みメモリをエージェントのためのライブ検索基盤にしたい場合は Cognee を使ってください。そのメモリがランタイムコンテキストになる前に、制御、検証、エクスポート、検査したい場合は LLM-Wiki を使ってください。</p>
+<hr>
+<h2 id="section-4">クイックスタート</h2>
+<pre><code class="language-bash">pip install llm-wiki
+
+llm_wiki project setup
+llm_wiki project compile
+llm_wiki project build-site
+llm_wiki project serve --port 8765</code></pre>
+<p>開く:</p>
+<pre><code class="language-text">http://127.0.0.1:8765/</code></pre>
+<p>セットアップウィザードは、<code>README.md</code>、<code>docs</code>、<code>src</code>、<code>data</code>、補助アーティファクトなどの一般的なソースを検出します。何をメモリにするかを選ぶと、LLM-Wiki がプロジェクト設定を書き込みます。</p>
+<pre><code class="language-text">◆ LLM-Wiki project setup
+Choose sources and companion tools. Press Enter to accept defaults.
+
+Sources
+  ✓ README.md
+  ✓ docs
+  ✓ src
+  ✓ .llm-wiki/external/understand-anything.md
+
+External tools
+  ◆ Understand Anything → .llm-wiki/external/understand-anything.md</code></pre>
+<hr>
+<h2 id="section-5">エクスポートされるもの</h2>
+<div class="table-scroll"><table class="md-table"><thead><tr><th>出力</th><th>重要な理由</th></tr></thead><tbody><tr><td><code>cognee_bundle/</code></td><td>Cognee 風メモリワークフロー向けのクリーンなグラフアーティファクト</td></tr><tr><td><code>graph.json</code> / <code>graph.jsonld</code></td><td>ポータブルな型付きメモリグラフ</td></tr><tr><td><code>sqlite.db</code> / Kuzu 出力</td><td>クエリ可能なローカルグラフストレージ</td></tr><tr><td><code>llms.txt</code> / <code>llms-full.txt</code></td><td>直接使えるエージェントコンテキストパック</td></tr><tr><td>MCP サーバー</td><td><code>search_nodes</code>、<code>node_context</code>、<code>timeline</code>、グラフツール</td></tr><tr><td><code>agent_harness/</code></td><td>Claude Code、Codex、Gemini、Cursor、Kiro、OpenCode の設定</td></tr><tr><td><code>markdown_projection/</code></td><td>人間と編集者向けの読みやすい wiki ファイル</td></tr><tr><td><code>.llm-wiki/site/</code></td><td>検査、共有、デバッグのための静的 Web サイト</td></tr></tbody></table></div>
+<hr>
+<h2 id="section-6">補助ツールであり、ロックインではない</h2>
+<p>LLM-Wiki はツールを置き換えるのではなく、ツールの間に位置するように設計されています。</p>
+<div class="table-scroll"><table class="md-table"><thead><tr><th>ツール</th><th>関係</th></tr></thead><tbody><tr><td>Understand Anything</td><td>独立したコードグラフアーティファクト → Markdown プロジェクション → コンパイル済みメモリ</td></tr><tr><td>Cognee</td><td>ハイブリッドなグラフ/ベクター検索のためのメモリバックエンド</td></tr><tr><td>Graphiti 風システム</td><td>時系列エピソード/ファクトのエクスポート経路</td></tr><tr><td>Obsidian / markdown</td><td>読みやすいプロジェクションであり、唯一の真実の源ではない</td></tr><tr><td>Claude Code / Codex</td><td>セッションメモリのソースであり、コンパイル済みコンテキストの利用者でもある</td></tr></tbody></table></div>
+<p>更新コマンドがシェルのエイリアス/関数である場合は、明示的にラップしてください:</p>
+<pre><code class="language-bash">llm_wiki project setup \
+  --yes \
+  --with-understand-anything \
+  --understand-anything-command &quot;zsh -ic &#x27;reunderstand&#x27;&quot; \
+  --run-understand-anything</code></pre>
+<hr>
+<h2 id="llm-wiki">LLM-Wiki が適したツールである場合</h2>
+<div class="table-scroll"><table class="md-table"><thead><tr><th>望むもの...</th><th>LLM-Wiki を使う理由...</th></tr></thead><tbody><tr><td>より良いコーディングエージェントの継続性</td><td>以前の Claude/Codex セッションが検索可能なメモリになります</td></tr><tr><td>より安全な GraphRAG 入力</td><td>検索の前にスキーマ検証が行われます</td></tr><tr><td>ローカルファーストなワークフロー</td><td>決定論的な抽出と CLI/OAuth 経路により、必須の API キー費用を避けられます</td></tr><tr><td>ポータブルなプロジェクトメモリ</td><td>1 回のコンパイルで Cognee、MCP、SQLite、Kuzu、Markdown、JSON、サイトアーティファクトを出力します</td></tr><tr><td>人間による検査</td><td>静的サイトで、エージェントが検索する内容をデバッグできます</td></tr></tbody></table></div>
+<hr>
+<h2 id="section-7">ドキュメント</h2>
+<div class="table-scroll"><table class="md-table"><thead><tr><th>ガイド</th><th>得られるもの</th></tr></thead><tbody><tr><td><a href="../raw/docs-quickstart-md.html">クイックスタート</a></td><td>最初のプロジェクトメモリコンパイル</td></tr><tr><td><a href="../raw/docs-installation-md.html">インストール</a></td><td>インストールオプションとラッパー</td></tr><tr><td><a href="../raw/docs-architecture-md.html">アーキテクチャ</a></td><td>パイプライン内部とグラフモデル</td></tr><tr><td><a href="../raw/docs-session-history-md.html">セッション履歴</a></td><td>Claude/Codex トランスクリプトのインポート</td></tr><tr><td><a href="../raw/docs-integrations-understand-anything-md.html">Understand Anything 補助ワークフロー</a></td><td>補助グラフの更新とプロジェクション</td></tr><tr><td><a href="../raw/docs-publishing-checklist-md.html">公開チェックリスト</a></td><td>生成された静的サイトのデプロイ</td></tr></tbody></table></div>
+<hr>
+<p align="center">
+  <strong>次のエージェントに空のリポジトリを渡さないでください。コンパイル済みメモリを渡しましょう。</strong>
+</p></section></article></div>
 <footer class="article-footer">
 
 </footer>
 </article>
 </main>
-<aside class="toc-rail" id="toc" hidden></aside>
+<aside class="toc-rail" id="toc"><aside class="toc" role="doc-toc" aria-label="On this page"><h2>On this page</h2><ol><li data-toc-target="section"><a class="toc-l-2" href="#section">提案</a></li><li data-toc-target="section-2"><a class="toc-l-2" href="#section-2">エージェントが使う理由</a></li><li data-toc-target="section-3"><a class="toc-l-2" href="#section-3">メモリパイプライン</a></li><li data-toc-target="cognee-llm-wiki"><a class="toc-l-2" href="#cognee-llm-wiki">Cognee + LLM-Wiki</a></li><li data-toc-target="section-4"><a class="toc-l-2" href="#section-4">クイックスタート</a></li><li data-toc-target="section-5"><a class="toc-l-2" href="#section-5">エクスポートされるもの</a></li><li data-toc-target="section-6"><a class="toc-l-2" href="#section-6">補助ツールであり、ロックインではない</a></li><li data-toc-target="llm-wiki"><a class="toc-l-2" href="#llm-wiki">LLM-Wiki が適したツールである場合</a></li><li data-toc-target="section-7"><a class="toc-l-2" href="#section-7">ドキュメント</a></li></ol></aside></aside>
 </div>
 <nav class="mobile-bottom-nav" aria-label="Quick"><ul><li><a class="" href="../index.html" aria-label="Home"><span class="icon" aria-hidden="true">⌂</span><span class="label">Home</span></a></li><li><a class="" href="../concepts/index.html" aria-label="Concepts"><span class="icon" aria-hidden="true">◆</span><span class="label">Concepts</span></a></li><li><a class="" href="../papers/index.html" aria-label="Papers"><span class="icon" aria-hidden="true">¶</span><span class="label">Papers</span></a></li><li><a class="" href="../syntheses/index.html" aria-label="Syntheses"><span class="icon" aria-hidden="true">✱</span><span class="label">Syntheses</span></a></li><li><a class="" href="../sessions/index.html" aria-label="Sessions"><span class="icon" aria-hidden="true">◷</span><span class="label">Sessions</span></a></li><li><a class="" href="../graph/index.html" aria-label="Graph"><span class="icon" aria-hidden="true">⁂</span><span class="label">Graph</span></a></li></ul></nav>
 <div class="palette" id="palette" hidden role="dialog" aria-modal="true" aria-label="Search palette">

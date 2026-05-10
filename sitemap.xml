@@ -4741,6 +4741,12 @@
     <priority>0.6</priority>
   </url>
   <url>
+    <loc>raw/license.html</loc>
+    <lastmod>2024-11-16T00:00:00Z</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.4</priority>
+  </url>
+  <url>
     <loc>raw/readme-md.html</loc>
     <lastmod>2024-08-31T00:00:00Z</lastmod>
     <changefreq>monthly</changefreq>
@@ -6369,6 +6375,42 @@
   <url>
     <loc>raw/docs-frontend-redesign-md.html</loc>
     <lastmod>2024-01-20T00:00:00Z</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.4</priority>
+  </url>
+  <url>
+    <loc>raw/docs-i18n-readme-es-md.html</loc>
+    <lastmod>2024-04-20T00:00:00Z</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.4</priority>
+  </url>
+  <url>
+    <loc>raw/docs-i18n-readme-fr-md.html</loc>
+    <lastmod>2024-12-17T00:00:00Z</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.4</priority>
+  </url>
+  <url>
+    <loc>raw/docs-i18n-readme-ja-md.html</loc>
+    <lastmod>2024-07-06T00:00:00Z</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.4</priority>
+  </url>
+  <url>
+    <loc>raw/docs-i18n-readme-ko-md.html</loc>
+    <lastmod>2024-12-16T00:00:00Z</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.4</priority>
+  </url>
+  <url>
+    <loc>raw/docs-i18n-readme-ru-md.html</loc>
+    <lastmod>2024-01-28T00:00:00Z</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.4</priority>
+  </url>
+  <url>
+    <loc>raw/docs-i18n-readme-zh-md.html</loc>
+    <lastmod>2024-02-24T00:00:00Z</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.4</priority>
   </url>

@@ -1,5 +1,5 @@
 {
-  "file_count": 3360,
+  "file_count": 3379,
   "files": [
     {
       "path": "about.html",
@@ -5938,7 +5938,7 @@
     },
     {
       "path": "graph.jsonld",
-      "sha256": "cea608bc82add36f85e8c431fcdf1fc38a9d3b8c2d68bd825503e18418accc01",
+      "sha256": "11d66400624c2c20d516feeee37041702bca8f2fb7e468e26f614956bbf6c864",
       "size": 339166
     },
     {
@@ -6598,8 +6598,8 @@
     },
     {
       "path": "papers/t-r-o-grasp-cross-embodiment-dexterous-grasping을-위한-robot-object-spatial-t-e5dccb3a.html",
-      "sha256": "48bfcfbf9cfdb42debbfe64b047f6db109d11d93527e91cc0baab6299c11eed1",
-      "size": 151193
+      "sha256": "5d3496f394faf9752f26e33beb094160a2ee4ff8fe91d2d0b6a324947f63c98a",
+      "size": 151170
     },
     {
       "path": "papers/t-r-o-grasp-cross-embodiment-dexterous-grasping을-위한-robot-object-spatial-t-e5dccb3a.json",
@@ -10852,6 +10852,96 @@
       "size": 21333
     },
     {
+      "path": "raw/docs-i18n-readme-es-md.html",
+      "sha256": "186903b3995656975c5c4b40713e36e6e67f52711f31d66e7a9aaf84dd055e5d",
+      "size": 156557
+    },
+    {
+      "path": "raw/docs-i18n-readme-es-md.json",
+      "sha256": "39f83b87e67c7c280d463e1fdf7932454b298eb234571fe01879108986ab7832",
+      "size": 20428
+    },
+    {
+      "path": "raw/docs-i18n-readme-es-md.txt",
+      "sha256": "94505dbb5e068faccc67e95fc10172d755dfef890db5495ee43aa7c8dde6db01",
+      "size": 9846
+    },
+    {
+      "path": "raw/docs-i18n-readme-fr-md.html",
+      "sha256": "bd391b1bc751ffa3da578bfcc4f22688c2aa323ea913bbc093909cee5339e3d1",
+      "size": 156636
+    },
+    {
+      "path": "raw/docs-i18n-readme-fr-md.json",
+      "sha256": "4c6d6f91dd34a5a7376b2e06eed8353777eab42f5fa8d7cf5dc4fa5040343abb",
+      "size": 20712
+    },
+    {
+      "path": "raw/docs-i18n-readme-fr-md.txt",
+      "sha256": "c2d261894d2c3378d872c54f0d1a5c74ed38ec9e864592ac29f07084f2616c9f",
+      "size": 9988
+    },
+    {
+      "path": "raw/docs-i18n-readme-ja-md.html",
+      "sha256": "bc25615c9ee59bc71d7f9bd345165a112dff7f8b761967cfee6f409eec4accd4",
+      "size": 157709
+    },
+    {
+      "path": "raw/docs-i18n-readme-ja-md.json",
+      "sha256": "5514e721fb90fbe0721e83babcf68e4921d74e5778473d501d17f17dc35a9560",
+      "size": 23382
+    },
+    {
+      "path": "raw/docs-i18n-readme-ja-md.txt",
+      "sha256": "e4c29fc3aeeefe11f2f8f9af614a5151c36b16fc83cb6967fa212c731e634eef",
+      "size": 11323
+    },
+    {
+      "path": "raw/docs-i18n-readme-ko-md.html",
+      "sha256": "661f90dac9eacb4fd62373c059f023aa5ca178db4541747d948d5e5a614e2720",
+      "size": 156178
+    },
+    {
+      "path": "raw/docs-i18n-readme-ko-md.json",
+      "sha256": "532dff140a9e33dafdcd2fa5f97f1a29ac143ae4267974a48b16e2941e2d1de8",
+      "size": 20476
+    },
+    {
+      "path": "raw/docs-i18n-readme-ko-md.txt",
+      "sha256": "4b8e82fceedcd703c3cdce941bb3fbc3a1515facc8a636664cfd1c2e44f89a57",
+      "size": 9870
+    },
+    {
+      "path": "raw/docs-i18n-readme-ru-md.html",
+      "sha256": "bacc76c2c01a9f36ff514227f6a957f4cc49678851044374b1e48cca15339f35",
+      "size": 159605
+    },
+    {
+      "path": "raw/docs-i18n-readme-ru-md.json",
+      "sha256": "5caa91b3fcacd763413d7a48bba678e28e831dc210565e9ef4ae81e74695b2b8",
+      "size": 27008
+    },
+    {
+      "path": "raw/docs-i18n-readme-ru-md.txt",
+      "sha256": "a07736b9dcfe21691309261263dd9b14b3f131c3a19c2fdf7752f52aff3b4cc4",
+      "size": 13136
+    },
+    {
+      "path": "raw/docs-i18n-readme-zh-md.html",
+      "sha256": "0b1fb1627239794392fcf48591aff766fc29ce88b2f5d4efbd54fc0d7093377f",
+      "size": 154843
+    },
+    {
+      "path": "raw/docs-i18n-readme-zh-md.json",
+      "sha256": "5b3aada9b26b33c82b922e4c129b846d2cc6db7f7108f796c29d6ff0e62fdff9",
+      "size": 17818
+    },
+    {
+      "path": "raw/docs-i18n-readme-zh-md.txt",
+      "sha256": "7871840127b1298def26df1e88afa6941b090cf10ce0eae8e1ef81420c0fb4ea",
+      "size": 8541
+    },
+    {
       "path": "raw/docs-installation-md.html",
       "sha256": "8850fea8f0b2e69330cb3fedfde04f2d62ed5e9bf0d5087f3c2f00c049268485",
       "size": 147288
@@ -11030,6 +11120,11 @@
       "path": "raw/docs-synthesis-llm-md.txt",
       "sha256": "e09c8b158ab7c919ff3cb55c82cd86bc8e151a3e96bc135e791a27579a11bbce",
       "size": 9272
+    },
+    {
+      "path": "raw/license.html",
+      "sha256": "7923f1788815bd0708e5182e0dc16d9ac38d1403e1436f037aa4b0ad471b5dcb",
+      "size": 142945
     },
     {
       "path": "raw/llm-wiki-agent-harness-py.html",
@@ -11238,7 +11333,7 @@
     },
     {
       "path": "raw/llm-wiki-site-raw-view-py.html",
-      "sha256": "e8570fabe3b8cf493bcb665884ab8183625af77aac78de9edbb10f9d2e410339",
+      "sha256": "d276816d49477821125626a8ca32b11daca5616382cbcb4cbd241bb312b5d888",
       "size": 142992
     },
     {
@@ -11638,7 +11733,7 @@
     },
     {
       "path": "raw/tests-test-raw-pages-py.html",
-      "sha256": "d4758d34849895a7cd7197887444c3560e1d97b33ccebd1e42aed2d9b6a93dc2",
+      "sha256": "c3baf39ba3491b5033dc77e788bfa7d2030bb8357765acc27475f308afff7226",
       "size": 143006
     },
     {
@@ -13833,18 +13928,18 @@
     },
     {
       "path": "rss.xml",
-      "sha256": "8bf222dcc67aae4a4dbd3ef68c9239530559c1d736be7f23b8f9f0cd7aa0c4b1",
+      "sha256": "30f5b0817e7dd8d45b1d83b958a61d69ff71609bc3a6a5db7a40f09fdeb4b3f7",
       "size": 33660
     },
     {
       "path": "search-index.json",
-      "sha256": "262c454bde1fe6d4069b394e2aabd1c8be896bc8277d3c88a0b9ba79306dfc7c",
+      "sha256": "7269b21a8b1a38f363795bf3c94de48af2c36dd2c47ff24835221b0f66e97190",
       "size": 839244
     },
     {
       "path": "search-index.json.gz",
-      "sha256": "77efb01e683ae7ef55e7d56c36b658899f9933a157281eb125bf073914ad84d3",
-      "size": 95931
+      "sha256": "99e5fe9b69896d2881430aaeb77d5e40817d9074c30f423b71f53578256023fe",
+      "size": 96121
     },
     {
       "path": "sessions/index.html",
@@ -14408,8 +14503,8 @@
     },
     {
       "path": "sitemap.xml",
-      "sha256": "0c3e868d91ff3af9345b57c6e775459312ba9dbb6af577dd599207578939e9e6",
-      "size": 223503
+      "sha256": "48cf6bd2c6434093af1145744bc84544397a145341b47598b76ea4e82c6f7034",
+      "size": 224706
     },
     {
       "path": "sources/architecture-fixture.html",
