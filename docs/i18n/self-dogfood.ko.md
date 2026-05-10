@@ -1,20 +1,20 @@
-# Self-dogfood Demo
+# Self-dogfood 데모
 
 <!-- translations:start -->
-<p align="center"><a href="i18n/self-dogfood.ko.md">한국어</a> · <a href="i18n/self-dogfood.zh.md">中文</a> · <a href="i18n/self-dogfood.ja.md">日本語</a> · <a href="i18n/self-dogfood.ru.md">Русский</a> · <a href="i18n/self-dogfood.es.md">Español</a> · <a href="i18n/self-dogfood.fr.md">Français</a></p>
+<p align="center"><a href="../self-dogfood.md">English</a> · <a href="self-dogfood.ko.md">한국어</a> · <a href="self-dogfood.zh.md">中文</a> · <a href="self-dogfood.ja.md">日本語</a> · <a href="self-dogfood.ru.md">Русский</a> · <a href="self-dogfood.es.md">Español</a> · <a href="self-dogfood.fr.md">Français</a></p>
 <!-- translations:end -->
-This project can index itself. The self-dogfood flow proves that LLM-Wiki can be installed, set up inside its own repository, ingest its own docs/source/tests/scripts, optionally refresh Understand Anything and Cognee, compile graph artifacts, and build the static web frontend.
+이 프로젝트는 자기 자신을 인덱싱할 수 있습니다. self-dogfood 흐름은 LLM-Wiki를 설치하고, 자체 저장소 안에서 설정하고, 자체 docs/source/tests/scripts를 수집하며, 선택적으로 Understand Anything과 Cognee를 새로고침하고, 그래프 아티팩트를 컴파일하고, 정적 웹 프론트엔드를 빌드할 수 있음을 증명합니다.
 
-## Commands
+## 명령
 
-From the repository root:
+저장소 루트에서:
 
 ```bash
-# Ensure the shell command is installed.
+# shell 명령이 설치되어 있는지 확인합니다.
 ./scripts/install.sh --dir "$PWD"
 export PATH="$HOME/.local/bin:$PATH"
 
-# Set up this repository as an LLM-Wiki project.
+# 이 저장소를 LLM-Wiki 프로젝트로 설정합니다.
 llm_wiki project setup \
   --yes \
   --name llm_wiki_self \
@@ -29,31 +29,31 @@ llm_wiki project setup \
   --run-cognee \
   --install-cognee
 
-# Compile the configured sources.
+# 구성된 소스를 컴파일합니다.
 llm_wiki project compile
 
-# Rebuild the static frontend explicitly.
+# 정적 프론트엔드를 명시적으로 다시 빌드합니다.
 llm_wiki project build-site
 
-# Serve locally.
+# 로컬에서 제공합니다.
 llm_wiki project serve --port 8765
 ```
 
-Open:
+열기:
 
 ```text
 http://127.0.0.1:8765/
 ```
 
-## Generated workspace
+## 생성된 워크스페이스
 
-The self-demo writes generated artifacts under:
+self-demo는 생성된 아티팩트를 다음 위치에 씁니다:
 
 ```text
 .llm-wiki/
 ```
 
-Key artifacts:
+주요 아티팩트:
 
 ```text
 .llm-wiki/config.json
@@ -71,11 +71,11 @@ Key artifacts:
 .llm-wiki/cognee_bundle/
 ```
 
-The generated workspace is intentionally not committed by default. It is reproducible from the repository source with the commands above.
+생성된 워크스페이스는 기본적으로 커밋하지 않도록 의도되어 있습니다. 위 명령으로 저장소 소스에서 재현할 수 있습니다.
 
-## Latest verified run
+## 최근 검증된 실행
 
-Verified on `2026-04-27 11:11:23 KST` from the LLM-Wiki repository itself.
+LLM-Wiki 저장소 자체에서 `2026-04-27 11:11:23 KST`에 검증되었습니다.
 
 ```text
 install command: ./scripts/install.sh --dir /Users/neo/Developer/Projects/LLM-Wiki --skip-shell-config
@@ -88,7 +88,7 @@ local URL:       http://127.0.0.1:56821/
 LAN URL:         http://192.168.45.130:56821/
 ```
 
-Final artifact counts:
+최종 아티팩트 수:
 
 ```text
 nodes:               667
@@ -105,7 +105,7 @@ node pages:          687
 source pages:        56
 ```
 
-Top node types:
+상위 노드 유형:
 
 ```text
 CodeFunction:    452
@@ -117,7 +117,7 @@ SourceDocument:    7
 CodeProject:       1
 ```
 
-Browser verification:
+브라우저 검증:
 
 ```text
 loaded title: Home · llm_wiki_self
@@ -129,11 +129,11 @@ console: no JavaScript errors on home, sources, source detail, or graph pages
 server: TCP *:56821 LISTEN, serving via --host 0.0.0.0
 ```
 
-## What this demonstrates
+## 이것이 보여주는 것
 
-- Public install path works.
-- `llm_wiki` shell command works.
-- A repository can attach a project-local `.llm-wiki` workspace.
-- Research/documentation markdown and development-code graph nodes can coexist.
-- Markdown, Obsidian, frontend, Graphiti, Cognee, SQLite, report, and agent-harness projections are produced from one graph pipeline.
-- The static HTML frontend can browse the project graph without a JavaScript build step.
+- 공개 설치 경로가 동작합니다.
+- `llm_wiki` shell 명령이 동작합니다.
+- 저장소가 프로젝트 로컬 `.llm-wiki` 워크스페이스를 연결할 수 있습니다.
+- 연구/문서 markdown과 개발 코드 그래프 노드가 공존할 수 있습니다.
+- Markdown, Obsidian, frontend, Graphiti, Cognee, SQLite, report, agent-harness 투영이 하나의 그래프 파이프라인에서 생성됩니다.
+- 정적 HTML 프론트엔드는 JavaScript 빌드 단계 없이 프로젝트 그래프를 탐색할 수 있습니다.

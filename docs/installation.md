@@ -1,5 +1,8 @@
 # Installation
 
+<!-- translations:start -->
+<p align="center"><a href="i18n/installation.ko.md">한국어</a> · <a href="i18n/installation.zh.md">中文</a> · <a href="i18n/installation.ja.md">日本語</a> · <a href="i18n/installation.ru.md">Русский</a> · <a href="i18n/installation.es.md">Español</a> · <a href="i18n/installation.fr.md">Français</a></p>
+<!-- translations:end -->
 LLM-Wiki is published on PyPI and exposes shell commands so users do not have to run `python3 -m llm_wiki.cli` manually.
 
 ## Install from PyPI (recommended)

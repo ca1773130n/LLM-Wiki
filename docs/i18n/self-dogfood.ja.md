@@ -1,20 +1,20 @@
-# Self-dogfood Demo
+# Self-dogfood デモ
 
 <!-- translations:start -->
-<p align="center"><a href="i18n/self-dogfood.ko.md">한국어</a> · <a href="i18n/self-dogfood.zh.md">中文</a> · <a href="i18n/self-dogfood.ja.md">日本語</a> · <a href="i18n/self-dogfood.ru.md">Русский</a> · <a href="i18n/self-dogfood.es.md">Español</a> · <a href="i18n/self-dogfood.fr.md">Français</a></p>
+<p align="center"><a href="../self-dogfood.md">English</a> · <a href="self-dogfood.ko.md">한국어</a> · <a href="self-dogfood.zh.md">中文</a> · <a href="self-dogfood.ja.md">日本語</a> · <a href="self-dogfood.ru.md">Русский</a> · <a href="self-dogfood.es.md">Español</a> · <a href="self-dogfood.fr.md">Français</a></p>
 <!-- translations:end -->
-This project can index itself. The self-dogfood flow proves that LLM-Wiki can be installed, set up inside its own repository, ingest its own docs/source/tests/scripts, optionally refresh Understand Anything and Cognee, compile graph artifacts, and build the static web frontend.
+このプロジェクトは自分自身をインデックスできます。self-dogfood フローは、LLM-Wiki をインストールし、自身のリポジトリ内で設定し、自身の docs/source/tests/scripts を取り込み、任意で Understand Anything と Cognee を更新し、グラフ成果物をコンパイルし、静的 Web フロントエンドをビルドできることを証明します。
 
-## Commands
+## コマンド
 
-From the repository root:
+リポジトリルートから:
 
 ```bash
-# Ensure the shell command is installed.
+# shell コマンドがインストールされていることを確認します。
 ./scripts/install.sh --dir "$PWD"
 export PATH="$HOME/.local/bin:$PATH"
 
-# Set up this repository as an LLM-Wiki project.
+# このリポジトリを LLM-Wiki プロジェクトとして設定します。
 llm_wiki project setup \
   --yes \
   --name llm_wiki_self \
@@ -29,31 +29,31 @@ llm_wiki project setup \
   --run-cognee \
   --install-cognee
 
-# Compile the configured sources.
+# 設定済みソースをコンパイルします。
 llm_wiki project compile
 
-# Rebuild the static frontend explicitly.
+# 静的フロントエンドを明示的に再ビルドします。
 llm_wiki project build-site
 
-# Serve locally.
+# ローカルで配信します。
 llm_wiki project serve --port 8765
 ```
 
-Open:
+開く:
 
 ```text
 http://127.0.0.1:8765/
 ```
 
-## Generated workspace
+## 生成されるワークスペース
 
-The self-demo writes generated artifacts under:
+self-demo は生成された成果物を次の場所に書き込みます:
 
 ```text
 .llm-wiki/
 ```
 
-Key artifacts:
+主要な成果物:
 
 ```text
 .llm-wiki/config.json
@@ -71,11 +71,11 @@ Key artifacts:
 .llm-wiki/cognee_bundle/
 ```
 
-The generated workspace is intentionally not committed by default. It is reproducible from the repository source with the commands above.
+生成されたワークスペースは、デフォルトではコミットしないことを意図しています。上記のコマンドでリポジトリソースから再現できます。
 
-## Latest verified run
+## 最新の検証済み実行
 
-Verified on `2026-04-27 11:11:23 KST` from the LLM-Wiki repository itself.
+LLM-Wiki リポジトリ自身から `2026-04-27 11:11:23 KST` に検証済みです。
 
 ```text
 install command: ./scripts/install.sh --dir /Users/neo/Developer/Projects/LLM-Wiki --skip-shell-config
@@ -88,7 +88,7 @@ local URL:       http://127.0.0.1:56821/
 LAN URL:         http://192.168.45.130:56821/
 ```
 
-Final artifact counts:
+最終成果物数:
 
 ```text
 nodes:               667
@@ -105,7 +105,7 @@ node pages:          687
 source pages:        56
 ```
 
-Top node types:
+上位ノードタイプ:
 
 ```text
 CodeFunction:    452
@@ -117,7 +117,7 @@ SourceDocument:    7
 CodeProject:       1
 ```
 
-Browser verification:
+ブラウザ検証:
 
 ```text
 loaded title: Home · llm_wiki_self
@@ -129,11 +129,11 @@ console: no JavaScript errors on home, sources, source detail, or graph pages
 server: TCP *:56821 LISTEN, serving via --host 0.0.0.0
 ```
 
-## What this demonstrates
+## これが示すこと
 
-- Public install path works.
-- `llm_wiki` shell command works.
-- A repository can attach a project-local `.llm-wiki` workspace.
-- Research/documentation markdown and development-code graph nodes can coexist.
-- Markdown, Obsidian, frontend, Graphiti, Cognee, SQLite, report, and agent-harness projections are produced from one graph pipeline.
-- The static HTML frontend can browse the project graph without a JavaScript build step.
+- 公開インストール経路が動作します。
+- `llm_wiki` shell コマンドが動作します。
+- リポジトリはプロジェクトローカルの `.llm-wiki` ワークスペースを接続できます。
+- 研究/ドキュメント markdown と開発コードのグラフノードが共存できます。
+- Markdown、Obsidian、frontend、Graphiti、Cognee、SQLite、report、agent-harness の投影が 1 つのグラフパイプラインから生成されます。
+- 静的 HTML フロントエンドは、JavaScript ビルド手順なしでプロジェクトグラフを閲覧できます。

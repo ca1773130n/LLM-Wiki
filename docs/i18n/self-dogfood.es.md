@@ -1,20 +1,20 @@
-# Self-dogfood Demo
+# Demo Self-dogfood
 
 <!-- translations:start -->
-<p align="center"><a href="i18n/self-dogfood.ko.md">한국어</a> · <a href="i18n/self-dogfood.zh.md">中文</a> · <a href="i18n/self-dogfood.ja.md">日本語</a> · <a href="i18n/self-dogfood.ru.md">Русский</a> · <a href="i18n/self-dogfood.es.md">Español</a> · <a href="i18n/self-dogfood.fr.md">Français</a></p>
+<p align="center"><a href="../self-dogfood.md">English</a> · <a href="self-dogfood.ko.md">한국어</a> · <a href="self-dogfood.zh.md">中文</a> · <a href="self-dogfood.ja.md">日本語</a> · <a href="self-dogfood.ru.md">Русский</a> · <a href="self-dogfood.es.md">Español</a> · <a href="self-dogfood.fr.md">Français</a></p>
 <!-- translations:end -->
-This project can index itself. The self-dogfood flow proves that LLM-Wiki can be installed, set up inside its own repository, ingest its own docs/source/tests/scripts, optionally refresh Understand Anything and Cognee, compile graph artifacts, and build the static web frontend.
+Este proyecto puede indexarse a sí mismo. El flujo self-dogfood demuestra que LLM-Wiki puede instalarse, configurarse dentro de su propio repositorio, ingerir sus propios docs/source/tests/scripts, actualizar opcionalmente Understand Anything y Cognee, compilar artefactos de grafo y construir el frontend web estático.
 
-## Commands
+## Comandos
 
-From the repository root:
+Desde la raíz del repositorio:
 
 ```bash
-# Ensure the shell command is installed.
+# Asegúrate de que el comando de shell esté instalado.
 ./scripts/install.sh --dir "$PWD"
 export PATH="$HOME/.local/bin:$PATH"
 
-# Set up this repository as an LLM-Wiki project.
+# Configura este repositorio como un proyecto LLM-Wiki.
 llm_wiki project setup \
   --yes \
   --name llm_wiki_self \
@@ -29,31 +29,31 @@ llm_wiki project setup \
   --run-cognee \
   --install-cognee
 
-# Compile the configured sources.
+# Compila las fuentes configuradas.
 llm_wiki project compile
 
-# Rebuild the static frontend explicitly.
+# Reconstruye explícitamente el frontend estático.
 llm_wiki project build-site
 
-# Serve locally.
+# Sirve localmente.
 llm_wiki project serve --port 8765
 ```
 
-Open:
+Abre:
 
 ```text
 http://127.0.0.1:8765/
 ```
 
-## Generated workspace
+## Workspace generado
 
-The self-demo writes generated artifacts under:
+La self-demo escribe los artefactos generados bajo:
 
 ```text
 .llm-wiki/
 ```
 
-Key artifacts:
+Artefactos clave:
 
 ```text
 .llm-wiki/config.json
@@ -71,11 +71,11 @@ Key artifacts:
 .llm-wiki/cognee_bundle/
 ```
 
-The generated workspace is intentionally not committed by default. It is reproducible from the repository source with the commands above.
+El workspace generado no se confirma por defecto de forma intencional. Es reproducible desde el código fuente del repositorio con los comandos anteriores.
 
-## Latest verified run
+## Última ejecución verificada
 
-Verified on `2026-04-27 11:11:23 KST` from the LLM-Wiki repository itself.
+Verificado el `2026-04-27 11:11:23 KST` desde el propio repositorio LLM-Wiki.
 
 ```text
 install command: ./scripts/install.sh --dir /Users/neo/Developer/Projects/LLM-Wiki --skip-shell-config
@@ -88,7 +88,7 @@ local URL:       http://127.0.0.1:56821/
 LAN URL:         http://192.168.45.130:56821/
 ```
 
-Final artifact counts:
+Conteos finales de artefactos:
 
 ```text
 nodes:               667
@@ -105,7 +105,7 @@ node pages:          687
 source pages:        56
 ```
 
-Top node types:
+Tipos de nodo principales:
 
 ```text
 CodeFunction:    452
@@ -117,7 +117,7 @@ SourceDocument:    7
 CodeProject:       1
 ```
 
-Browser verification:
+Verificación en navegador:
 
 ```text
 loaded title: Home · llm_wiki_self
@@ -129,11 +129,11 @@ console: no JavaScript errors on home, sources, source detail, or graph pages
 server: TCP *:56821 LISTEN, serving via --host 0.0.0.0
 ```
 
-## What this demonstrates
+## Qué demuestra esto
 
-- Public install path works.
-- `llm_wiki` shell command works.
-- A repository can attach a project-local `.llm-wiki` workspace.
-- Research/documentation markdown and development-code graph nodes can coexist.
-- Markdown, Obsidian, frontend, Graphiti, Cognee, SQLite, report, and agent-harness projections are produced from one graph pipeline.
-- The static HTML frontend can browse the project graph without a JavaScript build step.
+- La ruta de instalación pública funciona.
+- El comando de shell `llm_wiki` funciona.
+- Un repositorio puede adjuntar un workspace `.llm-wiki` local al proyecto.
+- El markdown de investigación/documentación y los nodos de grafo de código de desarrollo pueden coexistir.
+- Las proyecciones Markdown, Obsidian, frontend, Graphiti, Cognee, SQLite, report y agent-harness se producen desde una sola canalización de grafo.
+- El frontend HTML estático puede explorar el grafo del proyecto sin un paso de compilación JavaScript.

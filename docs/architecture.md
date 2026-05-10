@@ -1,5 +1,8 @@
 # Architecture
 
+<!-- translations:start -->
+<p align="center"><a href="i18n/architecture.ko.md">한국어</a> · <a href="i18n/architecture.zh.md">中文</a> · <a href="i18n/architecture.ja.md">日本語</a> · <a href="i18n/architecture.ru.md">Русский</a> · <a href="i18n/architecture.es.md">Español</a> · <a href="i18n/architecture.fr.md">Français</a></p>
+<!-- translations:end -->
 LLM-Wiki turns a directory of source material into a controlled, typed knowledge graph and projects that graph through a durable markdown wiki layer into a static, AI-friendly website. The April 2026 redesign reorganised the system around a Karpathy three-layer model: raw evidence stays raw, a typed graph governs ontology, and a markdown wiki layer sits between the graph and any rendered output. The static site is now a *renderer* of that wiki layer rather than a direct dump of the graph, with the controlled ontology in [`llm_wiki/research_graph.py`](../llm_wiki/research_graph.py) as the schema.
 
 ## The Karpathy three-layer model

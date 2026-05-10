@@ -1,5 +1,8 @@
 # LLM-Backed Synthesis Prose
 
+<!-- translations:start -->
+<p align="center"><a href="i18n/synthesis-llm.ko.md">한국어</a> · <a href="i18n/synthesis-llm.zh.md">中文</a> · <a href="i18n/synthesis-llm.ja.md">日本語</a> · <a href="i18n/synthesis-llm.ru.md">Русский</a> · <a href="i18n/synthesis-llm.es.md">Español</a> · <a href="i18n/synthesis-llm.fr.md">Français</a></p>
+<!-- translations:end -->
 LLM-Wiki ships with two synthesis paths. The default is a deterministic
 heuristic that never calls a network: it produces predictable, idempotent
 markdown templates from the research graph. The optional **LLM upgrade

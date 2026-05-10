@@ -1,5 +1,8 @@
 # Understand Anything companion workflow
 
+<!-- translations:start -->
+<p align="center"><a href="../i18n/integrations/understand-anything.ko.md">한국어</a> · <a href="../i18n/integrations/understand-anything.zh.md">中文</a> · <a href="../i18n/integrations/understand-anything.ja.md">日本語</a> · <a href="../i18n/integrations/understand-anything.ru.md">Русский</a> · <a href="../i18n/integrations/understand-anything.es.md">Español</a> · <a href="../i18n/integrations/understand-anything.fr.md">Français</a></p>
+<!-- translations:end -->
 [Understand Anything](https://github.com/Lum1104/Understand-Anything) and LLM-Wiki are complementary projects.
 
 - Understand Anything is great at producing a codebase knowledge graph and interactive dashboard.

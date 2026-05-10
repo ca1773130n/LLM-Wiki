@@ -1,20 +1,20 @@
-# Self-dogfood Demo
+# Self-dogfood 演示
 
 <!-- translations:start -->
-<p align="center"><a href="i18n/self-dogfood.ko.md">한국어</a> · <a href="i18n/self-dogfood.zh.md">中文</a> · <a href="i18n/self-dogfood.ja.md">日本語</a> · <a href="i18n/self-dogfood.ru.md">Русский</a> · <a href="i18n/self-dogfood.es.md">Español</a> · <a href="i18n/self-dogfood.fr.md">Français</a></p>
+<p align="center"><a href="../self-dogfood.md">English</a> · <a href="self-dogfood.ko.md">한국어</a> · <a href="self-dogfood.zh.md">中文</a> · <a href="self-dogfood.ja.md">日本語</a> · <a href="self-dogfood.ru.md">Русский</a> · <a href="self-dogfood.es.md">Español</a> · <a href="self-dogfood.fr.md">Français</a></p>
 <!-- translations:end -->
-This project can index itself. The self-dogfood flow proves that LLM-Wiki can be installed, set up inside its own repository, ingest its own docs/source/tests/scripts, optionally refresh Understand Anything and Cognee, compile graph artifacts, and build the static web frontend.
+此项目可以索引自身。self-dogfood 流程证明 LLM-Wiki 可以被安装、在自己的仓库内设置、摄取自己的 docs/source/tests/scripts、可选地刷新 Understand Anything 和 Cognee、编译图谱产物，并构建静态 Web 前端。
 
-## Commands
+## 命令
 
-From the repository root:
+从仓库根目录：
 
 ```bash
-# Ensure the shell command is installed.
+# 确保 shell 命令已安装。
 ./scripts/install.sh --dir "$PWD"
 export PATH="$HOME/.local/bin:$PATH"
 
-# Set up this repository as an LLM-Wiki project.
+# 将此仓库设置为 LLM-Wiki 项目。
 llm_wiki project setup \
   --yes \
   --name llm_wiki_self \
@@ -29,31 +29,31 @@ llm_wiki project setup \
   --run-cognee \
   --install-cognee
 
-# Compile the configured sources.
+# 编译已配置的源。
 llm_wiki project compile
 
-# Rebuild the static frontend explicitly.
+# 显式重建静态前端。
 llm_wiki project build-site
 
-# Serve locally.
+# 在本地提供服务。
 llm_wiki project serve --port 8765
 ```
 
-Open:
+打开：
 
 ```text
 http://127.0.0.1:8765/
 ```
 
-## Generated workspace
+## 生成的工作区
 
-The self-demo writes generated artifacts under:
+self-demo 会把生成的产物写入：
 
 ```text
 .llm-wiki/
 ```
 
-Key artifacts:
+关键产物：
 
 ```text
 .llm-wiki/config.json
@@ -71,11 +71,11 @@ Key artifacts:
 .llm-wiki/cognee_bundle/
 ```
 
-The generated workspace is intentionally not committed by default. It is reproducible from the repository source with the commands above.
+生成的工作区默认有意不提交。它可以通过上面的命令从仓库源复现。
 
-## Latest verified run
+## 最新已验证运行
 
-Verified on `2026-04-27 11:11:23 KST` from the LLM-Wiki repository itself.
+已于 `2026-04-27 11:11:23 KST` 从 LLM-Wiki 仓库自身验证。
 
 ```text
 install command: ./scripts/install.sh --dir /Users/neo/Developer/Projects/LLM-Wiki --skip-shell-config
@@ -88,7 +88,7 @@ local URL:       http://127.0.0.1:56821/
 LAN URL:         http://192.168.45.130:56821/
 ```
 
-Final artifact counts:
+最终产物计数：
 
 ```text
 nodes:               667
@@ -105,7 +105,7 @@ node pages:          687
 source pages:        56
 ```
 
-Top node types:
+主要节点类型：
 
 ```text
 CodeFunction:    452
@@ -117,7 +117,7 @@ SourceDocument:    7
 CodeProject:       1
 ```
 
-Browser verification:
+浏览器验证：
 
 ```text
 loaded title: Home · llm_wiki_self
@@ -129,11 +129,11 @@ console: no JavaScript errors on home, sources, source detail, or graph pages
 server: TCP *:56821 LISTEN, serving via --host 0.0.0.0
 ```
 
-## What this demonstrates
+## 这展示了什么
 
-- Public install path works.
-- `llm_wiki` shell command works.
-- A repository can attach a project-local `.llm-wiki` workspace.
-- Research/documentation markdown and development-code graph nodes can coexist.
-- Markdown, Obsidian, frontend, Graphiti, Cognee, SQLite, report, and agent-harness projections are produced from one graph pipeline.
-- The static HTML frontend can browse the project graph without a JavaScript build step.
+- 公开安装路径可用。
+- `llm_wiki` shell 命令可用。
+- 仓库可以附加一个项目本地的 `.llm-wiki` 工作区。
+- 研究/文档 markdown 和开发代码图谱节点可以共存。
+- Markdown、Obsidian、frontend、Graphiti、Cognee、SQLite、report 和 agent-harness 投影由同一条图谱流水线生成。
+- 静态 HTML 前端可以在没有 JavaScript 构建步骤的情况下浏览项目图谱。
