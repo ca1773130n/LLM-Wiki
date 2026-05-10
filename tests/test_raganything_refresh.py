@@ -78,3 +78,50 @@ def test_write_manifest_serializes_documents_with_sha256(tmp_path):
     meta = json.loads((tmp_path / ".llm-wiki" / "external" / "raganything" / "meta.json").read_text())
     assert meta["gitCommitHash"] == "abc123"
     assert meta["parser"] == "mineru"
+
+
+def test_refresh_runs_parse_documents_and_writes_manifest(tmp_path, monkeypatch):
+    import llm_wiki.raganything_refresh as mod
+
+    (tmp_path / "data").mkdir()
+    pdf = tmp_path / "data" / "paper.pdf"
+    pdf.write_bytes(b"%PDF-1.4")
+
+    fake_called = {}
+
+    def fake_parse(project, *, sources, parser, parse_method, working_dir, llm_funcs):
+        fake_called["sources"] = sorted(str(s.relative_to(project)) for s in sources)
+        fake_called["parser"] = parser
+        return [
+            {
+                "path": pdf,
+                "content_list": [{"type": "text", "page_idx": 0, "text": "ok"}],
+            }
+        ]
+
+    monkeypatch.setattr(mod, "parse_documents", fake_parse)
+    monkeypatch.setattr(mod, "_git_head", lambda p: "deadbeef")
+
+    rc = mod.refresh_raganything(tmp_path, parser="mineru", roots=["data"], force=True)
+    assert rc == 0
+    assert fake_called["sources"] == ["data/paper.pdf"]
+    manifest = tmp_path / ".llm-wiki" / "external" / "raganything" / "manifest.json"
+    assert manifest.exists()
+    payload = json.loads(manifest.read_text())
+    assert payload["parser"] == "mineru"
+    assert payload["git_commit"] == "deadbeef"
+
+
+def test_refresh_skips_when_artifact_current(tmp_path, monkeypatch, capsys):
+    import llm_wiki.raganything_refresh as mod
+    base = tmp_path / ".llm-wiki" / "external" / "raganything"
+    base.mkdir(parents=True)
+    (base / "manifest.json").write_text("{}")
+    (base / "meta.json").write_text(json.dumps({"gitCommitHash": "abc"}))
+    monkeypatch.setattr(mod, "_git_head", lambda p: "abc")
+    monkeypatch.setattr(mod, "parse_documents", lambda *a, **k: pytest.fail("should not parse"))
+
+    rc = mod.refresh_raganything(tmp_path, parser="mineru")
+    assert rc == 0
+    out = capsys.readouterr().out
+    assert "already current" in out
