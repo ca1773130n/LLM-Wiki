@@ -60,3 +60,29 @@ def _artifact_is_current(project: Path) -> bool:
         return True
     stored = _stored_commit(project)
     return stored == head
+
+
+_SUPPORTED_EXT = {
+    ".md", ".markdown", ".txt", ".rst",
+    ".pdf",
+    ".doc", ".docx", ".ppt", ".pptx", ".xls", ".xlsx",
+    ".png", ".jpg", ".jpeg", ".gif", ".bmp", ".tiff", ".webp",
+}
+
+_EXCLUDED_DIRS = {".git", ".venv", "node_modules", ".llm-wiki", ".understand-anything", ".pytest_cache", "__pycache__", "output", "dist", "build"}
+
+
+def discover_sources(project: Path, *, roots: Iterable[str] | None = None) -> list[Path]:
+    """Return all non-code files under the given roots that RAG-Anything can parse."""
+    project = Path(project).resolve()
+    candidates: list[Path] = []
+    search_roots = [project / r for r in (roots or ["."]) if (project / r).exists()]
+    for root in search_roots:
+        for path in root.rglob("*"):
+            if not path.is_file():
+                continue
+            if any(part in _EXCLUDED_DIRS for part in path.relative_to(project).parts):
+                continue
+            if path.suffix.lower() in _SUPPORTED_EXT:
+                candidates.append(path)
+    return sorted(candidates)
