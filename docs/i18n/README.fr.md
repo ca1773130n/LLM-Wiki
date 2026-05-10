@@ -1,0 +1,223 @@
+<h1 align="center">LLM-Wiki</h1>
+
+<p align="center">
+  <strong>Le compilateur de mémoire pour agents de programmation.</strong>
+  <br />
+  <em>Compilez des dépôts, de la documentation, des notes de recherche, des sessions Claude/Codex et des outils de graphe complémentaires en mémoire validée pour Cognee, MCP, Kuzu, SQLite, llms.txt et la documentation statique.</em>
+</p>
+
+<p align="center">
+  <a href="../../README.md">English</a> ·
+  <a href="README.ko.md">한국어</a> ·
+  <a href="README.zh.md">中文</a> ·
+  <a href="README.ja.md">日本語</a> ·
+  <a href="README.ru.md">Русский</a> ·
+  <a href="README.es.md">Español</a> ·
+  <a href="README.fr.md">Français</a>
+</p>
+
+<p align="center">
+  <a href="#démarrage-rapide"><img src="https://img.shields.io/badge/start-project_setup-blue" alt="Configuration du projet" /></a>
+  <a href="#cognee--llm-wiki"><img src="https://img.shields.io/badge/Cognee-memory_backend-d4a574" alt="Backend de mémoire Cognee" /></a>
+  <a href="#pourquoi-les-agents-lutilisent"><img src="https://img.shields.io/badge/agents-MCP%20%7C%20llms.txt%20%7C%20harness-38bdf8" alt="Exportations pour agents" /></a>
+  <a href="#pipeline-de-mémoire"><img src="https://img.shields.io/badge/graph-validated%20ontology-8A2BE2" alt="Graphe validé" /></a>
+  <a href="../../LICENSE"><img src="https://img.shields.io/github/license/ca1773130n/LLM-Wiki" alt="Licence" /></a>
+</p>
+
+<p align="center">
+  <img src="../../docs/assets/wiki-graph-screenshot.png" alt="Site statique LLM-Wiki affichant un graphe de mémoire de projet compilé et un explorateur de sources" width="100%" />
+</p>
+
+---
+
+## Le pitch
+
+La plupart des outils wiki pour LLM créent une page supplémentaire de notes générées.
+
+**LLM-Wiki construit la couche de mémoire à partir de laquelle démarre votre prochain agent.** Il prend la réalité désordonnée d’un projet — fichiers source, documentation Markdown, notes de recherche, transcriptions locales Claude/Codex et artefacts de graphe externes — et la compile en un système de mémoire typé et portable.
+
+Le site web n’est que la vitre. Le produit est l’artefact de mémoire compilée.
+
+<table>
+  <tr>
+    <td width="33%" valign="top">
+      <h3>🧬 Valider la mémoire</h3>
+      <p>Contraignez les nœuds et les arêtes avant qu’ils n’atteignent la récupération. Évitez la soupe aléatoire de <code>related_to</code>, les entités dupliquées et les schémas qui dérivent.</p>
+    </td>
+    <td width="33%" valign="top">
+      <h3>🧠 Préserver le travail de l’agent</h3>
+      <p>Transformez les sessions Claude Code et Codex en mémoire de projet consultable : décisions, commandes, fichiers, résumés et traces d’outils.</p>
+    </td>
+    <td width="33%" valign="top">
+      <h3>🔌 Exporter partout</h3>
+      <p>Envoyez la même mémoire vers Cognee, MCP, Kuzu, SQLite, des épisodes de style Graphiti, <code>llms.txt</code>, Markdown et un site web statique.</p>
+    </td>
+  </tr>
+</table>
+
+---
+
+## Pourquoi les agents l’utilisent
+
+| Si vous n’avez que... | Votre agent doit encore... | LLM-Wiki lui donne... |
+|---|---|---|
+| Un README | redécouvrir l’architecture et les décisions | mémoire de projet typée + provenance des sources |
+| Un site de documentation | rechercher dans les pages comme un humain | outils MCP, `llms.txt`, graphe JSON, contexte par page |
+| Une base vectorielle | deviner les relations à partir de fragments | nœuds, arêtes, alias, assertions et preuves validés |
+| Un visualiseur de graphe | admirer une image | artefacts de graphe portables utilisables par les systèmes de récupération |
+| Historique de chat | oublier le travail précédent | sessions d’agents importées comme mémoire durable |
+
+---
+
+## Pipeline de mémoire
+
+```mermaid
+flowchart TB
+  A["Raw project sources<br/>README · docs · code · research notes"]
+  B["Agent sessions<br/>Claude Code · Codex · subagents"]
+  C["Companion artifacts<br/>Understand Anything · external graphs"]
+  D["LLM-Wiki compiler<br/>detect · refresh · extract · validate"]
+  E["Typed memory graph<br/>ontology · aliases · evidence · temporal facts"]
+  F["Runtime memory backends<br/>Cognee · MCP · Kuzu · SQLite"]
+  G["Agent context exports<br/>llms.txt · harness · JSON · markdown"]
+  H["Inspectable projections<br/>static wiki · 2D/3D graph · source pages"]
+
+  A --> D
+  B --> D
+  C --> D
+  D --> E
+  E --> F
+  E --> G
+  E --> H
+```
+
+---
+
+## Cognee + LLM-Wiki
+
+**LLM-Wiki compile la mémoire. Cognee la récupère.**
+
+Cognee est puissant comme backend de mémoire IA : récupération graphe + vecteur, mémoire sémantique et hooks tenant compte de l’ontologie. Mais l’ingestion brute de dépôt/documentation peut tout de même devenir bruitée si la mémoire entrante n’est pas contrainte.
+
+LLM-Wiki agit comme l’étape de build avant Cognee :
+
+| Couche | Rôle de LLM-Wiki | Rôle de Cognee |
+|---|---|---|
+| Capture des sources | suit la documentation, le code, la recherche, les sessions et les artefacts complémentaires | peut ingérer de nombreux types de données |
+| Structure | valide les types de nœuds/arêtes, les alias, les preuves et la provenance | stocke et récupère la mémoire sémantique |
+| Runtime | exporte des bundles Cognee propres ou des flux cognify Codex/OAuth | sert une mémoire hybride graphe/vectorielle aux agents |
+| Sécurité | garde disponibles des chemins déterministes/local-first | ajoute une récupération de mémoire plus riche si souhaité |
+
+```mermaid
+flowchart LR
+  A["Messy project context"] --> B["LLM-Wiki<br/>validated memory graph"]
+  B --> C["Cognee<br/>hybrid graph + vector retrieval"]
+  C --> D["Coding agents<br/>ask better questions with durable context"]
+```
+
+Utilisez Cognee lorsque vous voulez que la mémoire compilée devienne un substrat de récupération vivant pour les agents. Utilisez LLM-Wiki lorsque vous voulez contrôler, valider, exporter et inspecter cette mémoire avant qu’elle ne devienne contexte d’exécution.
+
+---
+
+## Démarrage rapide
+
+```bash
+pip install llm-wiki
+
+llm_wiki project setup
+llm_wiki project compile
+llm_wiki project build-site
+llm_wiki project serve --port 8765
+```
+
+Ouvrez :
+
+```text
+http://127.0.0.1:8765/
+```
+
+L’assistant de configuration détecte les sources courantes comme `README.md`, `docs`, `src`, `data` et les artefacts complémentaires. Vous choisissez ce qui devient mémoire ; LLM-Wiki écrit la configuration du projet.
+
+```text
+◆ LLM-Wiki project setup
+Choose sources and companion tools. Press Enter to accept defaults.
+
+Sources
+  ✓ README.md
+  ✓ docs
+  ✓ src
+  ✓ .llm-wiki/external/understand-anything.md
+
+External tools
+  ◆ Understand Anything → .llm-wiki/external/understand-anything.md
+```
+
+---
+
+## Ce qui est exporté
+
+| Sortie | Pourquoi c’est important |
+|---|---|
+| `cognee_bundle/` | artefacts de graphe propres pour les workflows de mémoire de style Cognee |
+| `graph.json` / `graph.jsonld` | graphe de mémoire typé et portable |
+| `sqlite.db` / sortie Kuzu | stockage local de graphe interrogeable |
+| `llms.txt` / `llms-full.txt` | packs de contexte directs pour agents |
+| Serveur MCP | `search_nodes`, `node_context`, `timeline` et outils de graphe |
+| `agent_harness/` | configuration pour Claude Code, Codex, Gemini, Cursor, Kiro et OpenCode |
+| `markdown_projection/` | fichiers wiki lisibles pour les humains et les éditeurs |
+| `.llm-wiki/site/` | site web statique pour l’inspection, le partage et le débogage |
+
+---
+
+## Outils complémentaires, pas d’enfermement
+
+LLM-Wiki est conçu pour se placer entre les outils, pas pour les remplacer.
+
+| Outil | Relation |
+|---|---|
+| Understand Anything | artefact indépendant de graphe de code → projection Markdown → mémoire compilée |
+| Cognee | backend de mémoire pour récupération hybride graphe/vectorielle |
+| Systèmes de style Graphiti | chemin d’export d’épisodes/faits temporels |
+| Obsidian / Markdown | projection lisible, pas l’unique source de vérité |
+| Claude Code / Codex | à la fois sources de mémoire de session et consommateurs du contexte compilé |
+
+Si votre commande de rafraîchissement est un alias ou une fonction shell, encapsulez-la explicitement :
+
+```bash
+llm_wiki project setup \
+  --yes \
+  --with-understand-anything \
+  --understand-anything-command "zsh -ic 'reunderstand'" \
+  --run-understand-anything
+```
+
+---
+
+## Quand LLM-Wiki est le bon outil
+
+| Vous voulez... | Utilisez LLM-Wiki parce que... |
+|---|---|
+| une meilleure continuité pour les agents de programmation | les anciennes sessions Claude/Codex deviennent une mémoire consultable |
+| des entrées GraphRAG plus sûres | la validation du schéma a lieu avant la récupération |
+| des workflows local-first | l’extraction déterministe et les chemins CLI/OAuth évitent les dépenses obligatoires en clés API |
+| une mémoire de projet portable | une compilation émet des artefacts Cognee, MCP, SQLite, Kuzu, Markdown, JSON et site |
+| une inspection humaine | le site statique vous permet de déboguer ce que les agents récupéreront |
+
+---
+
+## Documentation
+
+| Guide | Ce que vous obtenez |
+|---|---|
+| [Démarrage rapide](../../docs/quickstart.md) | première compilation de mémoire de projet |
+| [Installation](../../docs/installation.md) | options d’installation et wrappers |
+| [Architecture](../../docs/architecture.md) | détails internes du pipeline et modèle de graphe |
+| [Historique des sessions](../../docs/session-history.md) | import des transcriptions Claude/Codex |
+| [Workflow complémentaire Understand Anything](../../docs/integrations/understand-anything.md) | rafraîchissement et projection du graphe complémentaire |
+| [Checklist de publication](../../docs/publishing-checklist.md) | déployer le site statique généré |
+
+---
+
+<p align="center">
+  <strong>Ne donnez pas à votre prochain agent un dépôt vide. Donnez-lui une mémoire compilée.</strong>
+</p>

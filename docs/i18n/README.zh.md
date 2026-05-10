@@ -1,0 +1,223 @@
+<h1 align="center">LLM-Wiki</h1>
+
+<p align="center">
+  <strong>面向编码智能体的记忆编译器。</strong>
+  <br />
+  <em>将代码仓库、文档、研究笔记、Claude/Codex 会话以及配套图工具编译为经过验证的记忆，供 Cognee、MCP、Kuzu、SQLite、llms.txt 和静态文档使用。</em>
+</p>
+
+<p align="center">
+  <a href="../../README.md">English</a> ·
+  <a href="README.ko.md">한국어</a> ·
+  <a href="README.zh.md">中文</a> ·
+  <a href="README.ja.md">日本語</a> ·
+  <a href="README.ru.md">Русский</a> ·
+  <a href="README.es.md">Español</a> ·
+  <a href="README.fr.md">Français</a>
+</p>
+
+<p align="center">
+  <a href="#快速开始"><img src="https://img.shields.io/badge/start-project_setup-blue" alt="项目设置" /></a>
+  <a href="#cognee--llm-wiki"><img src="https://img.shields.io/badge/Cognee-memory_backend-d4a574" alt="Cognee 记忆后端" /></a>
+  <a href="#智能体为什么使用它"><img src="https://img.shields.io/badge/agents-MCP%20%7C%20llms.txt%20%7C%20harness-38bdf8" alt="智能体导出" /></a>
+  <a href="#记忆流水线"><img src="https://img.shields.io/badge/graph-validated%20ontology-8A2BE2" alt="已验证图" /></a>
+  <a href="../../LICENSE"><img src="https://img.shields.io/github/license/ca1773130n/LLM-Wiki" alt="许可证" /></a>
+</p>
+
+<p align="center">
+  <img src="../../docs/assets/wiki-graph-screenshot.png" alt="LLM-Wiki 静态站点，展示已编译的项目记忆图和源码浏览器" width="100%" />
+</p>
+
+---
+
+## 核心卖点
+
+大多数 LLM wiki 工具只是再生成一页笔记。
+
+**LLM-Wiki 构建的是下一个智能体启动时所依赖的记忆层。** 它接收项目的复杂现实——源文件、Markdown 文档、研究笔记、本地 Claude/Codex 记录以及外部图谱工件——并将其编译为类型化、可移植的记忆系统。
+
+网站只是玻璃橱窗。产品本身是已编译的记忆工件。
+
+<table>
+  <tr>
+    <td width="33%" valign="top">
+      <h3>🧬 验证记忆</h3>
+      <p>在节点和边进入检索之前约束它们。避免随机的 <code>related_to</code> 大杂烩、重复实体和漂移的 schema。</p>
+    </td>
+    <td width="33%" valign="top">
+      <h3>🧠 保留智能体工作</h3>
+      <p>将 Claude Code 和 Codex 会话转换为可搜索的项目记忆：决策、命令、文件、摘要和工具轨迹。</p>
+    </td>
+    <td width="33%" valign="top">
+      <h3>🔌 随处导出</h3>
+      <p>将同一份记忆交付给 Cognee、MCP、Kuzu、SQLite、Graphiti 风格的 episodes、<code>llms.txt</code>、Markdown 和静态网站。</p>
+    </td>
+  </tr>
+</table>
+
+---
+
+## 智能体为什么使用它
+
+| 如果你只有... | 你的智能体仍然必须... | LLM-Wiki 为它提供... |
+|---|---|---|
+| 一个 README | 重新发现架构和决策 | 类型化项目记忆 + 源头溯源 |
+| 一个文档站点 | 像人类一样搜索页面 | MCP 工具、`llms.txt`、JSON 图、逐页上下文 |
+| 一个向量数据库 | 根据 chunks 猜测关系 | 已验证节点、边、别名、claims、证据 |
+| 一个图可视化器 | 欣赏一张图片 | 检索系统可使用的可移植图工件 |
+| 聊天历史 | 忘记之前的工作 | 作为持久记忆导入的智能体会话 |
+
+---
+
+## 记忆流水线
+
+```mermaid
+flowchart TB
+  A["Raw project sources<br/>README · docs · code · research notes"]
+  B["Agent sessions<br/>Claude Code · Codex · subagents"]
+  C["Companion artifacts<br/>Understand Anything · external graphs"]
+  D["LLM-Wiki compiler<br/>detect · refresh · extract · validate"]
+  E["Typed memory graph<br/>ontology · aliases · evidence · temporal facts"]
+  F["Runtime memory backends<br/>Cognee · MCP · Kuzu · SQLite"]
+  G["Agent context exports<br/>llms.txt · harness · JSON · markdown"]
+  H["Inspectable projections<br/>static wiki · 2D/3D graph · source pages"]
+
+  A --> D
+  B --> D
+  C --> D
+  D --> E
+  E --> F
+  E --> G
+  E --> H
+```
+
+---
+
+## Cognee + LLM-Wiki
+
+**LLM-Wiki 编译记忆。Cognee 检索它。**
+
+Cognee 是强大的 AI 记忆后端：图 + 向量检索、语义记忆以及具备本体感知能力的 hooks。但如果进入其中的记忆不受约束，原始仓库/文档摄取仍然可能变得嘈杂。
+
+LLM-Wiki 充当 Cognee 之前的构建步骤：
+
+| 层 | LLM-Wiki 角色 | Cognee 角色 |
+|---|---|---|
+| 来源捕获 | 跟踪文档、代码、研究、会话和配套工件 | 可摄取多种数据类型 |
+| 结构 | 验证节点/边类型、别名、证据和来源 | 存储并检索语义记忆 |
+| 运行时 | 导出干净的 Cognee bundle 或 Codex/OAuth cognify 流程 | 为智能体提供混合图/向量记忆 |
+| 安全性 | 保留确定性、本地优先的路径 | 在需要时增加更丰富的记忆检索 |
+
+```mermaid
+flowchart LR
+  A["Messy project context"] --> B["LLM-Wiki<br/>validated memory graph"]
+  B --> C["Cognee<br/>hybrid graph + vector retrieval"]
+  C --> D["Coding agents<br/>ask better questions with durable context"]
+```
+
+当你希望已编译记忆成为智能体的实时检索底座时，使用 Cognee。当你希望在记忆成为运行时上下文之前控制、验证、导出并检查它时，使用 LLM-Wiki。
+
+---
+
+## 快速开始
+
+```bash
+pip install llm-wiki
+
+llm_wiki project setup
+llm_wiki project compile
+llm_wiki project build-site
+llm_wiki project serve --port 8765
+```
+
+打开：
+
+```text
+http://127.0.0.1:8765/
+```
+
+设置向导会检测常见来源，例如 `README.md`、`docs`、`src`、`data` 和配套工件。你选择哪些内容成为记忆；LLM-Wiki 会写入项目配置。
+
+```text
+◆ LLM-Wiki project setup
+Choose sources and companion tools. Press Enter to accept defaults.
+
+Sources
+  ✓ README.md
+  ✓ docs
+  ✓ src
+  ✓ .llm-wiki/external/understand-anything.md
+
+External tools
+  ◆ Understand Anything → .llm-wiki/external/understand-anything.md
+```
+
+---
+
+## 它会导出什么
+
+| 输出 | 重要性 |
+|---|---|
+| `cognee_bundle/` | 适用于 Cognee 风格记忆工作流的干净图工件 |
+| `graph.json` / `graph.jsonld` | 可移植的类型化记忆图 |
+| `sqlite.db` / Kuzu output | 可查询的本地图存储 |
+| `llms.txt` / `llms-full.txt` | 直接供智能体使用的上下文包 |
+| MCP server | `search_nodes`、`node_context`、`timeline` 和图工具 |
+| `agent_harness/` | Claude Code、Codex、Gemini、Cursor、Kiro、OpenCode 设置 |
+| `markdown_projection/` | 供人类和编辑器阅读的 wiki 文件 |
+| `.llm-wiki/site/` | 用于检查、共享和调试的静态网站 |
+
+---
+
+## 配套工具，而非锁定
+
+LLM-Wiki 被设计为位于工具之间，而不是取代它们。
+
+| 工具 | 关系 |
+|---|---|
+| Understand Anything | 独立代码图工件 → Markdown 投影 → 已编译记忆 |
+| Cognee | 用于混合图/向量检索的记忆后端 |
+| Graphiti-style systems | 时间 episode/fact 导出路径 |
+| Obsidian / markdown | 可读投影，而非唯一事实来源 |
+| Claude Code / Codex | 既是会话记忆的来源，也是已编译上下文的消费者 |
+
+如果你的刷新命令是 shell alias/function，请显式包装它：
+
+```bash
+llm_wiki project setup \
+  --yes \
+  --with-understand-anything \
+  --understand-anything-command "zsh -ic 'reunderstand'" \
+  --run-understand-anything
+```
+
+---
+
+## 什么时候 LLM-Wiki 是合适的工具
+
+| 你想要... | 使用 LLM-Wiki，因为... |
+|---|---|
+| 更好的编码智能体连续性 | 旧的 Claude/Codex 会话会成为可搜索记忆 |
+| 更安全的 GraphRAG 输入 | schema 验证发生在检索之前 |
+| 本地优先工作流 | 确定性抽取和 CLI/OAuth 路径避免强制 API key 支出 |
+| 可移植项目记忆 | 一次编译即可生成 Cognee、MCP、SQLite、Kuzu、Markdown、JSON 和站点工件 |
+| 人类检查 | 静态站点让你调试智能体将要检索的内容 |
+
+---
+
+## 文档
+
+| 指南 | 你将获得 |
+|---|---|
+| [Quickstart](../../docs/quickstart.md) | 第一次项目记忆编译 |
+| [Installation](../../docs/installation.md) | 安装选项和 wrappers |
+| [Architecture](../../docs/architecture.md) | 流水线内部机制和图模型 |
+| [Session history](../../docs/session-history.md) | Claude/Codex 转录导入 |
+| [Understand Anything companion workflow](../../docs/integrations/understand-anything.md) | 配套图刷新和投影 |
+| [Publishing checklist](../../docs/publishing-checklist.md) | 部署生成的静态站点 |
+
+---
+
+<p align="center">
+  <strong>不要把一个空白仓库交给你的下一个智能体。给它已编译的记忆。</strong>
+</p>

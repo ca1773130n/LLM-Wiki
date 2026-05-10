@@ -1,41 +1,120 @@
 <h1 align="center">LLM-Wiki</h1>
 
 <p align="center">
-  <strong>A beautiful setup wizard that turns docs, code, graphs, and agent sessions into a publishable LLM-native wiki.</strong>
+  <strong>The memory compiler for coding agents.</strong>
   <br />
-  <em>Karpathy's LLM Wiki pattern, upgraded with a website builder, typed graph, session memory, and companion-tool automation.</em>
+  <em>Compile repos, docs, research notes, Claude/Codex sessions, and companion graph tools into validated memory for Cognee, MCP, Kuzu, SQLite, llms.txt, and static docs.</em>
 </p>
 
 <p align="center">
-  <a href="#quick-start"><img src="https://img.shields.io/badge/Quick_Start-setup_wizard-blue" alt="Quick Start" /></a>
-  <a href="docs/architecture.md"><img src="https://img.shields.io/badge/Graph-2D%2F3D-8A2BE2" alt="2D/3D Graph" /></a>
-  <a href="docs/session-history.md"><img src="https://img.shields.io/badge/Sessions-agent_memory-38bdf8" alt="Session History" /></a>
-  <a href="docs/integrations/understand-anything.md"><img src="https://img.shields.io/badge/Companion-Understand_Anything-d4a574" alt="Understand Anything companion workflow" /></a>
-  <a href="LICENSE"><img src="https://img.shields.io/badge/License-MIT-yellow" alt="MIT License" /></a>
+  <a href="docs/i18n/README.ko.md">한국어</a> ·
+  <a href="docs/i18n/README.zh.md">中文</a> ·
+  <a href="docs/i18n/README.ja.md">日本語</a> ·
+  <a href="docs/i18n/README.ru.md">Русский</a> ·
+  <a href="docs/i18n/README.es.md">Español</a> ·
+  <a href="docs/i18n/README.fr.md">Français</a>
 </p>
 
 <p align="center">
-  <img src="docs/assets/wiki-graph-screenshot.png" alt="LLM-Wiki website showing a 3D knowledge graph, source explorer, navigation, and graph controls" width="100%" />
+  <a href="#quick-start"><img src="https://img.shields.io/badge/start-project_setup-blue" alt="Project setup" /></a>
+  <a href="#cognee--llm-wiki"><img src="https://img.shields.io/badge/Cognee-memory_backend-d4a574" alt="Cognee memory backend" /></a>
+  <a href="#why-agents-use-it"><img src="https://img.shields.io/badge/agents-MCP%20%7C%20llms.txt%20%7C%20harness-38bdf8" alt="Agent exports" /></a>
+  <a href="#memory-pipeline"><img src="https://img.shields.io/badge/graph-validated%20ontology-8A2BE2" alt="Validated graph" /></a>
+  <a href="LICENSE"><img src="https://img.shields.io/github/license/ca1773130n/LLM-Wiki" alt="License" /></a>
+</p>
+
+<p align="center">
+  <img src="docs/assets/wiki-graph-screenshot.png" alt="LLM-Wiki static site showing a compiled project memory graph and source explorer" width="100%" />
 </p>
 
 ---
 
 ## The pitch
 
-Karpathy's [`llm-wiki.md`](https://gist.github.com/karpathy/442a6bf555914893e9891c11519de94f) sketched the right primitive:
+Most LLM wiki tools make another page of generated notes.
 
-> raw sources stay immutable, an LLM maintains a persistent markdown wiki, and the wiki compounds over time.
+**LLM-Wiki builds the memory layer your next agent starts from.** It takes the messy reality of a project — source files, markdown docs, research notes, local Claude/Codex transcripts, and external graph artifacts — and compiles it into a typed, portable memory system.
 
-LLM-Wiki turns that pattern into a developer product:
+The website is just the glass window. The product is the compiled memory artifact.
 
-- a colored setup wizard instead of a pile of flags;
-- a static wiki website instead of loose markdown only;
-- an interactive 2D / 3D graph instead of a flat folder;
-- local Claude Code / Codex sessions as searchable project memory;
-- agent-facing exports your tools can actually consume;
-- optional companion-tool refresh, starting with Understand Anything.
+<table>
+  <tr>
+    <td width="33%" valign="top">
+      <h3>🧬 Validate memory</h3>
+      <p>Constrain nodes and edges before they reach retrieval. Avoid random <code>related_to</code> soup, duplicate entities, and drifting schemas.</p>
+    </td>
+    <td width="33%" valign="top">
+      <h3>🧠 Preserve agent work</h3>
+      <p>Turn Claude Code and Codex sessions into searchable project memory: decisions, commands, files, summaries, and tool traces.</p>
+    </td>
+    <td width="33%" valign="top">
+      <h3>🔌 Export everywhere</h3>
+      <p>Ship the same memory to Cognee, MCP, Kuzu, SQLite, Graphiti-style episodes, <code>llms.txt</code>, markdown, and a static website.</p>
+    </td>
+  </tr>
+</table>
 
-In short: **give your agents a memory system that looks good, ships easily, and keeps itself wired to your project.**
+---
+
+## Why agents use it
+
+| If you only have... | Your agent still has to... | LLM-Wiki gives it... |
+|---|---|---|
+| A README | rediscover architecture and decisions | typed project memory + source provenance |
+| A docs site | search pages like a human | MCP tools, `llms.txt`, JSON graph, per-page context |
+| A vector DB | guess relationships from chunks | validated nodes, edges, aliases, claims, evidence |
+| A graph visualizer | admire a picture | portable graph artifacts that retrieval systems can use |
+| Chat history | forget previous work | imported agent sessions as durable memory |
+
+---
+
+## Memory pipeline
+
+```mermaid
+flowchart TB
+  A["Raw project sources<br/>README · docs · code · research notes"]
+  B["Agent sessions<br/>Claude Code · Codex · subagents"]
+  C["Companion artifacts<br/>Understand Anything · external graphs"]
+  D["LLM-Wiki compiler<br/>detect · refresh · extract · validate"]
+  E["Typed memory graph<br/>ontology · aliases · evidence · temporal facts"]
+  F["Runtime memory backends<br/>Cognee · MCP · Kuzu · SQLite"]
+  G["Agent context exports<br/>llms.txt · harness · JSON · markdown"]
+  H["Inspectable projections<br/>static wiki · 2D/3D graph · source pages"]
+
+  A --> D
+  B --> D
+  C --> D
+  D --> E
+  E --> F
+  E --> G
+  E --> H
+```
+
+---
+
+## Cognee + LLM-Wiki
+
+**LLM-Wiki compiles memory. Cognee retrieves it.**
+
+Cognee is powerful as an AI memory backend: graph + vector retrieval, semantic memory, and ontology-aware hooks. But raw repo/docs ingestion can still become noisy if the memory going in is unconstrained.
+
+LLM-Wiki acts as the build step before Cognee:
+
+| Layer | LLM-Wiki role | Cognee role |
+|---|---|---|
+| Source capture | tracks docs, code, research, sessions, companion artifacts | can ingest many data types |
+| Structure | validates node/edge types, aliases, evidence, provenance | stores and retrieves semantic memory |
+| Runtime | exports clean Cognee bundles or Codex/OAuth cognify flows | serves hybrid graph/vector memory to agents |
+| Safety | keeps deterministic/local-first paths available | adds richer memory retrieval when desired |
+
+```mermaid
+flowchart LR
+  A["Messy project context"] --> B["LLM-Wiki<br/>validated memory graph"]
+  B --> C["Cognee<br/>hybrid graph + vector retrieval"]
+  C --> D["Coding agents<br/>ask better questions with durable context"]
+```
+
+Use Cognee when you want the compiled memory to become a live retrieval substrate for agents. Use LLM-Wiki when you want to control, validate, export, and inspect that memory before it becomes runtime context.
 
 ---
 
@@ -43,11 +122,7 @@ In short: **give your agents a memory system that looks good, ships easily, and 
 
 ```bash
 pip install llm-wiki
-```
 
-Inside any repo:
-
-```bash
 llm_wiki project setup
 llm_wiki project compile
 llm_wiki project build-site
@@ -60,7 +135,7 @@ Open:
 http://127.0.0.1:8765/
 ```
 
-The setup wizard detects common sources like `README.md`, `docs`, `src`, `data`, and companion artifacts. You choose what to include; LLM-Wiki writes the config.
+The setup wizard detects common sources like `README.md`, `docs`, `src`, `data`, and companion artifacts. You choose what becomes memory; LLM-Wiki writes the project config.
 
 ```text
 ◆ LLM-Wiki project setup
@@ -78,129 +153,70 @@ External tools
 
 ---
 
-## What you get
+## What it exports
 
-<table>
-  <tr>
-    <td width="50%" valign="top">
-      <h3>✨ Wiki website builder</h3>
-      <p>Generate a polished static site under <code>.llm-wiki/site/</code> with home, source pages, concepts, papers, repos, syntheses, search, graph, and session routes.</p>
-    </td>
-    <td width="50%" valign="top">
-      <h3>🕸️ 2D / 3D graph view</h3>
-      <p>Browse a typed project graph, switch between 2D and 3D, search nodes, filter by type, and publish the same graph as JSON / JSON-LD.</p>
-    </td>
-  </tr>
-  <tr>
-    <td width="50%" valign="top">
-      <h3>🧠 Agent session memory</h3>
-      <p>Import Claude Code and Codex sessions into searchable pages with summaries, decisions, files, commands, readable turns, and collapsed tool payloads.</p>
-    </td>
-    <td width="50%" valign="top">
-      <h3>🤝 Companion tools</h3>
-      <p>Use independent tools like Understand Anything without vendoring them. Store refresh commands and compile their generated artifacts into the wiki.</p>
-    </td>
-  </tr>
-</table>
-
----
-
-## Understand Anything + LLM-Wiki
-
-Understand Anything already does a great job generating a code knowledge graph:
-
-```text
-.understand-anything/knowledge-graph.json
-```
-
-LLM-Wiki does not absorb it. Instead, the setup wizard can treat it as a companion artifact:
-
-1. refresh the external graph if you provide a command;
-2. materialize a readable projection at `.llm-wiki/external/understand-anything.md`;
-3. compile that projection alongside docs, code, research notes, and agent sessions;
-4. publish everything as one agent-native wiki website.
-
-If the refresh command is a shell alias/function, wrap it explicitly:
-
-```bash
-zsh -ic 'reunderstand'
-```
-
-More: [Understand Anything companion workflow](docs/integrations/understand-anything.md)
-
----
-
-## Agent-first outputs
-
-The website is the visible layer. The real target is agents.
-
-| Artifact | Use it for |
+| Output | Why it matters |
 |---|---|
-| `search-index.json` | fast local/project search |
-| `graph.json` / `graph.jsonld` | typed relationships |
-| `llms.txt` / `llms-full.txt` | context packs |
-| per-page `.txt` / `.json` | precise retrievable page context |
-| MCP server | `search_nodes`, `node_context`, `timeline`, and friends |
-| agent harness export | Claude Code, Codex, Gemini, Cursor, Kiro, OpenCode setup |
+| `cognee_bundle/` | clean graph artifacts for Cognee-style memory workflows |
+| `graph.json` / `graph.jsonld` | portable typed memory graph |
+| `sqlite.db` / Kuzu output | queryable local graph storage |
+| `llms.txt` / `llms-full.txt` | direct agent context packs |
+| MCP server | `search_nodes`, `node_context`, `timeline`, and graph tools |
+| `agent_harness/` | Claude Code, Codex, Gemini, Cursor, Kiro, OpenCode setup |
+| `markdown_projection/` | readable wiki files for humans and editors |
+| `.llm-wiki/site/` | static website for inspection, sharing, and debugging |
 
 ---
 
-## Import local agent sessions
+## Companion tools, not lock-in
+
+LLM-Wiki is designed to sit between tools, not replace them.
+
+| Tool | Relationship |
+|---|---|
+| Understand Anything | independent code graph artifact → markdown projection → compiled memory |
+| Cognee | memory backend for hybrid graph/vector retrieval |
+| Graphiti-style systems | temporal episode/fact export path |
+| Obsidian / markdown | readable projection, not the only source of truth |
+| Claude Code / Codex | both source of session memory and consumers of compiled context |
+
+If your refresh command is a shell alias/function, wrap it explicitly:
 
 ```bash
-llm_wiki project sessions discover
-llm_wiki project sessions discover --import
-llm_wiki project build-site
+llm_wiki project setup \
+  --yes \
+  --with-understand-anything \
+  --understand-anything-command "zsh -ic 'reunderstand'" \
+  --run-understand-anything
 ```
-
-Session pages make your agent history part of the project memory instead of leaving it buried in chat logs.
 
 ---
 
-## Publish
+## When LLM-Wiki is the right tool
 
-```bash
-llm_wiki project deploy --build --enable-pages
-```
-
-The generated site is plain static files, so `.llm-wiki/site/` can also be copied to any web server.
-
----
-
-## How it works
-
-```text
-raw sources + external artifacts + agent sessions
-  ↓
-setup wizard + configured refresh commands
-  ↓
-deterministic / optional LLM extraction
-  ↓
-validated typed graph + markdown projection
-  ↓
-static website + 2D/3D graph + search + agent exports
-```
-
-The controlled ontology is the guardrail. It keeps project memory useful instead of turning everything into random entity soup.
+| You want... | Use LLM-Wiki because... |
+|---|---|
+| better coding-agent continuity | old Claude/Codex sessions become searchable memory |
+| safer GraphRAG inputs | schema validation happens before retrieval |
+| local-first workflows | deterministic extraction and CLI/OAuth paths avoid mandatory API-key spend |
+| portable project memory | one compile emits Cognee, MCP, SQLite, Kuzu, markdown, JSON, and site artifacts |
+| human inspection | the static site lets you debug what agents will retrieve |
 
 ---
 
 ## Docs
 
-- [Quickstart](docs/quickstart.md)
-- [Installation](docs/installation.md)
-- [Architecture](docs/architecture.md)
-- [Feature map](docs/feature-map.md)
-- [Session history](docs/session-history.md)
-- [Understand Anything companion workflow](docs/integrations/understand-anything.md)
-- [Publishing checklist](docs/publishing-checklist.md)
+| Guide | What you get |
+|---|---|
+| [Quickstart](docs/quickstart.md) | first project memory compile |
+| [Installation](docs/installation.md) | install options and wrappers |
+| [Architecture](docs/architecture.md) | pipeline internals and graph model |
+| [Session history](docs/session-history.md) | Claude/Codex transcript import |
+| [Understand Anything companion workflow](docs/integrations/understand-anything.md) | companion graph refresh and projection |
+| [Publishing checklist](docs/publishing-checklist.md) | deploy the generated static site |
 
 ---
 
 <p align="center">
-  <strong>Stop losing project knowledge in docs, dashboards, and forgotten chats. Compile it into memory your agents can use.</strong>
-</p>
-
-<p align="center">
-  MIT License &copy; LLM-Wiki Contributors
+  <strong>Do not give your next agent a blank repo. Give it compiled memory.</strong>
 </p>
