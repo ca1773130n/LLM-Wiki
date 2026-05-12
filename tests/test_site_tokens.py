@@ -330,9 +330,13 @@ def test_graph_cursor_tooltip_styles_present():
     assert "font-size: 13px" in body
     assert "z-index: 50" in body
     assert "transition: opacity 100ms ease" in body
-    # Light-theme override flips the surface to a light translucent.
+    # GRAPH_FORCE_DARK — the graph tooltip lives INSIDE the dark canvas
+    # so even when the site theme toggle flips to light, it stays on
+    # the glass-dark palette (HypePaper's CitationGraph aesthetic). The
+    # previous round flipped it to a white surface that fought the dark
+    # scene around it.
     assert "[data-theme=\"light\"] .graph-tooltip" in CSS
-    assert "rgba(255,255,255,0.92)" in CSS
+    assert "rgba(0, 0, 0, 0.55)" in CSS
 
 
 def test_topbar_nav_active_uses_accent_with_bottom_border():

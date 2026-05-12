@@ -771,37 +771,59 @@ JS_GRAPH = r"""
   //                      One target shared between the focus fly-to
   //                      and the per-tick orbit so they don't fight.
   // ----------------------------------------------------------------
+  // Graph view is dark-only by design (matches HypePaper's CitationGraph).
+  // Even when the site theme toggle flips to "light", the canvas, labels,
+  // edges, and overlays all stay on the dark palette. The wiki chrome
+  // (sidebar, header, body) keeps responding to the toggle — only the
+  // graph widget is theme-locked. Background hex is HypePaper's #060A14.
+  var GRAPH_FORCE_DARK = true;
+  var GRAPH_BG_COLOR = '#060A14';
+  // Palette ported from HypePaper's CitationGraph.vue category dots:
+  // purple-500 / blue-500 / cyan-400 / amber-400 / emerald-400 / pink-400
+  // / gray-400 / gray-500. Concepts are the "seed" purple (matches the
+  // sprite text color #e9d5ff used over a #a855f7 sphere).
   var GROUP_COLORS = {
-    sources:   '#94a3b8',
-    papers:    '#fb7185',
-    repos:     '#60a5fa',
-    concepts:  '#22d3ee',
-    entities:  '#a78bfa',
-    topics:    '#fb923c',
-    syntheses: '#34d399',
-    questions: '#facc15',
-    other:     '#cbd5e1'
+    sources:   '#9ca3af',
+    papers:    '#3b82f6',
+    repos:     '#22d3ee',
+    concepts:  '#a855f7',
+    entities:  '#a855f7',
+    topics:    '#f472b6',
+    syntheses: '#fbbf24',
+    questions: '#34d399',
+    other:     '#6b7280'
   };
-  // Default edge: WHITE at 0.25 alpha (halved from 0.5 again so the webbing
-  // recedes further into the background). Hot (hovered/focused incident):
-  // YELLOW at 0.25 alpha — same alpha as the default so the "lit" cue is
-  // the colour shift, not a brightness jump. Dim: very low alpha so dimmed
-  // edges are essentially invisible.
-  var EDGE_COLOR_LIGHT = 'rgba(255,255,255,0.25)';
+  // Default edge: off-white at 0.18 alpha (HypePaper uses
+  // rgba(255,255,255,0.18) over the deep-dark canvas; ours matches so the
+  // webbing recedes evenly). Hot (hovered/focused incident): yellow at
+  // 0.85 alpha — same gold-amber the focus label uses. Dim: very low
+  // alpha so dimmed edges are essentially invisible.
+  var EDGE_COLOR_LIGHT = 'rgba(255,255,255,0.18)';
   var EDGE_COLOR_DIM   = 'rgba(255,255,255,0.025)';
-  var EDGE_COLOR_HOT   = 'rgba(250,204,21,0.25)';
+  var EDGE_COLOR_HOT   = 'rgba(250,204,21,0.85)';
   var THREE_URL = 'https://esm.sh/three@0.169.0';
 
+  // HSL anchors aligned with HypePaper's category dots. These drive the
+  // per-node lightness/sat wobble in ``nodeColorVariant`` so adjacent
+  // siblings in the same group don't render as a perfectly flat swatch
+  // but the hue still reads as its category at a glance.
+  //   sources/other   gray-400/500 (cool desaturated)
+  //   papers          blue-500
+  //   repos           cyan-400
+  //   concepts/ent.   purple-500
+  //   topics          pink-400
+  //   syntheses       amber-400
+  //   questions       emerald-400
   var GROUP_HSL = {
-    sources:   { h: 215, s: 20, l: 70 },
-    papers:    { h: 350, s: 88, l: 70 },
-    repos:     { h: 213, s: 92, l: 68 },
-    concepts:  { h: 188, s: 88, l: 64 },
-    entities:  { h: 258, s: 88, l: 74 },
-    topics:    { h: 25,  s: 94, l: 68 },
-    syntheses: { h: 154, s: 72, l: 62 },
-    questions: { h: 48,  s: 96, l: 64 },
-    other:     { h: 215, s: 22, l: 78 }
+    sources:   { h: 220, s: 9,  l: 65 },
+    papers:    { h: 217, s: 91, l: 60 },
+    repos:     { h: 188, s: 86, l: 53 },
+    concepts:  { h: 271, s: 91, l: 65 },
+    entities:  { h: 271, s: 91, l: 65 },
+    topics:    { h: 329, s: 86, l: 70 },
+    syntheses: { h: 41,  s: 96, l: 56 },
+    questions: { h: 158, s: 64, l: 52 },
+    other:     { h: 220, s: 9,  l: 50 }
   };
 
   function hashString(value){
@@ -1558,7 +1580,10 @@ JS_GRAPH = r"""
         // Issue 1 + 2 — pill is pure black on dark theme (alpha varies
         // per variant) and a light pill (rgba(255,255,255,0.85)) on
         // light theme. NO color border. NO accent stroke.
-        var pillFill = (theme === 'light')
+        // GRAPH_FORCE_DARK gate: when the graph is locked to dark
+        // (matching HypePaper), we always paint the dark pill regardless
+        // of the site theme toggle.
+        var pillFill = (!GRAPH_FORCE_DARK && theme === 'light')
           ? 'rgba(255,255,255,0.85)'
           : 'rgba(0,0,0,' + pillAlpha + ')';
         var radius = 4 * pxScale;
@@ -1598,12 +1623,18 @@ JS_GRAPH = r"""
       // when paired with the shadow below). Edge labels render at a
       // constant 85% alpha so they read as secondary chrome without
       // competing with node names.
+      // GRAPH_FORCE_DARK gate: the graph view is dark-only by design, so
+      // we never apply the light-theme text/glow variants even when the
+      // surrounding site is toggled to light. Keep the (!GRAPH_FORCE_DARK
+      // && theme === 'light') guard so the original light-theme code path
+      // is still trivially restorable by flipping the constant.
+      var isLight = (!GRAPH_FORCE_DARK && theme === 'light');
       var textFill;
       if (isHighlight) {
-        textFill = (theme === 'light') ? 'rgb(180, 83, 9)' : 'rgb(250, 204, 21)';
+        textFill = isLight ? 'rgb(180, 83, 9)' : 'rgb(250, 204, 21)';
       } else if (variant === 'edge') {
-        textFill = (theme === 'light') ? 'rgba(20, 20, 20, 0.85)' : 'rgba(255, 255, 255, 0.85)';
-      } else if (theme === 'light') {
+        textFill = isLight ? 'rgba(20, 20, 20, 0.85)' : 'rgba(255, 255, 255, 0.85)';
+      } else if (isLight) {
         textFill = 'rgb(20, 20, 20)';
       } else {
         textFill = 'rgb(255, 255, 255)';
@@ -1615,14 +1646,14 @@ JS_GRAPH = r"""
       // up the blur.
       if (isHighlight) {
         var glowAlpha = isFocused ? 0.7 : 0.5;
-        ctx.shadowColor = (theme === 'light')
+        ctx.shadowColor = isLight
           ? 'rgba(180, 83, 9, 0.7)'
           : 'rgba(250, 204, 21, ' + glowAlpha + ')';
         ctx.shadowBlur = isFocused ? 10 : 6;
         ctx.shadowOffsetX = 0;
         ctx.shadowOffsetY = 0;
       } else {
-        ctx.shadowColor = (theme === 'light') ? 'rgba(255, 255, 255, 0.7)' : 'rgba(0, 0, 0, 0.7)';
+        ctx.shadowColor = isLight ? 'rgba(255, 255, 255, 0.7)' : 'rgba(0, 0, 0, 0.7)';
         ctx.shadowBlur = 2;
         ctx.shadowOffsetX = 0;
         ctx.shadowOffsetY = 1;
@@ -2060,7 +2091,12 @@ JS_GRAPH = r"""
 
       var inst = ctor()(container)
         .graphData({ nodes: payload.nodes, links: payload.links })
-        .backgroundColor('rgba(0,0,0,0)')
+        // GRAPH_FORCE_DARK — paint the WebGL/canvas background opaque
+        // HypePaper-dark (#060A14) so the scene reads correctly even when
+        // the surrounding site theme toggles to light. The CSS on
+        // ``.graph-canvas`` enforces the same colour so the wrapper
+        // around the canvas matches.
+        .backgroundColor(GRAPH_BG_COLOR)
         .nodeId('id')
         .nodeLabel(function(n){ return ''; })
         .nodeVal(function(n){
@@ -2211,8 +2247,8 @@ JS_GRAPH = r"""
 
       try { if (inst.nodeOpacity) inst.nodeOpacity(0.95); } catch (_) {}
       // F-6 — edge alpha is encoded entirely in the rgba strings
-      // (EDGE_COLOR_LIGHT is rgba(255,255,255,0.5); EDGE_COLOR_HOT is
-      // rgba(250,204,21,0.5); EDGE_COLOR_DIM is rgba(255,255,255,0.05)).
+      // (EDGE_COLOR_LIGHT is rgba(255,255,255,0.18); EDGE_COLOR_HOT is
+      // rgba(250,204,21,0.85); EDGE_COLOR_DIM is rgba(255,255,255,0.025)).
       // ``linkOpacity`` is a scalar multiplier on the per-link material —
       // setting it to anything below 1.0 multiplies the rgba alpha and
       // washes the edges out far below the documented spec. We pin it to
@@ -2546,7 +2582,8 @@ JS_GRAPH = r"""
             var basePillAlpha = (typeof VARIANT_PILL_ALPHA[variant] === 'number') ? VARIANT_PILL_ALPHA[variant] : 0;
             var pillAlpha = basePillAlpha;
             if (pillAlpha > 0) {
-              ctx.fillStyle = (theme === 'light')
+              // GRAPH_FORCE_DARK gate (see makeLabel for full rationale).
+              ctx.fillStyle = (!GRAPH_FORCE_DARK && theme === 'light')
                 ? 'rgba(255,255,255,0.85)'
                 : 'rgba(0,0,0,' + pillAlpha.toFixed(3) + ')';
               ctx.beginPath();
@@ -2567,10 +2604,14 @@ JS_GRAPH = r"""
             // context, not the user's interaction target). Default text
             // is pure white on dark / near-black on light at full
             // opacity — no alpha modulation, ever.
+            // GRAPH_FORCE_DARK gate — keep the light-theme branches
+            // intact for trivial revertibility but skip them when the
+            // graph is theme-locked to dark (HypePaper parity).
+            var isLightLocal = (!GRAPH_FORCE_DARK && theme === 'light');
             var textColor;
             if (isHighlight) {
-              textColor = (theme === 'light') ? 'rgb(180, 83, 9)' : 'rgb(250, 204, 21)';
-            } else if (theme === 'light') {
+              textColor = isLightLocal ? 'rgb(180, 83, 9)' : 'rgb(250, 204, 21)';
+            } else if (isLightLocal) {
               textColor = 'rgb(20, 20, 20)';
             } else {
               textColor = 'rgb(255, 255, 255)';
@@ -2580,12 +2621,12 @@ JS_GRAPH = r"""
             // a subtle 2px drop-shadow so white text stays readable when
             // it overlaps bright node spheres.
             if (isHighlight) {
-              ctx.shadowColor = (theme === 'light')
+              ctx.shadowColor = isLightLocal
                 ? 'rgba(180, 83, 9, 0.7)'
                 : 'rgba(250, 204, 21, ' + (isFocusedLocal ? 0.7 : 0.5) + ')';
               ctx.shadowBlur  = isFocusedLocal ? 10 : 6;
             } else {
-              ctx.shadowColor = (theme === 'light') ? 'rgba(255, 255, 255, 0.7)' : 'rgba(0, 0, 0, 0.7)';
+              ctx.shadowColor = isLightLocal ? 'rgba(255, 255, 255, 0.7)' : 'rgba(0, 0, 0, 0.7)';
               ctx.shadowBlur  = 2;
             }
             ctx.fillStyle = textColor;
@@ -2636,7 +2677,8 @@ JS_GRAPH = r"""
             if (epillAlpha > 0) {
               // Issue 1 — same pill rules as node labels: black 0.5 on dark,
               // white 0.85 on light. NO accent border. NO color stroke.
-              ctx.fillStyle = (theme === 'light')
+              // GRAPH_FORCE_DARK gate keeps it dark regardless of toggle.
+              ctx.fillStyle = (!GRAPH_FORCE_DARK && theme === 'light')
                 ? 'rgba(255,255,255,0.85)'
                 : 'rgba(0,0,0,' + epillAlpha + ')';
               ctx.beginPath();
@@ -2653,7 +2695,8 @@ JS_GRAPH = r"""
               ctx.fill();
             }
             // Issue 1 — pure white text on dark, pure dark on light.
-            ctx.fillStyle = (theme === 'light')
+            // GRAPH_FORCE_DARK gate keeps it white regardless of toggle.
+            ctx.fillStyle = (!GRAPH_FORCE_DARK && theme === 'light')
               ? 'rgb(20, 20, 20)'
               : 'rgb(255, 255, 255)';
             ctx.fillText(label, midX, midY);

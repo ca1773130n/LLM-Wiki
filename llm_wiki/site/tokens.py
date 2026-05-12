@@ -1723,6 +1723,10 @@ body.palette-open { overflow: hidden; }
   border-color: var(--accent);
   box-shadow: 0 0 0 3px var(--accent-soft);
 }
+/* GRAPH_FORCE_DARK — the graph is dark-only regardless of the site
+   theme toggle. Background = #060A14 (HypePaper's CitationGraph base),
+   with two subtle off-axis tints to keep the cosmos feel. Border is
+   white/10 (rgba(255,255,255,0.10)) per HypePaper's panel chrome. */
 .graph-page .graph-canvas {
   position: relative;
   /* Canvas spans the wide-content column; never full-bleed. Height
@@ -1735,11 +1739,24 @@ body.palette-open { overflow: hidden; }
   border-radius: var(--radius);
   overflow: hidden;
   background:
-    radial-gradient(circle at 18% 18%, rgba(96, 165, 250, 0.16), transparent 28%),
-    radial-gradient(circle at 82% 24%, rgba(167, 139, 250, 0.13), transparent 30%),
-    linear-gradient(135deg, #020617 0%, #0f172a 52%, #111827 100%);
-  border: 1px solid rgba(148, 163, 184, 0.26);
-  box-shadow: inset 0 0 0 1px rgba(255,255,255,0.035), 0 24px 70px rgba(2, 6, 23, 0.28);
+    radial-gradient(circle at 18% 18%, rgba(99, 102, 241, 0.12), transparent 32%),
+    radial-gradient(circle at 82% 24%, rgba(168, 85, 247, 0.10), transparent 34%),
+    #060A14;
+  border: 1px solid rgba(255, 255, 255, 0.10);
+  color: rgba(255, 255, 255, 0.92);
+  box-shadow: inset 0 0 0 1px rgba(255,255,255,0.035), 0 24px 70px rgba(2, 6, 23, 0.45);
+}
+/* GRAPH_FORCE_DARK — pin the canvas background even when the site
+   theme toggle flips to light. The graph widget never inverts; only
+   the surrounding chrome (sidebar, header, body) responds to the
+   toggle. */
+[data-theme="light"] .graph-page .graph-canvas {
+  background:
+    radial-gradient(circle at 18% 18%, rgba(99, 102, 241, 0.12), transparent 32%),
+    radial-gradient(circle at 82% 24%, rgba(168, 85, 247, 0.10), transparent 34%),
+    #060A14;
+  border-color: rgba(255, 255, 255, 0.10);
+  color: rgba(255, 255, 255, 0.92);
 }
 @media (max-width: 1023px) {
   .graph-page .graph-canvas {
@@ -1794,9 +1811,15 @@ body.palette-open { overflow: hidden; }
   left: var(--space-3);
   bottom: var(--space-3);
   z-index: 12;
-  background: var(--surface);
+  /* GRAPH_FORCE_DARK — in fullscreen the legend sits on top of the
+     dark canvas. Use the glass-dark card chrome so it reads correctly
+     under both site themes. */
+  background: rgba(0, 0, 0, 0.55);
+  -webkit-backdrop-filter: blur(8px);
+  backdrop-filter: blur(8px);
+  color: rgba(255, 255, 255, 0.92);
   padding: 6px 10px;
-  border: 1px solid var(--rule);
+  border: 1px solid rgba(255, 255, 255, 0.10);
   border-radius: var(--radius);
 }
 /* Cursor-following tooltip (Issue 2). Lives inside ``.graph-canvas-wrapper``
@@ -1847,10 +1870,16 @@ body.palette-open { overflow: hidden; }
   letter-spacing: 0.04em;
   text-transform: uppercase;
 }
+/* GRAPH_FORCE_DARK — the tooltip sits *inside* the dark canvas, so
+   even when the site is in light mode we keep its glass-dark look
+   (HypePaper parity). The previous light-mode override flipped it to a
+   white surface that fought the dark scene behind it. */
 [data-theme="light"] .graph-tooltip {
-  background: rgba(255,255,255,0.92);
-  color: var(--ink);
-  border-color: var(--rule);
+  background: rgba(0, 0, 0, 0.55);
+  color: rgba(255, 255, 255, 0.92);
+  border-color: rgba(255, 255, 255, 0.18);
+  -webkit-backdrop-filter: blur(8px);
+  backdrop-filter: blur(8px);
 }
 
 /* F-5 — floating focus-detail panel. Pinned to the bottom-right corner
@@ -1941,18 +1970,23 @@ body.palette-open { overflow: hidden; }
   opacity: 1;
   background: rgba(255,255,255,0.12);
 }
+/* GRAPH_FORCE_DARK — the focus panel sits inside the dark canvas
+   wrapper, so it keeps its glass-dark look regardless of the site
+   theme. Inverting it to a white card under light mode fought the
+   dark scene around it. HypePaper's GraphNodeInfoPanel uses the same
+   ``bg-black/55 + border-white/10 + backdrop-blur`` recipe. */
 [data-theme="light"] .graph-canvas-wrapper .graph-focus-panel {
-  background: rgba(255,255,255,0.94);
-  color: var(--ink);
-  border-color: var(--rule);
+  background: rgba(0, 0, 0, 0.55);
+  color: rgba(255, 255, 255, 0.92);
+  border-color: rgba(255, 255, 255, 0.10);
 }
 [data-theme="light"] .graph-canvas-wrapper .graph-focus-panel-open {
-  background: var(--surface);
-  color: var(--accent);
-  border-color: var(--rule);
+  background: rgba(255, 255, 255, 0.12);
+  color: rgba(255, 255, 255, 0.95);
+  border-color: rgba(255, 255, 255, 0.24);
 }
 [data-theme="light"] .graph-canvas-wrapper .graph-focus-panel-close {
-  color: var(--ink);
+  color: rgba(255, 255, 255, 0.85);
 }
 .graph-page .graph-error-banner {
   position: absolute;

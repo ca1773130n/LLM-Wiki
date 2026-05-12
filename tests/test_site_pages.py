@@ -1233,6 +1233,119 @@ def test_build_graph_payload_hides_person_nodes_and_authored_by_edges() -> None:
     assert any(e.get("type") == "mentioned_in" for e in edges)
 
 
+def test_is_translation_sibling_matches_localized_md_pairs() -> None:
+    """The translation-sibling detector covers the four shapes used in
+    this repo:
+      * ``README.md`` <-> ``README.<lang>.md`` (root i18n)
+      * ``foo.md`` <-> ``foo.<lang>.md`` (peer i18n)
+      * ``docs/foo.md`` <-> ``docs/i18n/foo.<lang>.md`` (i18n subdir)
+      * ``paper.md`` <-> ``paper_<lang>.md`` (scraped-paper convention)
+    """
+    from llm_wiki.site.pages import _is_translation_sibling
+
+    # Root READMEs (dot suffix).
+    assert _is_translation_sibling("README.md", "README.ko.md") is True
+    assert _is_translation_sibling("README.ko.md", "README.md") is True
+    assert _is_translation_sibling("README.fr.md", "README.zh.md") is True
+    # Peer-directory i18n.
+    assert _is_translation_sibling("docs/quickstart.md", "docs/quickstart.ja.md") is True
+    # i18n subdirectory normalization (canonical at parent, translation in i18n/).
+    assert _is_translation_sibling(
+        "docs/integrations/rag-anything.md",
+        "docs/i18n/integrations/rag-anything.ko.md",
+    ) is True
+    # Scraped-paper underscore convention.
+    assert _is_translation_sibling(
+        "data/research/daily/2026-04-06/papers/2304.12210/paper.md",
+        "data/research/daily/2026-04-06/papers/2304.12210/paper_ko.md",
+    ) is True
+    # Different documents — must NOT match.
+    assert _is_translation_sibling("README.md", "docs/quickstart.md") is False
+    assert _is_translation_sibling("docs/foo.md", "docs/bar.md") is False
+    # Same exact path — within-document extraction, not a translation pair.
+    assert _is_translation_sibling("docs/architecture.md", "docs/architecture.md") is False
+    # Empty inputs — short-circuit to False.
+    assert _is_translation_sibling("", "README.ko.md") is False
+    assert _is_translation_sibling("README.md", "") is False
+    # Stem-prefix collision shouldn't false-match: ``paper.md`` and
+    # ``paper2.md`` share a prefix but normalize to different stems.
+    assert _is_translation_sibling("paper.md", "paper2.md") is False
+
+
+def test_build_graph_payload_filters_translation_sibling_edges() -> None:
+    """Edges between two nodes whose ``source_path`` resolves to the
+    same canonical document (in different languages) are translation-
+    siblings and are dropped from the interactive payload. They stay in
+    ``ctx.graph.edges`` so MCP/Cognee consumers see them; only the
+    visual graph loses them."""
+    from llm_wiki.research_graph import ResearchEdge
+    from llm_wiki.site.pages import build_graph_payload
+
+    # Two SourceDocument nodes — one canonical, one Korean translation
+    # — share a canonical path stem. The Concept node carries a normal
+    # source_path that doesn't translation-match either of them.
+    canonical = ResearchNode(
+        id="SourceDocument:architecture-en",
+        name="Architecture",
+        type=ResearchNodeType.SOURCE_DOCUMENT,
+        source_path="docs/architecture.md",
+    )
+    korean = ResearchNode(
+        id="SourceDocument:architecture-ko",
+        name="아키텍처",
+        type=ResearchNodeType.SOURCE_DOCUMENT,
+        source_path="docs/i18n/architecture.ko.md",
+    )
+    concept = ResearchNode(
+        id="Concept:graph-store",
+        name="Graph Store",
+        type=ResearchNodeType.CONCEPT,
+        source_path="docs/graph-store.md",
+    )
+
+    graph = ResearchGraph(
+        nodes=[canonical, korean, concept],
+        edges=[
+            # Translation-sibling edge — must be filtered out.
+            ResearchEdge(source=canonical.id, target=korean.id, type="documents"),
+            # Reverse direction — also filtered.
+            ResearchEdge(source=korean.id, target=canonical.id, type="documents"),
+            # Genuine cross-document edge — must SURVIVE.
+            ResearchEdge(source=canonical.id, target=concept.id, type="documents"),
+        ],
+    )
+    ctx = SiteContext.build(graph=graph, wiki_pages_by_kind={})
+
+    payload = build_graph_payload(ctx)
+    nodes = payload["nodes"]
+    edges = payload["links"]
+
+    # Both translation siblings still appear as separate nodes — we
+    # only filter EDGES between them, not the nodes themselves.
+    node_ids = {n["id"] for n in nodes}
+    assert canonical.id in node_ids
+    assert korean.id in node_ids
+
+    # No edge connects the two translation siblings.
+    sibling_edges = [
+        e for e in edges
+        if {e["source"], e["target"]} == {canonical.id, korean.id}
+    ]
+    assert sibling_edges == [], (
+        f"translation-sibling edges leaked into the graph payload: {sibling_edges!r}"
+    )
+
+    # The genuine cross-document edge survives.
+    assert any(
+        e["source"] == canonical.id and e["target"] == concept.id
+        for e in edges
+    )
+
+    # The full graph still has all three edges — we only filter on
+    # the visual payload.
+    assert len(ctx.graph.edges) == 3
+
+
 def test_detail_page_keeps_sticky_toc_aside_for_long_articles(
     site_ctx: SiteContext,
 ) -> None:

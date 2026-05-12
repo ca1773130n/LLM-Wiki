@@ -2166,6 +2166,91 @@ _GRAPH_HIDDEN_TYPES: frozenset[str] = frozenset({"Person"})
 _GRAPH_HIDDEN_EDGE_TYPES: frozenset[str] = frozenset({"authored_by"})
 
 
+# ---------------------------------------------------------------------------
+# Translation-sibling detection
+# ---------------------------------------------------------------------------
+# Localized docs in this repo follow GitHub's rendered-markdown convention:
+#   * Root READMEs:        ``README.<lang>.md``
+#   * Nested docs:         ``docs/foo.md`` (canonical)
+#                          ``docs/i18n/foo.<lang>.md`` (localization)
+#   * Some scraped papers: ``paper_<lang>.md`` next to ``paper.md``
+#
+# Two nodes whose ``source_path`` values normalize to the same canonical
+# stem are siblings: one is the canonical document and the other is a
+# translation of it. Edges between them carry no semantic information —
+# they're "this document linked to itself in another language" — so we
+# drop them from the interactive graph view. They remain in the full
+# ``graph.json`` because MCP/Cognee consumers may still want to surface
+# the redundancy. The visual graph only.
+_DOC_LANG_SUFFIX_RE = re.compile(
+    r"^(?P<base>.+?)[._](?P<lang>ko|zh|ja|ru|es|fr)\.md$",
+    re.IGNORECASE,
+)
+
+
+def _normalize_translation_path(path: str) -> str:
+    """Return a translation-insensitive canonical form of ``path``.
+
+    Strips any ``.<lang>.md`` / ``_<lang>.md`` suffix on the filename and
+    collapses an ``i18n/`` directory segment so localized docs map to
+    their canonical counterpart:
+
+      ``docs/architecture.md`` -> ``docs/architecture.md``
+      ``docs/i18n/architecture.ko.md`` -> ``docs/architecture.md``
+      ``data/research/paper.md`` -> ``data/research/paper.md``
+      ``data/research/paper_ko.md`` -> ``data/research/paper.md``
+
+    Returns ``""`` for an empty / None input so callers can safely
+    short-circuit (siblings are never empty paths).
+    """
+    if not path:
+        return ""
+    text = str(path).replace("\\", "/").strip()
+    if not text:
+        return ""
+    parts = text.split("/")
+    name = parts[-1]
+    match = _DOC_LANG_SUFFIX_RE.match(name)
+    if match:
+        name = f"{match.group('base')}.md"
+    # Drop any ``i18n/`` directory segment (case-insensitive) so the
+    # localized tree collapses onto the canonical tree.
+    dirs = [seg for seg in parts[:-1] if seg.lower() != "i18n"]
+    return "/".join(dirs + [name]).lower()
+
+
+def _is_translation_sibling(src_path: str, dst_path: str) -> bool:
+    """Return ``True`` when two ``source_path`` values point at the same
+    document translated into different languages.
+
+    Conservative by design: only matches when *both* paths normalize to
+    a non-empty canonical stem AND those stems are identical AND the raw
+    paths differ. That last guard means within-document extractions
+    (where both endpoints carry the same exact source_path) are NEVER
+    classified as sibling-noise — they're legitimate intra-document
+    relationships.
+
+    Examples that match (siblings -> True):
+      README.md            <-> README.ko.md
+      README.ko.md         <-> README.zh.md
+      docs/quickstart.md   <-> docs/i18n/quickstart.ko.md
+      data/.../paper.md    <-> data/.../paper_ko.md
+
+    Examples that do NOT match:
+      README.md            <-> docs/quickstart.md       (different docs)
+      docs/architecture.md <-> docs/architecture.md     (same doc)
+      data/.../paper.md    <-> data/.../README.md       (different stems)
+    """
+    if not src_path or not dst_path:
+        return False
+    if src_path == dst_path:
+        # Same file — not a translation-sibling pair, just within-doc.
+        return False
+    a = _normalize_translation_path(src_path)
+    b = _normalize_translation_path(dst_path)
+    return bool(a) and a == b
+
+
 def build_graph_payload(ctx: SiteContext) -> Dict[str, object]:
     """Compute the wiki-layer graph payload sent to the interactive view.
 
@@ -2199,6 +2284,14 @@ def build_graph_payload(ctx: SiteContext) -> Dict[str, object]:
     # (authored_by). Person endpoints already fail the source/target visibility
     # check above; this keeps the edge list clean even if a non-Person node
     # somehow ends up on an authored_by edge.
+    # Map node id -> source_path so the translation-sibling filter can
+    # check both endpoints in O(1) without re-traversing the node list
+    # per edge. ResearchNode.source_path may be ``None`` — coerce to
+    # empty string so ``_is_translation_sibling`` short-circuits cleanly.
+    visible_source_paths: Dict[str, str] = {
+        n.id: (n.source_path or "") for n in visible_nodes
+    }
+
     degree: Dict[str, int] = {nid: 0 for nid in visible_ids}
     in_degree: Dict[str, int] = {nid: 0 for nid in visible_ids}
     visible_edges: List[ResearchEdge] = []
@@ -2206,6 +2299,17 @@ def build_graph_payload(ctx: SiteContext) -> Dict[str, object]:
         if e.type in _GRAPH_HIDDEN_EDGE_TYPES:
             continue
         if e.source in visible_ids and e.target in visible_ids:
+            # Translation-sibling edges (README.md <-> README.ko.md,
+            # docs/foo.md <-> docs/i18n/foo.fr.md, paper.md <-> paper_ja.md,
+            # etc.) are suppressed: they're the same document in different
+            # languages, not a semantic relationship worth visualizing.
+            # Full ``graph.json`` keeps them so MCP/Cognee consumers can
+            # still see the redundancy if they want. See
+            # ``_is_translation_sibling`` for the matching rules.
+            src_path = visible_source_paths.get(e.source, "")
+            dst_path = visible_source_paths.get(e.target, "")
+            if _is_translation_sibling(src_path, dst_path):
+                continue
             visible_edges.append(e)
             degree[e.source] = degree.get(e.source, 0) + 1
             degree[e.target] = degree.get(e.target, 0) + 1

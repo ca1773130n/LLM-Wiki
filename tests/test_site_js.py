@@ -258,13 +258,15 @@ def test_graph_selection_fades_and_deprioritizes_non_neighbors():
 
 
 def test_graph_edges_are_visible_lines_not_only_particles():
-    # Default edge: WHITE at 0.5 alpha. Hot (hovered/focused incident): YELLOW
-    # at 0.5 alpha. Same alpha across the two states — the cue is the colour
-    # shift, not a brightness jump. Forbid the prior light-blue / 0.85 yellow.
-    assert "rgba(255,255,255,0.5)" in JS_GRAPH
-    assert "rgba(250,204,21,0.5)" in JS_GRAPH
+    # HypePaper-aligned edge palette: WHITE at 0.18 alpha for the resting
+    # state (subtle webbing over the deep-dark canvas), YELLOW at 0.85
+    # alpha for hover/focus-incident (clearly lit cue against the dim
+    # background — same gold-amber the focus label uses). The previous
+    # round used 0.5/0.5 which read as "too lit" under the new #060A14
+    # backdrop. Forbid the prior light-blue overlay.
+    assert "rgba(255,255,255,0.18)" in JS_GRAPH
+    assert "rgba(250,204,21,0.85)" in JS_GRAPH
     assert "rgba(191,219,254,0.34)" not in JS_GRAPH
-    assert "rgba(250,204,21,0.85)" not in JS_GRAPH
     # F-6 — linkOpacity is now pinned to 1.0 (alpha lives in the rgba).
     assert "if (inst.linkOpacity) inst.linkOpacity(1.0);" in JS_GRAPH
     # Issue 4 — edges thinner everywhere; widths now scale by camera
@@ -1173,6 +1175,69 @@ def test_graph_f12_dead_state_cleanup_removed():
     assert "focusedNode" in JS_GRAPH
     assert "userInteracted" in JS_GRAPH
     assert "orbitTarget" in JS_GRAPH
+
+
+# ---------------------------------------------------------------------------
+# HypePaper-aligned dark palette (GRAPH_FORCE_DARK)
+# ---------------------------------------------------------------------------
+
+def test_graph_force_dark_constant():
+    """The graph view is dark-only by design. ``GRAPH_FORCE_DARK = true``
+    is the single switch that gates every ``theme === 'light'`` branch
+    inside the graph block — flipping it back to ``false`` would restore
+    the legacy light-theme palette without any further code changes."""
+    assert "var GRAPH_FORCE_DARK = true" in JS_BUNDLE_GRAPH
+    # The constant is consulted at every theme branch — at least one of
+    # each label/pill/text-fill site references it. We assert the
+    # presence of the combined gate so a future refactor that drops it
+    # accidentally trips the test.
+    assert "!GRAPH_FORCE_DARK && theme === 'light'" in JS_BUNDLE_GRAPH
+
+
+def test_graph_uses_dark_background_color():
+    """HypePaper's CitationGraph paints over ``#060A14``. We pin the
+    same hex on both the WebGL canvas (via ``.backgroundColor``) and
+    the surrounding CSS surface so the wrapper matches the canvas."""
+    # The graph init wires backgroundColor to the GRAPH_BG_COLOR constant.
+    assert "var GRAPH_BG_COLOR = '#060A14'" in JS_BUNDLE_GRAPH
+    assert ".backgroundColor(GRAPH_BG_COLOR)" in JS_BUNDLE_GRAPH
+    # And the previous transparent background is gone.
+    assert ".backgroundColor('rgba(0,0,0,0)')" not in JS_BUNDLE_GRAPH
+
+
+def test_graph_palette_uses_hypepaper_category_colors():
+    """``GROUP_COLORS`` is ported from HypePaper's CitationGraph.vue
+    legend dots — purple-500 / blue-500 / cyan-400 / amber-400 /
+    emerald-400 / pink-400 / gray-400 / gray-500. At least the three
+    seed colors should be present so a future palette regression that
+    silently reverts to the pre-HypePaper rose/orange/lime trips
+    here."""
+    # Purple-500 (concepts / entities — seed).
+    assert "'#a855f7'" in JS_BUNDLE_GRAPH
+    # Blue-500 (papers — highly cited).
+    assert "'#3b82f6'" in JS_BUNDLE_GRAPH
+    # Cyan-400 (repos).
+    assert "'#22d3ee'" in JS_BUNDLE_GRAPH
+    # The previous "papers = rose-400" anchor (`#fb7185`) is GONE for
+    # the papers category. (It may still appear elsewhere in other JS
+    # blocks, but not as the papers GROUP_COLORS entry.)
+    assert "papers:    '#fb7185'" not in JS_BUNDLE_GRAPH
+
+
+def test_graph_label_pill_alpha_is_zero_still_holds_under_force_dark():
+    """The GRAPH_FORCE_DARK refactor must not regress the pill-alpha
+    contract — every variant stays at alpha 0 regardless of theme."""
+    assert (
+        "var VARIANT_PILL_ALPHA = { default: 0, edge: 0, neighbor: 0, hover: 0, focused: 0 }"
+        in JS_BUNDLE_GRAPH
+    )
+
+
+def test_graph_highlighted_labels_still_use_gold_text_under_force_dark():
+    """The yellow `rgb(250, 204, 21)` highlight is preserved through
+    the GRAPH_FORCE_DARK gate — even when the site theme is light the
+    graph stays dark and the highlight stays gold."""
+    assert "'rgb(250, 204, 21)'" in JS_BUNDLE_GRAPH
 
 
 # ---------------------------------------------------------------------------
