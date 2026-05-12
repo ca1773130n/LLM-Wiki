@@ -3329,7 +3329,61 @@ body {
 """
 
 
-CSS = CSS + MOBILE_CSS
+# --------------------------------------------------------------------------
+# B2 — cross-project bridge styling (wiki:// URI scheme)
+# --------------------------------------------------------------------------
+# Four states for an in-body wiki:// link:
+#   wiki-link-cross     — registered + built; live <a>
+#   wiki-link-tombstone — alias not registered; struck-through gray
+#   wiki-link-unbuilt   — alias registered but page not built yet
+#   wiki-link-broken    — URI failed to parse
+# Plus the toolbar checkbox label for the "Cross-project bridges" toggle.
+CROSS_PROJECT_CSS = """
+.wiki-link-cross {
+  border-bottom: 1px dashed rgba(167, 139, 250, 0.6);
+  color: rgb(167, 139, 250);
+  text-decoration: none;
+}
+.wiki-link-cross:hover {
+  border-bottom-style: solid;
+  color: rgb(196, 181, 253);
+}
+.wiki-link-tombstone {
+  color: rgba(255, 255, 255, 0.4);
+  text-decoration: line-through;
+  cursor: help;
+}
+[data-theme="light"] .wiki-link-tombstone {
+  color: rgba(0, 0, 0, 0.4);
+}
+.wiki-link-unbuilt {
+  color: rgb(167, 139, 250);
+  border-bottom: 1px dotted rgba(167, 139, 250, 0.3);
+  cursor: help;
+}
+.wiki-link-broken {
+  color: rgb(248, 113, 113);
+  text-decoration: line-through;
+}
+/* Toolbar checkbox for the graph-view bridge toggle. Inherits the
+   .graph-toolbar font-size/family; the gap keeps the box and label
+   spaced consistently with adjacent .graph-size-hint chips. */
+.graph-page .graph-toolbar-toggle {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 13px;
+  color: var(--ink-muted);
+  cursor: pointer;
+  user-select: none;
+}
+.graph-page .graph-toolbar-toggle input[type="checkbox"] {
+  accent-color: rgb(167, 139, 250);
+}
+"""
 
 
-__all__ = ["CSS", "MOBILE_CSS"]
+CSS = CSS + MOBILE_CSS + CROSS_PROJECT_CSS
+
+
+__all__ = ["CSS", "MOBILE_CSS", "CROSS_PROJECT_CSS"]

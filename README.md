@@ -112,6 +112,39 @@ llm_wiki ask "Where is the parser entry point?"
 
 The same registry is read by the MCP server, so MCP clients can call `list_projects`, `activate_project`, and `ask` against any registered wiki.
 
+### Cross-vault linking (`wiki://` URI scheme)
+
+Source markdown in one registered project can reference a node in another registered project via a stable URI:
+
+```
+wiki://<alias>/<kind>/<slug>
+```
+
+Examples:
+
+- `wiki://research/concepts/rlhf` — the RLHF concept in the `research` vault.
+- `wiki://other-vault/papers/arxiv-2510-12323` — a paper in `other-vault`.
+- `[See RLHF in research](wiki://research/concepts/rlhf)` — works inside a Markdown link too.
+
+At compile time these URIs become *bridge nodes* in the graph view (group `external`, violet) with a "Cross-project bridges" toggle in the toolbar so you can hide them. Unregistered aliases render as tombstones; registered-but-not-yet-built links render as placeholders.
+
+### Querying across vaults (`--scope all-registered`)
+
+`llm_wiki ask` and the MCP `ask` tool accept a `--scope` flag:
+
+```bash
+# Default — just the active/named project.
+llm_wiki ask "..."
+
+# Fan out across every registered project; aggregate envelopes by alias.
+llm_wiki ask "..." --scope all-registered
+
+# Restrict to a hand-picked subset of registered aliases.
+llm_wiki ask "..." --scope all-registered --scope-aliases research work
+```
+
+The aggregated JSON shape is `{"scope": "all-registered", "question": ..., "by_project": {"<alias>": <envelope>, ...}}`. Per-project failures are captured as `{"error": "..."}` entries; a single failing project never aborts the fan-out.
+
 ## MCP
 
 `llm_wiki project mcp-config` prints a server entry you can paste into Claude Code, Codex, or any MCP-aware client. The server exposes tools including `schema`, `graph_summary`, `search_nodes`, `node_context`, `search_facts`, `timeline`, `wiki_page`, `raw_source`, `lint_report`, `ask`, and the registry tools `list_projects` / `register_project` / `activate_project` / `unregister_project`. Tools that need a specific project resolve through the same registry as the CLI.

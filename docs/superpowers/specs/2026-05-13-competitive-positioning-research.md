@@ -258,7 +258,7 @@ These are real, and most have a named competitor that already solved them. The d
 | # | Bet | Effort | Impact | Risk |
 |---|-----|--------|--------|------|
 | B1 | Streaming compile with live wiki preview | M | High | Medium |
-| B2 | Cross-project graph linking via the registry | S | High | Low |
+| B2 | Cross-project graph linking via the registry **(shipped)** | S | High | Low |
 | B3 | Per-page embedded ask box | S | High | Low |
 | B4 | Spatial canvas mode for graph subsets | M | Medium | Medium |
 | B5 | Schema evolution via config (user-defined node types) | M | Medium | Low |
@@ -305,6 +305,8 @@ Ranking heuristic: B7 is decisive *for adoption* but not for the product. B1 / B
 **Risk.** Stale links if a sibling project is unregistered. Mitigation: degrade to a tombstone page that says "node X was in project Y, which is no longer registered."
 
 **Differentiates from.** Every personal-knowledge tool in Section 2.1 — none of them have a cross-vault linking primitive at this level. Obsidian has vault-internal links only.
+
+**Status (shipped).** Implemented in `llm_wiki/cross_project.py` (`parse_wiki_uri`, `cross_project_resolve`, `render_cross_project_link`, `find_wiki_uris_in_text`), wired into `build_graph_payload` (bridge nodes with `group="external"` + cross-project edges), `site/js.py` (violet palette + "Cross-project bridges" toolbar toggle), and `site/tokens.py` (tombstone / unbuilt / broken link CSS). The MCP `ask` tool and the top-level `llm_wiki ask` CLI gained `scope` / `scope_aliases` arguments; `scope="all-registered"` fans out and returns `{"scope", "question", "by_project"}`. Tests in `tests/test_cross_project.py` and `tests/test_cli_ask_scope.py`.
 
 #### B3. Per-page embedded ask box
 

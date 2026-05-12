@@ -2522,7 +2522,148 @@ def build_graph_payload(ctx: SiteContext) -> Dict[str, object]:
             "label": e.type.replace("_", " ") if e.type else "related",
         })
 
+    # Bet B2 — cross-project bridges. Scan every source markdown body
+    # (and every visible node's description) for ``wiki://<alias>/<kind>/<slug>``
+    # URIs, and for each unique URI emit a synthetic bridge node + an
+    # edge from the originating local node. Bridges carry
+    # ``group="external"`` so the graph view can filter / colour them
+    # distinctly. Resolved against the persistent ProjectRegistry; an
+    # unregistered alias still produces a bridge node (tombstone), so
+    # the visual graph surfaces dangling references rather than silently
+    # dropping them.
+    bridge_nodes, bridge_links = _build_cross_project_bridges(ctx, {n["id"] for n in nodes_payload})
+    nodes_payload.extend(bridge_nodes)
+    links_payload.extend(bridge_links)
+
     return {"nodes": nodes_payload, "links": links_payload}
+
+
+def _build_cross_project_bridges(
+    ctx: SiteContext, visible_local_ids: set[str]
+) -> tuple[List[Dict[str, object]], List[Dict[str, object]]]:
+    """Scan source bodies + node descriptions for ``wiki://`` URIs and
+    return ``(bridge_nodes, bridge_links)`` for the visual payload.
+
+    A "bridge node" is a synthetic node carrying
+    ``group="external"`` and ``metadata.external_project=<alias>``. It
+    represents a node in a SIBLING registered project (resolved via the
+    persistent registry) that one of THIS project's nodes mentions. A
+    bridge edge connects the originating local node to its bridge.
+
+    Three resolution outcomes:
+
+    * **Registered + built** — bridge node carries ``href="file://..."``
+      to the sibling's HTML page so a click in the graph view jumps
+      across vaults.
+    * **Registered but not built** — ``href=None``; the front-end
+      renders it as a placeholder.
+    * **Not registered (tombstone)** — same payload shape but with
+      ``metadata.tombstone=True``, letting the front-end style it as a
+      dangling reference.
+
+    Bridges are skipped when their originating local node is not in
+    ``visible_local_ids`` (e.g. a SourceDocument that was dropped by the
+    ``hide_groups`` filter). That keeps the bridge graph consistent
+    with the visible local subgraph — no orphan edges into nothing.
+    """
+    # Lazy import: this scanner is the only consumer of cross_project in
+    # the site builder, and importing at module load would force every
+    # graph build to touch the registry path even when no source body
+    # contains a wiki:// URI.
+    from ..cross_project import cross_project_resolve, find_wiki_uris_in_text
+
+    # Map each URI -> set of local node ids that mention it. Local nodes
+    # are discovered two ways:
+    #   1. By body: scan ctx.source_body_by_path; the local SourceDocument
+    #      node for that source_path is the originator.
+    #   2. By description: scan each visible node's own description
+    #      string — a paper/concept page that quotes a wiki:// URI in
+    #      its description still gets a bridge edge.
+    uri_to_local_ids: Dict[str, set[str]] = {}
+
+    # (1) source bodies
+    for source_path, body in (ctx.source_body_by_path or {}).items():
+        if not body:
+            continue
+        local_id = (ctx.node_id_for_source_path or {}).get(source_path)
+        if not local_id or local_id not in visible_local_ids:
+            continue
+        for uri in find_wiki_uris_in_text(body):
+            uri_to_local_ids.setdefault(uri, set()).add(local_id)
+
+    # (2) node descriptions (raw, pre-trim — ctx.graph.nodes carry the
+    #     full description; the payload-shape ``description[:400]`` would
+    #     still cover most legit URIs but the raw text is the safer
+    #     scanner input).
+    for n in ctx.graph.nodes:
+        if n.id not in visible_local_ids:
+            continue
+        desc = (n.description or "")
+        if "wiki://" not in desc:
+            continue
+        for uri in find_wiki_uris_in_text(desc):
+            uri_to_local_ids.setdefault(uri, set()).add(n.id)
+
+    if not uri_to_local_ids:
+        return ([], [])
+
+    bridge_nodes: List[Dict[str, object]] = []
+    bridge_links: List[Dict[str, object]] = []
+    seen_bridge_ids: set[str] = set()
+
+    # Sort URIs for deterministic payload output across runs — the on-
+    # disk ``payload-core.json`` / ``payload-rest.json`` must be
+    # byte-identical for the same input graph, and dict iteration order
+    # is insertion-order in CPython 3.7+ but the upstream scan order
+    # depends on file-system ordering of ``source_body_by_path``.
+    for uri in sorted(uri_to_local_ids.keys()):
+        try:
+            ref = cross_project_resolve(uri)
+        except ValueError:
+            # Should not happen — find_wiki_uris_in_text already filters
+            # to valid URIs — but guard anyway.
+            continue
+        bridge_id = f"bridge:{ref.alias}:{ref.kind}:{ref.slug}"
+        if bridge_id not in seen_bridge_ids:
+            seen_bridge_ids.add(bridge_id)
+            bridge_nodes.append({
+                "id": bridge_id,
+                "name": f"{ref.slug} ({ref.alias})",
+                # We reuse the existing SourceDocument type so the schema
+                # contract (ALLOWED_NODE_TYPES) does not need a new entry —
+                # the ``group="external"`` field is what the front-end
+                # filter keys on. Bet B2 explicitly notes "if a Bridge
+                # enum value already exists, reuse it; else add a single
+                # entry — whichever minimizes diff." There is no Bridge
+                # enum, so we pick the zero-schema-churn option.
+                "type": "SourceDocument",
+                "kind": ref.kind,
+                "group": "external",
+                "href": f"file://{ref.page_path}" if ref.is_built else None,
+                "val": 3.0,
+                "degree": len(uri_to_local_ids[uri]),
+                "in_degree": len(uri_to_local_ids[uri]),
+                "description": f"Cross-project link to {uri}",
+                "metadata": {
+                    "external_project": ref.alias,
+                    "external_kind": ref.kind,
+                    "external_slug": ref.slug,
+                    "external_uri": uri,
+                    "page_path": str(ref.page_path) if ref.is_built else None,
+                    "tombstone": not ref.is_resolvable,
+                    "unbuilt": ref.is_resolvable and not ref.is_built,
+                },
+            })
+        for local_id in sorted(uri_to_local_ids[uri]):
+            bridge_links.append({
+                "source": local_id,
+                "target": bridge_id,
+                "type": "mentions",
+                "label": "mentions",
+                "cross_project": True,
+            })
+
+    return (bridge_nodes, bridge_links)
 
 
 def build_graph_payload_split(
@@ -2725,6 +2866,9 @@ def render_graph_view(ctx: SiteContext) -> str:
         <input id="graph-search-input" type="search" placeholder="Search nodes ( / )" autocomplete="off" spellcheck="false">
       </div>
       <span class="graph-size-hint" title="Node radius scales with sqrt of incident-edge count, capped at degree=200.">node size = √(connections)</span>
+      <label class="graph-toolbar-toggle" data-cross-project-toggle hidden title="Show or hide bridge nodes that link to registered sibling vaults (B2).">
+        <input type="checkbox" checked> Cross-project bridges
+      </label>
       <button type="button" class="graph-help-button" data-graph-help aria-expanded="false" aria-controls="graph-help-popover" title="Help (?)" aria-label="Toggle help popover">?</button>
     </div>
     <div class="graph-canvas" id="graph-canvas" data-payload-url="payload.json" data-payload-core-url="payload-core.json" data-payload-rest-url="payload-rest.json" role="img" aria-label="Interactive 3D knowledge graph">

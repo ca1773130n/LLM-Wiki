@@ -791,6 +791,10 @@ JS_GRAPH = r"""
     topics:    '#f472b6',
     syntheses: '#fbbf24',
     questions: '#34d399',
+    // B2 — cross-project bridge nodes. Violet-400 (HypePaper-adjacent
+    // accent) so they read as "outside this vault" at a glance without
+    // clashing with the concept/entity purple.
+    external:  '#a78bfa',
     other:     '#6b7280'
   };
   // Default edge: off-white at 0.18 alpha (HypePaper uses
@@ -823,6 +827,9 @@ JS_GRAPH = r"""
     topics:    { h: 329, s: 86, l: 70 },
     syntheses: { h: 41,  s: 96, l: 56 },
     questions: { h: 158, s: 64, l: 52 },
+    // B2 — bridge violet (a78bfa ~= HSL 254 95 75); the per-node
+    // wobble in ``nodeColorVariant`` keeps the centroid here.
+    external:  { h: 254, s: 95, l: 75 },
     other:     { h: 220, s: 9,  l: 50 }
   };
 
@@ -971,6 +978,33 @@ JS_GRAPH = r"""
     }
     if (btnHelp) btnHelp.addEventListener('click', toggleHelpOpen);
 
+    // B2 — cross-project bridge toggle (default ON). Hidden when there
+    // are zero bridge nodes in the payload to keep the toolbar uncluttered
+    // for solo-project users. We re-check after the rest-payload merge
+    // (``__graphMergeRestPayload``) since bridges may live in rest, not
+    // core. The state variable ``showCrossProjectBridges`` is declared
+    // below, near ``isVisible``; this handler just flips it.
+    var crossProjectToggle = document.querySelector('[data-cross-project-toggle]');
+    function hasBridges(){
+      for (var i = 0; i < payload.nodes.length; i++) {
+        if (payload.nodes[i] && payload.nodes[i].group === 'external') return true;
+      }
+      return false;
+    }
+    function syncCrossProjectToggleVisibility(){
+      if (!crossProjectToggle) return;
+      crossProjectToggle.hidden = !hasBridges();
+    }
+    if (crossProjectToggle) {
+      var crossProjectCheckbox = crossProjectToggle.querySelector('input[type="checkbox"]');
+      if (crossProjectCheckbox) {
+        crossProjectCheckbox.addEventListener('change', function(){
+          showCrossProjectBridges = !!crossProjectCheckbox.checked;
+          if (Graph) refreshVisibility();
+        });
+      }
+    }
+
     var reduceMotion = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
 
     var typeCounts = {};
@@ -1017,6 +1051,9 @@ JS_GRAPH = r"""
       });
     }
     rebuildLegend();
+    // B2 — set initial toolbar-toggle visibility based on the core
+    // payload; the rest-merge re-checks once the union is in.
+    try { syncCrossProjectToggleVisibility(); } catch (_) {}
 
     var highlightNodes = new Set();
     var highlightLinks = new Set();
@@ -1325,6 +1362,14 @@ JS_GRAPH = r"""
       return [linkEndpointId(link.source), linkEndpointId(link.target), link.type || link.label || ''].join('→');
     }
 
+    // B2 — cross-project bridges toggle. Default ON (bridges visible)
+    // since the feature is the whole point of registering multiple
+    // projects. Toggled via the ``[data-cross-project-toggle]``
+    // checkbox in the toolbar; when off, every node with
+    // ``group === "external"`` and every incident edge is hidden,
+    // composing cleanly with the existing ``hiddenGroups`` chip filter.
+    var showCrossProjectBridges = true;
+
     function isVisible(node){
       // F-8 — visibility is now a HARD filter only. Type-chip toggles and
       // the day-filter literally hide non-matching nodes; they're meant
@@ -1335,6 +1380,10 @@ JS_GRAPH = r"""
       if (!node) return false;
       var g = node.group || 'other';
       if (hiddenGroups.has(g)) return false;
+      // B2 — bridge filter composes with the existing chip filter and
+      // day filter; either one returning false hides the node and its
+      // incident edges (linkVisibility checks both endpoints).
+      if (!showCrossProjectBridges && g === 'external') return false;
       if (dayFilter) {
         var created = node.metadata && node.metadata.created;
         if (!created || String(created).slice(0, 10) !== dayFilter) return false;
@@ -3592,6 +3641,9 @@ JS_GRAPH = r"""
       // core subgraph that startGraph saw. ``hiddenGroups`` is preserved
       // across the rebuild so any user-toggled-off chips stay off.
       rebuildLegend();
+      // B2 — bridges might only live in the rest payload, so reveal /
+      // hide the toolbar toggle once the union is known.
+      try { syncCrossProjectToggleVisibility(); } catch (_) {}
       // F-1 — the rest payload added new nodes and links to the live
       // simulation, which will redistribute the existing layout outside
       // the camera's currently-fitted view. Re-frame the union once,

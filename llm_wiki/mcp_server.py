@@ -444,7 +444,7 @@ class LLMWikiMCPServer:
                 "description": (
                     "Ask a natural-language question and get an answer from a configured "
                     "memory backend (raganything, cognee, or compiled wiki search). Mirrors "
-                    "`llm_wiki project ask`."
+                    "`llm_wiki project ask`. Supports cross-vault fan-out via `scope`."
                 ),
                 "inputSchema": {
                     "type": "object",
@@ -459,6 +459,17 @@ class LLMWikiMCPServer:
                         "project": project_prop,
                         "graph_path": graph_path_prop,
                         "top_k": {"type": "integer", "description": "Maximum results/context items.", "default": 5, "minimum": 1, "maximum": 100},
+                        "scope": {
+                            "type": "string",
+                            "enum": ["current", "all-registered"],
+                            "default": "current",
+                            "description": "B2: 'current' (default) targets the resolved project; 'all-registered' fans out across every registered project and returns an aggregated envelope.",
+                        },
+                        "scope_aliases": {
+                            "type": "array",
+                            "items": {"type": "string"},
+                            "description": "When scope='all-registered', optionally restrict to this list of registered alias names.",
+                        },
                     },
                     "required": ["question"],
                     "additionalProperties": False,
@@ -567,6 +578,16 @@ class LLMWikiMCPServer:
             if backend not in {"auto", "raganything", "cognee", "wiki"}:
                 raise ValueError(f"ask: unknown backend {backend!r}")
             top_k = int(args.get("top_k") or 5)
+            scope = str(args.get("scope") or "current")
+            if scope not in {"current", "all-registered"}:
+                raise ValueError(f"ask: unknown scope {scope!r}")
+            if scope == "all-registered":
+                return self._mcp_ask_all_registered(
+                    question=question,
+                    backend=backend,
+                    top_k=top_k,
+                    scope_aliases=_coerce_str_list(args.get("scope_aliases")),
+                )
             return self._mcp_ask(args, question=question, backend=backend, top_k=top_k)
         if name == "list_projects":
             return self.registry.list_projects()
@@ -800,6 +821,62 @@ class LLMWikiMCPServer:
         project_root = self._resolve_project_root_for_ask(args)
         wiki = ProjectWiki.load(project_root)
         return ask_project(wiki, question, backend=backend, top_k=top_k)
+
+    def _mcp_ask_all_registered(
+        self,
+        *,
+        question: str,
+        backend: str,
+        top_k: int,
+        scope_aliases: List[str],
+    ) -> JSONDict:
+        """B2 — fan ``ask`` out across every registered project.
+
+        Aggregates the per-project envelopes under
+        ``{"scope": "all-registered", "by_project": {...}}``. Mirrors
+        the CLI handler exactly so MCP clients and the CLI return the
+        same shape. Failures in one project are captured as
+        ``{"error": "..."}`` entries; the aggregate call never raises
+        on a single project's failure.
+        """
+        from .project import ProjectWiki
+        from .query import ask_project
+
+        data = self.registry.list_projects()
+        projects = list(data.get("projects") or [])
+        wanted = {a for a in scope_aliases if a}
+        if wanted:
+            projects = [p for p in projects if p.get("name") in wanted]
+            missing = wanted - {p.get("name") for p in projects}
+            if missing:
+                raise ValueError(
+                    f"ask: unknown scope alias(es): {sorted(missing)}. "
+                    f"Use list_projects to see registered projects."
+                )
+        if not projects:
+            raise ValueError(
+                "ask: scope='all-registered' but the registry is empty. "
+                "Use register_project to add a project first."
+            )
+        by_project: Dict[str, JSONDict] = {}
+        for entry in projects:
+            name = str(entry.get("name") or "")
+            root_str = entry.get("root")
+            if not root_str:
+                gp = Path(str(entry.get("graph_path") or "")).resolve()
+                project_root = gp.parent.parent if gp.parent.name == ".llm-wiki" else gp.parent
+            else:
+                project_root = Path(str(root_str)).resolve()
+            try:
+                wiki = ProjectWiki.load(project_root)
+                by_project[name] = ask_project(wiki, question, backend=backend, top_k=top_k)
+            except Exception as exc:
+                by_project[name] = {"error": f"ask failed: {exc}"}
+        return {
+            "scope": "all-registered",
+            "question": question,
+            "by_project": by_project,
+        }
 
     def node_context(self, graph: ResearchGraph, node_id: Optional[str] = None, node_name: Optional[str] = None, limit: int = 50) -> JSONDict:
         node = self._find_node(graph, node_id=node_id, node_name=node_name)

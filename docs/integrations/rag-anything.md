@@ -163,6 +163,21 @@ llm_wiki ask "..." --project /tmp/somewhere
 
 The dispatch logic — `--project > --wiki > active project` — is implemented in `_top_level_ask_handler` and the answer formatting / backend selection is shared with `project ask` and the MCP `ask` tool through `llm_wiki.query.ask_project`. The registry is file-backed (`~/.llm-wiki/registry.json` by default), so it persists across sessions and stays in sync with the MCP server's project list.
 
+#### Querying across multiple vaults (`--scope all-registered`)
+
+Bet B2 — when you have several registered projects (research vault, work vault, side-project vault) and you want to ask the same question against all of them, use `--scope all-registered`:
+
+```bash
+# Fan out across every registered project. The aggregated envelope is
+# {"scope": "all-registered", "question": "...", "by_project": {"<alias>": <envelope>}}.
+llm_wiki ask "What did I write about RLHF?" --scope all-registered --json
+
+# Restrict to a hand-picked subset of aliases.
+llm_wiki ask "..." --scope all-registered --scope-aliases research side-projects
+```
+
+The handler iterates registered projects in alphabetical order, calls `ask_project` against each, and aggregates the per-project envelopes. A single project failing — missing config, RAG-Anything not enabled, Cognee down — is captured as `{"error": "..."}` in that alias's slot and never aborts the rest of the fan-out. The same `scope` argument is accepted by the MCP `ask` tool, so MCP-driven coding agents get the same fan-out without extra plumbing.
+
 ### Multi-project registry (`llm_wiki wiki`)
 
 | Command | Purpose |

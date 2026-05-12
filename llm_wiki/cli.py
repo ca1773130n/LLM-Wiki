@@ -8,7 +8,7 @@ import json
 import sys
 from collections import Counter
 from pathlib import Path
-from typing import Iterable, List, Optional
+from typing import Dict, Iterable, List, Optional
 
 from .batch import BatchIngestRunner
 from .canonicalization import GraphCanonicalizer, ReviewDecision
@@ -265,10 +265,23 @@ def _top_level_ask_handler(args) -> int:
       1. ``--project <path>`` — direct path (no registry lookup).
       2. ``--wiki <name>`` — look up the registered alias.
       3. The registry's currently active project.
+
+    Bet B2 — ``--scope all-registered`` fans out across every registered
+    project instead of just the one resolved above. The single-project
+    path is kept as the default so existing call sites are unchanged.
     """
 
     from .mcp_server import ProjectRegistry
     from .query import ask_project
+
+    # B2 — multi-project scope. We dispatch through the same ask_project
+    # helper for each registered project, then aggregate the envelopes
+    # under one top-level wrapper so JSON consumers can iterate the
+    # ``by_project`` map. ``current`` (default) keeps the legacy
+    # single-project behaviour byte-for-byte.
+    scope = getattr(args, "scope", "current") or "current"
+    if scope == "all-registered":
+        return _top_level_ask_scope_all_registered(args)
 
     project_root: Optional[Path] = None
     source: str = ""
@@ -347,6 +360,102 @@ def _top_level_ask_handler(args) -> int:
         return 2
 
     return _emit_ask_envelope(envelope, json_output=bool(args.json_output))
+
+
+def _top_level_ask_scope_all_registered(args) -> int:
+    """B2 — fan out the question across every registered project.
+
+    Aggregates each project's :func:`ask_project` envelope into a single
+    ``{"scope": "all-registered", "question": ..., "by_project": {...}}``
+    payload. Failures in one project never abort the run — they're
+    captured as ``{"error": "..."}`` entries so the aggregate view stays
+    legible. Supports an optional ``--scope-aliases`` filter to restrict
+    to a hand-picked subset of the registry.
+    """
+
+    from .mcp_server import ProjectRegistry
+    from .query import ask_project
+
+    registry = ProjectRegistry()
+    data = registry.list_projects()
+    all_projects: List[dict] = list(data.get("projects") or [])
+    if not all_projects:
+        print(
+            "No projects registered. Use `llm_wiki wiki register <path> --name <alias>` first.",
+            file=sys.stderr,
+        )
+        return 2
+
+    requested = list(getattr(args, "scope_aliases", None) or [])
+    if requested:
+        wanted = {str(a) for a in requested}
+        all_projects = [p for p in all_projects if p.get("name") in wanted]
+        missing = wanted - {p.get("name") for p in all_projects}
+        if missing:
+            print(
+                f"Unknown scope alias(es): {sorted(missing)}. "
+                f"Use `llm_wiki wiki list` to see registered projects.",
+                file=sys.stderr,
+            )
+            return 2
+
+    by_project: Dict[str, dict] = {}
+    for entry in all_projects:
+        name = entry.get("name") or ""
+        root_str = entry.get("root")
+        if not root_str:
+            gp = Path(entry.get("graph_path") or "").resolve()
+            project_root = gp.parent.parent if gp.parent.name == ".llm-wiki" else gp.parent
+        else:
+            project_root = Path(root_str).resolve()
+        try:
+            wiki = ProjectWiki.load(project_root)
+        except Exception as exc:
+            by_project[name] = {"error": f"could not load project: {exc}"}
+            continue
+        try:
+            envelope = ask_project(
+                wiki,
+                args.question,
+                backend=args.backend,
+                top_k=args.top_k,
+                cognee_search_type=args.cognee_search_type,
+                cognee_dataset=args.cognee_dataset,
+            )
+            by_project[name] = envelope
+        except RuntimeError as exc:
+            by_project[name] = {"error": str(exc)}
+        except Exception as exc:
+            by_project[name] = {"error": f"ask failed: {exc}"}
+
+    aggregate = {
+        "scope": "all-registered",
+        "question": args.question,
+        "by_project": by_project,
+    }
+
+    if bool(args.json_output):
+        print(json.dumps(aggregate, ensure_ascii=False, indent=2))
+        return 0
+
+    # Human-readable rendering: one section per project, using the same
+    # ``_emit_ask_envelope`` helper for individual envelopes so the
+    # backend-specific formatting stays consistent with single-project
+    # ``ask``. Each section is preceded by a banner so the user can
+    # tell whose answer came from where.
+    print(f"All-registered scope · question: {args.question!r}")
+    for name in sorted(by_project.keys()):
+        envelope = by_project[name]
+        print()
+        print(f"=== {name} ===")
+        if isinstance(envelope, dict) and "error" in envelope:
+            print(f"(error: {envelope['error']})")
+            continue
+        # _emit_ask_envelope prints to stdout; ignore its return code
+        # since aggregation success doesn't depend on any single
+        # project's envelope rendering.
+        _emit_ask_envelope(envelope, json_output=False)
+    return 0
 
 
 def _wiki_command_handler(args) -> int:
@@ -445,6 +554,25 @@ def _build_top_level_ask_parser() -> argparse.ArgumentParser:
         "--cognee-dataset",
         default=None,
         help="Override the configured Cognee dataset.",
+    )
+    # Bet B2 — registry-scoped fan-out.
+    parser.add_argument(
+        "--scope",
+        choices=["current", "all-registered"],
+        default="current",
+        help=(
+            "Query scope: 'current' (default) hits the active/named project; "
+            "'all-registered' fans out across every project in the registry."
+        ),
+    )
+    parser.add_argument(
+        "--scope-aliases",
+        nargs="*",
+        default=None,
+        help=(
+            "When --scope=all-registered, optionally restrict to this list "
+            "of registered alias names (e.g. --scope-aliases research work)."
+        ),
     )
     return parser
 
