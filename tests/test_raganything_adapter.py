@@ -29,14 +29,20 @@ def _payload():
     }
 
 
-def test_import_payload_creates_source_file_with_multimodal_blocks(tmp_path):
+def test_import_payload_creates_source_document_with_multimodal_blocks(tmp_path):
+    """Raganything-projected docs are SourceDocument nodes (Bug B fix).
+
+    They previously landed as SOURCE_FILE, which routed them into
+    code_graph.json via partition_graph and made them invisible to the
+    visual payload + public wiki.
+    """
     adapter = RagAnythingGraphAdapter(tmp_path)
     graph, manifest = adapter.import_payload(
         _payload(),
         artifact_rel=".llm-wiki/external/raganything/manifest.json",
         artifact_sha256="deadbeef",
     )
-    sources = [n for n in graph.nodes if n.type == ResearchNodeType.SOURCE_FILE]
+    sources = [n for n in graph.nodes if n.type == ResearchNodeType.SOURCE_DOCUMENT]
     assert len(sources) == 1
     src = sources[0]
     assert src.metadata["parser"] == "raganything"
@@ -103,7 +109,7 @@ def test_import_payload_emits_empty_string_description_when_no_text_blocks(tmp_p
 
     adapter = RagAnythingGraphAdapter(tmp_path)
     graph, _manifest = adapter.import_payload(payload, artifact_rel="manifest.json")
-    sources = [n for n in graph.nodes if n.type == ResearchNodeType.SOURCE_FILE]
+    sources = [n for n in graph.nodes if n.type == ResearchNodeType.SOURCE_DOCUMENT]
     assert len(sources) == 1
     # Description must be a string (NOT None) so SQLite's NOT NULL constraint is satisfied.
     assert isinstance(sources[0].description, str)

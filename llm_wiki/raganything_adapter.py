@@ -135,9 +135,14 @@ class RagAnythingGraphAdapter:
             equations = [b for b in blocks if b["type"] == "equation"]
             if equations:
                 metadata["equations"] = equations
+            # Bug B fix: raganything-projected documents are research-layer
+            # source documents, not code-graph SourceFile nodes. Emitting
+            # SOURCE_DOCUMENT puts them in the main graph (instead of
+            # code_graph.json via partition_graph) and gives them a public
+            # wiki page + a ``sources`` group in the visual graph payload.
             node = builder.add_node(
                 path or doc_id,
-                ResearchNodeType.SOURCE_FILE,
+                ResearchNodeType.SOURCE_DOCUMENT,
                 description=description,
                 source_path=path or None,
                 metadata=metadata,

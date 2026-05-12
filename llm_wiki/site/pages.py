@@ -206,7 +206,13 @@ def _kind_for_node_type(node_type: ResearchNodeType) -> Optional[str]:
     Claim variants). Those types stay in ``graph.json`` for MCP/Cognee
     consumers but never get a URL of their own.
     """
-    if node_type == ResearchNodeType.SOURCE_DOCUMENT:
+    if node_type in (ResearchNodeType.SOURCE_DOCUMENT, ResearchNodeType.SOURCE_FILE):
+        # Bug B: ``SOURCE_FILE`` is normally a code-graph type and gets
+        # filtered out before reaching this map (see ``WIKI_LAYER_TYPES`` in
+        # ``site/search.py``). But raganything-projected docs used to be
+        # minted as SOURCE_FILE and may exist in older graphs on disk; map
+        # them to ``sources`` so they group correctly if they ever survive
+        # the visibility filter.
         return "sources"
     if node_type == ResearchNodeType.PAPER:
         return "papers"
@@ -2352,6 +2358,20 @@ def build_graph_payload(ctx: SiteContext) -> Dict[str, object]:
         capped_in = min(in_deg, 200)
         val = round(2 + (capped_in ** 0.92) * 1.4, 2)
         description = (n.description or "").strip()
+        # Bug B: surface the ``parser`` provenance flag (raganything /
+        # cognee / etc.) on each node so the front-end legend and any
+        # downstream consumers can distinguish externally-projected
+        # source documents from natively extracted ones. We deliberately
+        # send only the small flag, not the full metadata blob, to keep
+        # the payload byte budget tight.
+        node_meta = n.metadata or {}
+        payload_meta: Dict[str, object] = {}
+        parser_flag = node_meta.get("parser")
+        if parser_flag:
+            payload_meta["parser"] = parser_flag
+        external_system = node_meta.get("external_system")
+        if external_system:
+            payload_meta["external_system"] = external_system
         nodes_payload.append({
             "id": n.id,
             "name": n.name,
@@ -2363,6 +2383,7 @@ def build_graph_payload(ctx: SiteContext) -> Dict[str, object]:
             "degree": deg,
             "in_degree": in_deg,
             "description": description[:400],  # JS clips to 200 chars itself
+            "metadata": payload_meta,
         })
 
     links_payload: List[Dict[str, object]] = []

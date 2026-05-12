@@ -39,7 +39,7 @@ from .markdown_projection import GraphMarkdownProjector
 from .obsidian_adapter import ObsidianVaultAdapter
 from .persistence import SQLiteResearchGraphStore
 from .report import GraphReporter
-from .research_graph import ResearchCorpusAnalyzer, ResearchEdge, ResearchGraph, ResearchGraphExtractor, ResearchNode, ResearchNodeType, link_paper_repo_pairs, prefer_research_node
+from .research_graph import ResearchCorpusAnalyzer, ResearchEdge, ResearchGraph, ResearchGraphExtractor, ResearchNode, ResearchNodeType, filter_filename_shaped_concepts, link_paper_repo_pairs, prefer_research_node
 from .temporal import TemporalFactProjector, render_competitive_report
 from .raganything_adapter import merge_raganything_graph
 from .understand_anything_adapter import merge_understand_anything_graph
@@ -342,6 +342,13 @@ class ProjectWiki:
                         ]
                         prior_graph = ResearchGraph(nodes=kept_nodes, edges=kept_edges)
                     graph = merge_graphs([prior_graph, graph])
+        # Bug A guard: after every merge — native FS extractor, code graph,
+        # Understand-Anything, RAG-Anything, prior incremental graph — strip
+        # any concept-layer node whose name is a filename or path. UA in
+        # particular tends to mint ``Concept`` nodes for documents and feed
+        # entries; we don't want those duplicating SourceDocument pages in
+        # the visual graph. See ``filter_filename_shaped_concepts``.
+        graph = filter_filename_shaped_concepts(graph)
         self._write_artifacts(graph, cognify=cognify, store=store)
         return {
             "project_root": str(self.project_root),

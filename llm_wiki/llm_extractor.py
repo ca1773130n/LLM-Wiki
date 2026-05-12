@@ -23,6 +23,7 @@ from .research_graph import (
     ResearchNodeType,
     extract_source_metadata,
     extract_title,
+    filter_filename_shaped_concepts,
     source_kind_to_node_type,
 )
 
@@ -119,6 +120,12 @@ def graph_from_llm_payload(payload: Mapping[str, object], source_path: Optional[
         builder.add_edge(source, edge_type, target, evidence=str(raw_edge.get("evidence") or "") or None, metadata=dict(metadata))
 
     graph = builder.build()
+    # Bug A: the LLM occasionally returns ``Concept``-typed nodes whose
+    # names are literally filenames (``feature-map.md``, ``pyproject.toml``).
+    # They duplicate the ``SourceDocument`` nodes that already represent
+    # the same files with proper titles, so we strip them here before
+    # downstream validation/persistence.
+    graph = filter_filename_shaped_concepts(graph)
     validate_research_graph(graph)
     return graph
 

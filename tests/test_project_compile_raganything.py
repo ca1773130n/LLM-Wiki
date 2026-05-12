@@ -47,10 +47,15 @@ def test_project_compile_merges_configured_raganything_native_graph(tmp_path):
 
     wiki.compile(cognify=None)
 
-    # SOURCE_FILE nodes are partitioned into code-graph.json by partition_graph;
-    # raganything documents land there with parser=raganything metadata.
-    graph = load_graph_file(wiki.paths.code_graph)
-    sources = [n for n in graph.nodes if n.type == ResearchNodeType.SOURCE_FILE and n.metadata.get("parser") == "raganything"]
+    # Bug B fix: raganything-projected docs are SOURCE_DOCUMENT nodes (not
+    # SOURCE_FILE), so they land in the main graph -- where the visual
+    # payload + public wiki can see them -- rather than in code_graph.json.
+    graph = load_graph_file(wiki.paths.graph)
+    sources = [
+        n for n in graph.nodes
+        if n.type == ResearchNodeType.SOURCE_DOCUMENT
+        and n.metadata.get("parser") == "raganything"
+    ]
     assert len(sources) == 1
     assert sources[0].metadata["external_refs"][0]["system"] == "rag-anything"
     sync = json.loads((project / ".llm-wiki" / "external" / "raganything-sync.json").read_text())

@@ -15,7 +15,7 @@ import re
 from dataclasses import asdict, dataclass, field
 from enum import Enum
 from pathlib import Path
-from typing import Dict, Iterable, List, Mapping, Optional, Sequence, Set, Tuple
+from typing import Dict, FrozenSet, Iterable, List, Mapping, Optional, Sequence, Set, Tuple
 
 
 class ResearchNodeType(str, Enum):
@@ -1065,6 +1065,145 @@ def is_public_research_node(node: ResearchNode) -> bool:
         if quality and quality not in VERIFIED_PAPER_TITLE_QUALITIES:
             return False
     return True
+
+
+# ---------------------------------------------------------------------------
+# Filename-shaped concept filter
+# ---------------------------------------------------------------------------
+#
+# Bug A regression guard: the LLM extractor sometimes admits ``Concept``-typed
+# nodes whose names are literally filenames or path strings
+# (``feature-map.md``, ``pyproject.toml``, ``tests/test_x.py``). They duplicate
+# the same documents that already exist as ``SourceDocument`` nodes with proper
+# titles, polluting the concept layer of the visual graph. The predicate below
+# rejects only names that are unambiguously file references — real concept
+# tokens like ``GPT-4o``, ``Llama 3.1``, ``4D Gaussian Splatting`` survive.
+
+_FILENAME_EXTENSIONS: FrozenSet[str] = frozenset({
+    ".md", ".markdown", ".txt", ".rst", ".pdf",
+    ".json", ".yaml", ".yml", ".toml", ".ini", ".cfg",
+    ".py", ".pyi", ".pyc", ".pyx",
+    ".ts", ".tsx", ".js", ".jsx", ".mjs", ".cjs",
+    ".html", ".htm", ".css", ".scss", ".sass", ".less",
+    ".go", ".rs", ".java", ".kt", ".swift", ".rb",
+    ".sh", ".bash", ".zsh", ".fish",
+    ".sql", ".graphql", ".proto",
+    ".lock", ".log",
+    ".png", ".jpg", ".jpeg", ".gif", ".bmp", ".webp", ".svg",
+    ".docx", ".pptx", ".xlsx",
+})
+
+
+_BARE_FILENAME_RE = re.compile(r"^[A-Za-z0-9_\-]+(\.[A-Za-z0-9_\-]+)+$")
+
+
+# Concept-layer node types whose names should never look like filenames. This
+# is the union of types that map to the ``concepts`` site group via
+# ``site/pages.py::_kind_for_node_type``; keep the two in sync. We deliberately
+# do not include source/entity/topic types here — a Dataset named ``foo.json``
+# could in principle be legitimate, and we want the predicate to be
+# unambiguous when applied.
+_CONCEPTISH_TYPES_FOR_FILTER: FrozenSet["ResearchNodeType"] = frozenset({
+    ResearchNodeType.CONCEPT,
+    ResearchNodeType.TECHNICAL_TERM,
+    ResearchNodeType.MATHEMATICAL_CONCEPT,
+    ResearchNodeType.METHODOLOGICAL_CONCEPT,
+    ResearchNodeType.ALGORITHM,
+    ResearchNodeType.OBJECTIVE_FUNCTION,
+    ResearchNodeType.ARCHITECTURE_PATTERN,
+    ResearchNodeType.TRAINING_PARADIGM,
+    ResearchNodeType.INFERENCE_STRATEGY,
+    ResearchNodeType.EVALUATION_PROTOCOL,
+    ResearchNodeType.TASK,
+    ResearchNodeType.CAPABILITY,
+    ResearchNodeType.APPROACH_FAMILY,
+    ResearchNodeType.RESEARCH_TOPIC,
+})
+
+
+# Bare filenames whose extension would be missed by ``_FILENAME_EXTENSIONS``
+# but which are nonetheless unambiguous. Comparing case-insensitively.
+_KNOWN_BARE_FILENAMES: FrozenSet[str] = frozenset({
+    ".gitignore",
+    ".dockerignore",
+    ".gitattributes",
+    ".editorconfig",
+    ".npmrc",
+    "dockerfile",
+    "makefile",
+    "license",
+    "license.txt",
+    "license.md",
+    "readme",
+})
+
+
+def looks_like_filename_or_path(name: str) -> bool:
+    """Return ``True`` if ``name`` reads as a filename or path, not a concept.
+
+    Conservative by design — false negatives are preferred to false positives.
+    A real concept token like ``GPT-4o`` or ``Llama 3.1`` must survive even
+    though it superficially resembles ``foo.bar``.
+
+    Positive cases (returns ``True``):
+        ``feature-map.md``, ``pyproject.toml``, ``tests/test_x.py``,
+        ``docs/integrations/rag-anything.md``, ``__init__.py``,
+        ``package.json``, ``.gitignore``, ``Makefile``, ``Dockerfile``,
+        ``LICENSE``.
+
+    Negative cases (returns ``False``):
+        ``GaussianFlow SLAM``, ``Self-Supervised Learning``, ``Depth Map``,
+        ``A. M. Turing``, ``4D Gaussian Splatting``, ``128-D vector``,
+        ``GPT-4o``, ``Llama 3.1``.
+    """
+    if not name:
+        return False
+    name = name.strip()
+    if not name:
+        return False
+    # Any path separator is a dead giveaway. Tokens like ``OpenAI/GPT-4o``
+    # are vanishingly rare in research prose; if a concept name contains
+    # ``/`` or ``\`` it's almost certainly a path.
+    if "/" in name or "\\" in name:
+        return True
+    # File-extension match. ``os.path.splitext`` returns ``(root, ext)`` where
+    # ``ext`` is the trailing ``.<suffix>`` (empty string if none).
+    _, ext = os.path.splitext(name)
+    if ext.lower() in _FILENAME_EXTENSIONS:
+        return True
+    # Whitelist the handful of bare filenames whose extension we don't list
+    # (``Dockerfile``, ``Makefile``, ``LICENSE``, ``.gitignore`` etc.).
+    lowered = name.lower()
+    if lowered in _KNOWN_BARE_FILENAMES:
+        return True
+    # Past this point we deliberately do nothing. ``_BARE_FILENAME_RE`` could
+    # match ``GPT-4o`` (no dot — fails the regex, so safe) or ``Llama 3.1``
+    # (has a space — also fails). Anything that survives is preserved.
+    return False
+
+
+def filter_filename_shaped_concepts(graph: ResearchGraph) -> ResearchGraph:
+    """Return ``graph`` with filename-shaped conceptish nodes (and incident
+    edges) removed.
+
+    See :func:`looks_like_filename_or_path` for the predicate. Only nodes
+    whose type is in the concept layer are affected — a ``SourceDocument``
+    named ``README.md`` is the right shape and is preserved.
+    """
+    kept_nodes: List[ResearchNode] = []
+    dropped_ids: Set[str] = set()
+    for node in graph.nodes:
+        if node.type in _CONCEPTISH_TYPES_FOR_FILTER and looks_like_filename_or_path(node.name):
+            dropped_ids.add(node.id)
+            continue
+        kept_nodes.append(node)
+    if not dropped_ids:
+        return graph
+    kept_edges = [
+        edge for edge in graph.edges
+        if edge.source not in dropped_ids and edge.target not in dropped_ids
+    ]
+    return ResearchGraph(nodes=kept_nodes, edges=kept_edges)
 
 
 def infer_arxiv_reference_title(text: str, arxiv_match_start: int) -> Optional[str]:
