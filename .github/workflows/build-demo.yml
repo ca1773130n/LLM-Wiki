@@ -1,8 +1,22 @@
-# Build and deploy the LLM-Wiki dogfood demo to GitHub Pages.
+# Build and (optionally) deploy the LLM-Wiki dogfood demo.
 #
 # Compiles LLM-Wiki against its own source tree using the default
-# deterministic extractor (no LLM calls, no API keys required), builds
-# the static site, and publishes .llm-wiki/site/ to GitHub Pages.
+# deterministic extractor (no LLM calls, no API keys required) and
+# builds the static site. The site is uploaded as a regular workflow
+# artifact (so it is always inspectable from the Actions tab) and,
+# when GitHub Pages is enabled for the repository, ALSO deployed to
+# Pages.
+#
+# The Pages-related steps are intentionally non-fatal:
+#   • The default GITHUB_TOKEN granted to workflows cannot CREATE a
+#     Pages site programmatically — only deploy to one that already
+#     exists. So the very first deploy needs a one-time manual flip
+#     at Settings → Pages → Source: GitHub Actions.
+#   • Until that toggle is on, configure-pages / upload-pages-artifact /
+#     deploy-pages will fail with "Resource not accessible by integration".
+#   • Rather than making the whole CI red, those steps are marked
+#     continue-on-error so the build itself stays green and the
+#     static site is still produced as a downloadable artifact.
 #
 # Manual dispatch (workflow_dispatch) is reserved for future LLM-enabled
 # rebuilds; the push path is fully offline.
@@ -79,28 +93,72 @@ jobs:
           keys). To compile your own project, see the project README.
           TXT
 
-      - name: Configure Pages
+      - name: Upload site as workflow artifact (always available)
+        # Independent of Pages. This artifact is downloadable from the
+        # workflow run page even when Pages is not enabled.
+        uses: actions/upload-artifact@v4
+        with:
+          name: llm-wiki-site
+          path: .llm-wiki/site
+          retention-days: 14
+
+      # ---- The steps below try to publish to GitHub Pages. ----
+      # They fail-soft when Pages is not yet enabled for the repo
+      # (one-time manual setup: Settings → Pages → Source:
+      # "GitHub Actions"). Until that, the build job still passes.
+
+      - name: Configure Pages (non-fatal if Pages not yet enabled)
+        id: configure_pages
+        continue-on-error: true
         uses: actions/configure-pages@v5
         with:
-          # Auto-enable Pages on first run so the maintainer doesn't
-          # have to flip the Settings → Pages → Source toggle by hand.
-          # Requires `pages: write` permission, which is already set
-          # at the workflow level above.
           enablement: true
 
-      - name: Upload Pages artifact
+      - name: Upload Pages artifact (non-fatal)
+        if: steps.configure_pages.outcome == 'success'
+        continue-on-error: true
         uses: actions/upload-pages-artifact@v3
         with:
           path: .llm-wiki/site
+
+      - name: Notice when Pages is not enabled
+        if: steps.configure_pages.outcome != 'success'
+        run: |
+          echo "::warning::GitHub Pages is not enabled for this repository."
+          echo "::warning::Enable it once at: ${{ github.server_url }}/${{ github.repository }}/settings/pages"
+          echo "::warning::Source: GitHub Actions. The build artifact 'llm-wiki-site' is downloadable above."
 
   deploy:
     name: Deploy to GitHub Pages
     needs: build
     runs-on: ubuntu-latest
+    # Skip the deploy job entirely until the maintainer has enabled
+    # Pages. The deploy will run on every subsequent push thereafter.
+    # We probe via the REST API to avoid making the workflow red.
+    if: github.repository_owner != ''
+    continue-on-error: true
     environment:
       name: github-pages
       url: ${{ steps.deployment.outputs.page_url }}
     steps:
+      - name: Check Pages enablement
+        id: pages_status
+        continue-on-error: true
+        run: |
+          status=$(curl -s -o /dev/null -w "%{http_code}" \
+            -H "Authorization: Bearer ${{ secrets.GITHUB_TOKEN }}" \
+            -H "Accept: application/vnd.github+json" \
+            "${{ github.api_url }}/repos/${{ github.repository }}/pages")
+          echo "status=$status" >> "$GITHUB_OUTPUT"
+          if [ "$status" != "200" ]; then
+            echo "::warning::Pages site not yet provisioned (HTTP $status). Skipping deploy."
+            echo "::warning::Enable at ${{ github.server_url }}/${{ github.repository }}/settings/pages"
+            exit 0
+          fi
+          echo "Pages site exists; proceeding to deploy."
+
       - name: Deploy to Pages
         id: deployment
+        if: steps.pages_status.outputs.status == '200'
+        continue-on-error: true
         uses: actions/deploy-pages@v4
