@@ -81,6 +81,12 @@ jobs:
 
       - name: Configure Pages
         uses: actions/configure-pages@v5
+        with:
+          # Auto-enable Pages on first run so the maintainer doesn't
+          # have to flip the Settings → Pages → Source toggle by hand.
+          # Requires `pages: write` permission, which is already set
+          # at the workflow level above.
+          enablement: true
 
       - name: Upload Pages artifact
         uses: actions/upload-pages-artifact@v3
