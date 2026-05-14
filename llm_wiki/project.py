@@ -598,10 +598,26 @@ class ProjectWiki:
         # every source.
         graph_view_cfg = cfg.get("graph_view") if isinstance(cfg.get("graph_view"), dict) else {}
         show_sources = bool(graph_view_cfg.get("show_sources", False))
+        # Code-file links in source/raw pages (e.g. `[cli.py](../llm_wiki/cli.py)`)
+        # point at paths the site doesn't host. When `site.github_repo_url`
+        # is set in ``.llm-wiki/config.json``, the static builder rewrites
+        # these to absolute GitHub blob URLs at compile time so clicks land
+        # on real source instead of 404ing. Opt-in: no rewriting when unset.
+        # ``site.github_blob_base`` can override the default ``…/blob/main``
+        # when pointing at a non-main ref.
+        from .site.code_link_rewriter import derive_blob_base
+        site_cfg = cfg.get("site") if isinstance(cfg.get("site"), dict) else {}
+        github_repo_url = site_cfg.get("github_repo_url")
+        github_blob_base_cfg = site_cfg.get("github_blob_base")
+        github_blob_base = derive_blob_base(
+            github_repo_url=github_repo_url if isinstance(github_repo_url, str) else None,
+            github_blob_base=github_blob_base_cfg if isinstance(github_blob_base_cfg, str) else None,
+        )
         self.paths.wiki.mkdir(parents=True, exist_ok=True)
         return StaticSiteBuilder(
             site_title=site_title,
             show_sources=show_sources,
+            github_blob_base=github_blob_base,
         ).write_site(graph, self.paths.wiki, target)
 
     def query(

@@ -45,6 +45,7 @@ from .exports import (
     write_siblings,
 )
 from .ask_widget import ask_widget_css, ask_widget_js
+from .code_link_rewriter import derive_blob_base, rewrite_code_links
 from .js import JS_BUNDLE_BASE, JS_BUNDLE_GRAPH
 from .pages import (
     ROUTE_FOR_KIND,
@@ -171,6 +172,15 @@ class StaticSiteBuilder:
     # :meth:`llm_wiki.project.ProjectWiki.build_site` reads the flag and
     # forwards it here.
     show_sources: bool = False
+    # Optional GitHub blob URL prefix (e.g.
+    # ``"https://github.com/ca1773130n/LLM-Wiki/blob/main"``). When set,
+    # every internal ``href="…code_file.py"`` in detail and raw pages is
+    # rewritten to an absolute URL under this prefix so links to source
+    # code (which the site doesn't host) resolve on github.com instead of
+    # 404ing. Computed in :meth:`llm_wiki.project.ProjectWiki.build_site`
+    # from ``site.github_repo_url`` / ``site.github_blob_base`` in
+    # ``.llm-wiki/config.json``. ``None`` → no rewriting (legacy behavior).
+    github_blob_base: Optional[str] = None
 
     # ------------------------------------------------------------------ public
 
@@ -427,8 +437,6 @@ class StaticSiteBuilder:
 
             for page in sorted(wiki_pages_by_kind.get(kind, []), key=lambda p: p.slug):
                 html_path = kind_dir / f"{page.slug}.html"
-                html_path.write_text(detail_renderer(site_ctx, page), encoding="utf-8")
-
                 # Per-page AI siblings (.txt + .json next to the .html).
                 fm = page.frontmatter or {}
                 source_path = ""
@@ -436,6 +444,20 @@ class StaticSiteBuilder:
                     sp = fm.get("source_path") or fm.get("source") or ""
                     if isinstance(sp, str):
                         source_path = sp
+                # Code-file links in source/raw pages point at paths the site
+                # never hosts (Python, TOML, Dockerfiles, ...). When
+                # ``site.github_repo_url`` is configured, rewrite them to
+                # absolute GitHub blob URLs so clicks land on the real file
+                # instead of a 404. The source markdown's path
+                # (``source_path``) anchors relative ``../`` resolution so
+                # i18n variants resolve to the same canonical repo path.
+                rendered_html = detail_renderer(site_ctx, page)
+                rendered_html = rewrite_code_links(
+                    rendered_html,
+                    source_path=source_path or None,
+                    github_blob_base=self.github_blob_base,
+                )
+                html_path.write_text(rendered_html, encoding="utf-8")
                 body_text = _strip_frontmatter(page.body).strip()
                 record: Dict[str, object] = {
                     "title": page.title or page.slug,
@@ -526,18 +548,26 @@ class StaticSiteBuilder:
                     depth=1,
                     current_source_path=str(absolute),
                 )
-                raw_html_path.write_text(
-                    render_raw_view(
-                        site_title=self.site_title,
-                        project_relative_path=rel_path,
-                        absolute_path=absolute,
-                        asset_filename=asset_filename,
-                        counts=raw_nav_counts,
-                        doc_tree_html=doc_tree_html,
-                        wiki_link_resolver=wiki_link_resolver,
-                    ),
-                    encoding="utf-8",
+                raw_rendered = render_raw_view(
+                    site_title=self.site_title,
+                    project_relative_path=rel_path,
+                    absolute_path=absolute,
+                    asset_filename=asset_filename,
+                    counts=raw_nav_counts,
+                    doc_tree_html=doc_tree_html,
+                    wiki_link_resolver=wiki_link_resolver,
+                    github_blob_base=self.github_blob_base,
                 )
+                # Same code-file → GitHub-blob rewrite as detail pages.
+                # ``rel_path`` is project-relative, so relative ``../``
+                # link resolution is anchored to where the source markdown
+                # actually lives in the repo.
+                raw_rendered = rewrite_code_links(
+                    raw_rendered,
+                    source_path=str(rel_path) if rel_path else None,
+                    github_blob_base=self.github_blob_base,
+                )
+                raw_html_path.write_text(raw_rendered, encoding="utf-8")
                 _track(f"{RAW_ROUTE_DIR}/{slug}.html")
                 # AI siblings: only useful for text-style sources.
                 if is_markdown_source_path(absolute) or absolute.suffix.lower() == ".txt":

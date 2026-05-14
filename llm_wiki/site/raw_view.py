@@ -33,6 +33,7 @@ import re
 from pathlib import Path
 from typing import Callable, Iterable, List, Mapping, Optional, Tuple
 
+from .code_link_rewriter import looks_like_code_file_target
 from .components import breadcrumbs, page_shell, toc
 from .markdown import render_markdown
 
@@ -682,6 +683,7 @@ def _render_markdown_body(
     project_root: Optional[Path] = None,
     project_relative_path: Optional[str] = None,
     wiki_link_resolver: Optional[WikiLinkResolver] = None,
+    github_blob_base: Optional[str] = None,
 ) -> str:
     """Render the raw markdown body and rewrite neighbor ``.md`` links.
 
@@ -727,6 +729,16 @@ def _render_markdown_body(
                     project_rel_s = str(project_rel).replace("\\", "/")
                     if is_binary_extension(resolved.suffix):
                         return f"{_raw_asset_href_for_project_rel(project_rel_s, depth=1)}{query}{fragment}"
+                    # Code-file targets (``.py``, ``.toml``, ``Dockerfile``,
+                    # ...) never get raw pages — the wiki only ingests
+                    # markdown / text content sources, not source code. Send
+                    # those clicks to GitHub instead of a 404-bound
+                    # ``raw/<slug>.html`` URL when the rewriter is enabled.
+                    if (
+                        github_blob_base
+                        and looks_like_code_file_target(project_rel_s)
+                    ):
+                        return f"{github_blob_base.rstrip('/')}/{project_rel_s}{query}{fragment}"
                     href = raw_href(project_root, project_rel_s, depth=1)
                     if href:
                         return f"{href}{query}{fragment}"
@@ -899,6 +911,7 @@ def render_raw_view(
     counts: Optional[dict] = None,
     doc_tree_html: str = "",
     wiki_link_resolver: Optional[WikiLinkResolver] = None,
+    github_blob_base: Optional[str] = None,
 ) -> str:
     """Render the full ``raw/<safe>.html`` document.
 
@@ -941,6 +954,7 @@ def render_raw_view(
             project_root=project_root,
             project_relative_path=project_relative_path,
             wiki_link_resolver=wiki_link_resolver,
+            github_blob_base=github_blob_base,
         )
     elif suffix in _TEXT_EXTS and absolute_path.stat().st_size <= _TEXT_INLINE_LIMIT:
         body_html = _render_text_body(absolute_path)
