@@ -1,0 +1,28 @@
+{
+  "session_id": "2026-05-14-concept-trace",
+  "title": "Concept trace — Multi-View Consistency across the corpus",
+  "started_at": "2026-05-14T10:31:05Z",
+  "ended_at": "2026-05-14T10:36:10Z",
+  "user": "demo-researcher",
+  "agent": "claude-opus-4-7",
+  "project": "llm-wiki-demo-corpus",
+  "tools_used": ["search_nodes", "node_context", "search_facts", "timeline", "wiki_page"],
+  "papers_cited": [
+    "arxiv-2003-08934",
+    "arxiv-2106-10689",
+    "arxiv-2108-10869",
+    "arxiv-2308-04079",
+    "arxiv-2312-06741",
+    "arxiv-2403-17888",
+    "arxiv-2403-14627",
+    "arxiv-2311-11700",
+    "arxiv-2404-06109"
+  ],
+  "questions_referenced": ["multi-view-consistency"],
+  "artifacts_created": [],
+  "stumbles": [
+    "search_nodes with type=Concept returned 0 results for 'multi-view consistency' because the corpus tracks the topic as an OpenQuestion rather than a Concept node; recovered by dropping the type filter and broadening the search."
+  ],
+  "turn_count": 16,
+  "summary": "Traced 'Multi-View Consistency' through the corpus as a five-stage timeline anchored to NeRF (2020), NeuS (2021), DROID-SLAM (2021), 3DGS / MonoGS (2023), and 2DGS / MVSplat (2024). Used search_facts + timeline tools to pull predicate-level evidence (evaluated_on, introduces_property, raises_question). Surfaced the fast-motion robustness gap as the open question that connects the splatting and SLAM branches."
+}

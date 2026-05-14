@@ -1,0 +1,27 @@
+{
+  "session_id": "2026-05-12-weekly-digest",
+  "title": "Weekly Gaussian Splatting digest — W19",
+  "started_at": "2026-05-12T09:14:22Z",
+  "ended_at": "2026-05-12T09:26:10Z",
+  "user": "demo-researcher",
+  "agent": "claude-opus-4-7",
+  "project": "llm-wiki-demo-corpus",
+  "tools_used": ["search_nodes", "wiki_page", "node_context", "Write"],
+  "papers_cited": [
+    "arxiv-2308-04079",
+    "arxiv-2404-06109",
+    "arxiv-2403-14627",
+    "arxiv-2403-16292",
+    "arxiv-2403-17888",
+    "arxiv-2402-05054"
+  ],
+  "questions_referenced": ["multi-view-consistency"],
+  "artifacts_created": [
+    "examples/demo-corpus/data/research/weekly/2026-W19/synthesis.md"
+  ],
+  "stumbles": [
+    "wiki_page on guessed Synthesis node id 'Synthesis:weekly-2026-w18' returned 'not found'; recovered by searching the syntheses kind to find the correct id 'Synthesis:weekly-2026-W18'."
+  ],
+  "turn_count": 24,
+  "summary": "Compiled W19 digest by searching the corpus for recent Gaussian Splatting papers, reading four paper bodies (Revising Densification, MVSplat, latentSplat, 2DGS) and pulling MVSplat neighbours via node_context. Drafted a ~500-word synthesis anchored to six papers. Surfaced 'multi-view consistency under fast motion' as the recurring open question that feed-forward GS does not escape."
+}

@@ -23,6 +23,9 @@ __pycache__/
 
 # Local agent session markers
 .agent-sessions/
+# ...but the demo corpus ships hand-authored agent-session transcripts.
+!examples/demo-corpus/.agent-sessions/
+!examples/demo-corpus/.agent-sessions/**
 .hermes/
 .llm-wiki/external/raganything/working_dir/
 .llm-wiki/external/raganything/parsed/

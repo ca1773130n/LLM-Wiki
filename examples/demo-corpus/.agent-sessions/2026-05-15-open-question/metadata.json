@@ -1,0 +1,25 @@
+{
+  "session_id": "2026-05-15-open-question",
+  "title": "Investigate feed-forward vs per-scene reconstruction open question",
+  "started_at": "2026-05-15T11:08:14Z",
+  "ended_at": "2026-05-15T11:15:30Z",
+  "user": "demo-researcher",
+  "agent": "claude-opus-4-7",
+  "project": "llm-wiki-demo-corpus",
+  "tools_used": ["raw_source", "search_nodes", "wiki_page", "ask", "lint_report"],
+  "papers_cited": [
+    "arxiv-2311-04400",
+    "arxiv-2311-06214",
+    "arxiv-2402-05054",
+    "arxiv-2403-02151",
+    "arxiv-2309-16653",
+    "arxiv-2401-04099"
+  ],
+  "questions_referenced": ["inference-cost-vs-fidelity"],
+  "artifacts_created": [],
+  "stumbles": [
+    "lint_report tool call returned exists=false because the demo corpus has not been linted yet; the agent skipped that source of evidence and continued with what `ask` had already returned."
+  ],
+  "turn_count": 19,
+  "summary": "Investigated the inference-cost-vs-fidelity open question. Read the existing question doc via raw_source, enumerated the LRM-family papers (LRM, LGM, TripoSR) plus the SDS-on-splats family (DreamGaussian, AGG), and used the `ask` tool for a synthesis pass. Extended the question with a concrete four-axis experiment design (held-out PSNR, Chamfer/F-score, wall-clock, amortised GPU-hours) stratified across input categories to expose the thin-structure failure mode."
+}
