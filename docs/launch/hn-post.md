@@ -23,7 +23,7 @@ fresh against the same angle (the compile model, not the feature list).
 **Links to include in the first comment, not the post body:**
 
 - Repo: `https://github.com/<org>/<repo>` (fill in before posting)
-- Live demo: `https://<configure-github-pages-and-update-this-link>` (the dogfood compile of LLM-Wiki's own source, deployed by `.github/workflows/build-demo.yml`)
+- Live demo: `https://https://ca1773130n.github.io/LLM-Wiki` (the dogfood compile of LLM-Wiki's own source, deployed by `.github/workflows/build-demo.yml`)
 - Comparison table: link to the README anchor `#how-it-compares`
 - Research doc: `docs/superpowers/specs/2026-05-13-competitive-positioning-research.md`
 
@@ -53,7 +53,7 @@ list — same angle as the HN body. All tweets verified under 280 characters.
 
 5. Multimodal and code-graph are first-class adjuncts, not random forks. RAG-Anything handles PDFs and Office docs through MinerU/Docling. Understand Anything handles code. LLM-Wiki merges both into the same typed graph.
 
-6. The site is a static HTML build — host it on GitHub Pages, S3, or any laptop. Live dogfood demo (LLM-Wiki compiled against its own source) here: https://<configure-github-pages-and-update-this-link>
+6. The site is a static HTML build — host it on GitHub Pages, S3, or any laptop. Live dogfood demo (LLM-Wiki compiled against its own source) here: https://https://ca1773130n.github.io/LLM-Wiki
 
 ---
 
@@ -61,7 +61,7 @@ list — same angle as the HN body. All tweets verified under 280 characters.
 
 Before posting on HN:
 
-- [ ] Replace `<configure-github-pages-and-update-this-link>` in the README and in tweet 6 with the real Pages URL.
+- [ ] Replace `https://ca1773130n.github.io/LLM-Wiki` in the README and in tweet 6 with the real Pages URL.
 - [ ] Confirm the build-demo workflow has run at least once on `main` and the site is reachable.
 - [ ] Have a comment ready listing repo URL, comparison-table anchor, and the research doc.
 - [ ] Decide which of B1 (streaming compile) or B3 (per-page ask) to ask the audience about — the HN body asks both; pick one if the comments converge.
