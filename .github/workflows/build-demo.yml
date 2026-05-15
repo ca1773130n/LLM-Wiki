@@ -96,18 +96,37 @@ jobs:
 
       - name: Seed demo agent sessions
         # Copy pre-converted demo session JSON into the harness session
-        # store so the build-site step treats them as real sessions
-        # discovered during compile. The source JSONL transcripts live
-        # under examples/demo-corpus/.agent-sessions/ (showcase content);
-        # the harness-native JSON files under
-        # examples/demo-corpus/.harness-sessions/<harness>/ are derived
-        # artifacts produced by examples/demo-corpus/scripts/convert_sessions.py
-        # and committed to the repo. HarnessSessionStore.list_sessions()
-        # globs ``<root>/*/*.json`` so the per-harness subdirectory is
-        # preserved (e.g. .llm-wiki/harness_sessions/claude-code/*.json).
+        # store and re-stamp `project_root` to match the CI build's working
+        # directory. Sessions whose project_root doesn't match are filtered
+        # out by `session_matches_project()` before the renderer sees them,
+        # so committed JSON with a baked-in dev-machine path won't appear
+        # in /sessions/. The pre-conversion step under
+        # examples/demo-corpus/scripts/convert_sessions.py produces the
+        # harness-shaped JSON; this step rewrites the project_root field
+        # to $GITHUB_WORKSPACE and copies the files into the store layout
+        # HarnessSessionStore.list_sessions() expects (<root>/<harness>/*.json).
         run: |
-          mkdir -p .llm-wiki/harness_sessions
-          cp -r examples/demo-corpus/.harness-sessions/* .llm-wiki/harness_sessions/
+          python <<'PY'
+          import json, os, pathlib
+          workspace = os.environ['GITHUB_WORKSPACE']
+          src_root = pathlib.Path('examples/demo-corpus/.harness-sessions')
+          dst_root = pathlib.Path('.llm-wiki/harness_sessions')
+          dst_root.mkdir(parents=True, exist_ok=True)
+          seeded = 0
+          for src in sorted(src_root.rglob('*.json')):
+              harness = src.parent.name
+              dst_dir = dst_root / harness
+              dst_dir.mkdir(parents=True, exist_ok=True)
+              data = json.loads(src.read_text(encoding='utf-8'))
+              data['project_root'] = workspace
+              (dst_dir / src.name).write_text(
+                  json.dumps(data, ensure_ascii=False, indent=2, sort_keys=True) + '\n',
+                  encoding='utf-8',
+              )
+              seeded += 1
+              print(f'  re-stamped + seeded {harness}/{src.name}')
+          print(f'\nseeded {seeded} sessions with project_root={workspace}')
+          PY
           find .llm-wiki/harness_sessions -type f -name '*.json' | sort
 
       - name: Build static site
