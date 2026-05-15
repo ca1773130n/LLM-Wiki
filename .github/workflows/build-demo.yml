@@ -171,7 +171,7 @@ jobs:
       - name: Upload site as workflow artifact (always available)
         # Independent of Pages. This artifact is downloadable from the
         # workflow run page even when Pages is not enabled.
-        uses: actions/upload-artifact@v5
+        uses: actions/upload-artifact@v7
         with:
           name: llm-wiki-site
           path: .llm-wiki/site
@@ -184,7 +184,7 @@ jobs:
         # against this repo's `examples/demo-corpus/data/` tree gets a
         # populated /api/ask endpoint without re-burning Codex tokens.
         # Not bundled into the Pages deploy (which is static HTML only).
-        uses: actions/upload-artifact@v5
+        uses: actions/upload-artifact@v7
         with:
           name: raganything-store
           path: examples/demo-corpus/raganything-store
@@ -249,4 +249,4 @@ jobs:
         id: deployment
         if: steps.pages_status.outputs.status == '200'
         continue-on-error: true
-        uses: actions/deploy-pages@v4
+        uses: actions/deploy-pages@v5
