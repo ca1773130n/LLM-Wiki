@@ -332,7 +332,12 @@ def _shorten(text: str, limit: int = 700) -> str:
     return clean[:limit].rstrip() + "…"
 
 
-def render_sessions_index(site_title: str, sessions: List[HarnessSession]) -> str:
+def render_sessions_index(
+    site_title: str,
+    sessions: List[HarnessSession],
+    *,
+    nav_counts: Dict[str, int] | None = None,
+) -> str:
     rows = []
     for session in sorted(sessions, key=lambda s: (s.started_at or "", s.title), reverse=True):
         rows.append(
@@ -385,7 +390,7 @@ def render_sessions_index(site_title: str, sessions: List[HarnessSession]) -> st
         depth=1,
         active="sessions",
         site_title=site_title,
-        counts=_session_counts(sessions),
+        counts=nav_counts if nav_counts is not None else _session_counts(sessions),
         main_variant="wide",
         breadcrumbs_html=breadcrumbs([("Home", "../index.html"), ("Sessions", "")]),
         toc_html=toc([(2, "Stats", "stats"), (2, "Sessions", "sessions")]),
@@ -520,7 +525,13 @@ def _render_subagent_tree(session: HarnessSession) -> str:
     )
 
 
-def render_session_detail(site_title: str, session: HarnessSession, session_count: int = 0) -> str:
+def render_session_detail(
+    site_title: str,
+    session: HarnessSession,
+    session_count: int = 0,
+    *,
+    nav_counts: Dict[str, int] | None = None,
+) -> str:
     def list_items(items: List[str], code: bool = False, limit: int = 24) -> str:
         if not items:
             return "<p class='muted'>None recorded.</p>"
@@ -593,7 +604,7 @@ def render_session_detail(site_title: str, session: HarnessSession, session_coun
         active="sessions",
         site_title=site_title,
         main_variant="session",
-        counts={"sessions": session_count or 1},
+        counts=nav_counts if nav_counts is not None else {"sessions": session_count or 1},
         breadcrumbs_html=breadcrumbs([("Home", "../../index.html"), ("Sessions", "../index.html"), (session.title or session.slug, "")]),
         rail_html=_render_turn_rail(session),
         toc_html=toc([

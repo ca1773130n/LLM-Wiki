@@ -339,8 +339,17 @@ class StaticSiteBuilder:
 
         sessions_dir = out / "sessions"
         sessions_dir.mkdir(parents=True, exist_ok=True)
+        # Compute the full nav-count map once via the shared helper that all
+        # other detail/index renderers use. Without this, the session pages
+        # would render with only ``{"sessions": N}`` and the top + rail nav
+        # would drop the [N] badges for every other kind (Sources/Concepts/
+        # Entities/Papers/Repos/Topics/Syntheses/Questions). The user
+        # reported "the nav bar does not show the number of items sometimes
+        # which is annoying" — those were the session pages.
+        from .pages import _nav_counts as _build_nav_counts
+        nav_counts = _build_nav_counts(site_ctx)
         (sessions_dir / "index.html").write_text(
-            render_sessions_index(self.site_title, harness_sessions),
+            render_sessions_index(self.site_title, harness_sessions, nav_counts=nav_counts),
             encoding="utf-8",
         )
         _track("sessions/index.html")
@@ -349,7 +358,12 @@ class StaticSiteBuilder:
             session_dir.mkdir(parents=True, exist_ok=True)
             session_html = session_dir / f"{session.filename}.html"
             session_html.write_text(
-                render_session_detail(self.site_title, session, session_count=len(harness_sessions)),
+                render_session_detail(
+                    self.site_title,
+                    session,
+                    session_count=len(harness_sessions),
+                    nav_counts=nav_counts,
+                ),
                 encoding="utf-8",
             )
             write_siblings(
