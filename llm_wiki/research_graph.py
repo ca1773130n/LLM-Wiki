@@ -376,8 +376,9 @@ class ResearchGraphExtractor:
         source_kind: str = "SourceDocument",
     ) -> ResearchGraph:
         builder = ResearchGraphBuilder()
-        source_type = source_kind_to_node_type(source_kind, source_path)
         source_metadata = extract_source_metadata(text, source_path)
+        frontmatter = source_metadata.get("frontmatter") if isinstance(source_metadata.get("frontmatter"), dict) else None
+        source_type = source_kind_to_node_type(source_kind, source_path, frontmatter)
         if source_type == ResearchNodeType.SOURCE_DOCUMENT and is_social_feed_source_path(source_path):
             return builder.build()
         # Pre-compute heading-derived sections + candidate paper titles. We
@@ -497,6 +498,15 @@ class ResearchGraphExtractor:
             # low; ``builder.add_node`` is content-addressed so duplicates
             # against the paper-side extraction collapse cleanly.
             self._extract_repo_eval_entities(builder, paper, text, source_path)
+            return builder.build()
+
+        # Curated synthesis / open-question / digest markdown: the
+        # frontmatter ``type:`` field promoted these to typed nodes; their
+        # bodies are editorial summaries, not paper-shaped prose, so we
+        # only run the lightweight paper-reference extractor that wires
+        # ``arxiv:`` mentions back to the paper layer.
+        if source_type in {ResearchNodeType.SYNTHESIS, ResearchNodeType.OPEN_QUESTION}:
+            self._extract_paper_references(builder, paper, text, source_path)
             return builder.build()
 
         # Hard gate: if a paper.md failed to produce a verifiable title, we
@@ -1041,6 +1051,17 @@ _PAPER_REPO_FILE_RE = re.compile(
     r"data/research/.+?/papers/(\d{4}\.\d{4,6})/repo\.md$",
     re.IGNORECASE,
 )
+# Demo-corpus slug shape: ``papers/arxiv-2308-04079/{paper,abstract}.md``.
+# The hyphen-separated form is what the curated demo corpus uses; the
+# dotted form above (``2308.04079``) is the legacy daily-feed shape. The
+# in-between directory segment is optional so both
+# ``data/research/papers/arxiv-NNNN-NNNNN/paper.md`` (curated demo corpus)
+# and ``data/research/2024-01-15/papers/arxiv-NNNN-NNNNN/paper.md``
+# (daily-feed shape, hyphen variant) classify correctly.
+_PAPER_HYPHEN_SLUG_RE = re.compile(
+    r"data/research/(?:[^/]+/)?papers/arxiv-(\d{4})-(\d{4,6})/(?:paper|main|abstract)\.md$",
+    re.IGNORECASE,
+)
 _DAILY_REPOS_RE = re.compile(r"data/research/.+?/repos/.+?\.md$", re.IGNORECASE)
 _DAILY_FEEDS_RE = re.compile(r"data/research/.+?/feeds/.+?\.md$", re.IGNORECASE)
 
@@ -1051,14 +1072,33 @@ def is_social_feed_source_path(source_path: Optional[str]) -> bool:
     return _DAILY_FEEDS_RE.search(source_path.replace("\\", "/")) is not None
 
 
+# Node types that stay in ``graph.json`` (so MCP / Cognee / search still
+# see them) but are hidden from the public wiki projection: no wiki pages,
+# no entity-index rows, no visual-graph payload. Person is the canonical
+# example — author names from bibliographic ``Authors:`` blocks would
+# otherwise dominate the public ``/entities/`` index with hundreds of
+# rows of biblio noise, drowning out the typed-entity narrative.
+PRIVATE_PUBLIC_RESEARCH_TYPES: Set[str] = {
+    ResearchNodeType.PERSON.value,
+}
+
+
 def is_public_research_node(node: ResearchNode) -> bool:
     """Return whether a node should appear in the public wiki/site projection.
 
     Social feed captures are noisy evidence inputs, not durable wiki entities.
     Likewise, arXiv mentions that have not been resolved from a real paper file
-    must not become public paper pages.
+    must not become public paper pages. ``Person`` nodes (paper authors) are
+    private by default — they stay in ``graph.json`` for MCP/Cognee but
+    don't get wiki pages or entity-index rows. Names that look like YAML
+    frontmatter tokens (``type: Paper``, ``arxiv:``, ``authors:``, etc.)
+    are dropped from public outputs regardless of type.
     """
     if is_social_feed_source_path(node.source_path):
+        return False
+    if node.type.value in PRIVATE_PUBLIC_RESEARCH_TYPES:
+        return False
+    if looks_like_frontmatter_token(node.name):
         return False
     if node.type == ResearchNodeType.PAPER:
         quality = str(node.metadata.get("title_quality") or "")
@@ -1378,10 +1418,37 @@ def source_path_looks_like_i18n_duplicate(path: Optional[str]) -> bool:
     return False
 
 
+_FRONTMATTER_TOKEN_FILTERED_TYPES: FrozenSet["ResearchNodeType"] = frozenset({
+    *_CONCEPTISH_TYPES_FOR_FILTER,
+    # Frontmatter-shaped names (``type: Paper``, ``arxiv:``, ``authors:``,
+    # ``date: 2016-07-``) can leak into more than just the concept layer.
+    # ``extract_authors`` parses YAML list items as Person names when the
+    # block-list shape masquerades as an ``Authors:`` block; ``extract_title``
+    # used to mis-promote the ``type: Paper`` line as the Paper node name
+    # itself. The frontmatter-token predicate runs across every type that
+    # could plausibly be polluted by YAML key/value pairs.
+    ResearchNodeType.PERSON,
+    ResearchNodeType.ORGANIZATION,
+    ResearchNodeType.DATASET,
+    ResearchNodeType.BENCHMARK,
+    ResearchNodeType.METRIC,
+    ResearchNodeType.MODEL,
+    ResearchNodeType.RESULT,
+    ResearchNodeType.PAPER,
+    ResearchNodeType.REPOSITORY,
+    ResearchNodeType.SOURCE_DOCUMENT,
+    ResearchNodeType.SYNTHESIS,
+    ResearchNodeType.OPEN_QUESTION,
+})
+
+
 def _is_dropped_concept_node(node: ResearchNode) -> bool:
     """Predicate for the unified post-merge filter. Returns ``True`` if
     ``node`` is a concept-layer node whose name OR source path looks like
-    noise (filename, heading, sentence, numbered list, i18n duplicate)."""
+    noise (filename, heading, sentence, numbered list, i18n duplicate, or
+    YAML frontmatter token)."""
+    if node.type in _FRONTMATTER_TOKEN_FILTERED_TYPES and looks_like_frontmatter_token(node.name):
+        return True
     if node.type not in _CONCEPTISH_TYPES_FOR_FILTER:
         return False
     if looks_like_filename_or_path(node.name):
@@ -1525,14 +1592,28 @@ def strip_non_research_scaffold(text: str) -> str:
     return "\n".join(cleaned)
 
 
-def source_kind_to_node_type(source_kind: str, source_path: Optional[str]) -> ResearchNodeType:
+def source_kind_to_node_type(
+    source_kind: str,
+    source_path: Optional[str],
+    frontmatter: Optional[Dict[str, object]] = None,
+) -> ResearchNodeType:
+    # Highest-priority signal: an explicit ``type:`` value in the file's YAML
+    # frontmatter. The demo corpus uses this to annotate ``type: Paper`` /
+    # ``type: Repository`` / ``type: Synthesis`` / ``type: ResearchDigest``
+    # / ``type: OpenQuestion`` files; respecting it lets curated content live
+    # outside the legacy daily-feed slug shape.
+    if frontmatter:
+        ft = str(frontmatter.get("type") or "").strip().lower()
+        mapped = _frontmatter_node_type_map().get(ft)
+        if mapped is not None:
+            return mapped
     lowered = (source_kind or "").lower()
     path = (source_path or "").replace("\\", "/")
     path_lower = path.lower()
     # Path-precise matches win over the looser keyword fallbacks below: a daily
     # feed snippet must stay a SourceDocument even though the corpus root
     # contains the substring "papers".
-    if _PAPER_SUBFOLDER_RE.search(path):
+    if _PAPER_SUBFOLDER_RE.search(path) or _PAPER_HYPHEN_SLUG_RE.search(path):
         return ResearchNodeType.PAPER
     if _PAPER_REPO_FILE_RE.search(path) or _DAILY_REPOS_RE.search(path):
         return ResearchNodeType.REPOSITORY
@@ -1553,7 +1634,194 @@ def extract_arxiv_id_from_path(source_path: Optional[str]) -> Optional[str]:
     match = _PAPER_SUBFOLDER_RE.search(path) or _PAPER_REPO_FILE_RE.search(path)
     if match:
         return match.group(1)
+    hyphen = _PAPER_HYPHEN_SLUG_RE.search(path)
+    if hyphen:
+        return f"{hyphen.group(1)}.{hyphen.group(2)}"
     return None
+
+
+# YAML frontmatter parsing -------------------------------------------------
+#
+# The demo corpus annotates every research markdown file with a tiny YAML
+# frontmatter block (``type:`` / ``arxiv:`` / ``title:`` / ``authors:`` /
+# ``date:`` / ``methods:`` / ``datasets:`` / ``metrics:`` / ``organizations:``
+# / ``repo:`` / ``canonical_paper:``). The extractor parses it here so that:
+#
+#   * The ``type:`` value can override path-based ``source_kind`` detection
+#     (so ``papers/arxiv-2308-04079/paper.md`` becomes a Paper even though
+#     the slug shape is ``arxiv-<id>`` not the legacy daily-feed shape).
+#   * Frontmatter ``title`` / ``arxiv`` win over body-derived guesses so we
+#     never mis-promote ``type: Paper`` (the YAML token) as a node name.
+#   * ``methods`` / ``datasets`` / ``metrics`` lists feed straight into
+#     metadata for downstream consumers (MCP, Cognee, search).
+#
+# This is deliberately a tiny parser — yaml.safe_load would pull a heavy
+# dependency into the extractor hot path; we only need the leaf shapes the
+# demo corpus uses (scalars, ``["a", "b"]`` short lists, and ``- item``
+# block lists).
+_FRONTMATTER_NODE_TYPE_MAP: Dict[str, "ResearchNodeType"] = {}
+
+
+def _frontmatter_node_type_map() -> Dict[str, "ResearchNodeType"]:
+    # Defer enum lookup until ResearchNodeType is fully defined at import.
+    global _FRONTMATTER_NODE_TYPE_MAP
+    if not _FRONTMATTER_NODE_TYPE_MAP:
+        _FRONTMATTER_NODE_TYPE_MAP = {
+            "paper": ResearchNodeType.PAPER,
+            "repository": ResearchNodeType.REPOSITORY,
+            "repo": ResearchNodeType.REPOSITORY,
+            "synthesis": ResearchNodeType.SYNTHESIS,
+            "researchdigest": ResearchNodeType.SYNTHESIS,
+            "research_digest": ResearchNodeType.SYNTHESIS,
+            "digest": ResearchNodeType.SYNTHESIS,
+            "openquestion": ResearchNodeType.OPEN_QUESTION,
+            "open_question": ResearchNodeType.OPEN_QUESTION,
+            "question": ResearchNodeType.OPEN_QUESTION,
+        }
+    return _FRONTMATTER_NODE_TYPE_MAP
+
+
+def parse_research_frontmatter(text: str) -> Dict[str, object]:
+    """Return the parsed YAML frontmatter block of ``text`` (or ``{}``).
+
+    Supports the shapes used by the LLM-Wiki demo corpus:
+
+      * ``key: value`` scalars (quotes stripped),
+      * ``key: [a, b, c]`` short inline lists,
+      * ``key:`` followed by ``  - item`` block lists,
+      * lines starting with ``#`` (YAML comments) are skipped.
+
+    Unknown shapes (multi-line scalars, nested maps) are simply ignored;
+    the calling code falls back to body extraction for those keys.
+    """
+    if not text:
+        return {}
+    lines = text.splitlines()
+    if not lines or lines[0].strip() != "---":
+        return {}
+    fm: Dict[str, object] = {}
+    idx = 1
+    n = len(lines)
+    while idx < n and lines[idx].strip() != "---":
+        raw = lines[idx]
+        stripped = raw.strip()
+        if not stripped or stripped.startswith("#"):
+            idx += 1
+            continue
+        if ":" not in stripped:
+            idx += 1
+            continue
+        key, value = stripped.split(":", 1)
+        key = key.strip()
+        value = value.strip()
+        if value:
+            if value.startswith("[") and value.endswith("]"):
+                inner = value[1:-1].strip()
+                items = [item.strip().strip("\"'") for item in inner.split(",") if item.strip()]
+                fm[key] = items
+            else:
+                fm[key] = value.strip("\"'")
+            idx += 1
+            continue
+        # No inline value -> look ahead for a block list (``  - item``).
+        block_items: List[str] = []
+        probe = idx + 1
+        while probe < n:
+            candidate = lines[probe]
+            if not candidate.strip():
+                probe += 1
+                continue
+            if not candidate.startswith((" ", "\t")):
+                break
+            cstripped = candidate.strip()
+            if cstripped.startswith("- "):
+                block_items.append(cstripped[2:].strip().strip("\"'"))
+                probe += 1
+                continue
+            # Indented but not a list item — bail (could be a nested map).
+            break
+        if block_items:
+            fm[key] = block_items
+            idx = probe
+        else:
+            idx += 1
+    return fm
+
+
+_FRONTMATTER_KEY_TOKENS: FrozenSet[str] = frozenset({
+    "type",
+    "arxiv",
+    "arxiv_url",
+    "arxiv_id",
+    "title",
+    "authors",
+    "author",
+    "date",
+    "sub_topic",
+    "sub_topics",
+    "methods",
+    "datasets",
+    "metrics",
+    "license",
+    "organizations",
+    "organization",
+    "repo",
+    "oss_repo",
+    "github",
+    "github_repo",
+    "mirrored_at",
+    "canonical_paper",
+    "canonical_paper_url",
+    "covers_daily",
+    "papers_anchored",
+    "papers_covered",
+    "papers_surfaced_in",
+    "trend",
+    "iso_week",
+    "asked",
+    "status",
+    "period",
+    "tags",
+    "summary",
+})
+
+
+def looks_like_frontmatter_token(name: str) -> bool:
+    """Return ``True`` if ``name`` looks like a YAML frontmatter key/value
+    pair that leaked through prose extraction.
+
+    These tokens — ``type: Paper``, ``arxiv:``, ``authors:``, ``methods:
+    [PSNR]`` and so on — are scaffolding the demo corpus uses to annotate
+    its markdown files. They are not entity names; if one survives to the
+    public graph it shows up as a garbage node like ``type: Paper`` or
+    ``date: 2016-07-`` next to real research entities. The predicate is
+    conservative: a real concept name like ``GPT-4o`` or
+    ``Self-Supervised Learning`` must pass through untouched.
+
+    Positive cases (returns ``True``):
+        ``type: Paper``, ``arxiv:``, ``arxiv: "2308.04079"``,
+        ``authors:``, ``date: 2016-07-``, ``methods: [PSNR]``,
+        ``sub_topic: Visual SLAM``.
+
+    Negative cases (returns ``False``):
+        ``Self-Supervised Learning``, ``GPT-4o``,
+        ``4D Gaussian Splatting``, ``Visual SLAM`` (the literal concept,
+        not a frontmatter token), ``RLHF``.
+    """
+    if not name:
+        return False
+    s = name.strip()
+    if not s or ":" not in s:
+        return False
+    head, _, _tail = s.partition(":")
+    head = head.strip().lower()
+    if not head:
+        return False
+    # Reject only when the leading token is a known frontmatter key. We
+    # intentionally key off a curated allowlist so unrelated concept names
+    # that happen to contain colons (e.g. ``Whisper: large-v3``) survive
+    # unless their leading token is explicitly a YAML key.
+    return head in _FRONTMATTER_KEY_TOKENS
 
 
 # Heading-classification helpers ---------------------------------------------
@@ -1832,6 +2100,7 @@ def extract_title(text: str, source_path: Optional[str]) -> str:
 
     Strategy for ``paper.md`` files (in priority order):
 
+    0. ``title:`` field in YAML frontmatter (authoritative for curated corpora).
     1. ``# <title>`` *after* a ``## #N`` rank marker (papers.cool layout).
     2. ``<title> | Cool Papers`` line.
     3. The first heading-level title that survives
@@ -1840,7 +2109,28 @@ def extract_title(text: str, source_path: Optional[str]) -> str:
     """
     metadata = extract_source_metadata(text, source_path)
     arxiv_id = str(metadata.get("arxiv_id", ""))
+    # Priority 0: frontmatter ``title:`` wins. The demo corpus annotates
+    # every paper.md / readme.md / synthesis.md with an authoritative
+    # title; using it sidesteps the body-heading guess that would
+    # otherwise mis-promote ``type: Paper`` (the YAML token leading the
+    # frontmatter block) as the node name.
+    fm_title = metadata.get("frontmatter_title")
+    if isinstance(fm_title, str) and classify_paper_title_candidate(fm_title.strip(), in_fence=False):
+        return fm_title.strip()
     lines = text.splitlines()
+
+    # Pre-compute a parallel "is this line inside the YAML frontmatter
+    # block?" mask. Lines inside the leading ``---``/``---`` fence are
+    # frontmatter (``type: Paper``, ``arxiv: "..."``); they must never be
+    # promoted to a paper title.
+    fm_mask: List[bool] = [False] * len(lines)
+    if lines and lines[0].strip() == "---":
+        fm_mask[0] = True
+        for idx in range(1, len(lines)):
+            fm_mask[idx] = True
+            if lines[idx].strip() == "---":
+                # Close the fence; trailing lines are body text.
+                break
 
     # Pre-compute a parallel "is this line inside a fenced block?" mask.
     fence_state = False
@@ -1855,6 +2145,8 @@ def extract_title(text: str, source_path: Optional[str]) -> str:
     # Priority 1: title heading immediately after a ``## #N`` rank line.
     rank_marker_re = re.compile(r"^#{1,6}\s*#?\d+\s*$")
     for idx, raw in enumerate(lines):
+        if fm_mask[idx]:
+            continue
         if not rank_marker_re.match(raw.strip()):
             continue
         # Walk forward up to 8 lines looking for the first heading.
@@ -1871,7 +2163,7 @@ def extract_title(text: str, source_path: Optional[str]) -> str:
 
     # Priority 2: "<title> | Cool Papers" pattern, anywhere outside fences.
     for idx, raw in enumerate(lines):
-        if fence_mask[idx]:
+        if fence_mask[idx] or fm_mask[idx]:
             continue
         if " | Cool Papers" in raw:
             candidate = raw.split(" | Cool Papers", 1)[0].strip().lstrip("# ").strip()
@@ -1881,6 +2173,8 @@ def extract_title(text: str, source_path: Optional[str]) -> str:
 
     # Priority 3: any other heading line that survives the title gate.
     for idx, raw in enumerate(lines):
+        if fm_mask[idx]:
+            continue
         in_fence = fence_mask[idx]
         stripped = raw.strip().strip("# ").strip()
         if not stripped or stripped.startswith(">"):
@@ -1989,7 +2283,36 @@ def _looks_like_organization_owner(owner: str) -> bool:
 
 def extract_source_metadata(text: str, source_path: Optional[str]) -> Dict[str, object]:
     metadata: Dict[str, object] = {}
+    frontmatter = parse_research_frontmatter(text)
+    if frontmatter:
+        metadata["frontmatter"] = frontmatter
+        # Surface a few well-known fields directly so downstream consumers
+        # don't have to drill into ``metadata["frontmatter"]``.
+        for fm_key, meta_key in (
+            ("title", "frontmatter_title"),
+            ("authors", "frontmatter_authors"),
+            ("author", "frontmatter_authors"),
+            ("date", "frontmatter_date"),
+            ("methods", "frontmatter_methods"),
+            ("datasets", "frontmatter_datasets"),
+            ("metrics", "frontmatter_metrics"),
+            ("organizations", "frontmatter_organizations"),
+            ("organization", "frontmatter_organizations"),
+            ("repo", "frontmatter_repo"),
+            ("oss_repo", "frontmatter_repo"),
+            ("canonical_paper", "frontmatter_canonical_paper"),
+            ("sub_topic", "frontmatter_sub_topic"),
+            ("sub_topics", "frontmatter_sub_topics"),
+        ):
+            if fm_key in frontmatter and meta_key not in metadata:
+                metadata[meta_key] = frontmatter[fm_key]
     arxiv_id = extract_arxiv_id_from_path(source_path)
+    if not arxiv_id and frontmatter:
+        fm_arxiv = frontmatter.get("arxiv") or frontmatter.get("arxiv_id")
+        if isinstance(fm_arxiv, str):
+            m = re.search(r"(\d{4}\.\d{4,6})", fm_arxiv)
+            if m:
+                arxiv_id = m.group(1)
     if not arxiv_id:
         arxiv_match = re.search(r"arxiv(?:\.org/abs/|:\s*)(\d{4}\.\d{4,6})", text, flags=re.IGNORECASE)
         if not arxiv_match and source_path:
@@ -2003,10 +2326,23 @@ def extract_source_metadata(text: str, source_path: Optional[str]) -> Dict[str, 
         date_match = re.search(r"daily/(\d{4}-\d{2}-\d{2})/", source_path)
     if date_match:
         metadata["analysis_date"] = date_match.group(1)
-    # Repository identity: parse the *first* GitHub URL that looks like a
-    # repository root. We deliberately ignore the well-known papers.cool
-    # mirror which appears as a footer in every scrape.
+    # Repository identity: prefer the frontmatter ``repo:`` field for curated
+    # corpora (``graphdeco-inria/gaussian-splatting``), then fall back to the
+    # first GitHub URL found in the body. We deliberately ignore the well-
+    # known papers.cool mirror which appears as a footer in every scrape.
+    if "github_repo" not in metadata and frontmatter:
+        fm_repo = frontmatter.get("repo") or frontmatter.get("oss_repo") or frontmatter.get("github_repo")
+        if isinstance(fm_repo, str):
+            m = re.match(r"\s*([A-Za-z0-9](?:[A-Za-z0-9-]{0,38})?)/([A-Za-z0-9_.\-]{1,100})\s*$", fm_repo)
+            if m:
+                owner, repo = m.group(1), m.group(2)
+                if repo.lower().endswith(".git"):
+                    repo = repo[:-4]
+                metadata["github_repo"] = f"{owner.lower()}/{repo.lower()}"
+                metadata["repo_url"] = f"https://github.com/{owner}/{repo}"
     for match in _GITHUB_URL_RE.finditer(text):
+        if "github_repo" in metadata:
+            break
         owner = match.group(1)
         repo = match.group(2)
         if repo.lower().endswith(".git"):
