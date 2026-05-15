@@ -205,7 +205,7 @@ jobs:
       - name: Upload Pages artifact (non-fatal)
         if: steps.configure_pages.outcome == 'success'
         continue-on-error: true
-        uses: actions/upload-pages-artifact@v3
+        uses: actions/upload-pages-artifact@v5
         with:
           path: .llm-wiki/site
 
