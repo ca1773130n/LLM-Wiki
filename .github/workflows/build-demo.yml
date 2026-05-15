@@ -42,10 +42,10 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
-        uses: actions/checkout@v4
+        uses: actions/checkout@v5
 
       - name: Set up Python 3.11
-        uses: actions/setup-python@v5
+        uses: actions/setup-python@v6
         with:
           python-version: "3.11"
           cache: pip
@@ -171,7 +171,7 @@ jobs:
       - name: Upload site as workflow artifact (always available)
         # Independent of Pages. This artifact is downloadable from the
         # workflow run page even when Pages is not enabled.
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v5
         with:
           name: llm-wiki-site
           path: .llm-wiki/site
@@ -184,7 +184,7 @@ jobs:
         # against this repo's `examples/demo-corpus/data/` tree gets a
         # populated /api/ask endpoint without re-burning Codex tokens.
         # Not bundled into the Pages deploy (which is static HTML only).
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v5
         with:
           name: raganything-store
           path: examples/demo-corpus/raganything-store
@@ -198,7 +198,7 @@ jobs:
       - name: Configure Pages (non-fatal if Pages not yet enabled)
         id: configure_pages
         continue-on-error: true
-        uses: actions/configure-pages@v5
+        uses: actions/configure-pages@v6
         with:
           enablement: true
 
