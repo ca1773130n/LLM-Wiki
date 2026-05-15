@@ -23,7 +23,7 @@ fresh against the same angle (the compile model, not the feature list).
 **Links to include in the first comment, not the post body:**
 
 - Repo: `https://github.com/<org>/<repo>` (fill in before posting)
-- Live demo: `https://https://ca1773130n.github.io/LLM-Wiki` (the dogfood compile of LLM-Wiki's own source, deployed by `.github/workflows/build-demo.yml`)
+- Live demo: `https://ca1773130n.github.io/LLM-Wiki` (the dogfood compile of LLM-Wiki's own source, deployed by `.github/workflows/build-demo.yml`)
 - Comparison table: link to the README anchor `#how-it-compares`
 - Research doc: `docs/superpowers/specs/2026-05-13-competitive-positioning-research.md`
 
@@ -53,7 +53,7 @@ list — same angle as the HN body. All tweets verified under 280 characters.
 
 5. Multimodal and code-graph are first-class adjuncts, not random forks. RAG-Anything handles PDFs and Office docs through MinerU/Docling. Understand Anything handles code. LLM-Wiki merges both into the same typed graph.
 
-6. The site is a static HTML build — host it on GitHub Pages, S3, or any laptop. Live dogfood demo (LLM-Wiki compiled against its own source) here: https://https://ca1773130n.github.io/LLM-Wiki
+6. The site is a static HTML build — host it on GitHub Pages, S3, or any laptop. Live dogfood demo (LLM-Wiki compiled against its own source) here: https://ca1773130n.github.io/LLM-Wiki
 
 ---
 
