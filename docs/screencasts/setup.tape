@@ -35,7 +35,7 @@ Type "# Bootstrap the project: one command, non-interactive"
 Sleep 700ms
 Enter
 
-Type@30ms "llm_wiki project setup --yes --no-color --source ./research --no-cognee --skip-raganything --skip-install-cognee --skip-install-raganything --skip-install-understand-anything"
+Type@30ms "llm_wiki project setup --yes --source ./research --with-understand-anything --with-raganything --skip-install-cognee --skip-install-raganything --skip-install-understand-anything"
 Sleep 500ms
 Enter
 Sleep 4s
