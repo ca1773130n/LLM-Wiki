@@ -16,10 +16,10 @@ Set TypingSpeed 40ms
 
 Type "source /tmp/llm-wiki-demo-rec/venv/bin/activate"
 Enter
-Sleep 200ms
-Type "cd /tmp/llm-wiki-demo-rec/myproject && clear"
+Sleep 300ms
+Type "cd /tmp/llm-wiki-demo-rec/myproject"
 Enter
-Sleep 500ms
+Sleep 400ms
 
 # --- Setup -------------------------------------------------------------
 Type "# 1) Point LLM-Wiki at a research notes directory"
