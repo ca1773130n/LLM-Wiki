@@ -166,6 +166,54 @@ class ProjectWiki:
             vault_snapshot=self.root / "vault_snapshot.json",
             diverged_fields=self.root / "diverged-fields.md",
         )
+        # In-memory override of the Obsidian vault location, set by
+        # obsidian-sync --vault for the duration of a single CLI call.
+        # The persistent override lives in .llm-wiki/config.json under
+        # ``obsidian.vault_path``; see :meth:`effective_obsidian_vault`.
+        self._vault_override: Optional[Path] = None
+
+    def effective_obsidian_vault(self) -> Path:
+        """Resolve the Obsidian vault directory the projector / watcher / overlay use.
+
+        Resolution order:
+
+        1. ``_vault_override`` set via :meth:`set_vault_override` (the
+           per-call ``--vault`` flag on the CLI).
+        2. ``obsidian.vault_path`` in ``.llm-wiki/config.json``,
+           persisted by ``project setup --obsidian-vault``.
+        3. Default ``.llm-wiki/obsidian_vault/`` baked into
+           :class:`ProjectPaths`.
+
+        Always returns an absolute :class:`Path` so callers don't have
+        to think about cwd-relative resolution.
+        """
+        if self._vault_override is not None:
+            return self._vault_override
+        try:
+            cfg = self.config() if self.paths.config.is_file() else {}
+        except Exception:
+            cfg = {}
+        configured = (cfg.get("obsidian") or {}).get("vault_path")
+        if configured:
+            p = Path(configured).expanduser()
+            if not p.is_absolute():
+                p = (self.project_root / p).resolve()
+            return p
+        return self.paths.obsidian_vault
+
+    def set_vault_override(self, path: Optional[Path]) -> None:
+        """Override the resolved vault path for this :class:`ProjectWiki` instance.
+
+        Used by the CLI ``--vault`` flag to redirect the sync target for a
+        single command without persisting the change. Pass ``None`` to clear.
+        """
+        if path is None:
+            self._vault_override = None
+            return
+        resolved = Path(path).expanduser()
+        if not resolved.is_absolute():
+            resolved = (self.project_root / resolved).resolve()
+        self._vault_override = resolved
 
     @classmethod
     def init(cls, project_root: str | Path = ".", name: Optional[str] = None, source_kind: str = "SourceDocument", sources: Optional[Iterable[str | Path]] = None) -> "ProjectWiki":
@@ -175,7 +223,7 @@ class ProjectWiki:
         wiki.paths.cognee_bundle.mkdir(parents=True, exist_ok=True)
         wiki.paths.agent_harness.mkdir(parents=True, exist_ok=True)
         wiki.paths.harness_sessions.mkdir(parents=True, exist_ok=True)
-        wiki.paths.obsidian_vault.mkdir(parents=True, exist_ok=True)
+        wiki.effective_obsidian_vault().mkdir(parents=True, exist_ok=True)
         wiki.paths.site.mkdir(parents=True, exist_ok=True)
         wiki.paths.wiki.mkdir(parents=True, exist_ok=True)
         for kind in ("sources", "concepts", "entities", "papers", "repos", "topics", "syntheses", "questions"):
@@ -370,7 +418,7 @@ class ProjectWiki:
             "graph_path": str(self.paths.graph),
             "graphiti_episodes_path": str(self.paths.graphiti_episodes),
             "agent_harness_path": str(self.paths.agent_harness),
-            "obsidian_vault_path": str(self.paths.obsidian_vault),
+            "obsidian_vault_path": str(self.effective_obsidian_vault()),
             "site_path": str(self.paths.site),
             "mcp_server_name": cfg.get("name", sanitize_server_name(self.project_root.name)),
         }
@@ -586,7 +634,7 @@ class ProjectWiki:
     def export_obsidian(self, vault: Optional[str | Path] = None) -> dict:
         cfg = self.config()
         graph = load_graph_file(self.paths.graph)
-        target = Path(vault) if vault else self.paths.obsidian_vault
+        target = Path(vault) if vault else self.effective_obsidian_vault()
         name = cfg.get("name") or sanitize_server_name(self.project_root.name)
         return ObsidianVaultAdapter(vault_name=name).write_vault(graph, target)
 
@@ -792,7 +840,8 @@ class ProjectWiki:
         )
         from .vault_snapshot import read_snapshot
 
-        if not self.paths.obsidian_vault.exists():
+        vault_path = self.effective_obsidian_vault()
+        if not vault_path.exists():
             return graph
 
         node_by_id = {node.id: node for node in graph.nodes}
@@ -800,12 +849,12 @@ class ProjectWiki:
 
         snapshot = read_snapshot(self.paths.vault_snapshot)
         overrides = (
-            compute_overrides(self.paths.obsidian_vault, snapshot, node_by_id)
+            compute_overrides(vault_path, snapshot, node_by_id)
             if snapshot is not None
             else []
         )
         user_link_changes = compute_user_link_changes(
-            self.paths.obsidian_vault, graph, slug_by_id
+            vault_path, graph, slug_by_id
         )
         write_diverged_fields_report(
             overrides, self.paths.diverged_fields, user_link_changes
@@ -817,7 +866,7 @@ class ProjectWiki:
         if overrides:
             print(
                 f"[llm-wiki] vault overlay: applying {len(overrides)} field "
-                f"override(s) from {self.paths.obsidian_vault.name}/",
+                f"override(s) from {vault_path.name}/",
                 flush=True,
             )
         if user_link_changes:

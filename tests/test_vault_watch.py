@@ -83,6 +83,12 @@ class _FakeWiki:
         self.reproject_calls.append(result)
         return result
 
+    def effective_obsidian_vault(self) -> Path:
+        # Stubs follow the production resolver shape — see
+        # ProjectWiki.effective_obsidian_vault. Tests don't exercise the
+        # override path so this just returns the default location.
+        return self.paths.obsidian_vault
+
 
 def _bootstrap_wiki(tmp_path: Path) -> _FakeWiki:
     """Create the on-disk skeleton VaultWatcher.run requires (graph + vault dir)."""

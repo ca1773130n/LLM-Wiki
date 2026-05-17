@@ -98,7 +98,7 @@ class VaultWatcher:
         self._sleep = sleep
         # Baseline fingerprint that represents "vault state we caused" — any
         # change away from this is user-driven and needs reacting to.
-        self._baseline = VaultFingerprint.of(self.wiki.paths.obsidian_vault)
+        self._baseline = VaultFingerprint.of(self.wiki.effective_obsidian_vault())
 
     def run(self, max_iterations: Optional[int] = None) -> None:
         """Block until interrupted (or ``max_iterations`` poll cycles elapse).
@@ -106,7 +106,7 @@ class VaultWatcher:
         ``max_iterations`` is for tests; production use leaves it ``None``
         so the watcher runs until the user hits Ctrl-C.
         """
-        vault = self.wiki.paths.obsidian_vault
+        vault = self.wiki.effective_obsidian_vault()
         if not vault.is_dir():
             print(f"[llm-wiki] vault directory does not exist: {vault}", flush=True)
             print("[llm-wiki] run `llm_wiki project compile` first.", flush=True)
@@ -133,7 +133,7 @@ class VaultWatcher:
 
     def _tick(self) -> bool:
         """One poll cycle. Returns True iff a reproject happened."""
-        vault = self.wiki.paths.obsidian_vault
+        vault = self.wiki.effective_obsidian_vault()
         current = VaultFingerprint.of(vault)
         if current == self._baseline:
             return False

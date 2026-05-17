@@ -755,6 +755,26 @@ def project_main(argv: List[str] | None = None) -> int:
         default=1.5,
         help="Watch-mode poll interval in seconds (default: 1.5).",
     )
+    obsidian_sync_parser.add_argument(
+        "--vault",
+        type=str,
+        default=None,
+        help=(
+            "Override the configured Obsidian vault directory for this call. "
+            "Resolution order at runtime is --vault > config.obsidian.vault_path > "
+            ".llm-wiki/obsidian_vault/. Use `project setup --obsidian-vault PATH` "
+            "to make the override persistent."
+        ),
+    )
+    obsidian_sync_parser.add_argument(
+        "--persist-vault",
+        action="store_true",
+        help=(
+            "When passed with --vault, writes the path to .llm-wiki/config.json under "
+            "obsidian.vault_path so future commands (`project compile`, "
+            "`project obsidian-sync` without --vault) use it automatically."
+        ),
+    )
 
     refresh_raga_parser = subparsers.add_parser(
         "refresh-raganything",
@@ -1039,6 +1059,27 @@ def project_main(argv: List[str] | None = None) -> int:
         if args.dry_run and args.watch:
             print("error: --dry-run and --watch are mutually exclusive", file=sys.stderr)
             return 2
+        if args.vault:
+            from pathlib import Path as _Path
+            vault_path = _Path(args.vault).expanduser()
+            if not vault_path.is_absolute():
+                vault_path = (wiki.project_root / vault_path).resolve()
+            if not vault_path.is_dir():
+                print(f"error: --vault path is not a directory: {vault_path}", file=sys.stderr)
+                return 2
+            wiki.set_vault_override(vault_path)
+            if args.persist_vault:
+                import json as _json
+                cfg = wiki.config() if wiki.paths.config.is_file() else {}
+                cfg.setdefault("obsidian", {})["vault_path"] = str(vault_path)
+                wiki.paths.config.write_text(
+                    _json.dumps(cfg, ensure_ascii=False, indent=2, sort_keys=True) + "\n",
+                    encoding="utf-8",
+                )
+                print(f"saved obsidian.vault_path = {vault_path} to {wiki.paths.config}")
+        elif args.persist_vault:
+            print("error: --persist-vault requires --vault", file=sys.stderr)
+            return 2
         if args.dry_run:
             # Compute overlay + write the diverged-fields report but skip the
             # apply step. Loads the existing graph; never re-projects.
@@ -1055,11 +1096,11 @@ def project_main(argv: List[str] | None = None) -> int:
             graph = _load_graph_file(wiki.paths.graph)
             snap = read_snapshot(wiki.paths.vault_snapshot)
             overrides = (
-                compute_overrides(wiki.paths.obsidian_vault, snap, {n.id: n for n in graph.nodes})
+                compute_overrides(wiki.effective_obsidian_vault(), snap, {n.id: n for n in graph.nodes})
                 if snap is not None else []
             )
             link_changes = compute_user_link_changes(
-                wiki.paths.obsidian_vault, graph, unique_slugs(graph.nodes),
+                wiki.effective_obsidian_vault(), graph, unique_slugs(graph.nodes),
             )
             write_diverged_fields_report(overrides, wiki.paths.diverged_fields, link_changes)
             print(
