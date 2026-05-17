@@ -50,7 +50,30 @@ def build_ask_aware_handler(*, project_root: Path) -> Type[http.server.SimpleHTT
             if parsed.path == "/api/ask/health":
                 self._send_json(200, {"status": "ok"})
                 return
-            return super().do_GET()
+            try:
+                return super().do_GET()
+            except (BrokenPipeError, ConnectionResetError):
+                # The client disconnected before we finished streaming the
+                # response (mobile network drop, browser back/refresh,
+                # prefetcher cancellation). Routine on any HTTP server and
+                # entirely harmless — but stdlib's http.server lets the
+                # exception bubble all the way to the request thread,
+                # producing a multi-line traceback for every cancelled
+                # request. Swallow it so the operator log stays readable.
+                return
+
+        # ---------------------------------------------------------- exception
+        def handle_one_request(self):  # noqa: N802 — fixed by stdlib API
+            # Same protection one level up: even before ``do_GET`` runs the
+            # request line may already be coming in over a half-closed
+            # socket. Without this guard a ``ConnectionResetError`` during
+            # ``self.raw_requestline = self.rfile.readline(...)`` propagates
+            # out of the worker thread.
+            try:
+                return super().handle_one_request()
+            except (BrokenPipeError, ConnectionResetError):
+                self.close_connection = True
+                return
 
         # -------------------------------------------------------------- POST
         def do_POST(self):  # noqa: N802 — fixed by stdlib API
