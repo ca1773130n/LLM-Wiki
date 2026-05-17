@@ -199,6 +199,21 @@ class ProjectWiki:
             if not p.is_absolute():
                 p = (self.project_root / p).resolve()
             return p
+        # Registry fallback: if the multi-project registry has a `vault_root`
+        # AND this project is registered, default to `<vault_root>/<alias>/`.
+        # Lets `llm_wiki wiki obsidian-set-root <PATH>` configure many
+        # projects at once without per-project --vault setup. See
+        # docs/integrations/obsidian-sync.md.
+        try:
+            from .mcp_server import ProjectRegistry
+            registry = ProjectRegistry()
+            vault_root = registry.get_vault_root()
+            if vault_root is not None:
+                alias = registry.alias_for_root(self.project_root)
+                if alias:
+                    return (vault_root / alias).expanduser()
+        except Exception:
+            pass
         return self.paths.obsidian_vault
 
     def set_vault_override(self, path: Optional[Path]) -> None:

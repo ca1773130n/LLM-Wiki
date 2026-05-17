@@ -34,6 +34,27 @@ from ..ports import Source
 DEFAULT_EXTENSIONS: Tuple[str, ...] = (".md", ".txt", ".py", ".rst")
 
 
+# Generated / build / dependency directories that the walker should NEVER
+# descend into when discovering source markdown. These names mirror the
+# common .gitignore conventions plus LLM-Wiki's own output dir. A user with
+# an unusual layout can still pass these explicitly as a source root —
+# the filter only applies during recursive descent under a normal root.
+_EXCLUDED_TOPLEVEL_DIRS = frozenset({
+    "output",
+    "build",
+    "dist",
+    "target",
+    "node_modules",
+    "venv",
+    "__pycache__",
+    "site-packages",
+    ".pytest_cache",
+    ".mypy_cache",
+    ".ruff_cache",
+    "data-gym-cache",
+})
+
+
 class FilesystemSourceLoader:
     """Walks filesystem roots and yields :class:`Source` records.
 
@@ -156,6 +177,13 @@ class FilesystemSourceLoader:
                 # cases by skipping anything that doesn't relativize.
                 continue
             if any(part.startswith(".") for part in rel.parts):
+                continue
+            # Skip well-known generated/output directories. Without this the
+            # walker sweeps up everything under output/, build/, dist/, etc.,
+            # which on a repo that's been through previous compiles turns
+            # thousands of stale generated markdown files into "source" docs
+            # and balloons the typed graph with garbage Paper/Concept nodes.
+            if any(part in _EXCLUDED_TOPLEVEL_DIRS for part in rel.parts):
                 continue
             yield child
 

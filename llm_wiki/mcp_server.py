@@ -172,6 +172,58 @@ class ProjectRegistry:
         entry = data["projects"].get(active)
         return Path(entry["graph_path"]) if entry else None
 
+    # ---------------- vault-root extensions for multi-project sync ----------
+
+    def get_vault_root(self) -> Optional[Path]:
+        """Return the registry-wide Obsidian vault root, or None if unset.
+
+        When set, every registered project's :meth:`ProjectWiki.effective_obsidian_vault`
+        defaults to ``<vault_root>/<alias>/`` so a single command can sync many
+        projects into one Obsidian vault without per-project ``--vault`` setup.
+        """
+        data = self.load()
+        configured = (data.get("obsidian") or {}).get("vault_root")
+        return Path(configured).expanduser() if configured else None
+
+    def set_vault_root(self, path: Optional[str | Path]) -> None:
+        """Persist the registry-wide Obsidian vault root.
+
+        Pass ``None`` to clear. Path is stored verbatim (with ``~`` preserved
+        as written) so the registry is portable between accounts that share
+        the same home-relative layout.
+        """
+        data = self.load()
+        if path is None:
+            if "obsidian" in data:
+                data["obsidian"].pop("vault_root", None)
+                if not data["obsidian"]:
+                    data.pop("obsidian")
+        else:
+            data.setdefault("obsidian", {})["vault_root"] = str(path)
+        self.save(data)
+
+    def alias_for_root(self, project_root: str | Path) -> Optional[str]:
+        """Return the registered alias for a project root, or None.
+
+        Used by :meth:`ProjectWiki.effective_obsidian_vault` to compute the
+        per-project subdir under the registry vault root.
+        """
+        target = Path(project_root).resolve()
+        data = self.load()
+        for name, entry in data.get("projects", {}).items():
+            entry_root = Path(entry.get("root", "")).resolve()
+            if entry_root == target:
+                return name
+        return None
+
+    def iter_registered_projects(self) -> Iterable[tuple[str, Path]]:
+        """Yield ``(alias, project_root)`` for every registered project."""
+        data = self.load()
+        for name, entry in sorted(data.get("projects", {}).items()):
+            root = entry.get("root")
+            if root:
+                yield name, Path(root)
+
 
 def _materialize_graph(store: GraphStore) -> ResearchGraph:
     """Snapshot a :class:`GraphStore` into an in-memory :class:`ResearchGraph`.

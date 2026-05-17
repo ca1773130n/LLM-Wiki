@@ -516,8 +516,106 @@ def _wiki_command_handler(args) -> int:
         print(f"Unregistered: {args.name}")
         return 0
 
-    print("Usage: llm_wiki wiki {list|register|activate|unregister}", file=sys.stderr)
+    if sub == "obsidian-set-root":
+        if args.clear:
+            registry.set_vault_root(None)
+            print("Cleared registry obsidian.vault_root.")
+            return 0
+        if not args.path:
+            current = registry.get_vault_root()
+            print(f"Current obsidian.vault_root: {current or '(unset)'}")
+            print("Pass a path to set, or --clear to unset.")
+            return 0
+        from pathlib import Path as _Path
+        resolved = _Path(args.path).expanduser()
+        if not resolved.is_absolute():
+            resolved = resolved.resolve()
+        if not resolved.parent.is_dir():
+            print(f"error: parent dir does not exist: {resolved.parent}", file=sys.stderr)
+            return 2
+        resolved.mkdir(parents=True, exist_ok=True)
+        registry.set_vault_root(str(resolved))
+        print(f"Set registry obsidian.vault_root = {resolved}")
+        print("Each registered project now projects into:")
+        for alias, root in registry.iter_registered_projects():
+            print(f"  {alias:<24} -> {resolved / alias}")
+        return 0
+
+    if sub == "obsidian-sync-all":
+        return _wiki_obsidian_sync_all(registry, poll_interval=args.poll_interval)
+
+    print(
+        "Usage: llm_wiki wiki {list|register|activate|unregister|obsidian-set-root|obsidian-sync-all}",
+        file=sys.stderr,
+    )
     return 2
+
+
+def _wiki_obsidian_sync_all(registry, *, poll_interval: float) -> int:
+    """Spawn one VaultWatcher thread per registered project.
+
+    Each thread owns its own ProjectWiki + VaultWatcher and polls only its
+    own vault subdir. Ctrl-C cleanly signals all threads to stop.
+    """
+    import threading
+    from .project import ProjectWiki
+    from .vault_watch import VaultWatcher
+
+    projects = list(registry.iter_registered_projects())
+    if not projects:
+        print("No registered projects. Use `llm_wiki wiki register <path>` first.", file=sys.stderr)
+        return 2
+
+    vault_root = registry.get_vault_root()
+    if vault_root is None:
+        print("error: no registry vault root. Run `llm_wiki wiki obsidian-set-root <PATH>` first.", file=sys.stderr)
+        return 2
+
+    print(f"watching {len(projects)} registered project(s) under {vault_root}")
+    stop_event = threading.Event()
+    threads: list[threading.Thread] = []
+
+    def _watch(alias: str, root):
+        try:
+            wiki = ProjectWiki.load(str(root))
+        except Exception as exc:
+            print(f"[{alias}] could not load project: {exc}", flush=True)
+            return
+        watcher = VaultWatcher(wiki, poll_interval=poll_interval)
+        # Run a tick at a time so we can react to the stop_event between iterations.
+        try:
+            while not stop_event.is_set():
+                # _tick is a single poll+react cycle; sleeping inside it
+                # honors the same poll_interval the watcher uses normally.
+                changed = False
+                try:
+                    changed = watcher._tick()  # noqa: SLF001 — using internal for graceful stop
+                except Exception as exc:
+                    print(f"[{alias}] watcher error: {exc}", flush=True)
+                if not changed:
+                    # When tick returns False it already slept once (the
+                    # poll); no extra wait needed.
+                    pass
+        except KeyboardInterrupt:
+            return
+
+    for alias, root in projects:
+        t = threading.Thread(target=_watch, args=(alias, root), name=f"vault-watch:{alias}", daemon=True)
+        t.start()
+        threads.append(t)
+        print(f"  + watching {alias}")
+    print("Ctrl-C to stop all.")
+
+    try:
+        while any(t.is_alive() for t in threads):
+            for t in threads:
+                t.join(timeout=0.5)
+    except KeyboardInterrupt:
+        stop_event.set()
+        print("\nstopping watchers...", flush=True)
+        for t in threads:
+            t.join(timeout=2.0)
+    return 0
 
 
 def _build_top_level_ask_parser() -> argparse.ArgumentParser:
@@ -609,6 +707,22 @@ def _build_top_level_wiki_parser() -> argparse.ArgumentParser:
 
     wiki_unregister = subparsers.add_parser("unregister", help="Remove a project from the registry.")
     wiki_unregister.add_argument("name")
+
+    wiki_set_root = subparsers.add_parser(
+        "obsidian-set-root",
+        help="Set the registry-wide Obsidian vault root. Each registered project then projects into <root>/<alias>/.",
+    )
+    wiki_set_root.add_argument("path", nargs="?", help="Absolute path; omit and pass --clear to unset.")
+    wiki_set_root.add_argument("--clear", action="store_true", help="Remove the configured vault root.")
+
+    wiki_watch_all = subparsers.add_parser(
+        "obsidian-sync-all",
+        help="Run an obsidian-sync --watch loop for every registered project (one thread per project).",
+    )
+    wiki_watch_all.add_argument(
+        "--poll-interval", type=float, default=1.5,
+        help="Per-watcher poll interval in seconds (default: 1.5).",
+    )
     return parser
 
 
