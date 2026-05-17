@@ -36,7 +36,13 @@ from pathlib import Path
 from typing import Any, Dict, Iterable, List, Mapping, Optional, Sequence
 
 from .markdown_projection import USER_NOTES_END, USER_NOTES_START, slugify
-from .research_graph import ResearchEdge, ResearchGraph, ResearchNode, ResearchNodeType
+from .research_graph import (
+    ResearchEdge,
+    ResearchGraph,
+    ResearchNode,
+    ResearchNodeType,
+    is_public_research_node,
+)
 from .vault_snapshot import NodeSnapshot
 
 
@@ -623,7 +629,16 @@ def prune_orphan_pages(
     Designed to be safe to re-run: any state where vault matches the graph
     is a no-op.
     """
-    node_ids = {n.id for n in graph.nodes}
+    # A vault page is an orphan when its node_id either (a) isn't in the graph
+    # anymore OR (b) IS in the graph but is now a node type the projector
+    # never emits — Stubs (tombstones, by design) and any type in
+    # PRIVATE_PUBLIC_RESEARCH_TYPES (Person, etc.) live in graph.json for
+    # query reachability but have no vault page. Both conditions are
+    # "this file shouldn't exist" so prune treats them identically.
+    projected_ids = {
+        n.id for n in graph.nodes
+        if n.type != ResearchNodeType.STUB and is_public_research_node(n)
+    }
     deleted: List[Path] = []
     skipped: List[Path] = []
 
@@ -644,8 +659,8 @@ def prune_orphan_pages(
         if not frontmatter or "node_id" not in frontmatter:
             continue  # user-authored, leave alone
         node_id = str(frontmatter["node_id"])
-        if node_id in node_ids:
-            continue  # still in graph, keep
+        if node_id in projected_ids:
+            continue  # still in graph AND public, keep
         # Orphan. Check for user-notes content before deleting.
         notes = extract_user_notes_block(_split_body(text))
         if notes and not force:

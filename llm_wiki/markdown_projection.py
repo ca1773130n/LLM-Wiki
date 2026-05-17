@@ -18,7 +18,13 @@ from pathlib import Path
 from typing import Dict, Iterable, List, Sequence
 
 from .cross_project import find_wiki_uris_in_text, parse_wiki_uri
-from .research_graph import ResearchEdge, ResearchGraph, ResearchNode, ResearchNodeType
+from .research_graph import (
+    ResearchEdge,
+    ResearchGraph,
+    ResearchNode,
+    ResearchNodeType,
+    is_public_research_node,
+)
 
 
 PAPER_TYPES = {ResearchNodeType.PAPER, ResearchNodeType.REPOSITORY, ResearchNodeType.SOURCE_DOCUMENT}
@@ -152,6 +158,14 @@ class GraphMarkdownProjector:
             # still lives in graph.nodes for query reachability via MCP and
             # the static site (where it's hidden by is_public_research_node).
             if node.type == ResearchNodeType.STUB:
+                continue
+            # Skip everything that's private to the research graph (Persons —
+            # paper authors — and any other type in PRIVATE_PUBLIC_RESEARCH_TYPES).
+            # These nodes stay in graph.json so MCP search and the typed-graph
+            # queries can find them, but they don't deserve their own Obsidian
+            # page. Without this filter the vault concepts/ dir fills with
+            # hundreds of one-line author pages.
+            if not is_public_research_node(node):
                 continue
             rel_dir = directory_for_node(node)
             slug = slug_by_id[node.id]
