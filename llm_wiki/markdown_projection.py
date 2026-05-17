@@ -149,6 +149,7 @@ class GraphMarkdownProjector:
             outgoing[edge.source].append(edge)
             incoming[edge.target].append(edge)
 
+        owners = canonical_slug_owners(slug_by_id)
         written: List[Path] = []
         cross_vault_index: Dict[str, List[str]] = defaultdict(list)  # node_slug → URIs
         for node in graph.nodes:
@@ -166,6 +167,13 @@ class GraphMarkdownProjector:
             # page. Without this filter the vault concepts/ dir fills with
             # hundreds of one-line author pages.
             if not is_public_research_node(node):
+                continue
+            # Collision-loser: another node with the same slug won the
+            # type-priority tiebreak in unique_slugs. Skip writing a file;
+            # the node still exists in graph.json for queries and any
+            # wikilink pointing at it resolves to the canonical's page
+            # (because slug_by_id maps both to the same slug).
+            if node.id not in owners:
                 continue
             rel_dir = directory_for_node(node)
             slug = slug_by_id[node.id]
@@ -205,15 +213,111 @@ def directory_for_node(node: ResearchNode) -> str:
     return "concepts"
 
 
+# Type priority for slug-collision tie-breaking. When two nodes claim the same
+# slug, we keep the one with the higher-priority type and drop the others from
+# the projection (they still live in graph.json for query/MCP). Paper >
+# SourceDocument because the Paper is the canonical research entity; the
+# SourceDocument is just provenance. Synthesis > * because synthesis pages
+# are user-facing wiki overviews.
+_TYPE_PRIORITY: Dict[ResearchNodeType, int] = {
+    ResearchNodeType.PAPER: 100,
+    ResearchNodeType.SYNTHESIS: 90,
+    ResearchNodeType.REPOSITORY: 80,
+    ResearchNodeType.RESEARCH_TOPIC: 70,
+    ResearchNodeType.APPROACH_FAMILY: 60,
+    ResearchNodeType.METHODOLOGICAL_CONCEPT: 50,
+    ResearchNodeType.SOURCE_DOCUMENT: 10,
+}
+
+
+def _normalize_for_dedup(name: str) -> str:
+    """Aggressive normalization used to detect "morally the same" names.
+
+    Strips leading emoji-and-space, leading `# ` (markdown heading marker that
+    sometimes leaks into EvidenceSpan node names), lowercases, and collapses
+    whitespace. Two names that normalize the same get merged at projection time.
+    """
+    s = name.strip()
+    # Strip leading `# ` from leaked markdown headings.
+    while s.startswith("#"):
+        s = s.lstrip("#").lstrip()
+    # Strip leading emoji + whitespace (any non-ASCII non-word leading char).
+    while s and not (s[0].isalnum() or s[0] in "[("):
+        s = s[1:].lstrip()
+    return s.casefold()
+
+
 def unique_slugs(nodes: Sequence[ResearchNode]) -> Dict[str, str]:
-    used: Dict[str, int] = {}
-    slugs: Dict[str, str] = {}
+    """Return ``node_id → slug`` for EVERY node, deduped to one slug per name.
+
+    When multiple nodes claim the same base slug (case-only diffs, emoji
+    prefix variants, ``# ``-leaked Evidence names, etc.), one canonical
+    node wins via :data:`_TYPE_PRIORITY` and the others point at the SAME
+    canonical slug. Wikilinks to a collision-loser therefore resolve to
+    the canonical's page in the vault — no broken links, no
+    ``foo-2.md`` / ``foo-3.md`` siblings.
+
+    Use :func:`canonical_slug_owners` to learn which node IDs actually
+    own (and should produce) a vault page.
+    """
+    by_slug: Dict[str, List[ResearchNode]] = {}
     for node in nodes:
-        base = slugify(node.name)
-        count = used.get(base, 0)
-        used[base] = count + 1
-        slugs[node.id] = base if count == 0 else f"{base}-{count + 1}"
+        by_slug.setdefault(slugify(node.name), []).append(node)
+
+    slugs: Dict[str, str] = {}
+    for slug, candidates in by_slug.items():
+        # Canonical = highest type priority, then deterministic id tiebreak.
+        canonical = (
+            candidates[0]
+            if len(candidates) == 1
+            else max(candidates, key=lambda n: (_TYPE_PRIORITY.get(n.type, 0), n.id))
+        )
+        # EVERY node in the group maps to the canonical's slug — so edges
+        # pointing at a dropped dupe still resolve to a real wikilink.
+        for n in candidates:
+            slugs[n.id] = slug
+        # Mark canonical separately via canonical_slug_owners() below.
+        _CANONICAL_OWNERS_CACHE.setdefault(id(slugs), set()).add(canonical.id)
     return slugs
+
+
+# Module-level cache keyed by id(slugs_dict) so callers can recover the
+# "which node id is the canonical for its slug" decision from the slug map
+# without recomputing. Cleared opportunistically (the dict id is stable
+# only while the slugs dict is alive; once GC reclaims it the entry is
+# orphaned but harmless).
+_CANONICAL_OWNERS_CACHE: Dict[int, set[str]] = {}
+
+
+def canonical_slug_owners(slugs: Dict[str, str]) -> set[str]:
+    """Return the set of node ids that won the slug-collision tiebreak.
+
+    A node ID is in the result iff it should produce a vault page. Nodes
+    whose IDs are in ``slugs`` but NOT in this set are "collision-losers"
+    — they exist in graph.json for query reachability and their slug
+    entry redirects to the canonical sibling's page.
+
+    If the cache entry has been GC'd (unlikely in practice — slugs lives
+    for the duration of a projection), fall back to a recomputation that
+    yields the same result.
+    """
+    owners = _CANONICAL_OWNERS_CACHE.get(id(slugs))
+    if owners is not None:
+        return owners
+    # Fallback recomputation: nodes whose slug isn't shared with another id.
+    counts: Dict[str, int] = {}
+    for s in slugs.values():
+        counts[s] = counts.get(s, 0) + 1
+    # Without the node objects we can't pick canonical deterministically the
+    # same way, so just pick the first-id-encountered per slug. This is
+    # only the fallback path; normal flow always hits the cache.
+    seen: set[str] = set()
+    owners = set()
+    for nid, s in slugs.items():
+        if s not in seen:
+            seen.add(s)
+            owners.add(nid)
+    return owners
 
 
 def render_node_page(

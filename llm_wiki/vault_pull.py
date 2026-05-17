@@ -629,16 +629,35 @@ def prune_orphan_pages(
     Designed to be safe to re-run: any state where vault matches the graph
     is a no-op.
     """
-    # A vault page is an orphan when its node_id either (a) isn't in the graph
-    # anymore OR (b) IS in the graph but is now a node type the projector
-    # never emits — Stubs (tombstones, by design) and any type in
-    # PRIVATE_PUBLIC_RESEARCH_TYPES (Person, etc.) live in graph.json for
-    # query reachability but have no vault page. Both conditions are
-    # "this file shouldn't exist" so prune treats them identically.
-    projected_ids = {
-        n.id for n in graph.nodes
+    # A vault page is an orphan whenever it's NOT the exact file the projector
+    # would write for its node_id today. Four ways a file becomes stale:
+    #   1. node_id no longer in graph
+    #   2. node is private (Person, Stub) — projector skips it
+    #   3. node is a slug-collision loser (a sibling node won the canonical
+    #      slug; the loser's stale `<slug>-2.md` is left behind from when
+    #      the projector still suffixed dupes)
+    #   4. file path no longer matches the slug (rare; renames)
+    # We compute the EXPECTED file path for every canonical, projectable node
+    # and prune anything outside that set.
+    from .markdown_projection import (
+        canonical_slug_owners,
+        directory_for_node,
+        unique_slugs,
+    )
+
+    projectable = [
+        n for n in graph.nodes
         if n.type != ResearchNodeType.STUB and is_public_research_node(n)
-    }
+    ]
+    slug_by_id = unique_slugs(projectable)
+    owners = canonical_slug_owners(slug_by_id)
+    expected_files: Dict[Path, str] = {}
+    for n in projectable:
+        if n.id not in owners:
+            continue
+        rel_path = Path(directory_for_node(n)) / f"{slug_by_id[n.id]}.md"
+        expected_files[rel_path] = n.id
+
     deleted: List[Path] = []
     skipped: List[Path] = []
 
@@ -658,9 +677,10 @@ def prune_orphan_pages(
         frontmatter = parse_frontmatter(text)
         if not frontmatter or "node_id" not in frontmatter:
             continue  # user-authored, leave alone
-        node_id = str(frontmatter["node_id"])
-        if node_id in projected_ids:
-            continue  # still in graph AND public, keep
+        # The file is an orphan unless its path matches what the projector
+        # would write for SOME current canonical node.
+        if rel in expected_files:
+            continue
         # Orphan. Check for user-notes content before deleting.
         notes = extract_user_notes_block(_split_body(text))
         if notes and not force:
