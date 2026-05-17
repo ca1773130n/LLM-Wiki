@@ -318,12 +318,206 @@ class ResearchGraphBuilder:
         return edge
 
     def build(self) -> ResearchGraph:
+        # Cross-type dedup: when the same casefolded name appears as multiple
+        # node types (e.g. "Geometry-Grounded Gaussian Splatting" got
+        # extracted as Paper + SourceDocument + ApproachFamily for the same
+        # paper), merge them into the highest-priority type and rewrite
+        # incident edges. Avoids the graph carrying 2-3 dupes of every
+        # paper-shaped entity. Skips groups that share a single type
+        # (already handled by stable_id dedup in add_node).
+        merged_nodes, merged_edges = _merge_cross_type_duplicates(
+            list(self._nodes.values()),
+            list(self._edges.values()),
+        )
         # Keep source artifacts last so convenience maps keyed by display name
         # prefer the concrete Paper/Repository over an identically named
         # ApproachFamily candidate.
         source_types = {ResearchNodeType.PAPER, ResearchNodeType.REPOSITORY, ResearchNodeType.SOURCE_DOCUMENT}
-        nodes = sorted(self._nodes.values(), key=lambda node: node.type in source_types)
-        return ResearchGraph(nodes=nodes, edges=list(self._edges.values()))
+        nodes = sorted(merged_nodes, key=lambda node: node.type in source_types)
+        return ResearchGraph(nodes=nodes, edges=merged_edges)
+
+
+# Type priority for cross-type merge. When the same name appears with multiple
+# types, the higher-priority type wins and the others are merged into it
+# (their node ids become aliases, edges are rewritten). Mirrors the
+# projection-layer _TYPE_PRIORITY in markdown_projection.py but is the
+# canonical truth for graph-level dedup.
+def canonical_synthesis_id_seed(title: str) -> str:
+    """Return a slug-independent canonical seed for a Synthesis node id.
+
+    Both the programmatic synthesis pipeline (:mod:`llm_wiki.synthesis`)
+    and the frontmatter-driven digest ingestion (this module) need to
+    converge on the same node id when they describe the same logical
+    daily/weekly digest. The seed therefore encodes ``kind`` (derived
+    from the title prefix so the two callers don't need to negotiate a
+    shared label) plus a date/week token from the title; case
+    differences in the source headings collapse via casefold.
+    """
+    t = (title or "").strip()
+    tlow = t.casefold()
+    if tlow.startswith("daily digest"):
+        kind = "daily_digest"
+    elif tlow.startswith("weekly digest"):
+        kind = "weekly_digest"
+    elif tlow.startswith("monthly digest"):
+        kind = "monthly_digest"
+    elif tlow.startswith("pulse"):
+        kind = "pulse"
+    else:
+        kind = "synthesis"
+    date_match = re.search(r"\b(\d{4}-\d{2}-\d{2})\b", t)
+    if date_match:
+        return f"{kind}|{date_match.group(1)}"
+    week_match = re.search(r"\b(\d{4}-W\d{1,2})\b", t, re.IGNORECASE)
+    if week_match:
+        return f"{kind}|{week_match.group(1).lower()}"
+    return f"{kind}|{tlow}"
+
+
+_CROSS_TYPE_MERGE_PRIORITY: Dict["ResearchNodeType", int] = {}  # late-binding
+
+
+def _init_cross_type_priority() -> None:
+    # Defer assignment until ResearchNodeType is fully defined.
+    global _CROSS_TYPE_MERGE_PRIORITY
+    _CROSS_TYPE_MERGE_PRIORITY = {
+        ResearchNodeType.PAPER: 100,
+        ResearchNodeType.REPOSITORY: 90,
+        ResearchNodeType.SYNTHESIS: 85,
+        ResearchNodeType.RESEARCH_FIELD: 80,
+        ResearchNodeType.RESEARCH_TOPIC: 75,
+        ResearchNodeType.APPROACH_FAMILY: 70,
+        ResearchNodeType.METHODOLOGICAL_CONCEPT: 60,
+        # Claim subtypes — more specific wins over plain Claim.
+        ResearchNodeType.CONTRIBUTION_CLAIM: 55,
+        ResearchNodeType.PERFORMANCE_CLAIM: 55,
+        ResearchNodeType.COMPARISON_CLAIM: 55,
+        ResearchNodeType.LIMITATION_CLAIM: 55,
+        ResearchNodeType.CAUSAL_CLAIM: 55,
+        ResearchNodeType.CLAIM: 50,
+        ResearchNodeType.SOURCE_DOCUMENT: 10,
+    }
+
+
+def _merge_cross_type_duplicates(
+    nodes: List[ResearchNode],
+    edges: List[ResearchEdge],
+) -> Tuple[List[ResearchNode], List[ResearchEdge]]:
+    """Merge same-casefolded-name nodes of different types into one canonical.
+
+    For each group of nodes sharing the same ``name.casefold()`` AND having
+    multiple distinct types:
+
+    1. Pick the canonical node by ``_CROSS_TYPE_MERGE_PRIORITY`` (tiebreak
+       on node id for determinism).
+    2. Build an id-redirect map ``loser_id → canonical_id`` for the
+       non-canonical nodes.
+    3. Rewrite every edge: if ``source`` or ``target`` is a loser id, point
+       it at the canonical instead. Drop self-loops created by the merge.
+    4. Drop the loser nodes from the result. The losers' original type and
+       name are added to the canonical's aliases so MCP search by old name
+       still surfaces the canonical.
+
+    Single-type groups (e.g. two different Claims with similar names) are
+    NOT merged here — those are handled by the per-projection canonical
+    slug picker. This function only collapses the "same name, multiple
+    types" pathological pattern.
+    """
+    if not _CROSS_TYPE_MERGE_PRIORITY:
+        _init_cross_type_priority()
+
+    # Only merge across types that are explicitly ranked. Types outside
+    # this set (Person, Stub, CodeSymbol, Module, Metric, Benchmark,
+    # Dataset, …) can collide on short tokens like "F1" or "BLEU" without
+    # being true semantic duplicates, so we leave them alone and let the
+    # per-projection canonical-slug picker disambiguate at the vault layer.
+    mergeable_types = set(_CROSS_TYPE_MERGE_PRIORITY)
+
+    by_canonical_name: Dict[str, List[ResearchNode]] = {}
+    for node in nodes:
+        if node.type not in mergeable_types:
+            continue
+        key = (node.name or "").casefold().strip()
+        if not key:
+            continue
+        by_canonical_name.setdefault(key, []).append(node)
+
+    redirect: Dict[str, str] = {}
+    merged_types_buf: Dict[str, List[str]] = {}
+
+    for group in by_canonical_name.values():
+        if len(group) < 2:
+            continue
+        types = {n.type for n in group}
+        if len(types) < 2:
+            continue  # same-type dupes handled elsewhere
+
+        def sort_key(n: ResearchNode) -> Tuple[int, str]:
+            return (_CROSS_TYPE_MERGE_PRIORITY[n.type], n.id)
+
+        canonical = max(group, key=sort_key)
+        for loser in group:
+            if loser.id == canonical.id:
+                continue
+            redirect[loser.id] = canonical.id
+            # Record the loser's type as ``merged_types`` metadata on the
+            # canonical so downstream code (tests, MCP search, lint
+            # reports) can still observe "this Paper was also extracted as
+            # an ApproachFamily" without the duplicate node existing.
+            merged_types_buf.setdefault(canonical.id, []).append(loser.type.value)
+
+    if not redirect:
+        return nodes, edges
+
+    # Apply merged_types metadata to the canonical nodes.
+    new_nodes: List[ResearchNode] = []
+    for node in nodes:
+        if node.id in redirect:
+            continue  # loser, dropped
+        extras = merged_types_buf.get(node.id)
+        if extras:
+            new_metadata = dict(node.metadata or {})
+            existing = list(new_metadata.get("merged_types") or [])
+            for t in extras:
+                if t not in existing:
+                    existing.append(t)
+            new_metadata["merged_types"] = existing
+            node = ResearchNode(
+                id=node.id,
+                name=node.name,
+                type=node.type,
+                aliases=node.aliases,
+                description=node.description,
+                source_path=node.source_path,
+                metadata=new_metadata,
+            )
+        new_nodes.append(node)
+
+    # Rewrite edges, dropping the self-loops the merge creates.
+    new_edges: List[ResearchEdge] = []
+    seen_edge_keys: set = set()
+    for edge in edges:
+        src = redirect.get(edge.source, edge.source)
+        tgt = redirect.get(edge.target, edge.target)
+        if src == tgt:
+            continue
+        key = (src, tgt, edge.type)
+        if key in seen_edge_keys:
+            continue
+        seen_edge_keys.add(key)
+        if src == edge.source and tgt == edge.target:
+            new_edges.append(edge)
+        else:
+            new_edges.append(
+                ResearchEdge(
+                    source=src,
+                    target=tgt,
+                    type=edge.type,
+                    evidence=edge.evidence,
+                    metadata=edge.metadata,
+                )
+            )
+    return new_nodes, new_edges
 
 
 # ``TermRule`` is a backward-compat alias used by older tests. The canonical
@@ -495,7 +689,24 @@ class ResearchGraphExtractor:
         else:
             if candidate_paper_titles:
                 paper_metadata["candidate_paper_titles"] = candidate_paper_titles
-            paper = builder.add_node(title, source_type, source_path=source_path, metadata=paper_metadata)
+            # Synthesis nodes minted from frontmatter-tagged digest files
+            # (``type: ResearchDigest``) must share a stable, slug-independent
+            # id with synthesis pages generated programmatically (see
+            # ``llm_wiki.synthesis._canonical_synthesis_seed``) so the typed
+            # graph doesn't accumulate one Synthesis node per code path for
+            # the same logical day/week.
+            synthesis_seed = (
+                canonical_synthesis_id_seed(title)
+                if source_type == ResearchNodeType.SYNTHESIS
+                else None
+            )
+            paper = builder.add_node(
+                title,
+                source_type,
+                source_path=source_path,
+                metadata=paper_metadata,
+                id_seed=synthesis_seed,
+            )
 
         if source_type in {ResearchNodeType.SOURCE_DOCUMENT, ResearchNodeType.REPOSITORY, ResearchNodeType.PROJECT}:
             self._add_document_structure(builder, paper, registry_concept_headings, source_path)

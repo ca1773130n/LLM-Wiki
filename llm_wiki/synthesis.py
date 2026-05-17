@@ -74,6 +74,20 @@ _TOPIC_TYPES = {
 }
 
 
+def _canonical_synthesis_seed(plan: "_PagePlan") -> str:
+    """Delegate to the shared title-driven seed in :mod:`research_graph`.
+
+    Programmatic synthesis (this module) and frontmatter-driven digest
+    ingestion (``ResearchGraphExtractor``) must converge on identical
+    Synthesis node ids for the same logical day/week. The shared helper
+    derives ``kind`` from the title prefix so neither caller needs to
+    pre-agree on a label.
+    """
+    from llm_wiki.research_graph import canonical_synthesis_id_seed
+
+    return canonical_synthesis_id_seed(plan.title or "")
+
+
 def _slugify(value: str) -> str:
     safe = "".join(ch.lower() if ch.isalnum() else "-" for ch in value).strip("-")
     while "--" in safe:
@@ -398,6 +412,14 @@ class SynthesisProjector:
 
         new_nodes: List[ResearchNode] = list(graph.nodes)
         new_edges: List[ResearchEdge] = list(graph.edges)
+        # Index existing nodes/edges by id so the synthesis pass can
+        # merge with frontmatter-driven Synthesis nodes that
+        # ``ResearchGraphExtractor`` already minted for the same logical
+        # day/week (same ``canonical_synthesis_id_seed`` → same node id).
+        # Without this the projector blindly appends and we end up with
+        # two ``Synthesis:daily-digest-<date>:…`` entries per date.
+        existing_node_index = {node.id: idx for idx, node in enumerate(new_nodes)}
+        existing_edge_keys = {(e.source, e.type, e.target) for e in new_edges}
         written: List[WikiPage] = []
         ledger_entries: List[Dict[str, str]] = []
 
@@ -448,7 +470,15 @@ class SynthesisProjector:
                     }
                 )
 
-            node_id = stable_id(ResearchNodeType.SYNTHESIS.value, plan.slug)
+            # The id is derived from a *canonical* seed (not raw plan.slug)
+            # so two synthesis generators producing the same logical
+            # synthesis — e.g. one with slug "daily-digest-2026-04-10" and
+            # another with slug "daily-2026-04-10" — converge on the same
+            # node_id and merge instead of creating duplicate nodes.
+            node_id = stable_id(
+                ResearchNodeType.SYNTHESIS.value,
+                _canonical_synthesis_seed(plan),
+            )
             # Keep ``generated_at`` out of the in-graph metadata too: it would
             # otherwise leak into ``graph.json`` and break the byte-idempotence
             # invariant. The append-only history ledger is the canonical audit
@@ -458,18 +488,41 @@ class SynthesisProjector:
                 "content_hash": content_hash,
                 "input_ids": sorted(plan.input_ids),
             }
-            new_nodes.append(
-                ResearchNode(
-                    id=node_id,
-                    name=plan.title,
-                    type=ResearchNodeType.SYNTHESIS,
-                    aliases=[],
-                    description=plan.summary,
-                    source_path=None,
-                    metadata=metadata,
-                )
+            synthesis_node = ResearchNode(
+                id=node_id,
+                name=plan.title,
+                type=ResearchNodeType.SYNTHESIS,
+                aliases=[],
+                description=plan.summary,
+                source_path=None,
+                metadata=metadata,
             )
+            existing_idx = existing_node_index.get(node_id)
+            if existing_idx is None:
+                existing_node_index[node_id] = len(new_nodes)
+                new_nodes.append(synthesis_node)
+            else:
+                # Merge with a frontmatter-driven Synthesis node already in
+                # the graph: keep the projector's richer description /
+                # metadata (synthesis_kind, content_hash, input_ids) but
+                # carry over the source_path the original had so the page
+                # still tracks back to the digest file on disk.
+                prior = new_nodes[existing_idx]
+                merged_metadata = {**(prior.metadata or {}), **metadata}
+                new_nodes[existing_idx] = ResearchNode(
+                    id=node_id,
+                    name=synthesis_node.name,
+                    type=ResearchNodeType.SYNTHESIS,
+                    aliases=prior.aliases,
+                    description=synthesis_node.description or prior.description,
+                    source_path=prior.source_path,
+                    metadata=merged_metadata,
+                )
             for input_id in plan.input_ids:
+                key = (node_id, "synthesizes", input_id)
+                if key in existing_edge_keys:
+                    continue
+                existing_edge_keys.add(key)
                 new_edges.append(
                     ResearchEdge(
                         source=node_id,
@@ -480,6 +533,10 @@ class SynthesisProjector:
                     )
                 )
             for source_id in plan.summarize_targets:
+                key = (node_id, "summarizes", source_id)
+                if key in existing_edge_keys:
+                    continue
+                existing_edge_keys.add(key)
                 new_edges.append(
                     ResearchEdge(
                         source=node_id,

@@ -65,8 +65,20 @@ def test_research_extractor_assigns_approach_family_for_similar_papers():
         source_kind="Paper",
     )
 
-    families = [node for node in graph.nodes if node.type == ResearchNodeType.APPROACH_FAMILY]
-    assert any(node.name == "Geometry-Grounded Gaussian Splatting" for node in families)
+    # The extractor identifies "Geometry-Grounded Gaussian Splatting" as both
+    # a Paper and an ApproachFamily. ResearchGraphBuilder.build() collapses
+    # them into the canonical Paper (Paper outranks ApproachFamily in
+    # _CROSS_TYPE_MERGE_PRIORITY) and records the secondary type in
+    # metadata['merged_types'] so the extractor's signal is preserved.
+    match = [n for n in graph.nodes if n.name == "Geometry-Grounded Gaussian Splatting"]
+    assert match, "the canonical Geometry-Grounded Gaussian Splatting node must exist"
+    canonical = match[0]
+    assert canonical.type == ResearchNodeType.PAPER
+    merged = canonical.metadata.get("merged_types") or []
+    assert ResearchNodeType.APPROACH_FAMILY.value in merged, (
+        "extractor must mark this paper as also being an approach family "
+        "via metadata.merged_types"
+    )
     assert graph.has_edge_type("belongs_to_approach_family")
 
 
