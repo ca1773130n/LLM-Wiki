@@ -11,8 +11,8 @@ from pathlib import Path
 
 import pytest
 
-from llm_wiki.ports import Source, SourceLoader
-from llm_wiki.source_loaders import FilesystemSourceLoader
+from tesserae.ports import Source, SourceLoader
+from tesserae.source_loaders import FilesystemSourceLoader
 
 
 def test_discover_yields_one_source_per_md_file(tmp_path: Path) -> None:

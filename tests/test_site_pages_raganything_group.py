@@ -13,12 +13,12 @@ extracted ones.
 
 from __future__ import annotations
 
-from llm_wiki.research_graph import (
+from tesserae.research_graph import (
     ResearchGraph,
     ResearchNode,
     ResearchNodeType,
 )
-from llm_wiki.site.pages import SiteContext, build_graph_payload
+from tesserae.site.pages import SiteContext, build_graph_payload
 
 
 def _raganything_source_node() -> ResearchNode:

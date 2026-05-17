@@ -3,7 +3,7 @@
 <!-- translations:start -->
 <p align="center"><a href="../feature-map.md">English</a> · <a href="feature-map.ko.md">한국어</a> · <a href="feature-map.zh.md">中文</a> · <a href="feature-map.ja.md">日本語</a> · <a href="feature-map.ru.md">Русский</a> · <a href="feature-map.es.md">Español</a> · <a href="feature-map.fr.md">Français</a> · <a href="feature-map.de.md">Deutsch</a></p>
 <!-- translations:end -->
-本文档汇总了 LLM-Wiki 当前已实现的功能，包括状态、源文件以及文档位置。
+本文档汇总了 Tesserae 当前已实现的功能，包括状态、源文件以及文档位置。
 
 状态图例：✅ 已发布 · ⚠ 进行中 / 部分完成。
 
@@ -15,8 +15,8 @@
 
 | 功能 | 状态 | 来源 | 文档锚点 |
 |---|---|---|---|
-| `WikiPageStore`（幂等 body-hash 写入、frontmatter 解析器） | ✅ | [`llm_wiki/wiki_store.py`](../../llm_wiki/wiki_store.py) | [architecture.md § 模块地图](architecture.zh.md#wiki--synthesis-l2) |
-| `WikiLayerProjector` — 每个 wiki 层节点生成一个 md 页面 | ✅ | [`llm_wiki/wiki_projector.py`](../../llm_wiki/wiki_projector.py) | [architecture.md § 流水线](architecture.zh.md#pipeline) |
+| `WikiPageStore`（幂等 body-hash 写入、frontmatter 解析器） | ✅ | [`tesserae/wiki_store.py`](../../tesserae/wiki_store.py) | [architecture.md § 模块地图](architecture.zh.md#wiki--synthesis-l2) |
+| `WikiLayerProjector` — 每个 wiki 层节点生成一个 md 页面 | ✅ | [`tesserae/wiki_projector.py`](../../tesserae/wiki_projector.py) | [architecture.md § 流水线](architecture.zh.md#pipeline) |
 | `sources/` 页面 | ✅ | `wiki_projector.py` | [frontend-redesign.md § Sources](frontend-redesign.zh.md#sources) |
 | `concepts/` 页面 | ✅ | `wiki_projector.py` | [frontend-redesign.md § Concepts](frontend-redesign.zh.md#concepts) |
 | `entities/` 页面 | ✅ | `wiki_projector.py` | [frontend-redesign.md § Entities](frontend-redesign.zh.md#entities) |
@@ -24,7 +24,7 @@
 | `repos/` 页面 | ✅ | `wiki_projector.py` | [frontend-redesign.md § Repos](frontend-redesign.zh.md#repos) |
 | `topics/` 页面 | ✅ | `wiki_projector.py` | [frontend-redesign.md § Topics](frontend-redesign.zh.md#topics) |
 | `questions/` 页面（开放问题） | ✅ | `wiki_projector.py` | [frontend-redesign.md § Questions](frontend-redesign.zh.md#questions) |
-| `syntheses/` 页面 | ✅ | [`llm_wiki/synthesis.py`](../../llm_wiki/synthesis.py) | [frontend-redesign.md § Syntheses](frontend-redesign.zh.md#syntheses) |
+| `syntheses/` 页面 | ✅ | [`tesserae/synthesis.py`](../../tesserae/synthesis.py) | [frontend-redesign.md § Syntheses](frontend-redesign.zh.md#syntheses) |
 
 ### 综合类型（L2 → 派生）
 
@@ -38,13 +38,13 @@
 | `topic` | ✅ | `synthesis.py` | 每个含 ≥ 3 篇 papers 的 `ResearchTopic` / `ApproachFamily` 集群一个。 |
 | `comparison` | ✅ | `synthesis.py` | 每对在同一任务上竞争的 `ApproachFamily` 一个。 |
 | `field_overview` | ✅ | `synthesis.py` | 每个 `ResearchField` 一个。 |
-| LLM 升级摘要（由环境标志启用） | ⚠ | 仅 hook | 已发布启发式基线；`LLM_WIKI_SYNTHESIS_LLM=1` hook 保留为 stub。 |
+| LLM 升级摘要（由环境标志启用） | ⚠ | 仅 hook | 已发布启发式基线；`TESSERAE_SYNTHESIS_LLM=1` hook 保留为 stub。 |
 
 ### 静态站点路由
 
 | 路由 | 状态 | 来源 | 备注 |
 |---|---|---|---|
-| `/`（首页，hero pulse） | ✅ | [`llm_wiki/site/pages.py`](../../llm_wiki/site/pages.py) `render_home` | 统计行 + 精选入口 + 最近活动。 |
+| `/`（首页，hero pulse） | ✅ | [`tesserae/site/pages.py`](../../tesserae/site/pages.py) `render_home` | 统计行 + 精选入口 + 最近活动。 |
 | `/sources/`, `/sources/<slug>.html` | ✅ | `pages.py::render_sources_index`, `render_source_detail` | |
 | `/concepts/`, `/concepts/<slug>.html` | ✅ | `pages.py::render_concepts_index`, `render_concept_detail` | |
 | `/entities/`, `/entities/<slug>.html` | ✅ | `pages.py::render_entities_index`, `render_entity_detail` | |
@@ -62,13 +62,13 @@
 
 | 工件 | 状态 | 来源 | 目的 |
 |---|---|---|---|
-| 每页 `<page>.txt` 兄弟文件 | ✅ | [`llm_wiki/site/exports.py`](../../llm_wiki/site/exports.py) `write_siblings` | 单页纯文本视图（无导航、无样式）。 |
+| 每页 `<page>.txt` 兄弟文件 | ✅ | [`tesserae/site/exports.py`](../../tesserae/site/exports.py) `write_siblings` | 单页纯文本视图（无导航、无样式）。 |
 | 每页 `<page>.json` 兄弟文件 | ✅ | `exports.py::write_siblings` | `{title, kind, body, body_text, links, source_path, frontmatter}`。 |
 | `llms.txt` | ✅ | `exports.py::render_llms_txt` | llmstxt.org 短索引。 |
 | `llms-full.txt` | ✅ | `exports.py::render_llms_full_txt` | 所有页面正文，上限 5 MB。 |
 | `graph.jsonld` | ✅ | `exports.py::render_graph_jsonld` | schema.org `Dataset`，仅 wiki 层节点。 |
 | `graph.json` | ✅ | `__init__.py::write_site` | 完整图谱载荷（含工具用代码节点）。 |
-| `search-index.json` | ✅ | [`llm_wiki/site/search.py`](../../llm_wiki/site/search.py) | 命令面板 + 页面搜索；仅 wiki 层类型。 |
+| `search-index.json` | ✅ | [`tesserae/site/search.py`](../../tesserae/site/search.py) | 命令面板 + 页面搜索；仅 wiki 层类型。 |
 | `sitemap.xml` | ✅ | `exports.py::render_sitemap_xml` | 所有生成路由，`lastmod` 来自 frontmatter。 |
 | `rss.xml` | ✅ | `exports.py::render_rss_xml` | 最近 30 个 syntheses。 |
 | `robots.txt` | ✅ | `exports.py::render_robots_txt` | 宽松 — 允许抓取 + 索引。 |
@@ -79,8 +79,8 @@
 
 | 功能 | 状态 | 来源 | 备注 |
 |---|---|---|---|
-| 设计 token（浅色 + 深色主题、赤陶强调色） | ✅ | [`llm_wiki/site/tokens.py`](../../llm_wiki/site/tokens.py) | `assets/style.css` 中的单个 CSS 包。 |
-| 主题切换（持久化、无闪烁） | ✅ | [`llm_wiki/site/js.py`](../../llm_wiki/site/js.py) | `localStorage` 中的 `data-theme="dark"`，绘制前应用。 |
+| 设计 token（浅色 + 深色主题、赤陶强调色） | ✅ | [`tesserae/site/tokens.py`](../../tesserae/site/tokens.py) | `assets/style.css` 中的单个 CSS 包。 |
+| 主题切换（持久化、无闪烁） | ✅ | [`tesserae/site/js.py`](../../tesserae/site/js.py) | `localStorage` 中的 `data-theme="dark"`，绘制前应用。 |
 | 搜索面板（`cmd+k` / `ctrl+k` / `/`） | ✅ | `js.py` | 基于 `search-index.json` 的模糊匹配；最近页面列表。 |
 | 右侧固定 TOC | ✅ | `pages.py` + `tokens.py` | 仅桌面端；移动端通过 `<details>` 抽屉。 |
 | 带月份 + 星期标签的活动热力图 | ✅ | `components.py::heatmap_svg` | 26 周 SVG，单元格链接到当天 `digest.md`。 |
@@ -89,25 +89,25 @@
 | 页面过渡（120 ms 透明度，prefers-reduced-motion） | ✅ | `tokens.py` | |
 | 3D + 2D 图谱视图（悬停、边标签、以光标为锚点缩放） | ✅ | `pages.py::render_graph_view` + `js.py` | 3d-force-graph + Three.js，以 CDN 快照形式内置。 |
 | 每页 AI 兄弟文件页脚 | ✅ | `components.py::ai_siblings_footer` | 指向当前页 `.txt` 和 `.json` 的内联链接。 |
-| Harness 会话历史页面 | ✅ | [`llm_wiki/harness_sessions.py`](../../llm_wiki/harness_sessions.py) + [`llm_wiki/site/sessions.py`](../../llm_wiki/site/sessions.py) | 显式 Claude Code/Codex 导入；`/sessions/` 索引和详情页包含 markdown 轮次、左侧轮次栏、折叠的工具使用和搜索条目。 |
+| Harness 会话历史页面 | ✅ | [`tesserae/harness_sessions.py`](../../tesserae/harness_sessions.py) + [`tesserae/site/sessions.py`](../../tesserae/site/sessions.py) | 显式 Claude Code/Codex 导入；`/sessions/` 索引和详情页包含 markdown 轮次、左侧轮次栏、折叠的工具使用和搜索条目。 |
 
 ### 流水线 + CLI
 
 | 功能 | 状态 | 来源 | 备注 |
 |---|---|---|---|
-| `project compile` 按顺序调用 synthesis + wiki + site | ✅ | [`llm_wiki/project.py`](../../llm_wiki/project.py) | 重设计计划第 3 阶段。 |
-| 独立 `project build-site` | ✅ | `project.py` + [`llm_wiki/cli.py`](../../llm_wiki/cli.py) | 读取 `wiki/` + `graph.json`，写入 `site/`。 |
+| `project compile` 按顺序调用 synthesis + wiki + site | ✅ | [`tesserae/project.py`](../../tesserae/project.py) | 重设计计划第 3 阶段。 |
+| 独立 `project build-site` | ✅ | `project.py` + [`tesserae/cli.py`](../../tesserae/cli.py) | 读取 `wiki/` + `graph.json`，写入 `site/`。 |
 | `project serve` 本地 HTTP | ✅ | `cli.py` | 普通 stdlib 服务器。 |
-| `project deploy` → GitHub Pages | ✅ | [`llm_wiki/deploy.py`](../../llm_wiki/deploy.py) | worktree push 到 `gh-pages`；可通过 `gh` CLI 选用 `--enable-pages`。`--build`, `--dry-run`, `--branch`, `--remote`, `--force`。 |
-| `project sessions discover/import/list` | ✅ | [`llm_wiki/harness_sessions.py`](../../llm_wiki/harness_sessions.py) + `cli.py` | Claude Code/Codex 的入站会话历史；发现过程显式且限定在项目工作目录。 |
-| `project watch` 变更时重建 | ⚠ | [`llm_wiki/cli.py`](../../llm_wiki/cli.py) | Subagent R 正在完成轮询 watcher — `--interval`, `--debounce`, `--once`, `--paths`, `--quiet` 参数表面已就绪；重建循环主体正在本轮落地。 |
+| `project deploy` → GitHub Pages | ✅ | [`tesserae/deploy.py`](../../tesserae/deploy.py) | worktree push 到 `gh-pages`；可通过 `gh` CLI 选用 `--enable-pages`。`--build`, `--dry-run`, `--branch`, `--remote`, `--force`。 |
+| `project sessions discover/import/list` | ✅ | [`tesserae/harness_sessions.py`](../../tesserae/harness_sessions.py) + `cli.py` | Claude Code/Codex 的入站会话历史；发现过程显式且限定在项目工作目录。 |
+| `project watch` 变更时重建 | ⚠ | [`tesserae/cli.py`](../../tesserae/cli.py) | Subagent R 正在完成轮询 watcher — `--interval`, `--debounce`, `--once`, `--paths`, `--quiet` 参数表面已就绪；重建循环主体正在本轮落地。 |
 
 ## 既有功能（原样保留）
 
 ### CLI 与安装
 
 - ✅ 通过 `pyproject.toml` 安装的 Python 包。
-- ✅ 控制台命令：`llm_wiki`, `llm-wiki`, `llm_wiki_mcp`。
+- ✅ 控制台命令：`tesserae`, `tesserae`, `tesserae_mcp`。
 - ✅ 用于 `curl | bash` 安装的 `scripts/install.sh`。
 - ✅ 默认 editable 安装，便于快速本地开发。
 
@@ -140,19 +140,19 @@
 
 ### 项目本地工作流
 
-- ✅ `llm_wiki project init`
-- ✅ `llm_wiki project ingest`
-- ✅ `llm_wiki project compile`
-- ✅ `llm_wiki project mcp-config`
-- ✅ `llm_wiki project build-site`
-- ✅ `llm_wiki project serve`
-- ✅ `llm_wiki project deploy`（新增 — GitHub Pages）
-- ✅ `llm_wiki project sessions discover/import/list`（显式本地 agent-history 导入）
-- ⚠ `llm_wiki project watch`（进行中）
-- ✅ `llm_wiki project export-agent-harness`
-- ✅ `llm_wiki project export-obsidian`
-- ✅ `llm_wiki project export-graphiti`
-- ✅ `llm_wiki project sync-graphiti`
+- ✅ `tesserae project init`
+- ✅ `tesserae project ingest`
+- ✅ `tesserae project compile`
+- ✅ `tesserae project mcp-config`
+- ✅ `tesserae project build-site`
+- ✅ `tesserae project serve`
+- ✅ `tesserae project deploy`（新增 — GitHub Pages）
+- ✅ `tesserae project sessions discover/import/list`（显式本地 agent-history 导入）
+- ⚠ `tesserae project watch`（进行中）
+- ✅ `tesserae project export-agent-harness`
+- ✅ `tesserae project export-obsidian`
+- ✅ `tesserae project export-graphiti`
+- ✅ `tesserae project sync-graphiti`
 
 ### Obsidian
 
@@ -189,7 +189,7 @@
 
 ### MCP server
 
-- ✅ 基于 stdio JSON-RPC 的 `llm_wiki_mcp` / `python3 -m llm_wiki.mcp_server`。
+- ✅ 基于 stdio JSON-RPC 的 `tesserae_mcp` / `python3 -m tesserae.mcp_server`。
 - ✅ 工具：`schema`, `graph_summary`, `search_nodes`, `node_context`, `search_facts`, `timeline`。
 - ✅ 多项目注册表。
 

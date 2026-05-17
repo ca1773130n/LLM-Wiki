@@ -1,13 +1,13 @@
-# LLM-Wiki Demo Corpus: 3D Reconstruction (2016–2024)
+# Tesserae Demo Corpus: 3D Reconstruction (2016–2024)
 
-A curated, synthetic research log used to populate the LLM-Wiki GitHub Pages demo at <https://ca1773130n.github.io/LLM-Wiki/>. The corpus covers 3D reconstruction broadly — neural radiance fields, Gaussian splatting, visual SLAM and multi-view stereo, diffusion-based 3D generation, neural-implicit surface and mesh extraction, dynamic / 4D reconstruction, and feed-forward generative 3D representations (LRMs).
+A curated, synthetic research log used to populate the Tesserae GitHub Pages demo at <https://ca1773130n.github.io/Tesserae/>. The corpus covers 3D reconstruction broadly — neural radiance fields, Gaussian splatting, visual SLAM and multi-view stereo, diffusion-based 3D generation, neural-implicit surface and mesh extraction, dynamic / 4D reconstruction, and feed-forward generative 3D representations (LRMs).
 
 ## What's real and what's not
 
 - **50 paper abstracts** — verbatim from arXiv, mirrored under arXiv's CC0-equivalent abstract policy. See `LICENSES.md` for the full provenance ledger and `INVENTORY.md` for the per-sub-topic index.
 - **~12 OSS repo READMEs** *(Phase 3, not in this commit)* — mirrored from public projects with license attribution preserved. Most are MIT / Apache-2.0 / BSD; a few canonical era-defining repos (Inria's `gaussian-splatting`, NVlabs's `instant-ngp`) ship under research-only licenses and we mirror only the README with attribution.
 - **6 daily digests + 2 weekly syntheses + 3 open questions** *(Phase 4, not in this commit)* — hand-written narrative glue, original work for the demo. They cite real corpus papers/repos but the prose is fabricated.
-- **5 agent session transcripts** under `.agent-sessions/` — scripted demonstrations of LLM-Wiki's MCP query workflow. Tool names are real (verified against `llm_wiki/mcp_server.py`); the conversations themselves are written for the demo. *These ship as file-tree artifacts in the corpus only — the LLM-Wiki harness session importer (`llm_wiki/harness_sessions.py`) ingests native Claude Code / Codex transcripts (from `~/.claude/projects/...` and `~/.codex/sessions/...`), not the synthetic showcase format used here. Visitors who clone the repo can read them directly; they do not appear in the deployed site's `/sessions/` index.*
+- **5 agent session transcripts** under `.agent-sessions/` — scripted demonstrations of Tesserae's MCP query workflow. Tool names are real (verified against `tesserae/mcp_server.py`); the conversations themselves are written for the demo. *These ship as file-tree artifacts in the corpus only — the Tesserae harness session importer (`tesserae/harness_sessions.py`) ingests native Claude Code / Codex transcripts (from `~/.claude/projects/...` and `~/.codex/sessions/...`), not the synthetic showcase format used here. Visitors who clone the repo can read them directly; they do not appear in the deployed site's `/sessions/` index.*
 
 The goal is to make the GitHub Pages demo a believable "your literature review could look like this" experience without claiming any of the editorial work (digests, syntheses, sessions) is genuine research output.
 

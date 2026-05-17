@@ -1,8 +1,8 @@
 import json
 from pathlib import Path
 
-from llm_wiki.cognee_adapter import CogneeResearchGraphAdapter
-from llm_wiki.research_graph import ResearchEdge, ResearchGraph, ResearchNode, ResearchNodeType
+from tesserae.cognee_adapter import CogneeResearchGraphAdapter
+from tesserae.research_graph import ResearchEdge, ResearchGraph, ResearchNode, ResearchNodeType
 
 
 def sample_graph():

@@ -1,10 +1,10 @@
 import json
 import re
 
-from llm_wiki.research_graph import ResearchEdge, ResearchGraph, ResearchNode, ResearchNodeType, stable_id
-from llm_wiki.synthesis import SynthesisProjector
-from llm_wiki.wiki_projector import WikiLayerProjector
-from llm_wiki.wiki_store import WikiPageStore
+from tesserae.research_graph import ResearchEdge, ResearchGraph, ResearchNode, ResearchNodeType, stable_id
+from tesserae.synthesis import SynthesisProjector
+from tesserae.wiki_projector import WikiLayerProjector
+from tesserae.wiki_store import WikiPageStore
 
 
 def _node(name, node_type, **kwargs):

@@ -7,7 +7,7 @@ variants), so each consumer (projector, search, exports) was layering its
 own ad-hoc filter on top.
 
 The fix is to funnel every consumer through one helper:
-:func:`llm_wiki.wiki_projector.kind_for_node`. It returns the public wiki
+:func:`tesserae.wiki_projector.kind_for_node`. It returns the public wiki
 kind for a node or ``None`` (private). These tests pin that contract by
 exercising every entry in :class:`ResearchNodeType` plus the documented
 edge cases (paper title quality, social-feed source path, code-project vs
@@ -20,12 +20,12 @@ from typing import Optional
 
 import pytest
 
-from llm_wiki.research_graph import (
+from tesserae.research_graph import (
     ResearchNode,
     ResearchNodeType,
     is_public_research_node,
 )
-from llm_wiki.wiki_projector import (
+from tesserae.wiki_projector import (
     ASSERTION_LAYER_TYPES,
     CODE_GRAPH_TYPES,
     is_assertion_node,
@@ -128,8 +128,8 @@ def test_code_project_is_always_private() -> None:
     """
     node = _node(
         ResearchNodeType.CODE_PROJECT,
-        name="LLM-Wiki",
-        source_path="/Users/neo/Developer/Projects/LLM-Wiki",
+        name="Tesserae",
+        source_path="/Users/neo/Developer/Projects/Tesserae",
         metadata={"layer": "project", "source_kind": "CodeProject"},
     )
     assert kind_for_node(node) is None

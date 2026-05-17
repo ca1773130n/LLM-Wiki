@@ -1,4 +1,4 @@
-"""Tests for :mod:`llm_wiki.site.auto_link` — the HTML auto-linker.
+"""Tests for :mod:`tesserae.site.auto_link` — the HTML auto-linker.
 
 The tests build small ad-hoc :class:`AutoLinker` instances directly (no
 ``SiteContext`` round-trip required) so the assertions exercise the parser
@@ -11,14 +11,14 @@ import re
 
 import pytest
 
-from llm_wiki.research_graph import (
+from tesserae.research_graph import (
     ResearchEdge,
     ResearchGraph,
     ResearchNode,
     ResearchNodeType,
 )
-from llm_wiki.site.auto_link import AutoLinker, LinkTarget
-from llm_wiki.site.pages import SiteContext
+from tesserae.site.auto_link import AutoLinker, LinkTarget
+from tesserae.site.pages import SiteContext
 
 
 # ---------------------------------------------------------------------------

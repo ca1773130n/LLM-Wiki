@@ -20,7 +20,7 @@ methods: [TransformerArchitecture, LargeReconstructionModel, FeedForward]
 datasets: []
 metrics: [PSNR, SSIM, LPIPS]
 oss_repo: VAST-AI-Research/TripoSR
-license: "CC-BY-4.0 (LLM-Wiki demo prose)"
+license: "CC-BY-4.0 (Tesserae demo prose)"
 ---
 
 # TripoSR: Fast 3D Object Reconstruction from a Single Image

@@ -8,7 +8,7 @@ from unittest.mock import MagicMock
 
 import pytest
 
-from llm_wiki.vault_watch import VaultFingerprint, VaultWatcher, VaultWatchResult
+from tesserae.vault_watch import VaultFingerprint, VaultWatcher, VaultWatchResult
 
 
 # ---------------------------------------------------------------- fingerprint
@@ -49,31 +49,31 @@ class _FakeWiki:
 
     def __init__(self, vault: Path, graph: Path, project_root: Path):
         self.project_root = project_root
-        from llm_wiki.project import ProjectPaths
+        from tesserae.project import ProjectPaths
         # Build a real ProjectPaths so the watcher's path checks work without
         # actually mocking each individual path attribute.
         self.paths = ProjectPaths(
-            root=project_root / ".llm-wiki",
-            config=project_root / ".llm-wiki" / "config.json",
+            root=project_root / ".tesserae",
+            config=project_root / ".tesserae" / "config.json",
             graph=graph,
-            code_graph=project_root / ".llm-wiki" / "code-graph.json",
-            combined_graph=project_root / ".llm-wiki" / "combined-graph.json",
-            build_history=project_root / ".llm-wiki" / ".build-history.jsonl",
-            manifest=project_root / ".llm-wiki" / "manifest.json",
-            sqlite=project_root / ".llm-wiki" / "sqlite.db",
-            markdown_projection=project_root / ".llm-wiki" / "markdown_projection",
-            cognee_bundle=project_root / ".llm-wiki" / "cognee_bundle",
-            report=project_root / ".llm-wiki" / "report.md",
-            temporal_facts=project_root / ".llm-wiki" / "temporal_facts.jsonl",
-            competitive_report=project_root / ".llm-wiki" / "competitive_report.md",
-            graphiti_episodes=project_root / ".llm-wiki" / "graphiti_episodes.jsonl",
-            agent_harness=project_root / ".llm-wiki" / "agent_harness",
-            harness_sessions=project_root / ".llm-wiki" / "harness_sessions",
+            code_graph=project_root / ".tesserae" / "code-graph.json",
+            combined_graph=project_root / ".tesserae" / "combined-graph.json",
+            build_history=project_root / ".tesserae" / ".build-history.jsonl",
+            manifest=project_root / ".tesserae" / "manifest.json",
+            sqlite=project_root / ".tesserae" / "sqlite.db",
+            markdown_projection=project_root / ".tesserae" / "markdown_projection",
+            cognee_bundle=project_root / ".tesserae" / "cognee_bundle",
+            report=project_root / ".tesserae" / "report.md",
+            temporal_facts=project_root / ".tesserae" / "temporal_facts.jsonl",
+            competitive_report=project_root / ".tesserae" / "competitive_report.md",
+            graphiti_episodes=project_root / ".tesserae" / "graphiti_episodes.jsonl",
+            agent_harness=project_root / ".tesserae" / "agent_harness",
+            harness_sessions=project_root / ".tesserae" / "harness_sessions",
             obsidian_vault=vault,
-            site=project_root / ".llm-wiki" / "site",
-            wiki=project_root / ".llm-wiki" / "wiki",
-            vault_snapshot=project_root / ".llm-wiki" / "vault_snapshot.json",
-            diverged_fields=project_root / ".llm-wiki" / "diverged-fields.md",
+            site=project_root / ".tesserae" / "site",
+            wiki=project_root / ".tesserae" / "wiki",
+            vault_snapshot=project_root / ".tesserae" / "vault_snapshot.json",
+            diverged_fields=project_root / ".tesserae" / "diverged-fields.md",
         )
         self.reproject_calls: List[VaultWatchResult] = []
 
@@ -94,9 +94,9 @@ def _bootstrap_wiki(tmp_path: Path) -> _FakeWiki:
     """Create the on-disk skeleton VaultWatcher.run requires (graph + vault dir)."""
     project = tmp_path / "project"
     project.mkdir()
-    vault = project / ".llm-wiki" / "obsidian_vault"
+    vault = project / ".tesserae" / "obsidian_vault"
     vault.mkdir(parents=True)
-    graph = project / ".llm-wiki" / "graph.json"
+    graph = project / ".tesserae" / "graph.json"
     graph.write_text('{"nodes":[],"edges":[]}')
     return _FakeWiki(vault=vault, graph=graph, project_root=project)
 

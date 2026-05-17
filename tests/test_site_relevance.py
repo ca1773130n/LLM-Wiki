@@ -4,13 +4,13 @@ from __future__ import annotations
 
 import math
 
-from llm_wiki.research_graph import (
+from tesserae.research_graph import (
     ResearchEdge,
     ResearchGraph,
     ResearchNode,
     ResearchNodeType,
 )
-from llm_wiki.site.relevance import (
+from tesserae.site.relevance import (
     RelevanceContext,
     WEIGHT_ADAMIC_ADAR,
     WEIGHT_LINK,

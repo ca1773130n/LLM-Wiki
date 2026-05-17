@@ -10,7 +10,7 @@ authors:
   - "Alexander Keller"
 date: 2022-01-16
 sub_topic: Neural Radiance Fields
-license: "CC-BY-4.0 (LLM-Wiki demo prose)"
+license: "CC-BY-4.0 (Tesserae demo prose)"
 methods: [HashEncoding]
 datasets: []
 metrics: [PSNR, SSIM, LPIPS]

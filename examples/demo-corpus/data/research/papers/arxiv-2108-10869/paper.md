@@ -8,7 +8,7 @@ authors:
   - "Jia Deng"
 date: 2021-08-24
 sub_topic: Visual SLAM and MVS
-license: "CC-BY-4.0 (LLM-Wiki demo prose)"
+license: "CC-BY-4.0 (Tesserae demo prose)"
 methods: [SLAM, StructureFromMotion, BundleAdjustment]
 datasets: []
 metrics: [PSNR, SSIM, LPIPS]

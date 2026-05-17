@@ -1,4 +1,4 @@
-"""Unit tests for ``llm_wiki.site.components``.
+"""Unit tests for ``tesserae.site.components``.
 
 Each component renderer is asserted to:
   - Start with the expected outermost tag (so callers can chain them safely).
@@ -10,7 +10,7 @@ from __future__ import annotations
 
 import re
 
-from llm_wiki.site.components import (
+from tesserae.site.components import (
     ai_siblings_footer,
     badge,
     breadcrumbs,
@@ -435,9 +435,9 @@ def test_page_shell_includes_title_and_site_title():
         "My Page",
         head="",
         body="<p>x</p>",
-        site_title="LLM-Wiki",
+        site_title="Tesserae",
     )
-    assert "<title>My Page · LLM-Wiki</title>" in out
+    assert "<title>My Page · Tesserae</title>" in out
 
 
 def test_page_shell_injects_head_breadcrumbs_toc_and_siblings():
@@ -528,7 +528,7 @@ def test_heatmap_empty_svg_is_also_fluid():
 
 
 def test_css_contains_required_mobile_breakpoints():
-    from llm_wiki.site.tokens import CSS
+    from tesserae.site.tokens import CSS
 
     assert "@media (max-width: 479px)" in CSS
     assert "@media (max-width: 767px)" in CSS
@@ -765,7 +765,7 @@ def test_subtype_chips_are_buttons_not_anchors():
     """Subtype chips filter in place — they must be ``<button>`` elements
     so screen readers announce them as buttons (and Enter/Space activate
     them) rather than as links."""
-    from llm_wiki.site.pages import _render_subtype_chips
+    from tesserae.site.pages import _render_subtype_chips
 
     rows = [
         {"subtype": "Concept"},

@@ -3,16 +3,16 @@
 <!-- translations:start -->
 <p align="center"><a href="i18n/session-history.ko.md">한국어</a> · <a href="i18n/session-history.zh.md">中文</a> · <a href="i18n/session-history.ja.md">日本語</a> · <a href="i18n/session-history.ru.md">Русский</a> · <a href="i18n/session-history.es.md">Español</a> · <a href="i18n/session-history.fr.md">Français</a> · <a href="../i18n/session-history.de.md">Deutsch</a></p>
 <!-- translations:end -->
-LLM-Wiki can import local AI-agent transcripts and render them as project memory under the static site's `sessions/` section.
+Tesserae can import local AI-agent transcripts and render them as project memory under the static site's `sessions/` section.
 
 This feature is intentionally separate from `export-agent-harness`:
 
 - `export-agent-harness` is outbound context for tools such as Claude Code, Codex, Gemini, Cursor, Kiro, and OpenCode.
-- `project sessions ...` is inbound history: it normalizes prior Claude Code/Codex sessions for the current project, stores them under `.llm-wiki/harness_sessions/`, and lets `project build-site` publish session index/detail pages.
+- `project sessions ...` is inbound history: it normalizes prior Claude Code/Codex sessions for the current project, stores them under `.tesserae/harness_sessions/`, and lets `project build-site` publish session index/detail pages.
 
 ## Privacy model
 
-Session import is explicit. A normal `project compile` or `project build-site` reads already-normalized sessions from `.llm-wiki/harness_sessions/`, but it does not surprise-scrape private harness transcript directories.
+Session import is explicit. A normal `project compile` or `project build-site` reads already-normalized sessions from `.tesserae/harness_sessions/`, but it does not surprise-scrape private harness transcript directories.
 
 Imported session records are local project artifacts. Review them before publishing a public site, especially if your transcripts may include secrets, private paths, customer data, or unreleased code.
 
@@ -21,13 +21,13 @@ Imported session records are local project artifacts. Review them before publish
 From the project root:
 
 ```bash
-llm_wiki project sessions discover --import
+tesserae project sessions discover --import
 ```
 
 Discovery scans local Claude Code and Codex transcript roots that belong to the current project working directory. Use `--root` to scan a specific config directory, and repeat `--harness` to limit discovery:
 
 ```bash
-llm_wiki project sessions discover \
+tesserae project sessions discover \
   --root ~/.claude \
   --root ~/.codex \
   --harness claude-code \
@@ -42,7 +42,7 @@ Without `--import`, discovery prints what it found without writing normalized se
 If another tool has already produced normalized `HarnessSession` JSON, import one file or a list of files:
 
 ```bash
-llm_wiki project sessions import path/to/session.json path/to/more-sessions.json
+tesserae project sessions import path/to/session.json path/to/more-sessions.json
 ```
 
 Each input may contain one session object or a list of session objects.
@@ -50,13 +50,13 @@ Each input may contain one session object or a list of session objects.
 ## List imported sessions
 
 ```bash
-llm_wiki project sessions list
+tesserae project sessions list
 ```
 
 Sessions are stored below:
 
 ```text
-.llm-wiki/harness_sessions/
+.tesserae/harness_sessions/
   manifest.json
   <harness>/
     <session>.json
@@ -68,14 +68,14 @@ Sessions are stored below:
 After importing sessions, rebuild the site:
 
 ```bash
-llm_wiki project build-site
+tesserae project build-site
 ```
 
 The site emits:
 
 ```text
-.llm-wiki/site/sessions/index.html
-.llm-wiki/site/sessions/<project>/<session>.html
+.tesserae/site/sessions/index.html
+.tesserae/site/sessions/<project>/<session>.html
 ```
 
 The generated site links Sessions from the global rail, the home Browse cards, search entries, and each session detail page's breadcrumb trail.
@@ -110,9 +110,9 @@ Current transcript typography:
 
 Before deploying a public site that includes sessions:
 
-1. Run `llm_wiki project sessions list` and confirm the count is expected.
-2. Inspect `.llm-wiki/harness_sessions/` for sensitive content.
-3. Rebuild with `llm_wiki project build-site`.
+1. Run `tesserae project sessions list` and confirm the count is expected.
+2. Inspect `.tesserae/harness_sessions/` for sensitive content.
+3. Rebuild with `tesserae project build-site`.
 4. Open `sessions/index.html` and at least one session detail page locally.
 5. Confirm tool blocks are collapsed by default and raw tool payloads are acceptable to publish.
-6. Deploy with `llm_wiki project deploy --build` once the source tree is committed.
+6. Deploy with `tesserae project deploy --build` once the source tree is committed.

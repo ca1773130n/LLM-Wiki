@@ -1,7 +1,7 @@
 import json
 
-from llm_wiki.research_graph import ResearchEdge, ResearchGraph, ResearchNode, ResearchNodeType
-from llm_wiki.temporal import TemporalFactProjector, render_competitive_report
+from tesserae.research_graph import ResearchEdge, ResearchGraph, ResearchNode, ResearchNodeType
+from tesserae.temporal import TemporalFactProjector, render_competitive_report
 
 
 def temporal_sample_graph():

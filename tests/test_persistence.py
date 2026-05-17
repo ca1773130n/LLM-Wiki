@@ -1,8 +1,8 @@
 import json
 import sqlite3
 
-from llm_wiki.persistence import KuzuResearchGraphStore, SQLiteResearchGraphStore
-from llm_wiki.research_graph import ResearchEdge, ResearchGraph, ResearchNode, ResearchNodeType
+from tesserae.persistence import KuzuResearchGraphStore, SQLiteResearchGraphStore
+from tesserae.research_graph import ResearchEdge, ResearchGraph, ResearchNode, ResearchNodeType
 
 
 def sample_graph():

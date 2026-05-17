@@ -1,4 +1,4 @@
-from llm_wiki.research_graph import ResearchGraphExtractor, ResearchNodeType
+from tesserae.research_graph import ResearchGraphExtractor, ResearchNodeType
 
 
 def test_repository_document_extraction_uses_source_and_heading_nodes_not_research_claims():

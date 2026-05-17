@@ -11,7 +11,7 @@ authors:
   - "Yaron Lipman"
 date: 2020-02-24
 sub_topic: Mesh and Surface Reconstruction
-license: "CC-BY-4.0 (LLM-Wiki demo prose)"
+license: "CC-BY-4.0 (Tesserae demo prose)"
 methods: [PointCloud]
 datasets: []
 metrics: [PSNR, SSIM, LPIPS]

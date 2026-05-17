@@ -13,7 +13,7 @@ sub_topic: Visual SLAM and MVS
 methods: [SLAM, PointCloud]
 datasets: [ScanNet, Replica, TUM-RGBD]
 metrics: [PSNR, SSIM, LPIPS]
-license: "CC-BY-4.0 (LLM-Wiki demo prose)"
+license: "CC-BY-4.0 (Tesserae demo prose)"
 ---
 
 # Point-SLAM: Dense Neural Point Cloud-based SLAM

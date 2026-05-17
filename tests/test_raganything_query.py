@@ -10,7 +10,7 @@ def _force_modern_python(monkeypatch):
 
 
 def test_query_returns_string_via_aquery_when_backend_available(monkeypatch, tmp_path):
-    import llm_wiki.raganything_query as mod
+    import tesserae.raganything_query as mod
     _force_modern_python(monkeypatch)
 
     captured = {}
@@ -41,12 +41,12 @@ def test_query_returns_string_via_aquery_when_backend_available(monkeypatch, tmp
 
 
 def test_query_returns_none_when_disabled(tmp_path):
-    from llm_wiki.raganything_query import query
+    from tesserae.raganything_query import query
     assert query("q", backend_config={"enabled": False, "working_dir": str(tmp_path)}) is None
 
 
 def test_query_returns_none_when_module_missing(monkeypatch, tmp_path):
-    import llm_wiki.raganything_query as mod
+    import tesserae.raganything_query as mod
     _force_modern_python(monkeypatch)
 
     def boom(cfg):
@@ -61,7 +61,7 @@ def test_query_returns_none_when_python_too_old(monkeypatch, capsys, tmp_path):
     from collections import namedtuple
     V = namedtuple("version_info", ["major", "minor", "micro", "releaselevel", "serial"])
     monkeypatch.setattr(sys, "version_info", V(3, 9, 0, "final", 0))
-    from llm_wiki.raganything_query import query
+    from tesserae.raganything_query import query
     result = query("q", backend_config={"enabled": True, "working_dir": str(tmp_path)})
     assert result is None
     err = capsys.readouterr().err

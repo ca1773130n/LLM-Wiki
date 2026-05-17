@@ -16,7 +16,7 @@ sub_topic: 3D Gaussian Splatting
 methods: [GaussianSplatting, ImageTo3D]
 datasets: []
 metrics: [PSNR, SSIM, LPIPS]
-license: "CC-BY-4.0 (LLM-Wiki demo prose)"
+license: "CC-BY-4.0 (Tesserae demo prose)"
 ---
 
 # AGG: Amortized Generative 3D Gaussians for Single Image to 3D

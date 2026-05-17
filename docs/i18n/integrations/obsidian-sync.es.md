@@ -4,9 +4,9 @@
 <p align="center"><a href="../../integrations/obsidian-sync.md">English</a> · <a href="obsidian-sync.ko.md">한국어</a> · <a href="obsidian-sync.zh.md">中文</a> · <a href="obsidian-sync.ja.md">日本語</a> · <a href="obsidian-sync.ru.md">Русский</a> · <a href="obsidian-sync.fr.md">Français</a> · <a href="obsidian-sync.de.md">Deutsch</a></p>
 <!-- translations:end -->
 
-> **Estado: Propuesto (2026-05-17).** Este documento es una especificación de diseño, todavía no una funcionalidad. Describe cómo LLM-Wiki podría permitir que los usuarios editen páginas wiki proyectadas en Obsidian y que esas ediciones sobrevivan al siguiente `project compile`. La implementación queda condicionada a que este diseño aterrice.
+> **Estado: Propuesto (2026-05-17).** Este documento es una especificación de diseño, todavía no una funcionalidad. Describe cómo Tesserae podría permitir que los usuarios editen páginas wiki proyectadas en Obsidian y que esas ediciones sobrevivan al siguiente `project compile`. La implementación queda condicionada a que este diseño aterrice.
 
-Hoy la [exportación a Obsidian](obsidian.md) es estrictamente unidireccional: el grafo tipado en `.llm-wiki/graph.json` se proyecta al vault, y `project compile` sobrescribe los archivos proyectados. Los usuarios han pedido también la dirección opuesta — editar una descripción en Obsidian y verla sobrevivir a la recompilación.
+Hoy la [exportación a Obsidian](obsidian.md) es estrictamente unidireccional: el grafo tipado en `.tesserae/graph.json` se proyecta al vault, y `project compile` sobrescribe los archivos proyectados. Los usuarios han pedido también la dirección opuesta — editar una descripción en Obsidian y verla sobrevivir a la recompilación.
 
 Este documento detalla cómo funcionaría eso sin volver incoherente el modelo de datos.
 
@@ -14,7 +14,7 @@ Este documento detalla cómo funcionaría eso sin volver incoherente el modelo d
 
 El README actual desautoriza la edición en vivo:
 
-> LLM-Wiki elige compilar-desde-la-fuente en lugar de la edición en vivo. Si quieres editar notas en una UI, usa Logseq u Obsidian.
+> Tesserae elige compilar-desde-la-fuente en lugar de la edición en vivo. Si quieres editar notas en una UI, usa Logseq u Obsidian.
 
 La sincronización bidireccional **cambia ese contrato** para un subconjunto de campos. Vale la pena ser deliberado al respecto. El objetivo no es "Obsidian se convierte en el editor" — es "las ediciones del usuario en Obsidian no se destruyen silenciosamente al recompilar".
 
@@ -30,7 +30,7 @@ source markdown  ──extract──▶  base_graph
                               final_graph  ──project──▶  vault (.md files)
 ```
 
-`vault_overrides.json` vive en `.llm-wiki/` y es **calculado**, no escrito a mano. En cada compilación, LLM-Wiki recorre el vault, compara cada página proyectada con lo que la proyección anterior escribió, y registra cada cambio introducido por el usuario como una entrada del overlay. El grafo final es `base_graph` con los overlays aplicados. La siguiente proyección escribe el resultado de vuelta a disco.
+`vault_overrides.json` vive en `.tesserae/` y es **calculado**, no escrito a mano. En cada compilación, Tesserae recorre el vault, compara cada página proyectada con lo que la proyección anterior escribió, y registra cada cambio introducido por el usuario como una entrada del overlay. El grafo final es `base_graph` con los overlays aplicados. La siguiente proyección escribe el resultado de vuelta a disco.
 
 Estable en el viaje de ida y vuelta. Recompilar el mismo vault sin cambios en el lado de la fuente no produce diffs.
 
@@ -55,8 +55,8 @@ Cada campo de un nodo tiene un propietario. La propiedad decide qué pasa cuando
 
 | Caso | Por defecto | Por qué |
 |---|---|---|
-| El `description` del vault difiere del `description` re-extraído de la fuente | **Gana el vault**, se registra en `.llm-wiki/lint-report.md` bajo "diverged fields" | Respeto a la edición del usuario: la edición fue claramente intencional. El rastro de auditoría permite revisarlo después. |
-| Archivo fuente eliminado, la página proyectada sigue en el vault | Eliminar el nodo del grafo, listarlo en `.llm-wiki/orphans.md` | La fuente es autoritativa sobre la existencia; el log de huérfanos te deja decidir si restaurar o aceptar |
+| El `description` del vault difiere del `description` re-extraído de la fuente | **Gana el vault**, se registra en `.tesserae/lint-report.md` bajo "diverged fields" | Respeto a la edición del usuario: la edición fue claramente intencional. El rastro de auditoría permite revisarlo después. |
+| Archivo fuente eliminado, la página proyectada sigue en el vault | Eliminar el nodo del grafo, listarlo en `.tesserae/orphans.md` | La fuente es autoritativa sobre la existencia; el log de huérfanos te deja decidir si restaurar o aceptar |
 | El usuario escribió un wikilink a un slug que no existe | Crear un nodo lápida (tipo `Stub`), sacarlo a la luz en el lint report | No descartar la intención del usuario; marcarla para limpieza |
 | El usuario añadió una clave de frontmatter que el esquema no conoce | Preservar como `metadata.user.<key>`, nunca sobrescribir | Compatible hacia adelante sin contaminar el grafo tipado |
 | Dos vaults en máquinas distintas editan el mismo nodo, ambos sincronizados vía Obsidian Sync | **Fuera de alcance para v1.** Gana el último escritor a nivel de sistema de archivos. | La verdadera federación multi-vault es Tier 3; se aplaza hasta que haya un caso de uso real |
@@ -86,7 +86,7 @@ Dos efectos prácticos:
 
 ## Transporte remoto — no-objetivo explícito
 
-LLM-Wiki **no** construye un servidor de sincronización, una capa de autenticación, un daemon de resolución de conflictos ni un vault alojado. "Bidireccional" aquí significa "la compilación lee del vault" — qué hace que el vault llegue a la máquina que ejecuta la compilación es problema del usuario, resuelto por herramientas que ya existen:
+Tesserae **no** construye un servidor de sincronización, una capa de autenticación, un daemon de resolución de conflictos ni un vault alojado. "Bidireccional" aquí significa "la compilación lee del vault" — qué hace que el vault llegue a la máquina que ejecuta la compilación es problema del usuario, resuelto por herramientas que ya existen:
 
 | Stack | Coste | Notas |
 |---|---|---|
@@ -96,22 +96,22 @@ LLM-Wiki **no** construye un servidor de sincronización, una capa de autenticac
 | Git (vault versionado) | Gratis | La UX de conflictos es la mejor para usuarios técnicos |
 | LiveSync (plugin CouchDB) | Gratis, requiere servidor | Multi-dispositivo en tiempo real |
 
-Los cinco son compatibles con el modelo de overlay porque LLM-Wiki ve el vault como archivos-en-disco, no como un flujo de mutaciones.
+Los cinco son compatibles con el modelo de overlay porque Tesserae ve el vault como archivos-en-disco, no como un flujo de mutaciones.
 
 ## Superficie de CLI (propuesta)
 
 ```bash
 # Pull-only sync (Tier 1a): overlay reader runs as part of compile by default.
-llm_wiki project compile                  # always pulls vault overrides if vault exists
+tesserae project compile                  # always pulls vault overrides if vault exists
 
 # Inspect what would change before letting compile apply
-llm_wiki project obsidian-sync --dry-run
+tesserae project obsidian-sync --dry-run
 
 # Skip the pull for a single compile (recovery mode)
-llm_wiki project compile --no-vault-pull
+tesserae project compile --no-vault-pull
 
 # Long-running watch (Tier 2)
-llm_wiki project obsidian-sync --watch --vault ~/Documents/llm-wiki-vault
+tesserae project obsidian-sync --watch --vault ~/Documents/tesserae-vault
 ```
 
 ## Fases
@@ -134,10 +134,10 @@ llm_wiki project obsidian-sync --watch --vault ~/Documents/llm-wiki-vault
 
 Estas tienen comportamientos por defecto propuestos pero merecen una pasada final antes de que aterrice el código:
 
-1. **Forma del lint report.** ¿Los campos divergentes deberían aparecer como un archivo separado `.llm-wiki/diverged-fields.md`, o como una nueva sección en el `lint-report.md` existente? Propuesta: archivo dedicado para que se pueda diffear en git.
+1. **Forma del lint report.** ¿Los campos divergentes deberían aparecer como un archivo separado `.tesserae/diverged-fields.md`, o como una nueva sección en el `lint-report.md` existente? Propuesta: archivo dedicado para que se pueda diffear en git.
 2. **Tipo de nodo lápida.** ¿Añadir `Stub` como un tipo real del esquema, o aprovechar `OpenQuestion` con un discriminador `_kind: stub`? Propuesta: tipo real, llamado `Stub`, oculto de los índices públicos.
 3. **Pull-on-compile por defecto.** ¿Por defecto activado o desactivado? Propuesta: activado cuando existe un vault en la ruta configurada, con un prompt de confirmación único la primera vez que se activa para que los usuarios opten deliberadamente.
-4. **¿Qué cuenta como "la proyección anterior" para el diff?** ¿Snapshot guardado en `.llm-wiki/vault_snapshot.json`, o re-proyectar al vuelo en cada compilación? Propuesta: snapshot, escrito al final de cada compilación. Más barato y evita que el no-determinismo del extractor se filtre al overlay.
+4. **¿Qué cuenta como "la proyección anterior" para el diff?** ¿Snapshot guardado en `.tesserae/vault_snapshot.json`, o re-proyectar al vuelo en cada compilación? Propuesta: snapshot, escrito al final de cada compilación. Más barato y evita que el no-determinismo del extractor se filtre al overlay.
 5. **Proyección de vault multilingüe.** La proyección actual es monolingüe (la de la fuente). ¿Deberían los overlays ser conscientes del idioma (p. ej. que una edición a `description` en un vault coreano se aplique solo a la proyección coreana)? Propuesta: fuera de alcance para v1; el vault es monolingüe coincidiendo con el idioma principal del proyecto.
 
 ## Cómo aparece esto en `obsidian.md`

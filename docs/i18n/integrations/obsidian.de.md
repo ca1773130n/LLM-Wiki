@@ -4,7 +4,7 @@
 <p align="center"><a href="../../integrations/obsidian.md">English</a> · <a href="obsidian.ko.md">한국어</a> · <a href="obsidian.zh.md">中文</a> · <a href="obsidian.ja.md">日本語</a> · <a href="obsidian.ru.md">Русский</a> · <a href="obsidian.es.md">Español</a> · <a href="obsidian.fr.md">Français</a></p>
 <!-- translations:end -->
 
-Der Obsidian-Export von LLM-Wiki verwandelt deinen kompilierten typisierten Graphen in einen echten, opinionierten [Obsidian](https://obsidian.md)-Vault. Kein bloßes Markdown-Verzeichnis — ein Vault mit `.obsidian/`-Konfiguration, typbewussten [Callouts](https://help.obsidian.md/Editing+and+formatting/Callouts), [Dataview](https://blacksmithgu.github.io/obsidian-dataview/)-abfragbarem Frontmatter, einem Vault-Dashboard und einem Index aller `wiki://`-Querverweise zwischen Vaults.
+Der Obsidian-Export von Tesserae verwandelt deinen kompilierten typisierten Graphen in einen echten, opinionierten [Obsidian](https://obsidian.md)-Vault. Kein bloßes Markdown-Verzeichnis — ein Vault mit `.obsidian/`-Konfiguration, typbewussten [Callouts](https://help.obsidian.md/Editing+and+formatting/Callouts), [Dataview](https://blacksmithgu.github.io/obsidian-dataview/)-abfragbarem Frontmatter, einem Vault-Dashboard und einem Index aller `wiki://`-Querverweise zwischen Vaults.
 
 ## Voraussetzungen
 
@@ -12,16 +12,16 @@ Kompiliere zuerst das Projekt:
 
 ```bash
 cd /path/to/your-project
-llm_wiki project setup
-llm_wiki project compile
+tesserae project setup
+tesserae project compile
 ```
 
-Der Compile erzeugt `.llm-wiki/graph.json` (die Quelle der Wahrheit) und eine schlichte Markdown-Projektion unter `.llm-wiki/markdown_projection/`. Der Obsidian-Export setzt auf dieser Projektion auf, ergänzt aber auf jeder Seite Obsidian-eigene Anreicherungen.
+Der Compile erzeugt `.tesserae/graph.json` (die Quelle der Wahrheit) und eine schlichte Markdown-Projektion unter `.tesserae/markdown_projection/`. Der Obsidian-Export setzt auf dieser Projektion auf, ergänzt aber auf jeder Seite Obsidian-eigene Anreicherungen.
 
 ## 1) Den Vault exportieren
 
 ```bash
-llm_wiki project export-obsidian --vault ~/Documents/llm-wiki-vault
+tesserae project export-obsidian --vault ~/Documents/tesserae-vault
 ```
 
 Das Verzeichnis wird angelegt, falls es nicht existiert. Erneutes Ausführen überschreibt es idempotent — die Markdown-Projektion ist deterministisch bei gleichem Graphen.
@@ -29,7 +29,7 @@ Das Verzeichnis wird angelegt, falls es nicht existiert. Erneutes Ausführen üb
 Was auf der Platte landet:
 
 ```text
-llm-wiki-vault/
+tesserae-vault/
   .obsidian/                  # Obsidian config (app.json, graph.json, plugins)
   README.md                   # Vault entry point
   index.md                    # All nodes grouped by section
@@ -44,7 +44,7 @@ llm-wiki-vault/
 
 ## 2) Das Verzeichnis in Obsidian öffnen
 
-`File → Open vault... → Open folder as vault → ~/Documents/llm-wiki-vault`.
+`File → Open vault... → Open folder as vault → ~/Documents/tesserae-vault`.
 
 Obsidian erkennt `.obsidian/`, identifiziert das Ganze als echten Vault und lädt ihn. Die Liste der Community-Plugins enthält Dataview; Obsidian wird dich bitten, es zu aktivieren (empfohlen — ohne Dataview werden die dataview-Blöcke nur als Code-Fences gerendert).
 
@@ -134,11 +134,11 @@ Obsidians eingebaute Graph-Ansicht (`Ctrl/Cmd+G`) funktioniert bereits mit den W
 
 ## Cross-Vault-Workflows
 
-Registriere mehrere LLM-Wiki-Vaults, damit `wiki://`-URIs sich vault-übergreifend auflösen lassen:
+Registriere mehrere Tesserae-Vaults, damit `wiki://`-URIs sich vault-übergreifend auflösen lassen:
 
 ```bash
-llm_wiki register-project /path/to/research --name research
-llm_wiki register-project /path/to/notes    --name notes
+tesserae register-project /path/to/research --name research
+tesserae register-project /path/to/notes    --name notes
 ```
 
 Exportiere jeden Vault nach der Registrierung erneut. `_bridges.md` zeigt in jedem Export nun auflösbare Referenzen zwischen Vaults, gruppiert nach Alias.
@@ -147,16 +147,16 @@ Obsidian selbst folgt `wiki://`-URIs nicht nativ — sie werden als Inline-Text 
 
 ## Refresh-Workflow
 
-Der Obsidian-Vault ist ein **schreibgeschützter Export** des typisierten Graphen. Änderungen in Obsidian fließen nicht zurück nach `.llm-wiki/graph.json`. Um neue Quellen oder Fixes einzubauen:
+Der Obsidian-Vault ist ein **schreibgeschützter Export** des typisierten Graphen. Änderungen in Obsidian fließen nicht zurück nach `.tesserae/graph.json`. Um neue Quellen oder Fixes einzubauen:
 
 ```bash
 # Edit source files under your project's source dirs (NOT the vault), then:
-llm_wiki project compile
-llm_wiki project export-obsidian --vault ~/Documents/llm-wiki-vault
+tesserae project compile
+tesserae project export-obsidian --vault ~/Documents/tesserae-vault
 ```
 
 Obsidian lädt geänderte Dateien auf der Platte hot neu. Wenn du im Vault eigene Markdown-Notizen ergänzt hast, die nicht aus dem Graphen projiziert sind (z. B. persönliche Annotationen), bleiben sie erhalten — der Export überschreibt nur Dateien, die er selbst besitzt: unter `papers/`, `concepts/`, `claims/` sowie `index.md`, `_bridges.md`, `_meta/dashboard.md` und `README.md`.
 
 ## Wann das vs. die statische Site einsetzen
 
-Die kompilierte HTML-Site (`llm_wiki project build-site` → `.llm-wiki/site/`) ist zum Teilen gedacht — push sie auf GitHub Pages, S3 oder einen beliebigen statischen Host. Der Obsidian-Vault dient dem **lokalen Lesen und Abfragen** mit Dataview und Obsidians Graph-Ansicht. Beide projizieren aus demselben Graphen, sodass sie nie auseinanderdriften.
+Die kompilierte HTML-Site (`tesserae project build-site` → `.tesserae/site/`) ist zum Teilen gedacht — push sie auf GitHub Pages, S3 oder einen beliebigen statischen Host. Der Obsidian-Vault dient dem **lokalen Lesen und Abfragen** mit Dataview und Obsidians Graph-Ansicht. Beide projizieren aus demselben Graphen, sodass sie nie auseinanderdriften.

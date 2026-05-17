@@ -9,7 +9,7 @@ authors:
   - "Daniel Cremers"
 date: 2016-07-09
 sub_topic: Visual SLAM and MVS
-license: "CC-BY-4.0 (LLM-Wiki demo prose)"
+license: "CC-BY-4.0 (Tesserae demo prose)"
 methods: [RealTimeRendering]
 datasets: []
 metrics: [PSNR, SSIM, LPIPS]
@@ -46,6 +46,6 @@ and was extended in follow-up work to stereo, RGB-D, and inertial inputs.
 It is also a recurring comparison point for learned SLAM systems such as
 DROID-SLAM and DeepV2D, which inherit the dense-photometric residual but
 replace the hand-engineered front end with a recurrent network. Within
-the LLM-Wiki demo corpus, DSO sits at the classical end of the
+the Tesserae demo corpus, DSO sits at the classical end of the
 SLAM-to-radiance-field continuum: explicit residuals, sparse geometry,
 real-time on commodity hardware.

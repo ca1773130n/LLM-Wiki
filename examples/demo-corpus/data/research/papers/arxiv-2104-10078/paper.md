@@ -9,7 +9,7 @@ authors:
   - "Andreas Geiger"
 date: 2021-04-20
 sub_topic: Mesh and Surface Reconstruction
-license: "CC-BY-4.0 (LLM-Wiki demo prose)"
+license: "CC-BY-4.0 (Tesserae demo prose)"
 methods: [RadianceField, VolumeRendering, NeuralImplicitSurface, NovelViewSynthesis]
 datasets: [DTU, BlendedMVS]
 metrics: [PSNR, SSIM, LPIPS]

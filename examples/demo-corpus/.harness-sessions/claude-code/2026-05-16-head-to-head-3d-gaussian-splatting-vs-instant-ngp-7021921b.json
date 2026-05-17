@@ -27,7 +27,7 @@
     "stumbles": [
       "wiki_page call with both node_id AND a `name` argument naming 'Nerfacto' returned 'node not found'; the agent recognised the mistake (mixed call shape + Nerfacto is not a separate corpus node) and proceeded with the data already gathered."
     ],
-    "transcript": "/Users/neo/Developer/Projects/LLM-Wiki/examples/demo-corpus/.agent-sessions/2026-05-16-comparative/transcript.jsonl",
+    "transcript": "/Users/neo/Developer/Projects/Tesserae/examples/demo-corpus/.agent-sessions/2026-05-16-comparative/transcript.jsonl",
     "turn_count": 33,
     "turns": [
       {
@@ -155,7 +155,7 @@
     "user": "demo-researcher"
   },
   "model": "claude-opus-4-7",
-  "project_name": "LLM-Wiki",
+  "project_name": "Tesserae",
   "project_root": "",
   "raw_transcript_path": "examples/demo-corpus/.agent-sessions/2026-05-16-comparative/transcript.jsonl",
   "redacted_preview": "Compared 3DGS and Instant-NGP head-to-head on Mip-NeRF 360 outdoor average. Initial matrix listed PSNR/SSIM/FPS/train time but no VRAM column; the researcher asked for training memory, and the agent pulled per-scene primitive counts and peak VRAM facts to land on a concrete 24 GB consumer-card recommendation: Instant-NGP fits any scene at ~3 GB peak, 3DGS-vanilla sits at the OOM edge on the largest Mip-NeRF 360 outdoor scenes (~22 GB peak on garden), and the Bulo revised-densification config gives a comfortable margin on all scenes.",

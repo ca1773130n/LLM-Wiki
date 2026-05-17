@@ -1,4 +1,4 @@
-"""Tests for `llm_wiki.synthesis.SynthesisProjector`.
+"""Tests for `tesserae.synthesis.SynthesisProjector`.
 
 `WikiPageStore` is being implemented in parallel by a sibling subagent; this
 test module subclasses the stub with a minimal idempotent on-disk
@@ -15,15 +15,15 @@ from dataclasses import replace
 from pathlib import Path
 from typing import Dict, List
 
-from llm_wiki.research_graph import (
+from tesserae.research_graph import (
     ResearchEdge,
     ResearchGraph,
     ResearchNode,
     ResearchNodeType,
     stable_id,
 )
-from llm_wiki.synthesis import SynthesisProjector
-from llm_wiki.wiki_store import WikiPage, WikiPageStore
+from tesserae.synthesis import SynthesisProjector
+from tesserae.wiki_store import WikiPage, WikiPageStore
 
 
 # ---------------------------------------------------------------------------

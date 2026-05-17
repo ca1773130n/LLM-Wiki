@@ -20,7 +20,7 @@ sub_topic: Diffusion-based 3D Generation
 methods: [RadianceField, Diffusion, ImageTo3D, DepthEstimation]
 datasets: []
 metrics: [PSNR, SSIM, LPIPS]
-license: "CC-BY-4.0 (LLM-Wiki demo prose)"
+license: "CC-BY-4.0 (Tesserae demo prose)"
 ---
 
 # Magic123: One Image to High-Quality 3D Object Generation Using Both 2D and 3D Diffusion Priors

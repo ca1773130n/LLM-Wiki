@@ -1,10 +1,10 @@
-"""Tests for the wiki query / Q&A surface (``llm_wiki.query``).
+"""Tests for the wiki query / Q&A surface (``tesserae.query``).
 
 The fake Anthropic SDK lives in this module so no real network call ever
 fires. We swap it in via the ``set_client_factory`` test seam, mirroring
 ``tests/test_llm_synthesis.py``.
 
-The fixture below hand-crafts a tiny ``.llm-wiki/`` workspace — just the
+The fixture below hand-crafts a tiny ``.tesserae/`` workspace — just the
 ``site/search-index.json`` and matching ``wiki/<kind>/<slug>.md`` pages —
 because spinning up a full ``ProjectWiki.compile`` is overkill for a search
 unit test and would couple us to the extractor's behavior on synthetic
@@ -25,7 +25,7 @@ from typing import Any, Dict, List, Optional
 
 import pytest
 
-from llm_wiki.query import (
+from tesserae.query import (
     WikiQuery,
     reset_failure_log_for_tests,
     set_client_factory,
@@ -101,7 +101,7 @@ def _factory(*, fixed_body: str = "", raise_on_call: Optional[BaseException] = N
 
 
 def _make_project(tmp_path: Path) -> Path:
-    """Hand-build a tiny ``.llm-wiki/`` workspace with a search index + pages.
+    """Hand-build a tiny ``.tesserae/`` workspace with a search index + pages.
 
     The corpus is the smoke-test trio used elsewhere in the repo: a
     ``vision-banana`` Concept page that should win on the "vision banana"
@@ -111,8 +111,8 @@ def _make_project(tmp_path: Path) -> Path:
     """
 
     project = tmp_path / "demo"
-    wiki = project / ".llm-wiki" / "wiki"
-    site = project / ".llm-wiki" / "site"
+    wiki = project / ".tesserae" / "wiki"
+    site = project / ".tesserae" / "site"
     (wiki / "concepts").mkdir(parents=True)
     (wiki / "papers").mkdir(parents=True)
     site.mkdir(parents=True)
@@ -202,7 +202,7 @@ def _make_project(tmp_path: Path) -> Path:
     )
 
     # Optional: a wiki overview the LLM-mode prompt builder will read.
-    (project / ".llm-wiki" / "wiki" / "overview.md").write_text(
+    (project / ".tesserae" / "wiki" / "overview.md").write_text(
         "# Demo Wiki\n\nA tiny demo wiki for query tests.\n",
         encoding="utf-8",
     )
@@ -214,7 +214,7 @@ def _reset_factory_and_env(monkeypatch):
     reset_failure_log_for_tests()
     set_client_factory(None)
     # Tests own these env vars — never leak from the host shell.
-    for var in ("LLM_WIKI_QUERY_LLM", "LLM_WIKI_QUERY_DRY_RUN", "ANTHROPIC_API_KEY"):
+    for var in ("TESSERAE_QUERY_LLM", "TESSERAE_QUERY_DRY_RUN", "ANTHROPIC_API_KEY"):
         monkeypatch.delenv(var, raising=False)
     yield
     set_client_factory(None)
@@ -258,7 +258,7 @@ def test_search_kind_filter_narrows_results(tmp_path):
 
 def test_search_returns_empty_when_index_missing(tmp_path):
     project = tmp_path / "empty-project"
-    (project / ".llm-wiki" / "site").mkdir(parents=True)
+    (project / ".tesserae" / "site").mkdir(parents=True)
     wq = WikiQuery(project)
 
     assert wq.search("anything") == []
@@ -293,7 +293,7 @@ def test_answer_without_env_or_flag_returns_search_only(tmp_path):
 
 def test_answer_with_no_llm_flag_short_circuits(tmp_path, monkeypatch):
     project = _make_project(tmp_path)
-    monkeypatch.setenv("LLM_WIKI_QUERY_LLM", "1")
+    monkeypatch.setenv("TESSERAE_QUERY_LLM", "1")
     wq = WikiQuery(project)
 
     result = wq.answer("vision banana", force_no_llm=True)
@@ -304,8 +304,8 @@ def test_answer_with_no_llm_flag_short_circuits(tmp_path, monkeypatch):
 
 def test_answer_dry_run_returns_stub_without_calling_sdk(tmp_path, monkeypatch):
     project = _make_project(tmp_path)
-    monkeypatch.setenv("LLM_WIKI_QUERY_LLM", "1")
-    monkeypatch.setenv("LLM_WIKI_QUERY_DRY_RUN", "1")
+    monkeypatch.setenv("TESSERAE_QUERY_LLM", "1")
+    monkeypatch.setenv("TESSERAE_QUERY_DRY_RUN", "1")
 
     factory = _factory(fixed_body="should-never-be-called")
     set_client_factory(factory)
@@ -325,7 +325,7 @@ def test_answer_dry_run_via_force_llm_flag(tmp_path, monkeypatch):
     """``force_llm=True`` (CLI ``--llm``) should be enough — no env needed."""
 
     project = _make_project(tmp_path)
-    monkeypatch.setenv("LLM_WIKI_QUERY_DRY_RUN", "1")
+    monkeypatch.setenv("TESSERAE_QUERY_DRY_RUN", "1")
 
     wq = WikiQuery(project)
     result = wq.answer("vision banana", force_llm=True)
@@ -341,7 +341,7 @@ def test_answer_dry_run_via_force_llm_flag(tmp_path, monkeypatch):
 
 def test_answer_llm_path_returns_body_with_citations(tmp_path, monkeypatch):
     project = _make_project(tmp_path)
-    monkeypatch.setenv("LLM_WIKI_QUERY_LLM", "1")
+    monkeypatch.setenv("TESSERAE_QUERY_LLM", "1")
     monkeypatch.setenv("ANTHROPIC_API_KEY", "test-key")
 
     factory = _factory(
@@ -372,7 +372,7 @@ def test_answer_llm_path_returns_body_with_citations(tmp_path, monkeypatch):
 
 def test_answer_no_citation_falls_back(tmp_path, monkeypatch):
     project = _make_project(tmp_path)
-    monkeypatch.setenv("LLM_WIKI_QUERY_LLM", "1")
+    monkeypatch.setenv("TESSERAE_QUERY_LLM", "1")
     monkeypatch.setenv("ANTHROPIC_API_KEY", "test-key")
 
     factory = _factory(fixed_body="A perfectly nice answer that names no node ids.")
@@ -388,7 +388,7 @@ def test_answer_no_citation_falls_back(tmp_path, monkeypatch):
 
 def test_answer_api_exception_falls_back_with_log(tmp_path, monkeypatch):
     project = _make_project(tmp_path)
-    monkeypatch.setenv("LLM_WIKI_QUERY_LLM", "1")
+    monkeypatch.setenv("TESSERAE_QUERY_LLM", "1")
     monkeypatch.setenv("ANTHROPIC_API_KEY", "test-key")
 
     factory = _factory(raise_on_call=RuntimeError("simulated outage"))
@@ -407,7 +407,7 @@ def test_answer_api_exception_falls_back_with_log(tmp_path, monkeypatch):
 
 def test_answer_missing_api_key_returns_search_only(tmp_path, monkeypatch):
     project = _make_project(tmp_path)
-    monkeypatch.setenv("LLM_WIKI_QUERY_LLM", "1")
+    monkeypatch.setenv("TESSERAE_QUERY_LLM", "1")
     # No ANTHROPIC_API_KEY, no client factory: the gate must refuse.
     set_client_factory(None)
 
@@ -423,10 +423,10 @@ def test_answer_missing_api_key_returns_search_only(tmp_path, monkeypatch):
 
 
 def _subprocess_env(**extra: str) -> Dict[str, str]:
-    """Inherit os.environ but make sure the subprocess can import ``llm_wiki``.
+    """Inherit os.environ but make sure the subprocess can import ``tesserae``.
 
     On systems where pytest is run via a non-editable Python (e.g. the
-    macOS Command Line Tools python), ``python -m llm_wiki.cli`` would
+    macOS Command Line Tools python), ``python -m tesserae.cli`` would
     fail. We splice the project root onto ``PYTHONPATH`` so the subprocess
     finds the module the same way the test process does.
     """
@@ -445,7 +445,7 @@ def test_cli_one_shot_json_emits_valid_payload(tmp_path):
     cmd = [
         sys.executable,
         "-m",
-        "llm_wiki.cli",
+        "tesserae.cli",
         "project",
         "query",
         "vision banana",
@@ -465,13 +465,13 @@ def test_cli_one_shot_json_emits_valid_payload(tmp_path):
 def test_cli_dry_run_llm_returns_stub_answer(tmp_path):
     project = _make_project(tmp_path)
     env = _subprocess_env(
-        LLM_WIKI_QUERY_LLM="1",
-        LLM_WIKI_QUERY_DRY_RUN="1",
+        TESSERAE_QUERY_LLM="1",
+        TESSERAE_QUERY_DRY_RUN="1",
     )
     cmd = [
         sys.executable,
         "-m",
-        "llm_wiki.cli",
+        "tesserae.cli",
         "project",
         "query",
         "What is Gaussian Splatting?",

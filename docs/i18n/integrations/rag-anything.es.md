@@ -4,44 +4,44 @@
 <p align="center"><a href="../../integrations/rag-anything.md">English</a> · <a href="rag-anything.ko.md">한국어</a> · <a href="rag-anything.zh.md">中文</a> · <a href="rag-anything.ja.md">日本語</a> · <a href="rag-anything.ru.md">Русский</a> · <a href="rag-anything.fr.md">Français</a> · <a href="rag-anything.de.md">Deutsch</a></p>
 <!-- translations:end -->
 
-[RAG-Anything](https://github.com/HKUDS/RAG-Anything) es un framework RAG multimodal (construido sobre LightRAG) que parsea PDFs, documentos de Office, imágenes y ecuaciones a través de MinerU/Docling/PaddleOCR. LLM-Wiki lo integra tanto como una canalización de ingesta multimodal (proyección de grafo nativa al estilo UA) como un backend de memoria en tiempo de ejecución junto a Cognee.
+[RAG-Anything](https://github.com/HKUDS/RAG-Anything) es un framework RAG multimodal (construido sobre LightRAG) que parsea PDFs, documentos de Office, imágenes y ecuaciones a través de MinerU/Docling/PaddleOCR. Tesserae lo integra tanto como una canalización de ingesta multimodal (proyección de grafo nativa al estilo UA) como un backend de memoria en tiempo de ejecución junto a Cognee.
 
 ## ¿Por qué usar ambos?
 
-- LLM-Wiki — memoria de agente duradera, compilación wiki, proyección de grafo.
+- Tesserae — memoria de agente duradera, compilación wiki, proyección de grafo.
 - RAG-Anything — ingesta multimodal + recuperación en tiempo de ejecución de LightRAG.
 
-Ambos se complementan: RAG-Anything aporta comprensión de PDF/Office/imágenes que los cargadores de fuentes orientados a texto de LLM-Wiki no proporcionan; LLM-Wiki conserva la memoria duradera y consultable que sobrevive entre sesiones.
+Ambos se complementan: RAG-Anything aporta comprensión de PDF/Office/imágenes que los cargadores de fuentes orientados a texto de Tesserae no proporcionan; Tesserae conserva la memoria duradera y consultable que sobrevive entre sesiones.
 
 ## Flujo actual de baja fricción
 
 La ruta recomendada es el asistente de configuración:
 
 ```bash
-llm_wiki project setup
+tesserae project setup
 ```
 
 Para automatización:
 
 ```bash
-llm_wiki project setup \
+tesserae project setup \
   --yes \
   --with-raganything \
   --install-raganything \
   --raganything-parser mineru \
   --run-raganything
-llm_wiki project compile
+tesserae project compile
 ```
 
-LLM-Wiki almacena un comando de actualización administrado en lugar de pedir a los usuarios que inventen uno:
+Tesserae almacena un comando de actualización administrado en lugar de pedir a los usuarios que inventen uno:
 
 ```bash
-llm_wiki project refresh-raganything --parser mineru
+tesserae project refresh-raganything --parser mineru
 ```
 
-Durante la compilación, LLM-Wiki:
+Durante la compilación, Tesserae:
 
-1. comprueba si `.llm-wiki/external/raganything/manifest.json` existe y coincide con el commit git actual (mediante el `meta.json#gitCommitHash` almacenado);
+1. comprueba si `.tesserae/external/raganything/manifest.json` existe y coincide con el commit git actual (mediante el `meta.json#gitCommitHash` almacenado);
 2. ejecuta el wrapper de actualización administrado si falta/está obsoleto o si se pasa `--refresh-external-tools`;
 3. descubre fuentes no de código (PDFs, documentos de Office, imágenes, markdown) y las parsea con el parser configurado;
 4. escribe `manifest.json` + `meta.json`;
@@ -50,30 +50,30 @@ Durante la compilación, LLM-Wiki:
 Puedes forzar todos los comandos externos de actualización configurados antes de compilar:
 
 ```bash
-llm_wiki project compile --refresh-external-tools
+tesserae project compile --refresh-external-tools
 ```
 
 ## Equivalente manual
 
 ```bash
 pip install 'raganything[all]'
-python -m llm_wiki.raganything_refresh --project . --parser mineru
-llm_wiki project compile
+python -m tesserae.raganything_refresh --project . --parser mineru
+tesserae project compile
 ```
 
 ## Sincronización nativa de grafos
 
-LLM-Wiki importa de forma nativa el manifest parseado durante compile cuando la herramienta configurada usa `sync_mode: native_graph`.
+Tesserae importa de forma nativa el manifest parseado durante compile cuando la herramienta configurada usa `sync_mode: native_graph`.
 
-El adaptador nativo lee `.llm-wiki/external/raganything/manifest.json`, proyecta cada documento parseado en un `SourceFile` node con metadatos de bloques multimodales y escribe un sync manifest:
+El adaptador nativo lee `.tesserae/external/raganything/manifest.json`, proyecta cada documento parseado en un `SourceFile` node con metadatos de bloques multimodales y escribe un sync manifest:
 
 ```text
-.llm-wiki/external/raganything-sync.json
+.tesserae/external/raganything-sync.json
 ```
 
 Mapeo actual:
 
-| RAG-Anything | Dirección de LLM-Wiki |
+| RAG-Anything | Dirección de Tesserae |
 |---|---|
 | `documents[*]` | `SourceFile` node, `metadata.parser="raganything"` |
 | `content_list[type=text]` | plegado en `SourceFile.description`; concepts vía el extractor existente |
@@ -84,7 +84,7 @@ Mapeo actual:
 Se preserva la provenance en cada nodo:
 
 ```json
-{"system": "rag-anything", "id": "doc-<sha256>", "type": "document", "artifact": ".llm-wiki/external/raganything/manifest.json"}
+{"system": "rag-anything", "id": "doc-<sha256>", "type": "document", "artifact": ".tesserae/external/raganything/manifest.json"}
 ```
 
 ## Backend de memoria en tiempo de ejecución
@@ -93,11 +93,11 @@ Se preserva la provenance en cada nodo:
 
 ## Requisitos del sistema
 
-- **Python 3.10+** (requisito de RAG-Anything; LLM-Wiki en sí apunta a 3.9+).
+- **Python 3.10+** (requisito de RAG-Anything; Tesserae en sí apunta a 3.9+).
 - **LibreOffice** para parsear `.doc/.docx/.ppt/.pptx/.xls/.xlsx` — instálalo por separado mediante el gestor de paquetes de tu plataforma. RAG-Anything omite documentos de Office con una advertencia cuando falta LibreOffice.
 - **Los pesos de modelo de MinerU** se descargan en el primer parseo y se almacenan en caché (~GBs). Las ejecuciones siguientes reutilizan la caché.
 - **Claves de LLM/embedding/visión compatibles con OpenAI** (`OPENAI_API_KEY`, `OPENAI_BASE_URL`) para el backend de memoria en tiempo de ejecución. El modo solo parser no requiere claves.
 
 ## Principio de colaboración
 
-LLM-Wiki sigue siendo el memory compiler. RAG-Anything sigue siendo un acompañante independiente: parser multimodal + motor de recuperación LightRAG.
+Tesserae sigue siendo el memory compiler. RAG-Anything sigue siendo un acompañante independiente: parser multimodal + motor de recuperación LightRAG.

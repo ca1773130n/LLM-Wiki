@@ -1,4 +1,4 @@
-"""Tests for :mod:`llm_wiki.site.exports`."""
+"""Tests for :mod:`tesserae.site.exports`."""
 
 from __future__ import annotations
 
@@ -9,12 +9,12 @@ from pathlib import Path
 
 import pytest
 
-from llm_wiki.research_graph import (
+from tesserae.research_graph import (
     ResearchGraph,
     ResearchGraphBuilder,
     ResearchNodeType,
 )
-from llm_wiki.site.exports import (
+from tesserae.site.exports import (
     ExportContext,
     render_ai_readme,
     render_graph_jsonld,
@@ -25,7 +25,7 @@ from llm_wiki.site.exports import (
     render_sitemap_xml,
     write_siblings,
 )
-from llm_wiki.wiki_store import WikiPage
+from tesserae.wiki_store import WikiPage
 
 
 # ---------------------------------------------------------------- fixtures
@@ -113,7 +113,7 @@ def ctx(mixed_graph: ResearchGraph, sample_pages: dict[str, list[WikiPage]]) -> 
         ("/syntheses/weekly-2026-w17.html", None),
     ]
     return ExportContext(
-        site_title="LLM-Wiki Test",
+        site_title="Tesserae Test",
         graph=mixed_graph,
         wiki_pages_by_kind=sample_pages,
         routes=routes,
@@ -179,7 +179,7 @@ def test_render_graph_jsonld_parses_and_excludes_code_class(ctx: ExportContext):
 
     # Top-level Dataset metadata.
     assert payload["name"] == ctx.site_title
-    assert payload["creator"] == {"@type": "Organization", "name": "LLM-Wiki"}
+    assert payload["creator"] == {"@type": "Organization", "name": "Tesserae"}
 
 
 def test_render_graph_jsonld_inflates_paper_repo_synthesis(ctx: ExportContext):
@@ -338,7 +338,7 @@ def test_render_rss_xml_has_full_metadata(ctx: ExportContext):
     assert 'xmlns:dc="http://purl.org/dc/elements/1.1/"' in xml
     assert 'xmlns:atom="http://www.w3.org/2005/Atom"' in xml
     # Channel-level metadata.
-    assert "<generator>llm-wiki</generator>" in xml
+    assert "<generator>tesserae</generator>" in xml
     assert "<language>" in xml
     assert "<copyright>" in xml
     assert "atom:link" in xml

@@ -16,7 +16,7 @@ methods: [Diffusion, FeedForward]
 datasets: []
 metrics: [PSNR, SSIM, LPIPS]
 oss_repo: 3DTopia/LGM
-license: "CC-BY-4.0 (LLM-Wiki demo prose)"
+license: "CC-BY-4.0 (Tesserae demo prose)"
 ---
 
 # LGM: Large Multi-View Gaussian Model for High-Resolution 3D Content Creation

@@ -11,7 +11,7 @@ authors:
   - "Peter Hedman"
 date: 2021-11-23
 sub_topic: Neural Radiance Fields
-license: "CC-BY-4.0 (LLM-Wiki demo prose)"
+license: "CC-BY-4.0 (Tesserae demo prose)"
 methods: [RadianceField, AntiAliasing, NovelViewSynthesis]
 datasets: [Mip-NeRF360]
 metrics: [PSNR, SSIM, LPIPS]

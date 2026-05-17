@@ -317,4 +317,4 @@ This work is based on an increasing list of amazing research works and open-sour
     ```
     @article{chen2023fantasia3d,
 
-> Truncated at 300 lines for the LLM-Wiki demo. See upstream for the full README.
+> Truncated at 300 lines for the Tesserae demo. See upstream for the full README.

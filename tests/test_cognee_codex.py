@@ -4,7 +4,7 @@ import json
 
 from pydantic import BaseModel
 
-from llm_wiki.cognee_codex import (
+from tesserae.cognee_codex import (
     CodexCLICogneeAdapter,
     CogneeCodexPatch,
     DeterministicEmbeddingEngine,

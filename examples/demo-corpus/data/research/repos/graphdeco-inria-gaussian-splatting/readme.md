@@ -16,7 +16,7 @@ canonical_paper_url: https://arxiv.org/abs/2308.04079
 
 > **License notice (non-permissive):** This README is mirrored under the upstream
 > *Gaussian-Splatting License (research-only, non-commercial)*, which restricts use of the upstream code to non-commercial
-> research. The LLM-Wiki demo corpus mirrors only the README text under fair-use
+> research. The Tesserae demo corpus mirrors only the README text under fair-use
 > citation with full attribution; **no code from the upstream repository is
 > redistributed here**. See https://github.com/graphdeco-inria/gaussian-splatting for the full license terms.
 
@@ -323,4 +323,4 @@ We provide two interactive viewers for our method: remote and real-time. Our vie
 - Visual Studio or g++, **not Clang** (we used Visual Studio 2019 for Windows)
 - CUDA SDK 11, install *after* Visual Studio (we used 11.8)
 
-> Truncated at 300 lines for the LLM-Wiki demo. See upstream for the full README.
+> Truncated at 300 lines for the Tesserae demo. See upstream for the full README.

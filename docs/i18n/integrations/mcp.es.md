@@ -1,19 +1,19 @@
-# MCP — conecta LLM-Wiki con Claude Code, Codex, Cursor
+# MCP — conecta Tesserae con Claude Code, Codex, Cursor
 
 <!-- translations:start -->
 <p align="center"><a href="../../integrations/mcp.md">English</a> · <a href="mcp.ko.md">한국어</a> · <a href="mcp.zh.md">中文</a> · <a href="mcp.ja.md">日本語</a> · <a href="mcp.ru.md">Русский</a> · <a href="mcp.fr.md">Français</a> · <a href="mcp.de.md">Deutsch</a></p>
 <!-- translations:end -->
 
-LLM-Wiki incluye un servidor stdio de [Model Context Protocol](https://modelcontextprotocol.io) que expone el grafo tipado compilado a cualquier cliente compatible con MCP: Claude Code, Codex CLI, Cursor, Claude Desktop y otros. El servidor anuncia las tres superficies completas de MCP — **tools**, **resources** y **prompts** — de modo que los clientes pueden tanto consultar el grafo bajo demanda como sembrar contexto de forma económica a partir de URIs canónicas.
+Tesserae incluye un servidor stdio de [Model Context Protocol](https://modelcontextprotocol.io) que expone el grafo tipado compilado a cualquier cliente compatible con MCP: Claude Code, Codex CLI, Cursor, Claude Desktop y otros. El servidor anuncia las tres superficies completas de MCP — **tools**, **resources** y **prompts** — de modo que los clientes pueden tanto consultar el grafo bajo demanda como sembrar contexto de forma económica a partir de URIs canónicas.
 
 ## Requisitos previos
 
-El servidor lee desde `.llm-wiki/graph.json`, por lo que se requiere una compilación inicial:
+El servidor lee desde `.tesserae/graph.json`, por lo que se requiere una compilación inicial:
 
 ```bash
 cd /path/to/your-project
-llm_wiki project setup    # interactive; or --yes for non-interactive
-llm_wiki project compile  # deterministic, no LLM calls, no API keys
+tesserae project setup    # interactive; or --yes for non-interactive
+tesserae project compile  # deterministic, no LLM calls, no API keys
 ```
 
 Recompila siempre que cambien tus fuentes. El servidor recogerá el nuevo grafo en la siguiente llamada a una tool sin necesidad de reiniciar.
@@ -21,7 +21,7 @@ Recompila siempre que cambien tus fuentes. El servidor recogerá el nuevo grafo 
 ## 1) Generar la configuración del cliente
 
 ```bash
-llm_wiki project mcp-config
+tesserae project mcp-config
 ```
 
 Imprime un fragmento JSON aproximadamente así:
@@ -29,18 +29,18 @@ Imprime un fragmento JSON aproximadamente así:
 ```json
 {
   "mcpServers": {
-    "llm-wiki": {
+    "tesserae": {
       "command": "python3",
       "args": [
-        "-m", "llm_wiki.mcp_server",
-        "--graph", "/path/to/your-project/.llm-wiki/graph.json"
+        "-m", "tesserae.mcp_server",
+        "--graph", "/path/to/your-project/.tesserae/graph.json"
       ]
     }
   }
 }
 ```
 
-La ruta exacta se completa a partir del proyecto actual. Pasa `--name <alias>` si quieres un nombre de entrada de servidor distinto a `llm-wiki`.
+La ruta exacta se completa a partir del proyecto actual. Pasa `--name <alias>` si quieres un nombre de entrada de servidor distinto a `tesserae`.
 
 ## 2) Pégalo en tu cliente MCP
 
@@ -52,7 +52,7 @@ La ruta exacta se completa a partir del proyecto actual. Pasa `--name <alias>` s
 | Cursor | Settings → MCP Servers → pega el JSON |
 | Hermes | `~/.hermes/config.toml` (usa el bloque equivalente en TOML impreso por `mcp-config --format hermes`) |
 
-Reinicia el cliente después de editarlo. La siguiente sesión se conectará y descubrirá la superficie de LLM-Wiki.
+Reinicia el cliente después de editarlo. La siguiente sesión se conectará y descubrirá la superficie de Tesserae.
 
 ## 3) Lo que ve el cliente
 
@@ -76,14 +76,14 @@ Reinicia el cliente después de editarlo. La siguiente sesión se conectará y d
 
 URIs que el cliente puede incorporar mediante su selector de recursos sin gastar un turno de tool:
 
-- `llm-wiki://graph/schema` — la misma carga útil que la tool `schema`, lista como contexto estático
-- `llm-wiki://graph/summary` — resumen del proyecto activo
-- `llm-wiki://lint-report` — el último lint report en markdown
+- `tesserae://graph/schema` — la misma carga útil que la tool `schema`, lista como contexto estático
+- `tesserae://graph/summary` — resumen del proyecto activo
+- `tesserae://lint-report` — el último lint report en markdown
 
 Además de plantillas de URI que el cliente puede construir bajo demanda:
 
-- `llm-wiki://wiki/{kind}/{slug}` — el cuerpo de cualquier página wiki compilada
-- `llm-wiki://raw/{source_path}` — cualquier markdown fuente sin procesar
+- `tesserae://wiki/{kind}/{slug}` — el cuerpo de cualquier página wiki compilada
+- `tesserae://raw/{source_path}` — cualquier markdown fuente sin procesar
 
 ### Prompts — plantillas de investigación de un solo clic
 
@@ -97,15 +97,15 @@ Aparecen en el menú de comandos del cliente (por ejemplo, la paleta `/` de Clau
 | `gap-analysis` | `topic` (opcional) | Saca a la luz preguntas abiertas no resueltas, benchmarks faltantes y afirmaciones poco respaldadas |
 | `triage-open-questions` | _ninguno_ | Lista todos los nodos `OpenQuestion`, los agrupa por tema y propone un orden de prioridad |
 
-Cada prompt se renderiza como un único mensaje de usuario que le indica al modelo exactamente qué tools de LLM-Wiki encadenar, así el modelo no tiene que redescubrir la superficie cada vez.
+Cada prompt se renderiza como un único mensaje de usuario que le indica al modelo exactamente qué tools de Tesserae encadenar, así el modelo no tiene que redescubrir la superficie cada vez.
 
 ## Multiproyecto: registra varias vaults bajo un mismo servidor
 
-Un registro persistente en `~/.llm-wiki/registry.json` permite que el mismo servidor MCP resuelva cualquier proyecto registrado por nombre:
+Un registro persistente en `~/.tesserae/registry.json` permite que el mismo servidor MCP resuelva cualquier proyecto registrado por nombre:
 
 ```bash
-llm_wiki register-project /path/to/research --name research
-llm_wiki register-project /path/to/notes    --name notes
+tesserae register-project /path/to/research --name research
+tesserae register-project /path/to/notes    --name notes
 ```
 
 A partir de esto, cada tool que acepte `project` o `graph_path` resolverá `project: "research"` contra el registro en lugar de necesitar una ruta completa. El servidor incluso valida que el `graph_path` registrado siga existiendo y devuelve un error claro si hace falta recompilar.
@@ -146,12 +146,12 @@ El servidor exporta `CLAUDE_CONFIG_DIR` solo durante esa llamada y restaura el v
 
 Después de reiniciar tu cliente MCP, confirma la conexión:
 
-- Claude Code: `/mcp` debería listar `llm-wiki` con el conteo de tools.
-- Cursor: el icono MCP en la barra de chat debería mostrar `llm-wiki: connected` con los conteos de tools/resources/prompts.
+- Claude Code: `/mcp` debería listar `tesserae` con el conteo de tools.
+- Cursor: el icono MCP en la barra de chat debería mostrar `tesserae: connected` con los conteos de tools/resources/prompts.
 - Codex / Hermes: invoca cualquier tool por nombre (por ejemplo, `schema`) y revisa la respuesta.
 
-Si no aparece nada, verifica que `--graph` apunte a un `.llm-wiki/graph.json` existente — el servidor ahora valida esto al arrancar y en cada llamada a tool, así que verás un mensaje de error claro en lugar de un 500 silencioso.
+Si no aparece nada, verifica que `--graph` apunte a un `.tesserae/graph.json` existente — el servidor ahora valida esto al arrancar y en cada llamada a tool, así que verás un mensaje de error claro en lugar de un 500 silencioso.
 
 ## Dónde encaja esto
 
-El servidor MCP es la **interfaz de lectura** al grafo tipado. Para la **ruta de escritura** (ingestar fuentes, recompilar, refrescar herramientas acompañantes como RAG-Anything o Understand-Anything) usa la CLI directamente. Ambas están desacopladas: la CLI actualiza `.llm-wiki/`, y el servidor MCP lee lo que haya allí en la siguiente llamada a tool.
+El servidor MCP es la **interfaz de lectura** al grafo tipado. Para la **ruta de escritura** (ingestar fuentes, recompilar, refrescar herramientas acompañantes como RAG-Anything o Understand-Anything) usa la CLI directamente. Ambas están desacopladas: la CLI actualiza `.tesserae/`, y el servidor MCP lee lo que haya allí en la siguiente llamada a tool.

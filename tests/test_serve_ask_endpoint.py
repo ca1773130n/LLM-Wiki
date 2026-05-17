@@ -1,6 +1,6 @@
-"""Tests for the ``/api/ask`` endpoint served by ``llm_wiki project serve``.
+"""Tests for the ``/api/ask`` endpoint served by ``tesserae project serve``.
 
-The handler is built by :func:`llm_wiki.serve.build_ask_aware_handler`
+The handler is built by :func:`tesserae.serve.build_ask_aware_handler`
 and wraps :class:`http.server.SimpleHTTPRequestHandler` with two JSON
 routes (``GET /api/ask/health`` and ``POST /api/ask``). Everything else
 falls through to static-file serving so the existing site keeps
@@ -26,7 +26,7 @@ from typing import Iterator, Tuple
 
 import pytest
 
-from llm_wiki.serve import build_ask_aware_handler
+from tesserae.serve import build_ask_aware_handler
 
 
 def _free_port() -> int:
@@ -38,10 +38,10 @@ def _free_port() -> int:
 
 
 def _bootstrap_project(tmp_path: Path) -> Path:
-    """Minimal ``.llm-wiki/config.json`` so ``ProjectWiki.load`` succeeds."""
+    """Minimal ``.tesserae/config.json`` so ``ProjectWiki.load`` succeeds."""
     project = tmp_path / "demo"
     project.mkdir()
-    cfg = project / ".llm-wiki"
+    cfg = project / ".tesserae"
     cfg.mkdir()
     (cfg / "config.json").write_text(
         json.dumps({"name": "demo", "sources": ["README.md"], "external_tools": []}),
@@ -85,7 +85,7 @@ def _running_server(project_root: Path, site_dir: Path) -> Iterator[Tuple[str, i
 
 def test_serve_health_endpoint_returns_200(tmp_path: Path) -> None:
     project = _bootstrap_project(tmp_path)
-    site_dir = project / ".llm-wiki" / "site"
+    site_dir = project / ".tesserae" / "site"
     with _running_server(project, site_dir) as (host, port):
         with urllib.request.urlopen(
             f"http://{host}:{port}/api/ask/health", timeout=5
@@ -98,7 +98,7 @@ def test_serve_health_endpoint_returns_200(tmp_path: Path) -> None:
 def test_serve_static_files_still_work(tmp_path: Path) -> None:
     """Non-``/api/...`` paths fall through to the static-file handler."""
     project = _bootstrap_project(tmp_path)
-    site_dir = project / ".llm-wiki" / "site"
+    site_dir = project / ".tesserae" / "site"
     with _running_server(project, site_dir) as (host, port):
         with urllib.request.urlopen(f"http://{host}:{port}/index.html", timeout=5) as resp:
             assert resp.status == 200
@@ -116,7 +116,7 @@ def test_serve_ask_endpoint_delegates_to_ask_project(
 ) -> None:
     """POST /api/ask with a question reaches ``ask_project`` and returns its envelope."""
     project = _bootstrap_project(tmp_path)
-    site_dir = project / ".llm-wiki" / "site"
+    site_dir = project / ".tesserae" / "site"
 
     captured: dict = {}
 
@@ -131,7 +131,7 @@ def test_serve_ask_endpoint_delegates_to_ask_project(
         }
 
     # Patch on the module the handler imports from (it does a late import).
-    monkeypatch.setattr("llm_wiki.query.ask_project", _stub_ask_project)
+    monkeypatch.setattr("tesserae.query.ask_project", _stub_ask_project)
 
     body = json.dumps(
         {
@@ -161,7 +161,7 @@ def test_serve_ask_endpoint_delegates_to_ask_project(
 
 def test_serve_ask_endpoint_rejects_empty_question(tmp_path: Path) -> None:
     project = _bootstrap_project(tmp_path)
-    site_dir = project / ".llm-wiki" / "site"
+    site_dir = project / ".tesserae" / "site"
 
     body = json.dumps({"question": "   "}).encode("utf-8")
     with _running_server(project, site_dir) as (host, port):
@@ -178,7 +178,7 @@ def test_serve_ask_endpoint_rejects_empty_question(tmp_path: Path) -> None:
 
 def test_serve_unknown_api_path_returns_404(tmp_path: Path) -> None:
     project = _bootstrap_project(tmp_path)
-    site_dir = project / ".llm-wiki" / "site"
+    site_dir = project / ".tesserae" / "site"
 
     with _running_server(project, site_dir) as (host, port):
         req = urllib.request.Request(
@@ -197,12 +197,12 @@ def test_serve_ask_endpoint_surfaces_backend_error(
 ) -> None:
     """If ``ask_project`` raises, the handler returns a 500 with the error message."""
     project = _bootstrap_project(tmp_path)
-    site_dir = project / ".llm-wiki" / "site"
+    site_dir = project / ".tesserae" / "site"
 
     def _boom(*args, **kw):
         raise RuntimeError("boom from backend")
 
-    monkeypatch.setattr("llm_wiki.query.ask_project", _boom)
+    monkeypatch.setattr("tesserae.query.ask_project", _boom)
 
     body = json.dumps({"question": "anything"}).encode("utf-8")
     with _running_server(project, site_dir) as (host, port):

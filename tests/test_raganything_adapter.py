@@ -3,8 +3,8 @@ from pathlib import Path
 
 import pytest
 
-from llm_wiki.raganything_adapter import RagAnythingGraphAdapter, merge_raganything_graph
-from llm_wiki.research_graph import ResearchGraph, ResearchNode, ResearchNodeType
+from tesserae.raganything_adapter import RagAnythingGraphAdapter, merge_raganything_graph
+from tesserae.research_graph import ResearchGraph, ResearchNode, ResearchNodeType
 
 
 def _payload():
@@ -17,7 +17,7 @@ def _payload():
                 "id": "doc-abc123",
                 "path": "docs/whitepaper.pdf",
                 "sha256": "abc123",
-                "parsed_dir": ".llm-wiki/external/raganything/parsed/abc123",
+                "parsed_dir": ".tesserae/external/raganything/parsed/abc123",
                 "content_list": [
                     {"type": "text", "page_idx": 0, "text": "Mermaid rendering is described here."},
                     {"type": "image", "page_idx": 1, "img_path": "p1.png", "img_caption": ["Mermaid pipeline"]},
@@ -39,7 +39,7 @@ def test_import_payload_creates_source_document_with_multimodal_blocks(tmp_path)
     adapter = RagAnythingGraphAdapter(tmp_path)
     graph, manifest = adapter.import_payload(
         _payload(),
-        artifact_rel=".llm-wiki/external/raganything/manifest.json",
+        artifact_rel=".tesserae/external/raganything/manifest.json",
         artifact_sha256="deadbeef",
     )
     sources = [n for n in graph.nodes if n.type == ResearchNodeType.SOURCE_DOCUMENT]
@@ -58,7 +58,7 @@ def test_import_payload_creates_source_document_with_multimodal_blocks(tmp_path)
 
 
 def test_import_artifact_reads_file_and_records_sha256(tmp_path):
-    artifact = tmp_path / ".llm-wiki" / "external" / "raganything" / "manifest.json"
+    artifact = tmp_path / ".tesserae" / "external" / "raganything" / "manifest.json"
     artifact.parent.mkdir(parents=True)
     artifact.write_text(json.dumps(_payload()), encoding="utf-8")
 
@@ -69,10 +69,10 @@ def test_import_artifact_reads_file_and_records_sha256(tmp_path):
 
 
 def test_merge_raganything_graph_appends_to_existing_graph_and_writes_manifest(tmp_path):
-    artifact = tmp_path / ".llm-wiki" / "external" / "raganything" / "manifest.json"
+    artifact = tmp_path / ".tesserae" / "external" / "raganything" / "manifest.json"
     artifact.parent.mkdir(parents=True)
     artifact.write_text(json.dumps(_payload()), encoding="utf-8")
-    sync_path = tmp_path / ".llm-wiki" / "external" / "raganything-sync.json"
+    sync_path = tmp_path / ".tesserae" / "external" / "raganything-sync.json"
 
     base = ResearchGraph(nodes=[], edges=[])
     merged, manifest = merge_raganything_graph(
@@ -97,7 +97,7 @@ def test_import_payload_emits_empty_string_description_when_no_text_blocks(tmp_p
                 "id": "doc-empty",
                 "path": "data/empty.md",
                 "sha256": "00",
-                "parsed_dir": ".llm-wiki/external/raganything/parsed/00",
+                "parsed_dir": ".tesserae/external/raganything/parsed/00",
                 "content_list": [
                     # No text block — only an image (caption empty), simulating
                     # a doc whose parsed body is non-textual.

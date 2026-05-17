@@ -12,7 +12,7 @@ methods: [GaussianSplatting]
 datasets: []
 metrics: [PSNR, SSIM, LPIPS]
 oss_repo: Anttwo/SuGaR
-license: "CC-BY-4.0 (LLM-Wiki demo prose)"
+license: "CC-BY-4.0 (Tesserae demo prose)"
 ---
 
 # SuGaR: Surface-Aligned Gaussian Splatting for Efficient 3D Mesh Reconstruction and High-Quality Mesh Rendering

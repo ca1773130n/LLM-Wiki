@@ -14,7 +14,7 @@ sub_topic: 3D Gaussian Splatting
 methods: [GaussianSplatting, PointCloud]
 datasets: []
 metrics: [PSNR, SSIM, LPIPS]
-license: "CC-BY-4.0 (LLM-Wiki demo prose)"
+license: "CC-BY-4.0 (Tesserae demo prose)"
 ---
 
 # LucidDreamer: Domain-free Generation of 3D Gaussian Splatting Scenes

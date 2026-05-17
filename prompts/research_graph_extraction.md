@@ -1,6 +1,6 @@
 # Research Graph Extraction Prompt
 
-Use this prompt with Claude/Cognee extraction. The deterministic `llm_wiki.research_graph` module is the schema authority.
+Use this prompt with Claude/Cognee extraction. The deterministic `tesserae.research_graph` module is the schema authority.
 
 You are extracting a literature intelligence graph for a user's research field.
 Do **not** create arbitrary node types. Every node type MUST be one of:

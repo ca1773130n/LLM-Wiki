@@ -12,7 +12,7 @@ authors:
   - "Daniel Duckworth"
 date: 2020-08-05
 sub_topic: Neural Radiance Fields
-license: "CC-BY-4.0 (LLM-Wiki demo prose)"
+license: "CC-BY-4.0 (Tesserae demo prose)"
 methods: [RadianceField]
 datasets: []
 metrics: [PSNR, SSIM, LPIPS]

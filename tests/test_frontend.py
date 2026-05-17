@@ -21,15 +21,15 @@ from pathlib import Path
 
 import pytest
 
-from llm_wiki.frontend import StaticSiteBuilder  # legacy import path still works
-from llm_wiki.site import StaticSiteBuilder as NewStaticSiteBuilder
-from llm_wiki.research_graph import (
+from tesserae.frontend import StaticSiteBuilder  # legacy import path still works
+from tesserae.site import StaticSiteBuilder as NewStaticSiteBuilder
+from tesserae.research_graph import (
     ResearchEdge,
     ResearchGraph,
     ResearchNode,
     ResearchNodeType,
 )
-from llm_wiki.wiki_store import WikiPage, WikiPageStore
+from tesserae.wiki_store import WikiPage, WikiPageStore
 
 
 def _toy_graph() -> ResearchGraph:
@@ -177,7 +177,7 @@ def test_static_site_builder_emits_redesigned_ia(tmp_path: Path) -> None:
 
     result = StaticSiteBuilder(site_title="Demo Wiki").write_site(_toy_graph(), wiki, out)
 
-    # Same builder is re-exported from llm_wiki.site.
+    # Same builder is re-exported from tesserae.site.
     assert StaticSiteBuilder is NewStaticSiteBuilder
 
     assert result["site_path"] == str(out)
@@ -272,7 +272,7 @@ def test_static_site_builder_emits_redesigned_ia(tmp_path: Path) -> None:
 
     # ---- manifest is a real inventory ----------------------------------------
     manifest = json.loads((out / "manifest.json").read_text(encoding="utf-8"))
-    assert manifest["generator"] == "llm-wiki"
+    assert manifest["generator"] == "tesserae"
     assert manifest["version"] == "1"
     paths = {entry["path"] for entry in manifest["files"]}
     assert "index.html" in paths

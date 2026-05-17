@@ -3,16 +3,16 @@
 <!-- translations:start -->
 <p align="center"><a href="../session-history.md">English</a> · <a href="session-history.ko.md">한국어</a> · <a href="session-history.zh.md">中文</a> · <a href="session-history.ja.md">日本語</a> · <a href="session-history.ru.md">Русский</a> · <a href="session-history.es.md">Español</a> · <a href="session-history.fr.md">Français</a> · <a href="session-history.de.md">Deutsch</a></p>
 <!-- translations:end -->
-LLM-Wiki 可以导入本地 AI-agent transcript，并在静态站点的 `sessions/` 区域下把它们渲染为项目记忆。
+Tesserae 可以导入本地 AI-agent transcript，并在静态站点的 `sessions/` 区域下把它们渲染为项目记忆。
 
 此功能有意与 `export-agent-harness` 分开：
 
 - `export-agent-harness` 是面向 Claude Code、Codex、Gemini、Cursor、Kiro、OpenCode 等工具的出站上下文。
-- `project sessions ...` 是入站历史：它会为当前项目规范化既有 Claude Code/Codex 会话，将其存储在 `.llm-wiki/harness_sessions/` 下，并让 `project build-site` 发布会话索引/详情页。
+- `project sessions ...` 是入站历史：它会为当前项目规范化既有 Claude Code/Codex 会话，将其存储在 `.tesserae/harness_sessions/` 下，并让 `project build-site` 发布会话索引/详情页。
 
 ## 隐私模型
 
-会话导入是显式操作。普通的 `project compile` 或 `project build-site` 会读取 `.llm-wiki/harness_sessions/` 中已经规范化的会话，但不会意外抓取私有 harness transcript 目录。
+会话导入是显式操作。普通的 `project compile` 或 `project build-site` 会读取 `.tesserae/harness_sessions/` 中已经规范化的会话，但不会意外抓取私有 harness transcript 目录。
 
 导入的会话记录是本地项目产物。发布公开站点前请先检查它们，尤其当 transcript 可能包含密钥、私有路径、客户数据或未发布代码时。
 
@@ -21,13 +21,13 @@ LLM-Wiki 可以导入本地 AI-agent transcript，并在静态站点的 `session
 在项目根目录运行：
 
 ```bash
-llm_wiki project sessions discover --import
+tesserae project sessions discover --import
 ```
 
 Discovery 会扫描属于当前项目工作目录的本地 Claude Code 和 Codex transcript root。使用 `--root` 扫描指定配置目录，并重复 `--harness` 来限制 discovery：
 
 ```bash
-llm_wiki project sessions discover \
+tesserae project sessions discover \
   --root ~/.claude \
   --root ~/.codex \
   --harness claude-code \
@@ -42,7 +42,7 @@ llm_wiki project sessions discover \
 如果其他工具已经生成了规范化的 `HarnessSession` JSON，可以导入一个文件或一组文件：
 
 ```bash
-llm_wiki project sessions import path/to/session.json path/to/more-sessions.json
+tesserae project sessions import path/to/session.json path/to/more-sessions.json
 ```
 
 每个输入可以包含一个会话对象或会话对象列表。
@@ -50,13 +50,13 @@ llm_wiki project sessions import path/to/session.json path/to/more-sessions.json
 ## 列出已导入会话
 
 ```bash
-llm_wiki project sessions list
+tesserae project sessions list
 ```
 
 会话存储在：
 
 ```text
-.llm-wiki/harness_sessions/
+.tesserae/harness_sessions/
   manifest.json
   <harness>/
     <session>.json
@@ -68,14 +68,14 @@ llm_wiki project sessions list
 导入会话后，重新构建站点：
 
 ```bash
-llm_wiki project build-site
+tesserae project build-site
 ```
 
 站点会输出：
 
 ```text
-.llm-wiki/site/sessions/index.html
-.llm-wiki/site/sessions/<project>/<session>.html
+.tesserae/site/sessions/index.html
+.tesserae/site/sessions/<project>/<session>.html
 ```
 
 生成的站点会从全局 rail、首页 Browse 卡片、搜索条目以及每个会话详情页的 breadcrumb trail 链接到 Sessions。
@@ -110,9 +110,9 @@ llm_wiki project build-site
 
 部署包含会话的公开站点之前：
 
-1. 运行 `llm_wiki project sessions list` 并确认数量符合预期。
-2. 检查 `.llm-wiki/harness_sessions/` 是否包含敏感内容。
-3. 使用 `llm_wiki project build-site` 重新构建。
+1. 运行 `tesserae project sessions list` 并确认数量符合预期。
+2. 检查 `.tesserae/harness_sessions/` 是否包含敏感内容。
+3. 使用 `tesserae project build-site` 重新构建。
 4. 在本地打开 `sessions/index.html` 和至少一个会话详情页。
 5. 确认 tool blocks 默认折叠，并且 raw tool payload 可以发布。
-6. 在 source tree 已提交后，使用 `llm_wiki project deploy --build` 部署。
+6. 在 source tree 已提交后，使用 `tesserae project deploy --build` 部署。

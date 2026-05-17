@@ -1,50 +1,50 @@
 #!/usr/bin/env bash
-# LLM-Wiki installer
+# Tesserae installer
 #
 # Quick install:
-#   curl -fsSL https://raw.githubusercontent.com/ca1773130n/LLM-Wiki/main/scripts/install.sh | bash
+#   curl -fsSL https://raw.githubusercontent.com/ca1773130n/Tesserae/main/scripts/install.sh | bash
 #
 # With options:
-#   curl -fsSL https://raw.githubusercontent.com/ca1773130n/LLM-Wiki/main/scripts/install.sh | bash -s -- --dir ~/.llm-wiki/LLM-Wiki --skip-shell-config
+#   curl -fsSL https://raw.githubusercontent.com/ca1773130n/Tesserae/main/scripts/install.sh | bash -s -- --dir ~/.tesserae/Tesserae --skip-shell-config
 
 set -euo pipefail
 
-REPO_URL="${LLM_WIKI_REPO_URL:-https://github.com/ca1773130n/LLM-Wiki.git}"
-BRANCH="${LLM_WIKI_BRANCH:-main}"
-INSTALL_DIR="${LLM_WIKI_INSTALL_DIR:-$HOME/.llm-wiki/LLM-Wiki}"
-BIN_DIR="${LLM_WIKI_BIN_DIR:-$HOME/.local/bin}"
+REPO_URL="${TESSERAE_REPO_URL:-https://github.com/ca1773130n/Tesserae.git}"
+BRANCH="${TESSERAE_BRANCH:-main}"
+INSTALL_DIR="${TESSERAE_INSTALL_DIR:-$HOME/.tesserae/Tesserae}"
+BIN_DIR="${TESSERAE_BIN_DIR:-$HOME/.local/bin}"
 USE_VENV=1
 UPDATE_SHELL_CONFIG=1
 
 usage() {
   cat <<'USAGE'
-LLM-Wiki installer
+Tesserae installer
 
 Usage:
   install.sh [OPTIONS]
 
 Quick install:
-  curl -fsSL https://raw.githubusercontent.com/ca1773130n/LLM-Wiki/main/scripts/install.sh | bash
+  curl -fsSL https://raw.githubusercontent.com/ca1773130n/Tesserae/main/scripts/install.sh | bash
 
 Options:
-  --dir PATH             Install/update checkout at PATH (default: ~/.llm-wiki/LLM-Wiki)
+  --dir PATH             Install/update checkout at PATH (default: ~/.tesserae/Tesserae)
   --branch NAME          Git branch to install (default: main)
-  --repo URL             Git repository URL (default: https://github.com/ca1773130n/LLM-Wiki.git)
-  --bin-dir PATH         Directory for the llm_wiki command wrapper (default: ~/.local/bin)
+  --repo URL             Git repository URL (default: https://github.com/ca1773130n/Tesserae.git)
+  --bin-dir PATH         Directory for the tesserae command wrapper (default: ~/.local/bin)
   --no-venv              Install into the current Python environment instead of .venv
   --skip-shell-config    Do not append PATH setup to shell rc files
   -h, --help             Show this help
 
 After install:
-  llm_wiki project init --source-kind Repository --source README.md --source docs --source src
-  llm_wiki project compile --changed-only
-  llm_wiki project build-site
+  tesserae project init --source-kind Repository --source README.md --source docs --source src
+  tesserae project compile --changed-only
+  tesserae project build-site
 USAGE
 }
 
-log() { printf '\033[1;34m[llm-wiki]\033[0m %s\n' "$*"; }
-warn() { printf '\033[1;33m[llm-wiki]\033[0m %s\n' "$*" >&2; }
-fail() { printf '\033[1;31m[llm-wiki]\033[0m %s\n' "$*" >&2; exit 1; }
+log() { printf '\033[1;34m[tesserae]\033[0m %s\n' "$*"; }
+warn() { printf '\033[1;33m[tesserae]\033[0m %s\n' "$*" >&2; }
+fail() { printf '\033[1;31m[tesserae]\033[0m %s\n' "$*" >&2; exit 1; }
 
 while [ "$#" -gt 0 ]; do
   case "$1" in
@@ -118,27 +118,27 @@ if [ "$USE_VENV" -eq 1 ]; then
   PYTHON_BIN="$VENV_DIR/bin/python"
 fi
 
-log "Installing LLM-Wiki CLI"
+log "Installing Tesserae CLI"
 "$PYTHON_BIN" -m pip install --upgrade pip >/dev/null
 "$PYTHON_BIN" -m pip install -e "$INSTALL_DIR"
 
 COMMAND_BIN="$($PYTHON_BIN - <<'PY'
 import os, sysconfig
-print(os.path.join(sysconfig.get_path('scripts'), 'llm_wiki'))
+print(os.path.join(sysconfig.get_path('scripts'), 'tesserae'))
 PY
 )"
 
-cat > "$BIN_DIR/llm_wiki" <<EOF
+cat > "$BIN_DIR/tesserae" <<EOF
 #!/usr/bin/env bash
 exec "$COMMAND_BIN" "\$@"
 EOF
-chmod +x "$BIN_DIR/llm_wiki"
+chmod +x "$BIN_DIR/tesserae"
 
-cat > "$BIN_DIR/llm-wiki" <<EOF
+cat > "$BIN_DIR/tesserae" <<EOF
 #!/usr/bin/env bash
 exec "$COMMAND_BIN" "\$@"
 EOF
-chmod +x "$BIN_DIR/llm-wiki"
+chmod +x "$BIN_DIR/tesserae"
 
 if [ "$UPDATE_SHELL_CONFIG" -eq 1 ]; then
   PATH_LINE="export PATH=\"$BIN_DIR:\$PATH\""
@@ -146,16 +146,16 @@ if [ "$UPDATE_SHELL_CONFIG" -eq 1 ]; then
     if [ -f "$rc" ] && ! grep -Fq "$BIN_DIR" "$rc"; then
       log "Adding $BIN_DIR to PATH in $rc"
       {
-        printf '\n# LLM-Wiki CLI\n'
+        printf '\n# Tesserae CLI\n'
         printf '%s\n' "$PATH_LINE"
       } >> "$rc"
     fi
   done
 fi
 
-if ! command -v "$BIN_DIR/llm_wiki" >/dev/null 2>&1; then
-  warn "Installed wrapper at $BIN_DIR/llm_wiki, but it is not discoverable via command -v. Add $BIN_DIR to PATH."
+if ! command -v "$BIN_DIR/tesserae" >/dev/null 2>&1; then
+  warn "Installed wrapper at $BIN_DIR/tesserae, but it is not discoverable via command -v. Add $BIN_DIR to PATH."
 fi
 
-log "Installed: $BIN_DIR/llm_wiki"
-log "Try: llm_wiki project init --source-kind Repository --source README.md --source docs --source src"
+log "Installed: $BIN_DIR/tesserae"
+log "Try: tesserae project init --source-kind Repository --source README.md --source docs --source src"

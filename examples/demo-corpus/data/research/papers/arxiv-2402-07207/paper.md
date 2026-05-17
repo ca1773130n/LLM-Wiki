@@ -17,7 +17,7 @@ sub_topic: 3D Gaussian Splatting
 methods: [GaussianSplatting, TextTo3D]
 datasets: []
 metrics: [PSNR, SSIM, LPIPS]
-license: "CC-BY-4.0 (LLM-Wiki demo prose)"
+license: "CC-BY-4.0 (Tesserae demo prose)"
 ---
 
 # GALA3D: Towards Text-to-3D Complex Scene Generation via Layout-guided Generative Gaussian Splatting

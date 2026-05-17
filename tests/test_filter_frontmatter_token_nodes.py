@@ -19,7 +19,7 @@ public ``/entities/`` index or get wiki pages of their own.
 
 from __future__ import annotations
 
-from llm_wiki.research_graph import (
+from tesserae.research_graph import (
     ResearchEdge,
     ResearchGraph,
     ResearchNode,

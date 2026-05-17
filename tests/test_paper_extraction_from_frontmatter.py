@@ -1,6 +1,6 @@
 """Regression tests for frontmatter-driven Paper/Repository/Synthesis typing.
 
-The LLM-Wiki demo corpus annotates every curated research file with a YAML
+The Tesserae demo corpus annotates every curated research file with a YAML
 frontmatter block (``type: Paper`` / ``type: Repository`` / ``type: Synthesis``
 / ``type: OpenQuestion`` / ``type: ResearchDigest``). Before this fix, the
 extractor:
@@ -22,7 +22,7 @@ from __future__ import annotations
 
 from pathlib import Path
 
-from llm_wiki.research_graph import (
+from tesserae.research_graph import (
     ResearchGraphExtractor,
     ResearchNodeType,
     extract_arxiv_id_from_path,

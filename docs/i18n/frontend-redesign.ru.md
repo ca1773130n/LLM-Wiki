@@ -3,12 +3,12 @@
 <!-- translations:start -->
 <p align="center"><a href="../frontend-redesign.md">English</a> · <a href="frontend-redesign.ko.md">한국어</a> · <a href="frontend-redesign.zh.md">中文</a> · <a href="frontend-redesign.ja.md">日本語</a> · <a href="frontend-redesign.ru.md">Русский</a> · <a href="frontend-redesign.es.md">Español</a> · <a href="frontend-redesign.fr.md">Français</a> · <a href="frontend-redesign.de.md">Deutsch</a></p>
 <!-- translations:end -->
-Этот документ — пошаговый обзор всех видимых маршрутов на переработанном статическом сайте LLM-Wiki. Он дополняет высокоуровневую модель в [`architecture.md`](architecture.ru.md) и таблицу статусов в [`feature-map.md`](feature-map.ru.md).
+Этот документ — пошаговый обзор всех видимых маршрутов на переработанном статическом сайте Tesserae. Он дополняет высокоуровневую модель в [`architecture.md`](architecture.ru.md) и таблицу статусов в [`feature-map.md`](feature-map.ru.md).
 
-После `llm_wiki project compile` сайт находится в `.llm-wiki/site/`. Чтобы открыть его локально:
+После `tesserae project compile` сайт находится в `.tesserae/site/`. Чтобы открыть его локально:
 
 ```bash
-llm_wiki project serve --port 8765
+tesserae project serve --port 8765
 # open http://127.0.0.1:8765/
 ```
 
@@ -58,7 +58,7 @@ AI siblings footer      — links to the .txt and .json
 
 ## Sources
 
-Это исходные документы L1 — файлы в `data/`, `docs/` и дереве проекта, на которые ссылается `.llm-wiki/config.json`. Каждый источник становится узлом `SourceDocument` (или `Paper` / `Repository`) и получает wiki-страницу, спроецированную `WikiLayerProjector`.
+Это исходные документы L1 — файлы в `data/`, `docs/` и дереве проекта, на которые ссылается `.tesserae/config.json`. Каждый источник становится узлом `SourceDocument` (или `Paper` / `Repository`) и получает wiki-страницу, спроецированную `WikiLayerProjector`.
 
 ### `/sources/` ✅
 
@@ -74,7 +74,7 @@ AI siblings footer      — links to the .txt and .json
 
 > _Screenshot: source-detail.png_
 
-Один исходный документ, отрендеренный через stdlib markdown pipeline (`llm_wiki/site/markdown.py`). Тело — исходный markdown с безопасной отрисовкой ссылок и изображений. Ниже тела:
+Один исходный документ, отрендеренный через stdlib markdown pipeline (`tesserae/site/markdown.py`). Тело — исходный markdown с безопасной отрисовкой ссылок и изображений. Ниже тела:
 
 - **Mentions** — все concept / entity / paper, извлечённые из этого источника, с бейджами типов рёбер.
 - **Backlinks** — все остальные wiki-страницы, которые ссылаются сюда.
@@ -153,7 +153,7 @@ Papers — исследовательская литература, рассма
 - **Related concepts** — рёбра `introduces` / `extends` / `uses`.
 - **Open questions** — `OpenQuestion`, связанные через статью.
 
-Ссылки arXiv автоматически линкуются через `llm_wiki/site/markdown.py`; правый TOC отражает список разделов выше.
+Ссылки arXiv автоматически линкуются через `tesserae/site/markdown.py`; правый TOC отражает список разделов выше.
 
 ## Repos
 
@@ -205,7 +205,7 @@ Topics группируют концепты в более широкие обл
 
 ## Syntheses
 
-Syntheses — страницы более высокого порядка, создаваемые `SynthesisProjector`. Семь типов (pulse, daily_digest, weekly, topic, comparison, field_overview) покрывают временные и структурные срезы корпуса. Сегодня тела синтезов — детерминированные шаблоны; `LLM_WIKI_SYNTHESIS_LLM=1` — hook для LLM-апгрейда (stub).
+Syntheses — страницы более высокого порядка, создаваемые `SynthesisProjector`. Семь типов (pulse, daily_digest, weekly, topic, comparison, field_overview) покрывают временные и структурные срезы корпуса. Сегодня тела синтезов — детерминированные шаблоны; `TESSERAE_SYNTHESIS_LLM=1` — hook для LLM-апгрейда (stub).
 
 ### `/syntheses/` ✅
 
@@ -250,7 +250,7 @@ Open questions извлекаются из корпуса как узлы `OpenQ
 
 ## Sessions
 
-Sessions — импортированные локальные transcripts AI-harness, нормализованные в `.llm-wiki/harness_sessions/`, затем отрендеренные как поисковая память проекта. Импорт выполняется явно через `llm_wiki project sessions discover --import` или `llm_wiki project sessions import ...`; обычные сборки сайта потребляют только уже нормализованные записи.
+Sessions — импортированные локальные transcripts AI-harness, нормализованные в `.tesserae/harness_sessions/`, затем отрендеренные как поисковая память проекта. Импорт выполняется явно через `tesserae project sessions discover --import` или `tesserae project sessions import ...`; обычные сборки сайта потребляют только уже нормализованные записи.
 
 ### `/sessions/` ✅
 
@@ -288,7 +288,7 @@ Sessions — импортированные локальные transcripts AI-ha
 
 > _Screenshot: timeline-day.png_
 
-Детальные страницы по дням — список каждой paper / repo / concept / synthesis, привязанной к этому календарному дню — являются явным follow-up. Subagent P подключает emit дневных деталей через `StaticSiteBuilder`. Пока это не готово, ячейки heatmap ссылаются на страницу источника `digest.md` дня как временное решение. (См. `render_timeline` в `llm_wiki/site/pages.py` для inline TODO.)
+Детальные страницы по дням — список каждой paper / repo / concept / synthesis, привязанной к этому календарному дню — являются явным follow-up. Subagent P подключает emit дневных деталей через `StaticSiteBuilder`. Пока это не готово, ячейки heatmap ссылаются на страницу источника `digest.md` дня как временное решение. (См. `render_timeline` в `tesserae/site/pages.py` для inline TODO.)
 
 ## Graph view
 
@@ -307,7 +307,7 @@ Sessions — импортированные локальные transcripts AI-ha
 - Перетаскивание → orbit (3D) или pan (2D).
 - Переключение 2D/3D в правом верхнем углу.
 
-Встроенная в страницу полезная нагрузка ограничена `MAX_GRAPH_NODES = 1500` (см. [`pages.py`](../../llm_wiki/site/pages.py)). Полный граф всегда доступен по `/graph.json` для инструментов. Узлы code-graph (`CodeClass`, `CodeFunction`, `Dependency`, …) по замыслу фильтруются из визуализации.
+Встроенная в страницу полезная нагрузка ограничена `MAX_GRAPH_NODES = 1500` (см. [`pages.py`](../../tesserae/site/pages.py)). Полный граф всегда доступен по `/graph.json` для инструментов. Узлы code-graph (`CodeClass`, `CodeFunction`, `Dependency`, …) по замыслу фильтруются из визуализации.
 
 **Связанные маршруты.** Каждая wiki-страница ссылается на сфокусированный вид подграфа.
 
@@ -323,7 +323,7 @@ Sessions — импортированные локальные transcripts AI-ha
 
 ## AI siblings — как каждая страница также является данными
 
-LLM-Wiki поставляет каждую страницу в трёх формах: человеческий HTML, соседний plain-text файл и соседний структурированный JSON. Плюс экспорты уровня всего сайта для crawlers и agents.
+Tesserae поставляет каждую страницу в трёх формах: человеческий HTML, соседний plain-text файл и соседний структурированный JSON. Плюс экспорты уровня всего сайта для crawlers и agents.
 
 ### Per-page `<page>.txt` ✅
 
@@ -415,4 +415,4 @@ JSON-LD `Dataset` schema.org. Только узлы wiki-layer (без code node
 - [Architecture](architecture.ru.md) — трёхслойная модель, карта модулей, история идемпотентности.
 - [Feature map](feature-map.ru.md) — каждая функция со статусом, исходными файлами и ссылками сюда.
 - [Quickstart](quickstart.ru.md) — минимальный путь от `project init` до просматриваемого сайта.
-- [Self-dogfood demo](self-dogfood.ru.md) — запуск LLM-Wiki на собственном репозитории, включая этот сайт.
+- [Self-dogfood demo](self-dogfood.ru.md) — запуск Tesserae на собственном репозитории, включая этот сайт.

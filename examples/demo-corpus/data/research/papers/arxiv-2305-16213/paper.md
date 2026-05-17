@@ -16,7 +16,7 @@ sub_topic: Diffusion-based 3D Generation
 methods: [RadianceField, Diffusion, ScoreDistillation, TextTo3D, Variational]
 datasets: []
 metrics: [PSNR, SSIM, LPIPS]
-license: "CC-BY-4.0 (LLM-Wiki demo prose)"
+license: "CC-BY-4.0 (Tesserae demo prose)"
 ---
 
 # ProlificDreamer: High-Fidelity and Diverse Text-to-3D Generation with Variational Score Distillation

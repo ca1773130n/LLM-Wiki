@@ -12,7 +12,7 @@ methods: [GaussianSplatting]
 datasets: []
 metrics: [PSNR, SSIM, LPIPS]
 oss_repo: nerfstudio-project/gsplat
-license: "CC-BY-4.0 (LLM-Wiki demo prose)"
+license: "CC-BY-4.0 (Tesserae demo prose)"
 ---
 
 # Mathematical Supplement for the gsplat Library

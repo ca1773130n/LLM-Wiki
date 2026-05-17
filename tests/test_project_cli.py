@@ -3,19 +3,19 @@ import subprocess
 import sys
 from typing import Iterator, List, Optional
 
-from llm_wiki.cli import main
-from llm_wiki.ports import Source
-from llm_wiki.project import ProjectWiki
-from llm_wiki.research_graph import ResearchEdge, ResearchNode
+from tesserae.cli import main
+from tesserae.ports import Source
+from tesserae.project import ProjectWiki
+from tesserae.research_graph import ResearchEdge, ResearchNode
 
 
-def test_project_init_creates_llm_wiki_workspace(tmp_path):
+def test_project_init_creates_tesserae_workspace(tmp_path):
     project = tmp_path / "demo-project"
     project.mkdir()
 
     wiki = ProjectWiki.init(project, name="demo_wiki", source_kind="Repository")
 
-    assert wiki.root == project / ".llm-wiki"
+    assert wiki.root == project / ".tesserae"
     assert (wiki.root / "config.json").exists()
     assert (wiki.root / "graph.json").exists()
     assert (wiki.root / "manifest.json").exists()
@@ -25,7 +25,7 @@ def test_project_init_creates_llm_wiki_workspace(tmp_path):
     assert config["name"] == "demo_wiki"
     assert config["project_root"] == str(project.resolve())
     assert config["source_kind"] == "Repository"
-    assert config["graph_path"] == ".llm-wiki/graph.json"
+    assert config["graph_path"] == ".tesserae/graph.json"
 
 
 def test_project_mcp_config_renders_absolute_hermes_snippet(tmp_path):
@@ -33,14 +33,14 @@ def test_project_mcp_config_renders_absolute_hermes_snippet(tmp_path):
     project.mkdir()
     wiki = ProjectWiki.init(project, name="demo_wiki")
 
-    snippet = wiki.render_mcp_config(server_name="demo_project_wiki", pythonpath="/opt/llm-wiki")
+    snippet = wiki.render_mcp_config(server_name="demo_project_wiki", pythonpath="/opt/tesserae")
 
     assert "mcp_servers:" in snippet
     assert "demo_project_wiki:" in snippet
     assert 'command: "python3"' in snippet
-    assert "llm_wiki.mcp_server" in snippet
-    assert str((project / ".llm-wiki" / "graph.json").resolve()) in snippet
-    assert 'PYTHONPATH: "/opt/llm-wiki"' in snippet
+    assert "tesserae.mcp_server" in snippet
+    assert str((project / ".tesserae" / "graph.json").resolve()) in snippet
+    assert 'PYTHONPATH: "/opt/tesserae"' in snippet
 
 
 def test_project_ingest_updates_standard_artifacts(tmp_path):
@@ -55,13 +55,13 @@ def test_project_ingest_updates_standard_artifacts(tmp_path):
 
     assert result["node_count"] > 0
     assert result["edge_count"] > 0
-    graph = json.loads((project / ".llm-wiki" / "graph.json").read_text(encoding="utf-8"))
+    graph = json.loads((project / ".tesserae" / "graph.json").read_text(encoding="utf-8"))
     assert any(node["name"] == "Demo Paper" for node in graph["nodes"])
-    assert (project / ".llm-wiki" / "sqlite.db").exists()
-    assert (project / ".llm-wiki" / "markdown_projection" / "index.md").exists()
-    assert (project / ".llm-wiki" / "cognee_bundle" / "nodes.jsonl").exists()
-    assert (project / ".llm-wiki" / "temporal_facts.jsonl").exists()
-    assert (project / ".llm-wiki" / "competitive_report.md").exists()
+    assert (project / ".tesserae" / "sqlite.db").exists()
+    assert (project / ".tesserae" / "markdown_projection" / "index.md").exists()
+    assert (project / ".tesserae" / "cognee_bundle" / "nodes.jsonl").exists()
+    assert (project / ".tesserae" / "temporal_facts.jsonl").exists()
+    assert (project / ".tesserae" / "competitive_report.md").exists()
 
 
 def test_project_temporal_artifacts_include_provenance(tmp_path):
@@ -72,10 +72,10 @@ def test_project_temporal_artifacts_include_provenance(tmp_path):
 
     wiki.compile()
 
-    facts = [json.loads(line) for line in (project / ".llm-wiki" / "temporal_facts.jsonl").read_text(encoding="utf-8").splitlines()]
+    facts = [json.loads(line) for line in (project / ".tesserae" / "temporal_facts.jsonl").read_text(encoding="utf-8").splitlines()]
     assert facts
     assert all("provenance" in fact for fact in facts)
-    assert "MegaMem" in (project / ".llm-wiki" / "competitive_report.md").read_text(encoding="utf-8")
+    assert "MegaMem" in (project / ".tesserae" / "competitive_report.md").read_text(encoding="utf-8")
 
 
 def test_project_compile_writes_graphiti_episode_export(tmp_path):
@@ -86,7 +86,7 @@ def test_project_compile_writes_graphiti_episode_export(tmp_path):
 
     result = wiki.compile()
 
-    episodes_path = project / ".llm-wiki" / "graphiti_episodes.jsonl"
+    episodes_path = project / ".tesserae" / "graphiti_episodes.jsonl"
     episodes = [json.loads(line) for line in episodes_path.read_text(encoding="utf-8").splitlines()]
     assert result["graphiti_episodes_path"] == str(episodes_path)
     assert episodes
@@ -105,7 +105,7 @@ def test_cli_project_export_graphiti_writes_episode_jsonl(tmp_path, capsys):
 
     captured = capsys.readouterr().out
     assert "Exported Graphiti episodes" in captured
-    assert (project / ".llm-wiki" / "graphiti_episodes.jsonl").exists()
+    assert (project / ".tesserae" / "graphiti_episodes.jsonl").exists()
 
 
 def test_cli_project_sync_graphiti_dry_run_reports_episode_count(tmp_path, capsys):
@@ -130,12 +130,12 @@ def test_project_compile_writes_agent_harness_and_obsidian_vault(tmp_path):
 
     result = wiki.compile()
 
-    assert result["agent_harness_path"] == str(project / ".llm-wiki" / "agent_harness")
-    assert result["obsidian_vault_path"] == str(project / ".llm-wiki" / "obsidian_vault")
-    assert (project / ".llm-wiki" / "agent_harness" / "manifest.json").exists()
-    assert (project / ".llm-wiki" / "agent_harness" / "cursor" / ".cursor" / "rules" / "llm-wiki.mdc").exists()
-    assert (project / ".llm-wiki" / "obsidian_vault" / ".obsidian" / "app.json").exists()
-    assert (project / ".llm-wiki" / "obsidian_vault" / "index.md").exists()
+    assert result["agent_harness_path"] == str(project / ".tesserae" / "agent_harness")
+    assert result["obsidian_vault_path"] == str(project / ".tesserae" / "obsidian_vault")
+    assert (project / ".tesserae" / "agent_harness" / "manifest.json").exists()
+    assert (project / ".tesserae" / "agent_harness" / "cursor" / ".cursor" / "rules" / "tesserae.mdc").exists()
+    assert (project / ".tesserae" / "obsidian_vault" / ".obsidian" / "app.json").exists()
+    assert (project / ".tesserae" / "obsidian_vault" / "index.md").exists()
 
 
 def test_cli_project_export_agent_harness_and_obsidian(tmp_path, capsys):
@@ -151,8 +151,8 @@ def test_cli_project_export_agent_harness_and_obsidian(tmp_path, capsys):
     captured = capsys.readouterr().out
     assert "Exported agent harness" in captured
     assert "Exported Obsidian vault" in captured
-    assert (project / ".llm-wiki" / "agent_harness" / "claude" / "CLAUDE.md").exists()
-    assert (project / ".llm-wiki" / "obsidian_vault" / "_meta" / "dashboard.md").exists()
+    assert (project / ".tesserae" / "agent_harness" / "claude" / "CLAUDE.md").exists()
+    assert (project / ".tesserae" / "obsidian_vault" / "_meta" / "dashboard.md").exists()
 
 
 def test_project_compile_includes_code_graph_and_frontend_site_for_repository(tmp_path):
@@ -165,24 +165,24 @@ def test_project_compile_includes_code_graph_and_frontend_site_for_repository(tm
 
     result = wiki.compile()
 
-    assert result["site_path"] == str(project / ".llm-wiki" / "site")
+    assert result["site_path"] == str(project / ".tesserae" / "site")
     # Codex review F-11: code-graph nodes live in their own artifact, not in
     # ``graph.json``. ``graph.json`` is research-only; ``code-graph.json``
     # carries ``CodeProject`` / ``SourceFile`` / ``CodeFunction`` / etc.
     code_graph = json.loads(
-        (project / ".llm-wiki" / "code-graph.json").read_text(encoding="utf-8")
+        (project / ".tesserae" / "code-graph.json").read_text(encoding="utf-8")
     )
     code_types = {node["type"] for node in code_graph["nodes"]}
     assert {"CodeProject", "SourceFile"}.issubset(code_types)
     research_graph = json.loads(
-        (project / ".llm-wiki" / "graph.json").read_text(encoding="utf-8")
+        (project / ".tesserae" / "graph.json").read_text(encoding="utf-8")
     )
     research_types = {node["type"] for node in research_graph["nodes"]}
     assert research_types.isdisjoint(
         {"CodeProject", "SourceFile", "CodeClass", "CodeFunction", "CodeModule", "Dependency"}
     )
-    assert (project / ".llm-wiki" / "site" / "index.html").exists()
-    assert (project / ".llm-wiki" / "site" / "search-index.json").exists()
+    assert (project / ".tesserae" / "site" / "index.html").exists()
+    assert (project / ".tesserae" / "site" / "search-index.json").exists()
 
 
 def test_cli_project_build_site_and_serve_smoke(tmp_path, capsys):
@@ -239,7 +239,7 @@ def test_cli_project_init_ingest_and_mcp_config_from_working_directory(tmp_path,
     assert "Ingested project wiki" in captured
     assert "mcp_servers:" in captured
     assert "demo_wiki:" in captured
-    assert (project / ".llm-wiki" / "graph.json").exists()
+    assert (project / ".tesserae" / "graph.json").exists()
 
 
 def test_project_compile_scans_configured_sources_and_changed_only(tmp_path):
@@ -257,7 +257,7 @@ def test_project_compile_scans_configured_sources_and_changed_only(tmp_path):
     assert first["node_count"] > 0
     assert second["processed_files"] == 0
     assert second["skipped_files"] == 1
-    graph = json.loads((project / ".llm-wiki" / "graph.json").read_text(encoding="utf-8"))
+    graph = json.loads((project / ".tesserae" / "graph.json").read_text(encoding="utf-8"))
     assert any(node["name"] == "Compile Paper" for node in graph["nodes"])
 
 
@@ -273,7 +273,7 @@ def test_cli_project_compile_uses_configured_sources(tmp_path, capsys):
 
     captured = capsys.readouterr().out
     assert "Compiled project wiki" in captured
-    graph = json.loads((project / ".llm-wiki" / "graph.json").read_text(encoding="utf-8"))
+    graph = json.loads((project / ".tesserae" / "graph.json").read_text(encoding="utf-8"))
     assert any(node["name"] == "CLI Compile Paper" for node in graph["nodes"])
 
 
@@ -281,17 +281,17 @@ def test_cli_module_can_init_from_current_working_directory(tmp_path):
     project = tmp_path / "cwd-project"
     project.mkdir()
     result = subprocess.run(
-        [sys.executable, "-m", "llm_wiki.cli", "project", "init", "--name", "cwd_wiki"],
+        [sys.executable, "-m", "tesserae.cli", "project", "init", "--name", "cwd_wiki"],
         cwd=project,
         text=True,
         stdout=subprocess.PIPE,
         stderr=subprocess.PIPE,
-        env={"PYTHONPATH": "/Users/neo/Developer/Projects/LLM-Wiki"},
+        env={"PYTHONPATH": "/Users/neo/Developer/Projects/Tesserae"},
         timeout=20,
     )
 
     assert result.returncode == 0, result.stderr
-    assert (project / ".llm-wiki" / "config.json").exists()
+    assert (project / ".tesserae" / "config.json").exists()
     assert "Initialized project wiki" in result.stdout
 
 
@@ -346,7 +346,7 @@ class _StubGraphStore:
                 yield node
 
     def query_subgraph(self, seeds, depth=1):
-        from llm_wiki.research_graph import ResearchGraph
+        from tesserae.research_graph import ResearchGraph
 
         return ResearchGraph(nodes=list(self.upserted_nodes), edges=list(self.upserted_edges))
 

@@ -317,4 +317,4 @@ Some insights about neural voxel grids and dynamic scenes reconstruction origina
     title     = {4D Gaussian Splatting for Real-Time Dynamic Scene Rendering},
     booktitle = {Proceedings of the IEEE/CVF Conference on Computer Vision and Pattern Recognition (CVPR)},
 
-> Truncated at 300 lines for the LLM-Wiki demo. See upstream for the full README.
+> Truncated at 300 lines for the Tesserae demo. See upstream for the full README.

@@ -13,10 +13,10 @@ from __future__ import annotations
 
 from pathlib import Path
 
-from llm_wiki.graph_stores import SqliteGraphStore
-from llm_wiki.persistence import SQLiteResearchGraphStore
-from llm_wiki.ports import GraphStore
-from llm_wiki.research_graph import ResearchEdge, ResearchGraph, ResearchNode, ResearchNodeType
+from tesserae.graph_stores import SqliteGraphStore
+from tesserae.persistence import SQLiteResearchGraphStore
+from tesserae.ports import GraphStore
+from tesserae.research_graph import ResearchEdge, ResearchGraph, ResearchNode, ResearchNodeType
 
 
 def _make_node(

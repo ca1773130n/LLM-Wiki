@@ -2,7 +2,7 @@
 
 The live GH Pages deploy is static HTML with no /api/ask backend, so the
 per-page ask widget normally collapses to a one-liner saying "host this
-wiki with llm_wiki project serve...". This script bakes answers for a
+wiki with tesserae project serve...". This script bakes answers for a
 small curated set of demo questions so the widget's degraded mode can
 show "Try a demo question" instead — visitors get a real taste of the
 RAG retrieval without us needing to run a hosted backend.
@@ -57,7 +57,7 @@ QUESTIONS: list[tuple[str, str]] = [
 async def main() -> int:
     from raganything import RAGAnything, RAGAnythingConfig
     from lightrag import LightRAG
-    from llm_wiki.raganything_llm import build_runtime_funcs
+    from tesserae.raganything_llm import build_runtime_funcs
 
     if not STORE_DIR.exists() or not any(STORE_DIR.glob("*.json")):
         print(f"ERROR: seeded store not found at {STORE_DIR}", file=sys.stderr)
@@ -125,7 +125,7 @@ def _strip_provenance_footer(text: str) -> str:
 
     The widget doesn't render markdown headings nicely and the citation
     bullets just dilute the answer. The full citations are still
-    discoverable via the live /api/ask path during `llm_wiki serve`.
+    discoverable via the live /api/ask path during `tesserae serve`.
     """
     return re.sub(r"\n+#+\s*References.*\Z", "", text, flags=re.DOTALL).rstrip()
 

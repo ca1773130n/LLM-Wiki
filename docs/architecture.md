@@ -3,7 +3,7 @@
 <!-- translations:start -->
 <p align="center"><a href="i18n/architecture.ko.md">한국어</a> · <a href="i18n/architecture.zh.md">中文</a> · <a href="i18n/architecture.ja.md">日本語</a> · <a href="i18n/architecture.ru.md">Русский</a> · <a href="i18n/architecture.es.md">Español</a> · <a href="i18n/architecture.fr.md">Français</a> · <a href="../i18n/architecture.de.md">Deutsch</a></p>
 <!-- translations:end -->
-LLM-Wiki turns a directory of source material into a controlled, typed knowledge graph and projects that graph through a durable markdown wiki layer into a static, AI-friendly website. The April 2026 redesign reorganised the system around a Karpathy three-layer model: raw evidence stays raw, a typed graph governs ontology, and a markdown wiki layer sits between the graph and any rendered output. The static site is now a *renderer* of that wiki layer rather than a direct dump of the graph, with the controlled ontology in [`llm_wiki/research_graph.py`](../llm_wiki/research_graph.py) as the schema.
+Tesserae turns a directory of source material into a controlled, typed knowledge graph and projects that graph through a durable markdown wiki layer into a static, AI-friendly website. The April 2026 redesign reorganised the system around a Karpathy three-layer model: raw evidence stays raw, a typed graph governs ontology, and a markdown wiki layer sits between the graph and any rendered output. The static site is now a *renderer* of that wiki layer rather than a direct dump of the graph, with the controlled ontology in [`tesserae/research_graph.py`](../tesserae/research_graph.py) as the schema.
 
 ## The Karpathy three-layer model
 
@@ -11,15 +11,15 @@ Andrej Karpathy's framing for LLM-friendly knowledge bases distinguishes three l
 
 | Layer | Concern | Repo location | Owner |
 |---|---|---|---|
-| L1 — Raw sources | The literal bytes the user authored or harvested. Append-only. | `data/`, `docs/`, project trees referenced in `.llm-wiki/config.json` | the user |
-| L2 — Wiki | Typed markdown pages (sources, concepts, entities, papers, repos, topics, syntheses, questions) with YAML frontmatter. Idempotent: regenerated each compile, but only rewritten when content hashes change. | `.llm-wiki/wiki/` | `WikiPageStore`, `WikiLayerProjector`, `SynthesisProjector` |
-| L3 — Rendered | The static HTML site, AI-sibling exports, search index, sitemaps, JSON-LD. Wiped and rewritten every compile, but byte-stable across reruns. | `.llm-wiki/site/` | `StaticSiteBuilder` (`llm_wiki/site/`) |
+| L1 — Raw sources | The literal bytes the user authored or harvested. Append-only. | `data/`, `docs/`, project trees referenced in `.tesserae/config.json` | the user |
+| L2 — Wiki | Typed markdown pages (sources, concepts, entities, papers, repos, topics, syntheses, questions) with YAML frontmatter. Idempotent: regenerated each compile, but only rewritten when content hashes change. | `.tesserae/wiki/` | `WikiPageStore`, `WikiLayerProjector`, `SynthesisProjector` |
+| L3 — Rendered | The static HTML site, AI-sibling exports, search index, sitemaps, JSON-LD. Wiped and rewritten every compile, but byte-stable across reruns. | `.tesserae/site/` | `StaticSiteBuilder` (`tesserae/site/`) |
 
-The schema sits across all three layers as a separate axis: `ResearchGraph` in `graph.json` is the controlled ontology that L2 pages link against, and the `ResearchNodeType` / edge whitelist in [`llm_wiki/research_graph.py`](../llm_wiki/research_graph.py) is the source of truth for what types exist at all.
+The schema sits across all three layers as a separate axis: `ResearchGraph` in `graph.json` is the controlled ontology that L2 pages link against, and the `ResearchNodeType` / edge whitelist in [`tesserae/research_graph.py`](../tesserae/research_graph.py) is the source of truth for what types exist at all.
 
 The redesign added L2 explicitly. Before April 2026 the static site was projected straight from `graph.json`; the wiki layer existed only inside the Obsidian vault export. Splitting it out gave us:
 
-- A single human-editable surface (open `.llm-wiki/wiki/` in Obsidian or any markdown editor).
+- A single human-editable surface (open `.tesserae/wiki/` in Obsidian or any markdown editor).
 - Idempotent rebuilds: re-running `project compile` produces zero file diffs unless source content changed.
 - An evolution log: synthesis pages accumulate over time and let the project narrate itself.
 
@@ -28,7 +28,7 @@ The redesign added L2 explicitly. Before April 2026 the static site was projecte
 ```
 data/, docs/, src/                                    (L1 raw)
         │
-        ▼  project compile  (llm_wiki/project.py)
+        ▼  project compile  (tesserae/project.py)
 ┌───────────────────────────┐
 │ ResearchGraphExtractor    │   deterministic + selective Claude
 │ + canonicalization        │
@@ -44,14 +44,14 @@ data/, docs/, src/                                    (L1 raw)
             │
             ▼
 ┌───────────────────────────┐
-│ .llm-wiki/wiki/  (L2 md)  │   sources/, concepts/, entities/,
+│ .tesserae/wiki/  (L2 md)  │   sources/, concepts/, entities/,
 │                            │   papers/, repos/, topics/,
 │                            │   syntheses/, questions/
 └───────────┬───────────────┘
             │
             ▼  StaticSiteBuilder.write_site
 ┌───────────────────────────┐
-│ .llm-wiki/site/  (L3 html)│   index.html, <kind>/index.html,
+│ .tesserae/site/  (L3 html)│   index.html, <kind>/index.html,
 │                            │   <kind>/<slug>.html,
 │                            │   per-page .txt + .json siblings,
 │                            │   llms.txt, llms-full.txt,
@@ -63,7 +63,7 @@ data/, docs/, src/                                    (L1 raw)
 └───────────────────────────┘
 ```
 
-Every step is incremental. The graph extractor uses `manifest.json` content hashes to skip unchanged source files. `WikiPageStore.write_page` returns `False` (and skips the write) when the body hash matches what's already on disk. `StaticSiteBuilder` wipes and rewrites `.llm-wiki/site/`, but its output is deterministic — see "Idempotence story" below.
+Every step is incremental. The graph extractor uses `manifest.json` content hashes to skip unchanged source files. `WikiPageStore.write_page` returns `False` (and skips the write) when the body hash matches what's already on disk. `StaticSiteBuilder` wipes and rewrites `.tesserae/site/`, but its output is deterministic — see "Idempotence story" below.
 
 ## Module map
 
@@ -71,57 +71,57 @@ Every step is incremental. The graph extractor uses `manifest.json` content hash
 
 | Module | Responsibility |
 |---|---|
-| [`llm_wiki/wiki_store.py`](../llm_wiki/wiki_store.py) | `WikiPage` dataclass, `WikiPageStore` for filesystem I/O. Stdlib-only YAML-subset frontmatter parser. Body-hash idempotence. |
-| [`llm_wiki/wiki_projector.py`](../llm_wiki/wiki_projector.py) | `WikiLayerProjector`: maps each `ResearchGraph` node of a wiki-layer type to a markdown page in the right `kind/` folder. |
-| [`llm_wiki/synthesis.py`](../llm_wiki/synthesis.py) | `SynthesisProjector`: deterministic templates for pulse, daily_digest, weekly, topic, comparison, field_overview. Adds `Synthesis` nodes and `synthesizes` / `summarizes` edges back into the graph. |
+| [`tesserae/wiki_store.py`](../tesserae/wiki_store.py) | `WikiPage` dataclass, `WikiPageStore` for filesystem I/O. Stdlib-only YAML-subset frontmatter parser. Body-hash idempotence. |
+| [`tesserae/wiki_projector.py`](../tesserae/wiki_projector.py) | `WikiLayerProjector`: maps each `ResearchGraph` node of a wiki-layer type to a markdown page in the right `kind/` folder. |
+| [`tesserae/synthesis.py`](../tesserae/synthesis.py) | `SynthesisProjector`: deterministic templates for pulse, daily_digest, weekly, topic, comparison, field_overview. Adds `Synthesis` nodes and `synthesizes` / `summarizes` edges back into the graph. |
 
 ### Graph + ontology
 
 | Module | Responsibility |
 |---|---|
-| [`llm_wiki/research_graph.py`](../llm_wiki/research_graph.py) | `ResearchNodeType` enum (incl. `SYNTHESIS`), edge-type whitelist (incl. `synthesizes`, `summarizes`), validation. |
-| [`llm_wiki/canonicalization.py`](../llm_wiki/canonicalization.py) | Alias canonicalization + near-duplicate review queue. |
-| [`llm_wiki/code_graph.py`](../llm_wiki/code_graph.py) | Deterministic Python AST extractor for the development slice. |
-| [`llm_wiki/llm_extractor.py`](../llm_wiki/llm_extractor.py) | Claude CLI/OAuth selective extractor. |
+| [`tesserae/research_graph.py`](../tesserae/research_graph.py) | `ResearchNodeType` enum (incl. `SYNTHESIS`), edge-type whitelist (incl. `synthesizes`, `summarizes`), validation. |
+| [`tesserae/canonicalization.py`](../tesserae/canonicalization.py) | Alias canonicalization + near-duplicate review queue. |
+| [`tesserae/code_graph.py`](../tesserae/code_graph.py) | Deterministic Python AST extractor for the development slice. |
+| [`tesserae/llm_extractor.py`](../tesserae/llm_extractor.py) | Claude CLI/OAuth selective extractor. |
 
 ### Site renderer (L3)
 
 | Module | Responsibility |
 |---|---|
-| [`llm_wiki/site/__init__.py`](../llm_wiki/site/__init__.py) | `StaticSiteBuilder.write_site`: wipes + rebuilds the site, walks every route, emits exports + AI siblings + manifest. |
-| [`llm_wiki/site/pages.py`](../llm_wiki/site/pages.py) | One renderer per route (home, indexes, detail pages, timeline, graph, about). `SiteContext` carries precomputed indices so renderers stay pure. |
-| [`llm_wiki/site/components.py`](../llm_wiki/site/components.py) | HTML primitives: `breadcrumbs`, `card`, `badge`, `node_table`, `edge_list`, `sparkline_svg`, `heatmap_svg`, `toc`, `page_shell`, `ai_siblings_footer`. |
-| [`llm_wiki/site/tokens.py`](../llm_wiki/site/tokens.py) | Design tokens — CSS variables, light + dark themes, layout, typography, all components styled here. |
-| [`llm_wiki/site/js.py`](../llm_wiki/site/js.py) | Client JS bundle: search palette, theme toggle, sigma + 3D-force graph view. |
-| [`llm_wiki/site/markdown.py`](../llm_wiki/site/markdown.py) | Stdlib-only markdown renderer (links, autolinks, code, emphasis, headings). No external dependency. |
-| [`llm_wiki/site/relevance.py`](../llm_wiki/site/relevance.py) | Four-signal relevance scoring (direct link, source overlap, Adamic-Adar, type affinity) used by every `Related` section. |
-| [`llm_wiki/site/search.py`](../llm_wiki/site/search.py) | `search-index.json` builder. Wiki-layer kinds only. |
-| [`llm_wiki/site/sessions.py`](../llm_wiki/site/sessions.py) | Session index/detail renderers for imported harness history: project-memory summary sections, conversation turn rail, markdown transcript rendering, and collapsed tool-use blocks. |
-| [`llm_wiki/site/exports.py`](../llm_wiki/site/exports.py) | `llms.txt`, `llms-full.txt`, `graph.jsonld`, `sitemap.xml`, `rss.xml`, `robots.txt`, `ai-readme.md`, per-page `.txt`/`.json` siblings. |
+| [`tesserae/site/__init__.py`](../tesserae/site/__init__.py) | `StaticSiteBuilder.write_site`: wipes + rebuilds the site, walks every route, emits exports + AI siblings + manifest. |
+| [`tesserae/site/pages.py`](../tesserae/site/pages.py) | One renderer per route (home, indexes, detail pages, timeline, graph, about). `SiteContext` carries precomputed indices so renderers stay pure. |
+| [`tesserae/site/components.py`](../tesserae/site/components.py) | HTML primitives: `breadcrumbs`, `card`, `badge`, `node_table`, `edge_list`, `sparkline_svg`, `heatmap_svg`, `toc`, `page_shell`, `ai_siblings_footer`. |
+| [`tesserae/site/tokens.py`](../tesserae/site/tokens.py) | Design tokens — CSS variables, light + dark themes, layout, typography, all components styled here. |
+| [`tesserae/site/js.py`](../tesserae/site/js.py) | Client JS bundle: search palette, theme toggle, sigma + 3D-force graph view. |
+| [`tesserae/site/markdown.py`](../tesserae/site/markdown.py) | Stdlib-only markdown renderer (links, autolinks, code, emphasis, headings). No external dependency. |
+| [`tesserae/site/relevance.py`](../tesserae/site/relevance.py) | Four-signal relevance scoring (direct link, source overlap, Adamic-Adar, type affinity) used by every `Related` section. |
+| [`tesserae/site/search.py`](../tesserae/site/search.py) | `search-index.json` builder. Wiki-layer kinds only. |
+| [`tesserae/site/sessions.py`](../tesserae/site/sessions.py) | Session index/detail renderers for imported harness history: project-memory summary sections, conversation turn rail, markdown transcript rendering, and collapsed tool-use blocks. |
+| [`tesserae/site/exports.py`](../tesserae/site/exports.py) | `llms.txt`, `llms-full.txt`, `graph.jsonld`, `sitemap.xml`, `rss.xml`, `robots.txt`, `ai-readme.md`, per-page `.txt`/`.json` siblings. |
 
 ### Pipeline orchestration
 
 | Module | Responsibility |
 |---|---|
-| [`llm_wiki/project.py`](../llm_wiki/project.py) | `ProjectWiki.compile`: drives extraction → graph → wiki layer → site. Owns `ProjectPaths` (`config`, `graph`, `manifest`, `wiki`, `site`, etc.). |
-| [`llm_wiki/cli.py`](../llm_wiki/cli.py) | All `llm_wiki project …` subcommands, including `compile`, `build-site`, `serve`, `watch`, `deploy`. |
-| [`llm_wiki/deploy.py`](../llm_wiki/deploy.py) | `project deploy`: pushes `.llm-wiki/site/` to a `gh-pages` branch via worktree, optionally enables Pages via `gh`. |
+| [`tesserae/project.py`](../tesserae/project.py) | `ProjectWiki.compile`: drives extraction → graph → wiki layer → site. Owns `ProjectPaths` (`config`, `graph`, `manifest`, `wiki`, `site`, etc.). |
+| [`tesserae/cli.py`](../tesserae/cli.py) | All `tesserae project …` subcommands, including `compile`, `build-site`, `serve`, `watch`, `deploy`. |
+| [`tesserae/deploy.py`](../tesserae/deploy.py) | `project deploy`: pushes `.tesserae/site/` to a `gh-pages` branch via worktree, optionally enables Pages via `gh`. |
 
 ### External adapters (unchanged this round)
 
 | Module | Responsibility |
 |---|---|
-| [`llm_wiki/obsidian_adapter.py`](../llm_wiki/obsidian_adapter.py) | Obsidian vault projection (graph coloring, Dataview dashboard, raw assets). |
-| [`llm_wiki/agent_harness.py`](../llm_wiki/agent_harness.py) | Claude Code / Codex / Gemini / Kiro / Cursor / OpenCode harness exports. |
-| [`llm_wiki/harness_sessions.py`](../llm_wiki/harness_sessions.py) | Inbound Claude Code/Codex session discovery, normalization, storage under `.llm-wiki/harness_sessions/`, and redacted markdown summaries. |
-| [`llm_wiki/graphiti_adapter.py`](../llm_wiki/graphiti_adapter.py) | Temporal-fact JSONL + optional live Graphiti sync. |
-| [`llm_wiki/cognee_adapter.py`](../llm_wiki/cognee_adapter.py) | Cognee nodes/edges JSONL bundle and direct add/cognify path. |
-| [`llm_wiki/mcp_server.py`](../llm_wiki/mcp_server.py) | MCP stdio server exposing `schema`, `graph_summary`, `search_nodes`, `node_context`, `search_facts`, `timeline`. |
+| [`tesserae/obsidian_adapter.py`](../tesserae/obsidian_adapter.py) | Obsidian vault projection (graph coloring, Dataview dashboard, raw assets). |
+| [`tesserae/agent_harness.py`](../tesserae/agent_harness.py) | Claude Code / Codex / Gemini / Kiro / Cursor / OpenCode harness exports. |
+| [`tesserae/harness_sessions.py`](../tesserae/harness_sessions.py) | Inbound Claude Code/Codex session discovery, normalization, storage under `.tesserae/harness_sessions/`, and redacted markdown summaries. |
+| [`tesserae/graphiti_adapter.py`](../tesserae/graphiti_adapter.py) | Temporal-fact JSONL + optional live Graphiti sync. |
+| [`tesserae/cognee_adapter.py`](../tesserae/cognee_adapter.py) | Cognee nodes/edges JSONL bundle and direct add/cognify path. |
+| [`tesserae/mcp_server.py`](../tesserae/mcp_server.py) | MCP stdio server exposing `schema`, `graph_summary`, `search_nodes`, `node_context`, `search_facts`, `timeline`. |
 
 ## Project workspace layout
 
 ```text
-.llm-wiki/
+.tesserae/
   config.json                 project name, source kind, source list
   graph.json                  validated ResearchGraph (incl. Synthesis nodes)
   manifest.json               per-source content hashes (input dedup)
@@ -139,7 +139,7 @@ Every step is incremental. The graph extractor uses `manifest.json` content hash
   site/                       L3 static site — see below
 ```
 
-### `.llm-wiki/wiki/` (L2)
+### `.tesserae/wiki/` (L2)
 
 ```text
 wiki/
@@ -153,9 +153,9 @@ wiki/
   questions/<slug>.md         OpenQuestion
 ```
 
-Each file is editable by hand; the next compile honours user edits as long as the body hash differs from what the projector would write. (Editing only the body wins; editing the frontmatter loses on next compile because frontmatter is regenerated.) Obsidian users can open `.llm-wiki/wiki/` directly; the existing `obsidian_vault/` adapter is a separate projection, not a substitute.
+Each file is editable by hand; the next compile honours user edits as long as the body hash differs from what the projector would write. (Editing only the body wins; editing the frontmatter loses on next compile because frontmatter is regenerated.) Obsidian users can open `.tesserae/wiki/` directly; the existing `obsidian_vault/` adapter is a separate projection, not a substitute.
 
-### `.llm-wiki/site/` (L3)
+### `.tesserae/site/` (L3)
 
 ```text
 site/
@@ -187,7 +187,7 @@ site/
 
 The redesign drew an explicit line: code-class and code-function nodes stay in `graph.json` (so MCP, Cognee, and Graphiti consumers still see them) but never get HTML pages, never appear in `search-index.json`, and never appear in the navigation. That's the user-facing contract — the wiki is a document-first knowledge base, not a function browser.
 
-Concretely, `StaticSiteBuilder` skips any node whose type is not in the L2 wiki kind map (`llm_wiki/wiki_projector.py::_KIND_FOR_TYPE`):
+Concretely, `StaticSiteBuilder` skips any node whose type is not in the L2 wiki kind map (`tesserae/wiki_projector.py::_KIND_FOR_TYPE`):
 
 - Excluded from L2 + L3: `CodeClass`, `CodeFunction`, `CodeModule`, `Dependency`, `EvidenceSpan`, `SourceFile`, all `Claim` variants (`Claim`, `ContributionClaim`, `PerformanceClaim`, `ComparisonClaim`, `LimitationClaim`, `CausalClaim`).
 - Surface where they still appear: as bullets, badges, neighbour counts, or evidence excerpts inline on related wiki pages, and in `graph.json` for downstream tooling.
@@ -207,8 +207,8 @@ This is verified by `tests/test_site_pages.py` and the end-to-end smoke in `test
 
 ## Scaling notes
 
-- **Graph view node cap.** [`MAX_GRAPH_NODES = 1500`](../llm_wiki/site/pages.py) bounds the page-embedded payload for the interactive force layout. Beyond ~1500 nodes the browser-side simulation gets sluggish on mid-range hardware, so the page drops the lowest-degree wiki-layer nodes first when the count exceeds the cap. The exported `graph.json` is unaffected — it always contains the full graph. Code nodes are filtered out before the cap is applied.
-- **`llms-full.txt` cap.** A 5 MB safety cap applies in [`llm_wiki/site/exports.py`](../llm_wiki/site/exports.py); the file ends with a `[TRUNCATED — see graph.jsonld for the full set]` marker if the cap is hit. `graph.jsonld` is uncapped because JSON-LD consumers expect the full set.
+- **Graph view node cap.** [`MAX_GRAPH_NODES = 1500`](../tesserae/site/pages.py) bounds the page-embedded payload for the interactive force layout. Beyond ~1500 nodes the browser-side simulation gets sluggish on mid-range hardware, so the page drops the lowest-degree wiki-layer nodes first when the count exceeds the cap. The exported `graph.json` is unaffected — it always contains the full graph. Code nodes are filtered out before the cap is applied.
+- **`llms-full.txt` cap.** A 5 MB safety cap applies in [`tesserae/site/exports.py`](../tesserae/site/exports.py); the file ends with a `[TRUNCATED — see graph.jsonld for the full set]` marker if the cap is hit. `graph.jsonld` is uncapped because JSON-LD consumers expect the full set.
 - **Search index.** Wiki-layer kinds only. Code-graph nodes never enter `search-index.json`; the redesign target is < 500 KB for the dogfood corpus and we're well under that today.
 - **Per-page byte budget (rule of thumb).** Each detail page < 60 KB gz HTML, shared CSS < 30 KB, shared JS < 25 KB, sigma vendor on the graph page only (~60 KB). The graph view uses 3D-force-graph + Three.js loaded once; all other pages stay vanilla.
 - **Compile time on dogfood.** ~300 markdown files extract in under 5 s on a recent dev machine; site render adds another ~2 s. The wiki layer's idempotence means subsequent compiles touch only the changed paths.
@@ -235,4 +235,4 @@ This is verified by `tests/test_site_pages.py` and the end-to-end smoke in `test
 - [Quickstart](quickstart.md) — minimum path from `project init` to a browsable site.
 - [Frontend redesign walkthrough](frontend-redesign.md) — annotated tour of every route.
 - [Feature map](feature-map.md) — what's shipped, what's in-progress, with file pointers.
-- [Self-dogfood demo](self-dogfood.md) — running LLM-Wiki against its own repo.
+- [Self-dogfood demo](self-dogfood.md) — running Tesserae against its own repo.

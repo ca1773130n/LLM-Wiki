@@ -3,33 +3,33 @@
 <!-- translations:start -->
 <p align="center"><a href="i18n/installation.ko.md">한국어</a> · <a href="i18n/installation.zh.md">中文</a> · <a href="i18n/installation.ja.md">日本語</a> · <a href="i18n/installation.ru.md">Русский</a> · <a href="i18n/installation.es.md">Español</a> · <a href="i18n/installation.fr.md">Français</a> · <a href="../i18n/installation.de.md">Deutsch</a></p>
 <!-- translations:end -->
-LLM-Wiki is published on PyPI and exposes shell commands so users do not have to run `python3 -m llm_wiki.cli` manually.
+Tesserae is published on PyPI and exposes shell commands so users do not have to run `python3 -m tesserae.cli` manually.
 
 ## Install from PyPI (recommended)
 
 ```bash
-pip install llm-research-wiki
+pip install tesserae
 ```
 
 That's it. `pip` registers three console scripts on your `PATH`:
 
 ```bash
-llm_wiki --help
-llm-wiki --help
-llm_wiki_mcp --help
+tesserae --help
+tesserae --help
+tesserae_mcp --help
 ```
 
-The canonical command in docs is `llm_wiki`; `llm-wiki` (with a dash) is an alias. `llm_wiki_mcp` starts the MCP server.
+The canonical command in docs is `tesserae`; `tesserae` (with a dash) is an alias. `tesserae_mcp` starts the MCP server.
 
 > **pipx is fine too.** If you prefer to keep CLI tools in their own isolated venvs:
 > ```bash
-> pipx install llm-research-wiki
+> pipx install tesserae
 > ```
 
 ## Upgrade
 
 ```bash
-pip install --upgrade llm-research-wiki
+pip install --upgrade tesserae
 ```
 
 ## Optional integrations
@@ -38,7 +38,7 @@ The default wheel is intentionally light. The setup wizard can install the heavi
 
 ```bash
 # Understand Anything companion graph + RAG-Anything multimodal + Cognee runtime memory
-llm_wiki project setup \
+tesserae project setup \
   --with-understand-anything \
   --install-understand-anything \
   --understand-anything-platform codex \
@@ -58,20 +58,20 @@ pip install kuzu cognee graphiti-core
 
 - `kuzu` — Kuzu graph persistence.
 - `cognee` — runtime Cognee add/cognify workflows; setup stores `{python} -m pip install cognee` and retries once if Cognee is missing.
-- Understand Anything — installed via the upstream installer when `--install-understand-anything` is selected; LLM-Wiki stores a managed refresh wrapper instead of asking users to invent a shell command.
-- RAG-Anything — installed via `pip install 'raganything[all]'` when `--install-raganything` is selected; LLM-Wiki stores a managed refresh wrapper for multimodal parser runs.
+- Understand Anything — installed via the upstream installer when `--install-understand-anything` is selected; Tesserae stores a managed refresh wrapper instead of asking users to invent a shell command.
+- RAG-Anything — installed via `pip install 'raganything[all]'` when `--install-raganything` is selected; Tesserae stores a managed refresh wrapper for multimodal parser runs.
 - `graphiti-core` — live Graphiti/Neo4j sync. `export-graphiti` and `sync-graphiti --dry-run` work without it.
 
 The Anthropic-backed synthesis path uses an extras marker:
 
 ```bash
-pip install "llm-research-wiki[synthesis-llm]"
+pip install "tesserae[synthesis-llm]"
 ```
 
 For the multimodal RAG-Anything stack with all parsers preinstalled:
 
 ```bash
-pip install 'llm-research-wiki[raganything-all]'
+pip install 'tesserae[raganything-all]'
 ```
 
 > **System prerequisite:** parsing `.doc/.docx/.ppt/.pptx/.xls/.xlsx` requires LibreOffice on the host. Install it via your platform's package manager (e.g., `brew install --cask libreoffice`, `apt-get install libreoffice`); RAG-Anything skips Office documents with a warning when LibreOffice is missing.
@@ -81,8 +81,8 @@ pip install 'llm-research-wiki[raganything-all]'
 If you want to hack on the codebase, install the editable checkout instead:
 
 ```bash
-git clone https://github.com/ca1773130n/LLM-Wiki.git
-cd LLM-Wiki
+git clone https://github.com/ca1773130n/Tesserae.git
+cd Tesserae
 pip install -e .
 ```
 
@@ -90,7 +90,7 @@ A convenience installer is also bundled — it clones, creates a project-local `
 
 ```bash
 # Quick: clone + install in one shot
-curl -fsSL https://raw.githubusercontent.com/ca1773130n/LLM-Wiki/main/scripts/install.sh | bash
+curl -fsSL https://raw.githubusercontent.com/ca1773130n/Tesserae/main/scripts/install.sh | bash
 
 # From an existing checkout
 ./scripts/install.sh --dir "$PWD"
@@ -116,7 +116,7 @@ export PATH="$HOME/.local/bin:$PATH"
 ## Verify installation
 
 ```bash
-llm_wiki project init --help
-llm_wiki project compile --help
-llm_wiki project build-site --help
+tesserae project init --help
+tesserae project compile --help
+tesserae project build-site --help
 ```

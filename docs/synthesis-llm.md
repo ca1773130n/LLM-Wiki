@@ -3,7 +3,7 @@
 <!-- translations:start -->
 <p align="center"><a href="i18n/synthesis-llm.ko.md">한국어</a> · <a href="i18n/synthesis-llm.zh.md">中文</a> · <a href="i18n/synthesis-llm.ja.md">日本語</a> · <a href="i18n/synthesis-llm.ru.md">Русский</a> · <a href="i18n/synthesis-llm.es.md">Español</a> · <a href="i18n/synthesis-llm.fr.md">Français</a> · <a href="../i18n/synthesis-llm.de.md">Deutsch</a></p>
 <!-- translations:end -->
-LLM-Wiki ships with two synthesis paths. The default is a deterministic
+Tesserae ships with two synthesis paths. The default is a deterministic
 heuristic that never calls a network: it produces predictable, idempotent
 markdown templates from the research graph. The optional **LLM upgrade
 path** replaces those templates with prose written by Claude on every
@@ -34,7 +34,7 @@ descriptions, source paths). The difference is the body.
 ...
 
 ## Tagline
-LLM-Wiki — a self-evolving research notebook.
+Tesserae — a self-evolving research notebook.
 ```
 
 Reads like a database dump. Useful, deterministic, and shipped today.
@@ -65,7 +65,7 @@ Two blocks: a long, stable system block wrapped in
 ### System block (cached, identical across pages)
 
 ```
-You are an LLM-Wiki synthesis writer. Your job is to summarize a controlled
+You are an Tesserae synthesis writer. Your job is to summarize a controlled
 knowledge graph into a single Markdown page. Rules you follow ABSOLUTELY:
 
   RULE 1 — DO NOT INVENT FACTS. Restate or summarize ONLY material you find
@@ -97,7 +97,7 @@ A node id has the shape ``Type:slug:hash``.
 ```
 
 The full block is ~500 tokens. See
-[`llm_wiki/llm_synthesis.py`](../llm_wiki/llm_synthesis.py) for the
+[`tesserae/llm_synthesis.py`](../tesserae/llm_synthesis.py) for the
 canonical text. Any byte change there invalidates the prompt cache for
 every subsequent page in a run, so the rule text is intentionally frozen.
 
@@ -127,7 +127,7 @@ CONTEXT:
   total edges: 4394
   field name: 3D Reconstruction
   contributing days/weeks: 2026-04-25, 2026-04-26
-  site title: LLM-Wiki
+  site title: Tesserae
   page summary: Topic synthesis for Gaussian Splatting.
 
 EDITORIAL ANGLE (HEURISTIC FALLBACK BODY for the model to consult):
@@ -152,24 +152,24 @@ the highest-signal contributors land in the prompt when a plan has more.
 ## How to enable it
 
 ```sh
-pip install llm-research-wiki[synthesis-llm]
-export LLM_WIKI_SYNTHESIS_LLM=1
+pip install tesserae[synthesis-llm]
+export TESSERAE_SYNTHESIS_LLM=1
 export ANTHROPIC_API_KEY=sk-...
-python -m llm_wiki.cli project compile
+python -m tesserae.cli project compile
 ```
 
-Override the model with `LLM_WIKI_SYNTHESIS_MODEL` (default
+Override the model with `TESSERAE_SYNTHESIS_MODEL` (default
 `claude-sonnet-4-6`). Anthropic SDK ≥ 0.40 is required.
 
 The path activates only when **all three** are true:
 
-1. `LLM_WIKI_SYNTHESIS_LLM` is `1`/`true`/`yes`/`on`.
+1. `TESSERAE_SYNTHESIS_LLM` is `1`/`true`/`yes`/`on`.
 2. `ANTHROPIC_API_KEY` is non-empty (or you set `synthesis.api_key` in your
-   project's `.llm-wiki/config.json`).
+   project's `.tesserae/config.json`).
 3. The `anthropic` package can be imported.
 
 Any of those missing logs one informational line to stderr
-(`[llm-wiki] LLM synthesis disabled (...)`) and falls back to the heuristic.
+(`[tesserae] LLM synthesis disabled (...)`) and falls back to the heuristic.
 
 If the LLM path is active but a single page fails — network blip, 401, 429
 — that page falls back to the heuristic with a single stderr log per error
@@ -207,7 +207,7 @@ per page (uncached): ~1300 * $3/1M + ~270 * $15/1M ≈ $0.0080
 ```
 
 If you switch to Haiku 4.5 (`$1/M` input, `$5/M` output) the same compile
-costs roughly `~$0.027`. Run with `LLM_WIKI_SYNTHESIS_DRY_RUN=1` first if
+costs roughly `~$0.027`. Run with `TESSERAE_SYNTHESIS_DRY_RUN=1` first if
 you want to confirm prompt shape without spending tokens.
 
 ## Privacy
@@ -227,8 +227,8 @@ heuristic path runs fully offline and is the default.
 Unset the env var (or set it to `0`) and re-run:
 
 ```sh
-unset LLM_WIKI_SYNTHESIS_LLM
-python -m llm_wiki.cli project compile
+unset TESSERAE_SYNTHESIS_LLM
+python -m tesserae.cli project compile
 ```
 
 Subsequent compiles regenerate the affected synthesis pages with the
@@ -255,10 +255,10 @@ Diffing across two compiles is the simplest way to compare outputs:
 
 ```sh
 git diff --no-index \
-  baseline/.llm-wiki/wiki/syntheses/pulse.md \
-  upgraded/.llm-wiki/wiki/syntheses/pulse.md
+  baseline/.tesserae/wiki/syntheses/pulse.md \
+  upgraded/.tesserae/wiki/syntheses/pulse.md
 ```
 
-The append-only `.history.jsonl` ledger in `.llm-wiki/wiki/syntheses/`
+The append-only `.history.jsonl` ledger in `.tesserae/wiki/syntheses/`
 records the generator label for every rewrite, so you can audit when a
 page transitioned from heuristic to LLM (or back).

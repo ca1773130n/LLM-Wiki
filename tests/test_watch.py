@@ -9,14 +9,14 @@ from pathlib import Path
 
 import pytest
 
-from llm_wiki.watch import WatchLoop
+from tesserae.watch import WatchLoop
 
 
 def _make_project(tmp_path: Path) -> Path:
     project = tmp_path / "demo-project"
     project.mkdir()
-    (project / ".llm-wiki").mkdir()
-    (project / ".llm-wiki" / "config.json").write_text(
+    (project / ".tesserae").mkdir()
+    (project / ".tesserae" / "config.json").write_text(
         json.dumps(
             {
                 "name": "demo_wiki",
@@ -120,7 +120,7 @@ def test_run_once_no_changes_writes_cache(tmp_path):
     loop.run(once=True)
     assert received == []
     assert "no changes" in stream.getvalue()
-    assert (project / ".llm-wiki" / ".watch-cache.json").exists()
+    assert (project / ".tesserae" / ".watch-cache.json").exists()
 
 
 def test_run_once_after_edit_fires_callback_with_path(tmp_path):
@@ -221,7 +221,7 @@ def test_custom_paths_override_defaults(tmp_path):
 
 def test_cli_project_watch_once_runs(tmp_path, monkeypatch, capsys):
     project = _make_project(tmp_path)
-    from llm_wiki.cli import main
+    from tesserae.cli import main
 
     rc = main(["project", "watch", "--project", str(project), "--once", "--quiet"])
     assert rc == 0

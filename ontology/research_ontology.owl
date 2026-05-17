@@ -6,7 +6,7 @@
      xmlns:rdfs="http://www.w3.org/2000/01/rdf-schema#">
 
   <owl:Ontology rdf:about="http://llmwiki.local/research">
-    <rdfs:comment>Research-domain ontology for LLM-Wiki literature intelligence graphs.</rdfs:comment>
+    <rdfs:comment>Research-domain ontology for Tesserae literature intelligence graphs.</rdfs:comment>
   </owl:Ontology>
 
   <owl:Class rdf:about="#ResearchField"/>

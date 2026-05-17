@@ -1,4 +1,4 @@
-"""Sanity tests for the exported CSS in ``llm_wiki.site.tokens``.
+"""Sanity tests for the exported CSS in ``tesserae.site.tokens``.
 
 These tests don't try to validate the whole stylesheet; they pin a handful
 of design rules that the redesign spec hard-requires (sticky right TOC,
@@ -7,7 +7,7 @@ stat-row spacing, button hit area, auto-fill card grid).
 
 from __future__ import annotations
 
-from llm_wiki.site.tokens import CSS
+from tesserae.site.tokens import CSS
 
 
 def test_css_makes_right_toc_sticky():

@@ -15,7 +15,7 @@ sub_topic: Dynamic and 4D Reconstruction
 methods: [GaussianSplatting, DeformationField, RotorRepresentation, NovelViewSynthesis, RealTimeRendering]
 datasets: []
 metrics: [FPS]
-license: "CC-BY-4.0 (LLM-Wiki demo prose)"
+license: "CC-BY-4.0 (Tesserae demo prose)"
 ---
 
 # 4D-Rotor Gaussian Splatting: Towards Efficient Novel View Synthesis for Dynamic Scenes

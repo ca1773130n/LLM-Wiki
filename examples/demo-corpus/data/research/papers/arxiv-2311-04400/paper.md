@@ -19,7 +19,7 @@ sub_topic: Generative 3D Representations
 methods: [RadianceField, ImageTo3D, TransformerArchitecture, LargeReconstructionModel]
 datasets: [ShapeNet, Objaverse]
 metrics: [PSNR, SSIM, LPIPS]
-license: "CC-BY-4.0 (LLM-Wiki demo prose)"
+license: "CC-BY-4.0 (Tesserae demo prose)"
 ---
 
 # LRM: Large Reconstruction Model for Single Image to 3D

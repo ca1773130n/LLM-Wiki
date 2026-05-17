@@ -3,7 +3,7 @@
 <!-- translations:start -->
 <p align="center"><a href="../feature-map.md">English</a> · <a href="feature-map.ko.md">한국어</a> · <a href="feature-map.zh.md">中文</a> · <a href="feature-map.ja.md">日本語</a> · <a href="feature-map.ru.md">Русский</a> · <a href="feature-map.es.md">Español</a> · <a href="feature-map.fr.md">Français</a> · <a href="feature-map.de.md">Deutsch</a></p>
 <!-- translations:end -->
-このドキュメントは、LLM-Wiki に現在実装されている機能を、状態、ソースファイル、ドキュメント上の場所とともにまとめたものです。
+このドキュメントは、Tesserae に現在実装されている機能を、状態、ソースファイル、ドキュメント上の場所とともにまとめたものです。
 
 状態凡例: ✅ 出荷済み · ⚠ 進行中 / 部分実装。
 
@@ -15,8 +15,8 @@
 
 | 機能 | 状態 | ソース | ドキュメントアンカー |
 |---|---|---|---|
-| `WikiPageStore`（冪等な body-hash 書き込み、frontmatter パーサー） | ✅ | [`llm_wiki/wiki_store.py`](../../llm_wiki/wiki_store.py) | [architecture.md § モジュールマップ](architecture.ja.md#wiki--synthesis-l2) |
-| `WikiLayerProjector` — wiki レイヤーノードごとに 1 つの md ページ | ✅ | [`llm_wiki/wiki_projector.py`](../../llm_wiki/wiki_projector.py) | [architecture.md § パイプライン](architecture.ja.md#pipeline) |
+| `WikiPageStore`（冪等な body-hash 書き込み、frontmatter パーサー） | ✅ | [`tesserae/wiki_store.py`](../../tesserae/wiki_store.py) | [architecture.md § モジュールマップ](architecture.ja.md#wiki--synthesis-l2) |
+| `WikiLayerProjector` — wiki レイヤーノードごとに 1 つの md ページ | ✅ | [`tesserae/wiki_projector.py`](../../tesserae/wiki_projector.py) | [architecture.md § パイプライン](architecture.ja.md#pipeline) |
 | `sources/` ページ | ✅ | `wiki_projector.py` | [frontend-redesign.md § Sources](frontend-redesign.ja.md#sources) |
 | `concepts/` ページ | ✅ | `wiki_projector.py` | [frontend-redesign.md § Concepts](frontend-redesign.ja.md#concepts) |
 | `entities/` ページ | ✅ | `wiki_projector.py` | [frontend-redesign.md § Entities](frontend-redesign.ja.md#entities) |
@@ -24,7 +24,7 @@
 | `repos/` ページ | ✅ | `wiki_projector.py` | [frontend-redesign.md § Repos](frontend-redesign.ja.md#repos) |
 | `topics/` ページ | ✅ | `wiki_projector.py` | [frontend-redesign.md § Topics](frontend-redesign.ja.md#topics) |
 | `questions/` ページ（未解決の質問） | ✅ | `wiki_projector.py` | [frontend-redesign.md § Questions](frontend-redesign.ja.md#questions) |
-| `syntheses/` ページ | ✅ | [`llm_wiki/synthesis.py`](../../llm_wiki/synthesis.py) | [frontend-redesign.md § Syntheses](frontend-redesign.ja.md#syntheses) |
+| `syntheses/` ページ | ✅ | [`tesserae/synthesis.py`](../../tesserae/synthesis.py) | [frontend-redesign.md § Syntheses](frontend-redesign.ja.md#syntheses) |
 
 ### 合成の種類 (L2 → 派生)
 
@@ -38,13 +38,13 @@
 | `topic` | ✅ | `synthesis.py` | 3 本以上の papers を含む `ResearchTopic` / `ApproachFamily` クラスターごとに 1 つ。 |
 | `comparison` | ✅ | `synthesis.py` | 同じタスクで競合する `ApproachFamily` のペアごとに 1 つ。 |
 | `field_overview` | ✅ | `synthesis.py` | `ResearchField` ごとに 1 つ。 |
-| LLM 強化サマリー（環境フラグ） | ⚠ | hook のみ | ヒューリスティックなベースラインは出荷済み。`LLM_WIKI_SYNTHESIS_LLM=1` hook は stub として残されています。 |
+| LLM 強化サマリー（環境フラグ） | ⚠ | hook のみ | ヒューリスティックなベースラインは出荷済み。`TESSERAE_SYNTHESIS_LLM=1` hook は stub として残されています。 |
 
 ### 静的サイトルート
 
 | ルート | 状態 | ソース | 注記 |
 |---|---|---|---|
-| `/`（ホーム、hero pulse） | ✅ | [`llm_wiki/site/pages.py`](../../llm_wiki/site/pages.py) `render_home` | 統計行 + キュレーション済み入口 + 最近の活動。 |
+| `/`（ホーム、hero pulse） | ✅ | [`tesserae/site/pages.py`](../../tesserae/site/pages.py) `render_home` | 統計行 + キュレーション済み入口 + 最近の活動。 |
 | `/sources/`, `/sources/<slug>.html` | ✅ | `pages.py::render_sources_index`, `render_source_detail` | |
 | `/concepts/`, `/concepts/<slug>.html` | ✅ | `pages.py::render_concepts_index`, `render_concept_detail` | |
 | `/entities/`, `/entities/<slug>.html` | ✅ | `pages.py::render_entities_index`, `render_entity_detail` | |
@@ -62,13 +62,13 @@
 
 | アーティファクト | 状態 | ソース | 目的 |
 |---|---|---|---|
-| ページごとの `<page>.txt` 兄弟ファイル | ✅ | [`llm_wiki/site/exports.py`](../../llm_wiki/site/exports.py) `write_siblings` | 1 ページのプレーンテキスト表示（ナビゲーション、スタイルなし）。 |
+| ページごとの `<page>.txt` 兄弟ファイル | ✅ | [`tesserae/site/exports.py`](../../tesserae/site/exports.py) `write_siblings` | 1 ページのプレーンテキスト表示（ナビゲーション、スタイルなし）。 |
 | ページごとの `<page>.json` 兄弟ファイル | ✅ | `exports.py::write_siblings` | `{title, kind, body, body_text, links, source_path, frontmatter}`。 |
 | `llms.txt` | ✅ | `exports.py::render_llms_txt` | llmstxt.org の短いインデックス。 |
 | `llms-full.txt` | ✅ | `exports.py::render_llms_full_txt` | 全ページ本文、5 MB 上限。 |
 | `graph.jsonld` | ✅ | `exports.py::render_graph_jsonld` | schema.org `Dataset`、wiki レイヤーノードのみ。 |
 | `graph.json` | ✅ | `__init__.py::write_site` | 完全なグラフペイロード（ツール用コードノードを含む）。 |
-| `search-index.json` | ✅ | [`llm_wiki/site/search.py`](../../llm_wiki/site/search.py) | パレット + ページ検索。wiki レイヤー種別のみ。 |
+| `search-index.json` | ✅ | [`tesserae/site/search.py`](../../tesserae/site/search.py) | パレット + ページ検索。wiki レイヤー種別のみ。 |
 | `sitemap.xml` | ✅ | `exports.py::render_sitemap_xml` | 出力された全ルート、`lastmod` は frontmatter 由来。 |
 | `rss.xml` | ✅ | `exports.py::render_rss_xml` | 最新 30 件の syntheses。 |
 | `robots.txt` | ✅ | `exports.py::render_robots_txt` | 許可的 — クロール + インデックス。 |
@@ -79,8 +79,8 @@
 
 | 機能 | 状態 | ソース | 注記 |
 |---|---|---|---|
-| デザイントークン（ライト + ダークテーマ、テラコッタのアクセント） | ✅ | [`llm_wiki/site/tokens.py`](../../llm_wiki/site/tokens.py) | `assets/style.css` の単一 CSS バンドル。 |
-| テーマ切替（永続化、ちらつきなし） | ✅ | [`llm_wiki/site/js.py`](../../llm_wiki/site/js.py) | `localStorage` 内の `data-theme="dark"`、描画前に適用。 |
+| デザイントークン（ライト + ダークテーマ、テラコッタのアクセント） | ✅ | [`tesserae/site/tokens.py`](../../tesserae/site/tokens.py) | `assets/style.css` の単一 CSS バンドル。 |
+| テーマ切替（永続化、ちらつきなし） | ✅ | [`tesserae/site/js.py`](../../tesserae/site/js.py) | `localStorage` 内の `data-theme="dark"`、描画前に適用。 |
 | 検索パレット（`cmd+k` / `ctrl+k` / `/`） | ✅ | `js.py` | `search-index.json` に対するファジーマッチ。最近ページリスト。 |
 | 右側固定 TOC | ✅ | `pages.py` + `tokens.py` | デスクトップのみ。モバイルは `<details>` によるドロワー。 |
 | 月 + 曜日ラベル付き活動ヒートマップ | ✅ | `components.py::heatmap_svg` | 26 週 SVG、セルはその日の `digest.md` へリンク。 |
@@ -89,25 +89,25 @@
 | ページ遷移（120 ms 不透明度、prefers-reduced-motion） | ✅ | `tokens.py` | |
 | 3D + 2D グラフ表示（ホバー、エッジラベル、カーソル基準ズーム） | ✅ | `pages.py::render_graph_view` + `js.py` | 3d-force-graph + Three.js、CDN スナップショットとして vendored。 |
 | ページごとの AI 兄弟ファイルフッター | ✅ | `components.py::ai_siblings_footer` | 現在ページの `.txt` と `.json` へのインラインリンク。 |
-| ハーネスセッション履歴ページ | ✅ | [`llm_wiki/harness_sessions.py`](../../llm_wiki/harness_sessions.py) + [`llm_wiki/site/sessions.py`](../../llm_wiki/site/sessions.py) | 明示的な Claude Code/Codex インポート。markdown ターン、左側ターンレール、折りたたみツール使用、検索エントリを備えた `/sessions/` インデックスと詳細ページ。 |
+| ハーネスセッション履歴ページ | ✅ | [`tesserae/harness_sessions.py`](../../tesserae/harness_sessions.py) + [`tesserae/site/sessions.py`](../../tesserae/site/sessions.py) | 明示的な Claude Code/Codex インポート。markdown ターン、左側ターンレール、折りたたみツール使用、検索エントリを備えた `/sessions/` インデックスと詳細ページ。 |
 
 ### パイプライン + CLI
 
 | 機能 | 状態 | ソース | 注記 |
 |---|---|---|---|
-| `project compile` は synthesis + wiki + site を順に呼び出す | ✅ | [`llm_wiki/project.py`](../../llm_wiki/project.py) | 再設計計画のフェーズ 3。 |
-| `project build-site` 単体実行 | ✅ | `project.py` + [`llm_wiki/cli.py`](../../llm_wiki/cli.py) | `wiki/` + `graph.json` を読み、`site/` を書き出す。 |
+| `project compile` は synthesis + wiki + site を順に呼び出す | ✅ | [`tesserae/project.py`](../../tesserae/project.py) | 再設計計画のフェーズ 3。 |
+| `project build-site` 単体実行 | ✅ | `project.py` + [`tesserae/cli.py`](../../tesserae/cli.py) | `wiki/` + `graph.json` を読み、`site/` を書き出す。 |
 | `project serve` ローカル HTTP | ✅ | `cli.py` | 素の stdlib サーバー。 |
-| `project deploy` → GitHub Pages | ✅ | [`llm_wiki/deploy.py`](../../llm_wiki/deploy.py) | `gh-pages` への worktree push。`gh` CLI 経由の任意 `--enable-pages`。`--build`, `--dry-run`, `--branch`, `--remote`, `--force`。 |
-| `project sessions discover/import/list` | ✅ | [`llm_wiki/harness_sessions.py`](../../llm_wiki/harness_sessions.py) + `cli.py` | Claude Code/Codex 用のインバウンドセッション履歴。発見は明示的で、プロジェクト作業ディレクトリにスコープされる。 |
-| `project watch` 変更時再ビルド | ⚠ | [`llm_wiki/cli.py`](../../llm_wiki/cli.py) | Subagent R がポーリング watcher を仕上げ中 — `--interval`, `--debounce`, `--once`, `--paths`, `--quiet` の引数面は準備済み。再ビルドループ本体はこのラウンドで投入中。 |
+| `project deploy` → GitHub Pages | ✅ | [`tesserae/deploy.py`](../../tesserae/deploy.py) | `gh-pages` への worktree push。`gh` CLI 経由の任意 `--enable-pages`。`--build`, `--dry-run`, `--branch`, `--remote`, `--force`。 |
+| `project sessions discover/import/list` | ✅ | [`tesserae/harness_sessions.py`](../../tesserae/harness_sessions.py) + `cli.py` | Claude Code/Codex 用のインバウンドセッション履歴。発見は明示的で、プロジェクト作業ディレクトリにスコープされる。 |
+| `project watch` 変更時再ビルド | ⚠ | [`tesserae/cli.py`](../../tesserae/cli.py) | Subagent R がポーリング watcher を仕上げ中 — `--interval`, `--debounce`, `--once`, `--paths`, `--quiet` の引数面は準備済み。再ビルドループ本体はこのラウンドで投入中。 |
 
 ## 既存機能（変更なしで継続）
 
 ### CLI とインストール
 
 - ✅ `pyproject.toml` によるインストール可能な Python パッケージ。
-- ✅ コンソールコマンド: `llm_wiki`, `llm-wiki`, `llm_wiki_mcp`。
+- ✅ コンソールコマンド: `tesserae`, `tesserae`, `tesserae_mcp`。
 - ✅ `curl | bash` インストール用の `scripts/install.sh`。
 - ✅ 高速なローカル開発のため、デフォルトで editable install。
 
@@ -140,19 +140,19 @@
 
 ### プロジェクトローカルワークフロー
 
-- ✅ `llm_wiki project init`
-- ✅ `llm_wiki project ingest`
-- ✅ `llm_wiki project compile`
-- ✅ `llm_wiki project mcp-config`
-- ✅ `llm_wiki project build-site`
-- ✅ `llm_wiki project serve`
-- ✅ `llm_wiki project deploy`（新規 — GitHub Pages）
-- ✅ `llm_wiki project sessions discover/import/list`（明示的なローカル agent-history インポート）
-- ⚠ `llm_wiki project watch`（進行中）
-- ✅ `llm_wiki project export-agent-harness`
-- ✅ `llm_wiki project export-obsidian`
-- ✅ `llm_wiki project export-graphiti`
-- ✅ `llm_wiki project sync-graphiti`
+- ✅ `tesserae project init`
+- ✅ `tesserae project ingest`
+- ✅ `tesserae project compile`
+- ✅ `tesserae project mcp-config`
+- ✅ `tesserae project build-site`
+- ✅ `tesserae project serve`
+- ✅ `tesserae project deploy`（新規 — GitHub Pages）
+- ✅ `tesserae project sessions discover/import/list`（明示的なローカル agent-history インポート）
+- ⚠ `tesserae project watch`（進行中）
+- ✅ `tesserae project export-agent-harness`
+- ✅ `tesserae project export-obsidian`
+- ✅ `tesserae project export-graphiti`
+- ✅ `tesserae project sync-graphiti`
 
 ### Obsidian
 
@@ -189,7 +189,7 @@
 
 ### MCP サーバー
 
-- ✅ stdio JSON-RPC 上の `llm_wiki_mcp` / `python3 -m llm_wiki.mcp_server`。
+- ✅ stdio JSON-RPC 上の `tesserae_mcp` / `python3 -m tesserae.mcp_server`。
 - ✅ ツール: `schema`, `graph_summary`, `search_nodes`, `node_context`, `search_facts`, `timeline`。
 - ✅ マルチプロジェクトレジストリ。
 

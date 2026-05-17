@@ -16,7 +16,7 @@ authors:
   - "Tsung-Yi Lin"
 date: 2022-11-18
 sub_topic: Diffusion-based 3D Generation
-license: "CC-BY-4.0 (LLM-Wiki demo prose)"
+license: "CC-BY-4.0 (Tesserae demo prose)"
 methods: [RadianceField, Diffusion, HashEncoding, TextTo3D]
 datasets: []
 metrics: [PSNR, SSIM, LPIPS]

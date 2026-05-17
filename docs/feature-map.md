@@ -3,7 +3,7 @@
 <!-- translations:start -->
 <p align="center"><a href="i18n/feature-map.ko.md">한국어</a> · <a href="i18n/feature-map.zh.md">中文</a> · <a href="i18n/feature-map.ja.md">日本語</a> · <a href="i18n/feature-map.ru.md">Русский</a> · <a href="i18n/feature-map.es.md">Español</a> · <a href="i18n/feature-map.fr.md">Français</a> · <a href="../i18n/feature-map.de.md">Deutsch</a></p>
 <!-- translations:end -->
-This document summarizes the features currently implemented in LLM-Wiki, with status, source files, and where they're documented.
+This document summarizes the features currently implemented in Tesserae, with status, source files, and where they're documented.
 
 Status legend: ✅ shipped · ⚠ in-progress / partial.
 
@@ -15,8 +15,8 @@ Document-first, hierarchical wiki replaces the old graph dump. See [`docs/fronte
 
 | Feature | Status | Source | Doc anchor |
 |---|---|---|---|
-| `WikiPageStore` (idempotent body-hash writes, frontmatter parser) | ✅ | [`llm_wiki/wiki_store.py`](../llm_wiki/wiki_store.py) | [architecture.md § Module map](architecture.md#wiki--synthesis-l2) |
-| `WikiLayerProjector` — one md page per wiki-layer node | ✅ | [`llm_wiki/wiki_projector.py`](../llm_wiki/wiki_projector.py) | [architecture.md § Pipeline](architecture.md#pipeline) |
+| `WikiPageStore` (idempotent body-hash writes, frontmatter parser) | ✅ | [`tesserae/wiki_store.py`](../tesserae/wiki_store.py) | [architecture.md § Module map](architecture.md#wiki--synthesis-l2) |
+| `WikiLayerProjector` — one md page per wiki-layer node | ✅ | [`tesserae/wiki_projector.py`](../tesserae/wiki_projector.py) | [architecture.md § Pipeline](architecture.md#pipeline) |
 | `sources/` pages | ✅ | `wiki_projector.py` | [frontend-redesign.md § Sources](frontend-redesign.md#sources) |
 | `concepts/` pages | ✅ | `wiki_projector.py` | [frontend-redesign.md § Concepts](frontend-redesign.md#concepts) |
 | `entities/` pages | ✅ | `wiki_projector.py` | [frontend-redesign.md § Entities](frontend-redesign.md#entities) |
@@ -24,7 +24,7 @@ Document-first, hierarchical wiki replaces the old graph dump. See [`docs/fronte
 | `repos/` pages | ✅ | `wiki_projector.py` | [frontend-redesign.md § Repos](frontend-redesign.md#repos) |
 | `topics/` pages | ✅ | `wiki_projector.py` | [frontend-redesign.md § Topics](frontend-redesign.md#topics) |
 | `questions/` pages (Open questions) | ✅ | `wiki_projector.py` | [frontend-redesign.md § Questions](frontend-redesign.md#questions) |
-| `syntheses/` pages | ✅ | [`llm_wiki/synthesis.py`](../llm_wiki/synthesis.py) | [frontend-redesign.md § Syntheses](frontend-redesign.md#syntheses) |
+| `syntheses/` pages | ✅ | [`tesserae/synthesis.py`](../tesserae/synthesis.py) | [frontend-redesign.md § Syntheses](frontend-redesign.md#syntheses) |
 
 ### Synthesis kinds (L2 → derived)
 
@@ -38,13 +38,13 @@ Document-first, hierarchical wiki replaces the old graph dump. See [`docs/fronte
 | `topic` | ✅ | `synthesis.py` | One per `ResearchTopic` / `ApproachFamily` cluster ≥ 3 papers. |
 | `comparison` | ✅ | `synthesis.py` | One per pair of `ApproachFamily` competing on the same task. |
 | `field_overview` | ✅ | `synthesis.py` | One per `ResearchField`. |
-| LLM-upgraded summaries (env-flagged) | ⚠ | hook only | Heuristic baseline ships; `LLM_WIKI_SYNTHESIS_LLM=1` hook left as a stub. |
+| LLM-upgraded summaries (env-flagged) | ⚠ | hook only | Heuristic baseline ships; `TESSERAE_SYNTHESIS_LLM=1` hook left as a stub. |
 
 ### Static site routes
 
 | Route | Status | Source | Notes |
 |---|---|---|---|
-| `/` (home, hero pulse) | ✅ | [`llm_wiki/site/pages.py`](../llm_wiki/site/pages.py) `render_home` | Stat row + curated entry points + recent activity. |
+| `/` (home, hero pulse) | ✅ | [`tesserae/site/pages.py`](../tesserae/site/pages.py) `render_home` | Stat row + curated entry points + recent activity. |
 | `/sources/`, `/sources/<slug>.html` | ✅ | `pages.py::render_sources_index`, `render_source_detail` | |
 | `/concepts/`, `/concepts/<slug>.html` | ✅ | `pages.py::render_concepts_index`, `render_concept_detail` | |
 | `/entities/`, `/entities/<slug>.html` | ✅ | `pages.py::render_entities_index`, `render_entity_detail` | |
@@ -62,13 +62,13 @@ Document-first, hierarchical wiki replaces the old graph dump. See [`docs/fronte
 
 | Artifact | Status | Source | Purpose |
 |---|---|---|---|
-| Per-page `<page>.txt` sibling | ✅ | [`llm_wiki/site/exports.py`](../llm_wiki/site/exports.py) `write_siblings` | Plain-text view of one page (no nav, no styling). |
+| Per-page `<page>.txt` sibling | ✅ | [`tesserae/site/exports.py`](../tesserae/site/exports.py) `write_siblings` | Plain-text view of one page (no nav, no styling). |
 | Per-page `<page>.json` sibling | ✅ | `exports.py::write_siblings` | `{title, kind, body, body_text, links, source_path, frontmatter}`. |
 | `llms.txt` | ✅ | `exports.py::render_llms_txt` | llmstxt.org short index. |
 | `llms-full.txt` | ✅ | `exports.py::render_llms_full_txt` | Every page body, capped at 5 MB. |
 | `graph.jsonld` | ✅ | `exports.py::render_graph_jsonld` | schema.org `Dataset`, wiki-layer nodes only. |
 | `graph.json` | ✅ | `__init__.py::write_site` | Full graph payload (incl. code nodes for tooling). |
-| `search-index.json` | ✅ | [`llm_wiki/site/search.py`](../llm_wiki/site/search.py) | Palette + page search; wiki-layer kinds only. |
+| `search-index.json` | ✅ | [`tesserae/site/search.py`](../tesserae/site/search.py) | Palette + page search; wiki-layer kinds only. |
 | `sitemap.xml` | ✅ | `exports.py::render_sitemap_xml` | Every emitted route, `lastmod` from frontmatter. |
 | `rss.xml` | ✅ | `exports.py::render_rss_xml` | Last 30 syntheses. |
 | `robots.txt` | ✅ | `exports.py::render_robots_txt` | Permissive — crawl + index. |
@@ -79,8 +79,8 @@ Document-first, hierarchical wiki replaces the old graph dump. See [`docs/fronte
 
 | Feature | Status | Source | Notes |
 |---|---|---|---|
-| Design tokens (light + dark themes, terracotta accent) | ✅ | [`llm_wiki/site/tokens.py`](../llm_wiki/site/tokens.py) | One CSS bundle in `assets/style.css`. |
-| Theme toggle (persisted, no flash) | ✅ | [`llm_wiki/site/js.py`](../llm_wiki/site/js.py) | `data-theme="dark"` in `localStorage`, applied pre-paint. |
+| Design tokens (light + dark themes, terracotta accent) | ✅ | [`tesserae/site/tokens.py`](../tesserae/site/tokens.py) | One CSS bundle in `assets/style.css`. |
+| Theme toggle (persisted, no flash) | ✅ | [`tesserae/site/js.py`](../tesserae/site/js.py) | `data-theme="dark"` in `localStorage`, applied pre-paint. |
 | Search palette (`cmd+k` / `ctrl+k` / `/`) | ✅ | `js.py` | Fuzzy match over `search-index.json`; recent-page list. |
 | Sticky right TOC | ✅ | `pages.py` + `tokens.py` | Desktop only; mobile drawer via `<details>`. |
 | Activity heatmap with month + weekday labels | ✅ | `components.py::heatmap_svg` | 26-week SVG, cells link to the day's `digest.md`. |
@@ -89,25 +89,25 @@ Document-first, hierarchical wiki replaces the old graph dump. See [`docs/fronte
 | Page transitions (120 ms opacity, prefers-reduced-motion) | ✅ | `tokens.py` | |
 | 3D + 2D graph view (hover, edge labels, cursor-anchored zoom) | ✅ | `pages.py::render_graph_view` + `js.py` | 3d-force-graph + Three.js, vendored as a CDN snapshot. |
 | Per-page AI siblings footer | ✅ | `components.py::ai_siblings_footer` | Inline links to the `.txt` and `.json` for the current page. |
-| Harness session history pages | ✅ | [`llm_wiki/harness_sessions.py`](../llm_wiki/harness_sessions.py) + [`llm_wiki/site/sessions.py`](../llm_wiki/site/sessions.py) | Explicit Claude Code/Codex import; `/sessions/` index and detail pages with markdown turns, left turn rail, collapsed tool use, and search entries. |
+| Harness session history pages | ✅ | [`tesserae/harness_sessions.py`](../tesserae/harness_sessions.py) + [`tesserae/site/sessions.py`](../tesserae/site/sessions.py) | Explicit Claude Code/Codex import; `/sessions/` index and detail pages with markdown turns, left turn rail, collapsed tool use, and search entries. |
 
 ### Pipeline + CLI
 
 | Feature | Status | Source | Notes |
 |---|---|---|---|
-| `project compile` calls synthesis + wiki + site in order | ✅ | [`llm_wiki/project.py`](../llm_wiki/project.py) | Phase 3 of the redesign plan. |
-| `project build-site` standalone | ✅ | `project.py` + [`llm_wiki/cli.py`](../llm_wiki/cli.py) | Reads `wiki/` + `graph.json`, writes `site/`. |
+| `project compile` calls synthesis + wiki + site in order | ✅ | [`tesserae/project.py`](../tesserae/project.py) | Phase 3 of the redesign plan. |
+| `project build-site` standalone | ✅ | `project.py` + [`tesserae/cli.py`](../tesserae/cli.py) | Reads `wiki/` + `graph.json`, writes `site/`. |
 | `project serve` local HTTP | ✅ | `cli.py` | Plain stdlib server. |
-| `project deploy` → GitHub Pages | ✅ | [`llm_wiki/deploy.py`](../llm_wiki/deploy.py) | Worktree push to `gh-pages`; optional `--enable-pages` via `gh` CLI. `--build`, `--dry-run`, `--branch`, `--remote`, `--force`. |
-| `project sessions discover/import/list` | ✅ | [`llm_wiki/harness_sessions.py`](../llm_wiki/harness_sessions.py) + `cli.py` | Inbound session history for Claude Code/Codex; discovery is explicit and scoped to the project working directory. |
-| `project watch` rebuild-on-change | ⚠ | [`llm_wiki/cli.py`](../llm_wiki/cli.py) | Subagent R is finishing the polling watcher — `--interval`, `--debounce`, `--once`, `--paths`, `--quiet` arg surface is in place; the rebuild loop body is being landed in this round. |
+| `project deploy` → GitHub Pages | ✅ | [`tesserae/deploy.py`](../tesserae/deploy.py) | Worktree push to `gh-pages`; optional `--enable-pages` via `gh` CLI. `--build`, `--dry-run`, `--branch`, `--remote`, `--force`. |
+| `project sessions discover/import/list` | ✅ | [`tesserae/harness_sessions.py`](../tesserae/harness_sessions.py) + `cli.py` | Inbound session history for Claude Code/Codex; discovery is explicit and scoped to the project working directory. |
+| `project watch` rebuild-on-change | ⚠ | [`tesserae/cli.py`](../tesserae/cli.py) | Subagent R is finishing the polling watcher — `--interval`, `--debounce`, `--once`, `--paths`, `--quiet` arg surface is in place; the rebuild loop body is being landed in this round. |
 
 ## Pre-existing features (carried forward unchanged)
 
 ### CLI and installation
 
 - ✅ Installable Python package via `pyproject.toml`.
-- ✅ Console commands: `llm_wiki`, `llm-wiki`, `llm_wiki_mcp`.
+- ✅ Console commands: `tesserae`, `tesserae`, `tesserae_mcp`.
 - ✅ `scripts/install.sh` for `curl | bash` installation.
 - ✅ Editable installs by default for fast local development.
 
@@ -140,19 +140,19 @@ Document-first, hierarchical wiki replaces the old graph dump. See [`docs/fronte
 
 ### Project-local workflow
 
-- ✅ `llm_wiki project init`
-- ✅ `llm_wiki project ingest`
-- ✅ `llm_wiki project compile`
-- ✅ `llm_wiki project mcp-config`
-- ✅ `llm_wiki project build-site`
-- ✅ `llm_wiki project serve`
-- ✅ `llm_wiki project deploy` (new — GitHub Pages)
-- ✅ `llm_wiki project sessions discover/import/list` (explicit local agent-history import)
-- ⚠ `llm_wiki project watch` (in-progress)
-- ✅ `llm_wiki project export-agent-harness`
-- ✅ `llm_wiki project export-obsidian`
-- ✅ `llm_wiki project export-graphiti`
-- ✅ `llm_wiki project sync-graphiti`
+- ✅ `tesserae project init`
+- ✅ `tesserae project ingest`
+- ✅ `tesserae project compile`
+- ✅ `tesserae project mcp-config`
+- ✅ `tesserae project build-site`
+- ✅ `tesserae project serve`
+- ✅ `tesserae project deploy` (new — GitHub Pages)
+- ✅ `tesserae project sessions discover/import/list` (explicit local agent-history import)
+- ⚠ `tesserae project watch` (in-progress)
+- ✅ `tesserae project export-agent-harness`
+- ✅ `tesserae project export-obsidian`
+- ✅ `tesserae project export-graphiti`
+- ✅ `tesserae project sync-graphiti`
 
 ### Obsidian
 
@@ -189,7 +189,7 @@ Generated target files for:
 
 ### MCP server
 
-- ✅ `llm_wiki_mcp` / `python3 -m llm_wiki.mcp_server` over stdio JSON-RPC.
+- ✅ `tesserae_mcp` / `python3 -m tesserae.mcp_server` over stdio JSON-RPC.
 - ✅ Tools: `schema`, `graph_summary`, `search_nodes`, `node_context`, `search_facts`, `timeline`.
 - ✅ Multi-project registry.
 

@@ -10,9 +10,9 @@
 # recording doesn't have to wait on slow network IO. The setup output
 # still lists them as configured external tools.
 #
-# Uses the /tmp/llm-wiki-demo-rec workspace. Re-create before recording:
+# Uses the /tmp/tesserae-demo-rec workspace. Re-create before recording:
 #
-#     rm -rf /tmp/llm-wiki-demo-rec/myproject/.llm-wiki
+#     rm -rf /tmp/tesserae-demo-rec/myproject/.tesserae
 
 Output "docs/screencasts/showcase.gif"
 
@@ -22,10 +22,10 @@ Set Height 460
 Set Theme "Catppuccin Mocha"
 Set TypingSpeed 35ms
 
-Type "source /tmp/llm-wiki-demo-rec/venv/bin/activate"
+Type "source /tmp/tesserae-demo-rec/venv/bin/activate"
 Enter
 Sleep 300ms
-Type "cd /tmp/llm-wiki-demo-rec/myproject"
+Type "cd /tmp/tesserae-demo-rec/myproject"
 Enter
 Sleep 400ms
 
@@ -34,7 +34,7 @@ Type "# 1) Set up — Cognee, RAG-Anything, Understand-Anything all configured"
 Sleep 300ms
 Enter
 
-Type@25ms "llm_wiki project setup --yes --source ./research --with-understand-anything --with-raganything --skip-install-cognee --skip-install-raganything --skip-install-understand-anything"
+Type@25ms "tesserae project setup --yes --source ./research --with-understand-anything --with-raganything --skip-install-cognee --skip-install-raganything --skip-install-understand-anything"
 Sleep 200ms
 Enter
 Sleep 3s
@@ -44,7 +44,7 @@ Type "# 2) Compile the typed knowledge graph + build the static site"
 Sleep 300ms
 Enter
 
-Type@25ms "llm_wiki project compile && llm_wiki project build-site"
+Type@25ms "tesserae project compile && tesserae project build-site"
 Sleep 200ms
 Enter
 Sleep 7s
@@ -54,17 +54,17 @@ Type "# 3) Ask the compiled wiki — deterministic graph lookup"
 Sleep 300ms
 Enter
 
-Type@25ms `llm_wiki project ask --backend wiki --top-k 3 "What is 3D Gaussian Splatting?"`
+Type@25ms `tesserae project ask --backend wiki --top-k 3 "What is 3D Gaussian Splatting?"`
 Sleep 200ms
 Enter
 Sleep 3500ms
 
-Type@25ms `llm_wiki project ask --backend wiki --top-k 3 "Which repos implement NeRF?"`
+Type@25ms `tesserae project ask --backend wiki --top-k 3 "Which repos implement NeRF?"`
 Sleep 200ms
 Enter
 Sleep 3500ms
 
-Type@25ms `llm_wiki project ask --backend wiki --top-k 3 "How does DreamFusion generate 3D from text?"`
+Type@25ms `tesserae project ask --backend wiki --top-k 3 "How does DreamFusion generate 3D from text?"`
 Sleep 200ms
 Enter
 Sleep 4500ms

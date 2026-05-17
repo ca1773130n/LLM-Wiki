@@ -1,10 +1,10 @@
 import json
 
-from llm_wiki.cli import main
-from llm_wiki.harness_sessions import HarnessSession, HarnessSessionStore
-from llm_wiki.project import ProjectWiki
-from llm_wiki.research_graph import ResearchGraph
-from llm_wiki.site import StaticSiteBuilder
+from tesserae.cli import main
+from tesserae.harness_sessions import HarnessSession, HarnessSessionStore
+from tesserae.project import ProjectWiki
+from tesserae.research_graph import ResearchGraph
+from tesserae.site import StaticSiteBuilder
 
 
 def sample_session(project_root):
@@ -20,19 +20,19 @@ def sample_session(project_root):
         branch="main",
         model="claude-sonnet-4-6",
         title="Project memory ingestion",
-        summary="Discussed ingesting agent harness session history into LLM-Wiki.",
+        summary="Discussed ingesting agent harness session history into Tesserae.",
         message_count=4,
         tool_call_count=7,
         token_total=12345,
         tools_used=["Read", "Write", "Bash"],
-        files_touched=["llm_wiki/project.py", "llm_wiki/site/__init__.py"],
+        files_touched=["tesserae/project.py", "tesserae/site/__init__.py"],
         commands_run=["pytest tests/test_harness_sessions.py -q"],
         decisions=["Treat harness sessions as first-class project memory."],
         redacted_preview="User asked to add harness session history pages.",
         metadata={
             "turns": [
-                {"role": "user", "timestamp": "2026-05-05T10:00:00Z", "text": "Please ingest Claude Code and Codex sessions from llm_wiki/project.py for #project-memory.\n\n<command-name>/effort</command-name> <command-message>effort</command-message> <command-args></command-args>"},
-                {"role": "assistant", "timestamp": "2026-05-05T10:01:00Z", "text": "I will add **normalized** `project-memory` session pages.\n\n- Render sessions\n- Index turns\n\n```python\ndef build_session():\n    return 42\n```\n\n```sh\nllm-wiki project build-site --project .\n```"},
+                {"role": "user", "timestamp": "2026-05-05T10:00:00Z", "text": "Please ingest Claude Code and Codex sessions from tesserae/project.py for #project-memory.\n\n<command-name>/effort</command-name> <command-message>effort</command-message> <command-args></command-args>"},
+                {"role": "assistant", "timestamp": "2026-05-05T10:01:00Z", "text": "I will add **normalized** `project-memory` session pages.\n\n- Render sessions\n- Index turns\n\n```python\ndef build_session():\n    return 42\n```\n\n```sh\ntesserae project build-site --project .\n```"},
                 {"role": "tool", "timestamp": "2026-05-05T10:02:00Z", "name": "Read", "text": "{\"ok\": true, \"count\": 2}"},
                 {"role": "assistant", "timestamp": "2026-05-05T10:42:00Z", "text": "Implemented session import and static pages. <status>ready</status>"},
             ]
@@ -43,7 +43,7 @@ def sample_session(project_root):
 def test_harness_session_store_writes_manifest_and_json(tmp_path):
     project = tmp_path / "demo-project"
     project.mkdir()
-    store = HarnessSessionStore(project / ".llm-wiki" / "harness_sessions")
+    store = HarnessSessionStore(project / ".tesserae" / "harness_sessions")
     session = sample_session(project)
 
     written = store.write_sessions([session])
@@ -62,9 +62,9 @@ def test_static_site_renders_harness_sessions_and_search_entries(tmp_path):
     project = tmp_path / "demo-project"
     project.mkdir()
     wiki = ProjectWiki.init(project, name="demo_project", source_kind="Repository")
-    HarnessSessionStore(project / ".llm-wiki" / "harness_sessions").write_sessions([sample_session(project)])
+    HarnessSessionStore(project / ".tesserae" / "harness_sessions").write_sessions([sample_session(project)])
 
-    result = StaticSiteBuilder(site_title="LLM-Wiki").write_site(
+    result = StaticSiteBuilder(site_title="Tesserae").write_site(
         ResearchGraph(), wiki.paths.wiki, wiki.paths.site
     )
 
@@ -87,7 +87,7 @@ def test_static_site_renders_harness_sessions_and_search_entries(tmp_path):
     assert "Main outcome" in detail_html
     assert "Timeline &amp; size" in detail_html
     assert "Treat harness sessions as first-class project memory." in detail_html
-    assert "llm_wiki/project.py" in detail_html
+    assert "tesserae/project.py" in detail_html
     assert "Turn-by-turn conversation" in detail_html
     assert "session-turn-list" in detail_html
     assert "id='turn-1'" in detail_html
@@ -105,7 +105,7 @@ def test_static_site_renders_harness_sessions_and_search_entries(tmp_path):
     assert "shell shell--session" in detail_html
     assert "href=\"#turn-3\"" in detail_html
     assert "Please ingest" in detail_html
-    assert "session-token session-token--path'>llm_wiki/project.py</span>" in detail_html
+    assert "session-token session-token--path'>tesserae/project.py</span>" in detail_html
     assert "session-token session-token--tag'>#project-memory</span>" in detail_html
     assert "session-token--noun" not in detail_html
     assert "session-turn-nav--user" in detail_html
@@ -124,7 +124,7 @@ def test_static_site_renders_harness_sessions_and_search_entries(tmp_path):
     assert "session-code-lang'>python</span>" in detail_html
     assert "session-code-keyword'>def</span> build_session" in detail_html
     assert "session-code-keyword'>return</span> <span class='session-code-number'>42</span>" in detail_html
-    assert "session-code-command'>llm-wiki</span>" in detail_html
+    assert "session-code-command'>tesserae</span>" in detail_html
     assert "session-code-flag'>--project</span>" in detail_html
     assert "session-tool-details" in detail_html
     assert "Tool use (1)" in detail_html
@@ -163,16 +163,16 @@ def test_static_site_renders_subagent_history_collapsed_under_parent(tmp_path):
                     "message_count": 2,
                     "tool_call_count": 3,
                     "summary": "Subagent investigated frontend links.",
-                    "files_touched": ["llm_wiki/site/sessions.py"],
+                    "files_touched": ["tesserae/site/sessions.py"],
                     "commands_run": ["pytest tests/test_harness_sessions.py -q"],
                     "raw_transcript_path": "/tmp/parent/subagents/agent-child.jsonl",
                 }
             ]
         },
     })
-    HarnessSessionStore(project / ".llm-wiki" / "harness_sessions").write_sessions([parent])
+    HarnessSessionStore(project / ".tesserae" / "harness_sessions").write_sessions([parent])
 
-    StaticSiteBuilder(site_title="LLM-Wiki").write_site(
+    StaticSiteBuilder(site_title="Tesserae").write_site(
         ResearchGraph(), wiki.paths.wiki, wiki.paths.site
     )
 
@@ -184,7 +184,7 @@ def test_static_site_renders_subagent_history_collapsed_under_parent(tmp_path):
     assert "Subagent sessions (1)" in detail_html
     assert "Child subagent session" in detail_html
     assert "Subagent investigated frontend links." in detail_html
-    assert "llm_wiki/site/sessions.py" in detail_html
+    assert "tesserae/site/sessions.py" in detail_html
 
 
 def test_harness_sessions_with_same_date_and_title_get_distinct_pages(tmp_path):
@@ -193,9 +193,9 @@ def test_harness_sessions_with_same_date_and_title_get_distinct_pages(tmp_path):
     wiki = ProjectWiki.init(project, name="demo_project", source_kind="Repository")
     base = sample_session(project)
     other = HarnessSession.from_dict({**base.to_dict(), "id": "claude-code:other", "raw_transcript_path": "/tmp/other.jsonl"})
-    HarnessSessionStore(project / ".llm-wiki" / "harness_sessions").write_sessions([base, other])
+    HarnessSessionStore(project / ".tesserae" / "harness_sessions").write_sessions([base, other])
 
-    StaticSiteBuilder(site_title="LLM-Wiki").write_site(
+    StaticSiteBuilder(site_title="Tesserae").write_site(
         ResearchGraph(), wiki.paths.wiki, wiki.paths.site
     )
 

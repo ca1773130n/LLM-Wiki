@@ -1,7 +1,7 @@
 import json
 
-from llm_wiki.obsidian_adapter import ObsidianVaultAdapter
-from llm_wiki.research_graph import ResearchEdge, ResearchGraph, ResearchNode, ResearchNodeType
+from tesserae.obsidian_adapter import ObsidianVaultAdapter
+from tesserae.research_graph import ResearchEdge, ResearchGraph, ResearchNode, ResearchNodeType
 
 
 def obsidian_sample_graph():

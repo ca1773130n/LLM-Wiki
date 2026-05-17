@@ -16,7 +16,7 @@ import subprocess
 
 import pytest
 
-from llm_wiki.site.js import (
+from tesserae.site.js import (
     JS_BUNDLE,
     JS_BUNDLE_BASE,
     JS_BUNDLE_GRAPH,
@@ -41,8 +41,8 @@ def test_bundle_wires_data_toggle_theme_clicks():
     assert "data-theme" in JS_THEME_TOGGLE
 
 
-def test_bundle_uses_llm_wiki_theme_localstorage_key():
-    assert "llm-wiki-theme" in JS_BUNDLE
+def test_bundle_uses_tesserae_theme_localstorage_key():
+    assert "tesserae-theme" in JS_BUNDLE
     assert "localStorage" in JS_BUNDLE
 
 
@@ -97,7 +97,7 @@ def test_bundle_palette_arrow_navigation():
 
 
 def test_bundle_palette_recents_storage():
-    assert "llm-wiki-recents" in JS_BUNDLE
+    assert "tesserae-recents" in JS_BUNDLE
 
 
 # ---------------------------------------------------------------------------
@@ -852,7 +852,7 @@ def test_graph_theme_toggle_invalidates_label_cache():
     assert "labelSpriteCache.clear()" in JS_BUNDLE_GRAPH
     # The base bundle's theme toggle pokes the hook (no-op on every
     # other route).
-    from llm_wiki.site.js import JS_THEME_TOGGLE
+    from tesserae.site.js import JS_THEME_TOGGLE
     assert "__graphRefreshLabels" in JS_THEME_TOGGLE
 
 

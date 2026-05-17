@@ -1,19 +1,19 @@
-# MCP — connecter LLM-Wiki à Claude Code, Codex, Cursor
+# MCP — connecter Tesserae à Claude Code, Codex, Cursor
 
 <!-- translations:start -->
 <p align="center"><a href="../../integrations/mcp.md">English</a> · <a href="mcp.ko.md">한국어</a> · <a href="mcp.zh.md">中文</a> · <a href="mcp.ja.md">日本語</a> · <a href="mcp.ru.md">Русский</a> · <a href="mcp.es.md">Español</a> · <a href="mcp.de.md">Deutsch</a></p>
 <!-- translations:end -->
 
-LLM-Wiki fournit un serveur stdio [Model Context Protocol](https://modelcontextprotocol.io) qui expose le graphe typé compilé à tout client compatible MCP : Claude Code, Codex CLI, Cursor, Claude Desktop, et d'autres. Le serveur annonce trois surfaces MCP complètes — **tools**, **resources** et **prompts** — afin que les clients puissent à la fois interroger le graphe à la demande et amorcer le contexte à moindre coût depuis des URI canoniques.
+Tesserae fournit un serveur stdio [Model Context Protocol](https://modelcontextprotocol.io) qui expose le graphe typé compilé à tout client compatible MCP : Claude Code, Codex CLI, Cursor, Claude Desktop, et d'autres. Le serveur annonce trois surfaces MCP complètes — **tools**, **resources** et **prompts** — afin que les clients puissent à la fois interroger le graphe à la demande et amorcer le contexte à moindre coût depuis des URI canoniques.
 
 ## Prérequis
 
-Le serveur lit depuis `.llm-wiki/graph.json`, donc une compilation initiale est requise :
+Le serveur lit depuis `.tesserae/graph.json`, donc une compilation initiale est requise :
 
 ```bash
 cd /path/to/your-project
-llm_wiki project setup    # interactive; or --yes for non-interactive
-llm_wiki project compile  # deterministic, no LLM calls, no API keys
+tesserae project setup    # interactive; or --yes for non-interactive
+tesserae project compile  # deterministic, no LLM calls, no API keys
 ```
 
 Recompilez chaque fois que vos sources changent. Le serveur prendra en compte le nouveau graphe au prochain appel d'outil, sans nécessiter de redémarrage.
@@ -21,7 +21,7 @@ Recompilez chaque fois que vos sources changent. Le serveur prendra en compte le
 ## 1) Générer la configuration client
 
 ```bash
-llm_wiki project mcp-config
+tesserae project mcp-config
 ```
 
 Affiche un fragment JSON ressemblant à :
@@ -29,18 +29,18 @@ Affiche un fragment JSON ressemblant à :
 ```json
 {
   "mcpServers": {
-    "llm-wiki": {
+    "tesserae": {
       "command": "python3",
       "args": [
-        "-m", "llm_wiki.mcp_server",
-        "--graph", "/path/to/your-project/.llm-wiki/graph.json"
+        "-m", "tesserae.mcp_server",
+        "--graph", "/path/to/your-project/.tesserae/graph.json"
       ]
     }
   }
 }
 ```
 
-Le chemin exact est rempli à partir du projet courant. Passez `--name <alias>` si vous souhaitez un nom d'entrée de serveur différent de `llm-wiki`.
+Le chemin exact est rempli à partir du projet courant. Passez `--name <alias>` si vous souhaitez un nom d'entrée de serveur différent de `tesserae`.
 
 ## 2) Coller la configuration dans votre client MCP
 
@@ -52,7 +52,7 @@ Le chemin exact est rempli à partir du projet courant. Passez `--name <alias>` 
 | Cursor | Settings → MCP Servers → coller le JSON |
 | Hermes | `~/.hermes/config.toml` (utilisez le bloc équivalent TOML affiché par `mcp-config --format hermes`) |
 
-Redémarrez le client après modification. La session suivante se connectera et découvrira la surface LLM-Wiki.
+Redémarrez le client après modification. La session suivante se connectera et découvrira la surface Tesserae.
 
 ## 3) Ce que voit le client
 
@@ -76,14 +76,14 @@ Redémarrez le client après modification. La session suivante se connectera et 
 
 URI que le client peut tirer via son sélecteur de ressources sans consommer un tour d'outil :
 
-- `llm-wiki://graph/schema` — même charge utile que l'outil `schema`, prête à servir de contexte statique
-- `llm-wiki://graph/summary` — résumé du projet actif
-- `llm-wiki://lint-report` — le dernier lint report au format markdown
+- `tesserae://graph/schema` — même charge utile que l'outil `schema`, prête à servir de contexte statique
+- `tesserae://graph/summary` — résumé du projet actif
+- `tesserae://lint-report` — le dernier lint report au format markdown
 
 Plus des templates d'URI que le client peut construire à la demande :
 
-- `llm-wiki://wiki/{kind}/{slug}` — le corps de n'importe quelle page wiki compilée
-- `llm-wiki://raw/{source_path}` — n'importe quel markdown source brut
+- `tesserae://wiki/{kind}/{slug}` — le corps de n'importe quelle page wiki compilée
+- `tesserae://raw/{source_path}` — n'importe quel markdown source brut
 
 ### Prompts — modèles de recherche en un clic
 
@@ -97,15 +97,15 @@ Ils apparaissent dans le menu slash du client (par ex. la palette `/` de Claude 
 | `gap-analysis` | `topic` (optionnel) | Fait remonter les questions ouvertes non résolues, les benchmarks manquants, les affirmations peu étayées |
 | `triage-open-questions` | _aucun_ | Liste chaque nœud `OpenQuestion`, les regroupe par sujet, propose un ordre de priorité |
 
-Chaque prompt se matérialise par un unique message utilisateur qui indique au modèle exactement quels outils LLM-Wiki enchaîner, afin que le modèle n'ait pas à redécouvrir la surface à chaque fois.
+Chaque prompt se matérialise par un unique message utilisateur qui indique au modèle exactement quels outils Tesserae enchaîner, afin que le modèle n'ait pas à redécouvrir la surface à chaque fois.
 
 ## Multi-projet : enregistrer plusieurs vaults sous un même serveur
 
-Un registre persistant à `~/.llm-wiki/registry.json` permet au même serveur MCP de résoudre n'importe quel projet enregistré par son nom :
+Un registre persistant à `~/.tesserae/registry.json` permet au même serveur MCP de résoudre n'importe quel projet enregistré par son nom :
 
 ```bash
-llm_wiki register-project /path/to/research --name research
-llm_wiki register-project /path/to/notes    --name notes
+tesserae register-project /path/to/research --name research
+tesserae register-project /path/to/notes    --name notes
 ```
 
 Après cela, tout outil acceptant `project` ou `graph_path` résoudra `project: "research"` via le registre au lieu d'exiger un chemin complet. Le serveur vérifie même que le `graph_path` enregistré existe toujours et renvoie une erreur claire si une recompilation est nécessaire.
@@ -146,12 +146,12 @@ Le serveur exporte `CLAUDE_CONFIG_DIR` pour la durée de cet appel uniquement et
 
 Après le redémarrage de votre client MCP, confirmez la connexion :
 
-- Claude Code : `/mcp` devrait lister `llm-wiki` avec le nombre d'outils.
-- Cursor : l'icône MCP dans la barre de chat devrait afficher `llm-wiki: connected` avec les compteurs de tools/resources/prompts.
+- Claude Code : `/mcp` devrait lister `tesserae` avec le nombre d'outils.
+- Cursor : l'icône MCP dans la barre de chat devrait afficher `tesserae: connected` avec les compteurs de tools/resources/prompts.
 - Codex / Hermes : invoquez n'importe quel outil par son nom (par ex. `schema`) et vérifiez la réponse.
 
-Si rien n'apparaît, vérifiez à deux fois que `--graph` pointe vers un `.llm-wiki/graph.json` existant — le serveur valide désormais cela au démarrage et à chaque appel d'outil, vous verrez donc un message d'erreur clair plutôt qu'une 500 silencieuse.
+Si rien n'apparaît, vérifiez à deux fois que `--graph` pointe vers un `.tesserae/graph.json` existant — le serveur valide désormais cela au démarrage et à chaque appel d'outil, vous verrez donc un message d'erreur clair plutôt qu'une 500 silencieuse.
 
 ## Où cela s'inscrit
 
-Le serveur MCP est l'**interface de lecture** du graphe typé. Pour le **chemin d'écriture** (ingestion des sources, recompilation, rafraîchissement d'outils compagnons comme RAG-Anything ou Understand-Anything), utilisez la CLI directement. Les deux sont découplés : la CLI met à jour `.llm-wiki/`, le serveur MCP lit ce qui s'y trouve au prochain appel d'outil.
+Le serveur MCP est l'**interface de lecture** du graphe typé. Pour le **chemin d'écriture** (ingestion des sources, recompilation, rafraîchissement d'outils compagnons comme RAG-Anything ou Understand-Anything), utilisez la CLI directement. Les deux sont découplés : la CLI met à jour `.tesserae/`, le serveur MCP lit ce qui s'y trouve au prochain appel d'outil.

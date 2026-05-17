@@ -1,7 +1,7 @@
 # Architecture (fixture)
 
 The wiki corpus is shaped after the real `data/research/` layout used by
-LLM-Wiki: a `daily/<date>/` folder per day with a `digest.md`, optional
+Tesserae: a `daily/<date>/` folder per day with a `digest.md`, optional
 `papers/<arxiv-id>/paper.md` plus `repo.md`, and `feeds/` or `repos/`
 sidecars; a `weekly/<iso-week>/` folder for synthesis.
 

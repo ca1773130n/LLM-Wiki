@@ -8,20 +8,20 @@ from pathlib import Path
 
 import pytest
 
-from llm_wiki.research_graph import (
+from tesserae.research_graph import (
     ResearchEdge,
     ResearchGraph,
     ResearchNode,
     ResearchNodeType,
 )
-from llm_wiki.site import StaticSiteBuilder
-from llm_wiki.site.raw_view import (
+from tesserae.site import StaticSiteBuilder
+from tesserae.site.raw_view import (
     raw_href,
     relativize_source_path,
     render_raw_view,
     safe_raw_slug,
 )
-from llm_wiki.wiki_store import WikiPage, WikiPageStore
+from tesserae.wiki_store import WikiPage, WikiPageStore
 
 
 # ---------------------------------------------------------------------------
@@ -49,9 +49,9 @@ def _seed_project(tmp_path: Path) -> tuple[Path, Path, Path, Path]:
     data_json = data / "metadata.json"
     data_json.write_text('{"key": "value", "nested": {"a": 1}}', encoding="utf-8")
 
-    wiki_root = project / ".llm-wiki" / "wiki"
+    wiki_root = project / ".tesserae" / "wiki"
     wiki_root.mkdir(parents=True)
-    site_root = project / ".llm-wiki" / "site"
+    site_root = project / ".tesserae" / "site"
     return project, wiki_root, site_root, paper_md
 
 
@@ -123,7 +123,7 @@ def test_render_raw_view_markdown_emits_real_headings(tmp_path: Path) -> None:
     project, _wiki, _site, paper_md = _seed_project(tmp_path)
     rel = "data/research/daily/2026-04-25/papers/2603.24725/paper.md"
     out = render_raw_view(
-        site_title="LLM-Wiki",
+        site_title="Tesserae",
         project_relative_path=rel,
         absolute_path=paper_md,
     )
@@ -140,7 +140,7 @@ def test_render_raw_view_markdown_preserves_readme_html_and_admonitions(tmp_path
     project.mkdir()
     readme = project / "README.md"
     readme.write_text(
-        '<h1 align="center">LLM-Wiki</h1>\n\n'
+        '<h1 align="center">Tesserae</h1>\n\n'
         '<p align="center">\n'
         '  <strong>Turn docs into a graph.</strong>\n'
         '  <br />\n'
@@ -156,12 +156,12 @@ def test_render_raw_view_markdown_preserves_readme_html_and_admonitions(tmp_path
     asset.write_bytes(b"fake png bytes")
 
     out = render_raw_view(
-        site_title="LLM-Wiki",
+        site_title="Tesserae",
         project_relative_path="README.md",
         absolute_path=readme,
     )
 
-    assert '<h1 align="center">LLM-Wiki</h1>' in out
+    assert '<h1 align="center">Tesserae</h1>' in out
     assert '<p align="center">' in out
     assert '<strong>Turn docs into a graph.</strong>' in out
     assert '../raw-assets/docs-assets-wiki-graph-screenshot-png.png' in out
@@ -177,7 +177,7 @@ def test_render_raw_view_json_emits_pretty_printed_pre(tmp_path: Path) -> None:
     project, _wiki, _site, _paper = _seed_project(tmp_path)
     json_path = project / "data" / "research" / "daily" / "2026-04-25" / "papers" / "2603.24725" / "metadata.json"
     out = render_raw_view(
-        site_title="LLM-Wiki",
+        site_title="Tesserae",
         project_relative_path="data/.../metadata.json",
         absolute_path=json_path,
     )
@@ -300,9 +300,9 @@ def test_bundled_corpus_emits_n_raw_pages(tmp_path: Path) -> None:
 def test_builder_copies_raw_markdown_embedded_image_assets(tmp_path: Path) -> None:
     project = tmp_path / "p"
     project.mkdir()
-    wiki_root = project / ".llm-wiki" / "wiki"
+    wiki_root = project / ".tesserae" / "wiki"
     wiki_root.mkdir(parents=True)
-    site_root = project / ".llm-wiki" / "site"
+    site_root = project / ".tesserae" / "site"
     readme = project / "README.md"
     asset = project / "docs" / "assets" / "demo.png"
     asset.parent.mkdir(parents=True)
@@ -480,9 +480,9 @@ def _seed_digest_corpus(tmp_path: Path) -> tuple[Path, Path, Path, Path]:
     repo2_md.parent.mkdir(parents=True)
     repo2_md.write_text("# GitHub: OpenDriveLab/WorldEngine\n", encoding="utf-8")
 
-    wiki_root = project / ".llm-wiki" / "wiki"
+    wiki_root = project / ".tesserae" / "wiki"
     wiki_root.mkdir(parents=True)
-    site_root = project / ".llm-wiki" / "site"
+    site_root = project / ".tesserae" / "site"
     return project, wiki_root, site_root, digest_md
 
 

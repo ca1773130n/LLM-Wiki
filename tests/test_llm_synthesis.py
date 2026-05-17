@@ -2,7 +2,7 @@
 
 The fake Anthropic client lives entirely in this module — no network, no real
 SDK required. We inject it via the ``set_client_factory`` test seam in
-``llm_wiki.llm_synthesis`` so the rest of the call site is exercised exactly
+``tesserae.llm_synthesis`` so the rest of the call site is exercised exactly
 as it would be in production.
 """
 
@@ -17,22 +17,22 @@ from typing import Any, Dict, List, Optional
 
 import pytest
 
-from llm_wiki import llm_synthesis as llm_mod
-from llm_wiki.llm_synthesis import (
+from tesserae import llm_synthesis as llm_mod
+from tesserae.llm_synthesis import (
     LlmSynthesisRequest,
     LlmSynthesizer,
     reset_failure_log_for_tests,
     set_client_factory,
 )
-from llm_wiki.research_graph import (
+from tesserae.research_graph import (
     ResearchEdge,
     ResearchGraph,
     ResearchNode,
     ResearchNodeType,
     stable_id,
 )
-from llm_wiki.synthesis import SynthesisProjector
-from llm_wiki.wiki_store import WikiPageStore
+from tesserae.synthesis import SynthesisProjector
+from tesserae.wiki_store import WikiPageStore
 
 
 # ---------------------------------------------------------------------------
@@ -173,7 +173,7 @@ def test_system_block_carries_ephemeral_cache_control():
     assert system[0]["cache_control"] == {"type": "ephemeral"}
     assert system[0]["type"] == "text"
     # Long stable preamble — the cached prefix.
-    assert "LLM-Wiki" in system[0]["text"]
+    assert "Tesserae" in system[0]["text"]
 
 
 def test_empty_response_returns_none_and_logs_once():
@@ -188,7 +188,7 @@ def test_empty_response_returns_none_and_logs_once():
 
     assert out is None
     log = buf.getvalue()
-    assert log.count("[llm-wiki]") == 1
+    assert log.count("[tesserae]") == 1
     assert "empty" in log
 
 
@@ -316,7 +316,7 @@ def test_user_message_contains_kind_title_inputs_and_heuristic_body():
         ),
         context={
             "kind": "topic",
-            "site_title": "LLM-Wiki",
+            "site_title": "Tesserae",
             "total_nodes": 2859,
             "total_edges": 4316,
             "field": "3D Reconstruction",
@@ -374,7 +374,7 @@ def test_user_message_caps_inputs_at_25():
 def test_validate_response_rejects_short_body():
     """``_validate_response`` enforces the 80-char minimum."""
 
-    from llm_wiki.llm_synthesis import _validate_response
+    from tesserae.llm_synthesis import _validate_response
 
     short_with_citation = "Tiny [node-a].\n"
     assert _validate_response(short_with_citation) is None
@@ -383,7 +383,7 @@ def test_validate_response_rejects_short_body():
 def test_validate_response_rejects_zero_citations():
     """A long body with no [id] markers fails validation."""
 
-    from llm_wiki.llm_synthesis import _validate_response
+    from tesserae.llm_synthesis import _validate_response
 
     long_no_citation = (
         "This paragraph is plenty long but it does not name any node by id "
@@ -395,7 +395,7 @@ def test_validate_response_rejects_zero_citations():
 def test_validate_response_accepts_valid_body():
     """A long body with at least one [id] marker is accepted."""
 
-    from llm_wiki.llm_synthesis import _validate_response
+    from tesserae.llm_synthesis import _validate_response
 
     body = (
         "The wiki tightened around 3D reconstruction this week, with three "
@@ -537,8 +537,8 @@ def _set_env(monkeypatch, **values: Optional[str]) -> None:
 def test_projector_uses_heuristic_when_env_unset(tmp_path: Path, monkeypatch):
     _set_env(
         monkeypatch,
-        LLM_WIKI_SYNTHESIS_LLM=None,
-        LLM_WIKI_SYNTHESIS_DRY_RUN=None,
+        TESSERAE_SYNTHESIS_LLM=None,
+        TESSERAE_SYNTHESIS_DRY_RUN=None,
     )
 
     factory = _factory(fixed_body="MUST NOT BE INVOKED [node-a]")
@@ -557,9 +557,9 @@ def test_projector_uses_llm_when_enabled_with_fake_client(tmp_path: Path,
                                                           monkeypatch):
     _set_env(
         monkeypatch,
-        LLM_WIKI_SYNTHESIS_LLM="1",
+        TESSERAE_SYNTHESIS_LLM="1",
         ANTHROPIC_API_KEY="sk-test",
-        LLM_WIKI_SYNTHESIS_DRY_RUN=None,
+        TESSERAE_SYNTHESIS_DRY_RUN=None,
     )
 
     def factory_body(kwargs):
@@ -600,9 +600,9 @@ def test_projector_falls_back_to_heuristic_on_rate_limit(tmp_path: Path,
                                                           monkeypatch):
     _set_env(
         monkeypatch,
-        LLM_WIKI_SYNTHESIS_LLM="1",
+        TESSERAE_SYNTHESIS_LLM="1",
         ANTHROPIC_API_KEY="sk-test",
-        LLM_WIKI_SYNTHESIS_DRY_RUN=None,
+        TESSERAE_SYNTHESIS_DRY_RUN=None,
     )
 
     factory = _factory(raise_on_call=_FakeRateLimitError("429"))
@@ -619,7 +619,7 @@ def test_projector_falls_back_to_heuristic_on_rate_limit(tmp_path: Path,
     pulse = (tmp_path / "wiki" / "syntheses" / "pulse.md").read_text(encoding="utf-8")
     assert "generator: heuristic-v1" in pulse
     log = buf.getvalue()
-    assert "[llm-wiki]" in log
+    assert "[tesserae]" in log
     # One log line per (kind, error-class) pair — pulse is the first.
     assert log.count("_FakeRateLimitError") >= 1
 
@@ -627,9 +627,9 @@ def test_projector_falls_back_to_heuristic_on_rate_limit(tmp_path: Path,
 def test_projector_dry_run_path(tmp_path: Path, monkeypatch):
     _set_env(
         monkeypatch,
-        LLM_WIKI_SYNTHESIS_LLM="1",
+        TESSERAE_SYNTHESIS_LLM="1",
         ANTHROPIC_API_KEY="sk-test",
-        LLM_WIKI_SYNTHESIS_DRY_RUN="1",
+        TESSERAE_SYNTHESIS_DRY_RUN="1",
     )
 
     # No factory needed — dry run skips client construction. Make absolutely
@@ -650,9 +650,9 @@ def test_projector_dry_run_path(tmp_path: Path, monkeypatch):
 def test_projector_disabled_when_api_key_missing(tmp_path: Path, monkeypatch):
     _set_env(
         monkeypatch,
-        LLM_WIKI_SYNTHESIS_LLM="1",
+        TESSERAE_SYNTHESIS_LLM="1",
         ANTHROPIC_API_KEY="",
-        LLM_WIKI_SYNTHESIS_DRY_RUN=None,
+        TESSERAE_SYNTHESIS_DRY_RUN=None,
     )
 
     set_client_factory(_factory(fixed_body="should not run [node-a]"))

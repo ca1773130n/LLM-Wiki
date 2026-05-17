@@ -3,7 +3,7 @@
 <!-- translations:start -->
 <p align="center"><a href="../feature-map.md">English</a> · <a href="feature-map.ko.md">한국어</a> · <a href="feature-map.zh.md">中文</a> · <a href="feature-map.ja.md">日本語</a> · <a href="feature-map.ru.md">Русский</a> · <a href="feature-map.es.md">Español</a> · <a href="feature-map.fr.md">Français</a> · <a href="feature-map.de.md">Deutsch</a></p>
 <!-- translations:end -->
-이 문서는 LLM-Wiki에 현재 구현된 기능을 상태, 소스 파일, 문서화 위치와 함께 요약합니다.
+이 문서는 Tesserae에 현재 구현된 기능을 상태, 소스 파일, 문서화 위치와 함께 요약합니다.
 
 상태 범례: ✅ 출시됨 · ⚠ 진행 중 / 부분 구현.
 
@@ -15,8 +15,8 @@
 
 | 기능 | 상태 | 소스 | 문서 앵커 |
 |---|---|---|---|
-| `WikiPageStore` (멱등 body-hash 쓰기, frontmatter 파서) | ✅ | [`llm_wiki/wiki_store.py`](../../llm_wiki/wiki_store.py) | [architecture.md § 모듈 맵](architecture.ko.md#wiki--synthesis-l2) |
-| `WikiLayerProjector` — 위키 계층 노드마다 md 페이지 1개 | ✅ | [`llm_wiki/wiki_projector.py`](../../llm_wiki/wiki_projector.py) | [architecture.md § 파이프라인](architecture.ko.md#pipeline) |
+| `WikiPageStore` (멱등 body-hash 쓰기, frontmatter 파서) | ✅ | [`tesserae/wiki_store.py`](../../tesserae/wiki_store.py) | [architecture.md § 모듈 맵](architecture.ko.md#wiki--synthesis-l2) |
+| `WikiLayerProjector` — 위키 계층 노드마다 md 페이지 1개 | ✅ | [`tesserae/wiki_projector.py`](../../tesserae/wiki_projector.py) | [architecture.md § 파이프라인](architecture.ko.md#pipeline) |
 | `sources/` 페이지 | ✅ | `wiki_projector.py` | [frontend-redesign.md § Sources](frontend-redesign.ko.md#sources) |
 | `concepts/` 페이지 | ✅ | `wiki_projector.py` | [frontend-redesign.md § Concepts](frontend-redesign.ko.md#concepts) |
 | `entities/` 페이지 | ✅ | `wiki_projector.py` | [frontend-redesign.md § Entities](frontend-redesign.ko.md#entities) |
@@ -24,7 +24,7 @@
 | `repos/` 페이지 | ✅ | `wiki_projector.py` | [frontend-redesign.md § Repos](frontend-redesign.ko.md#repos) |
 | `topics/` 페이지 | ✅ | `wiki_projector.py` | [frontend-redesign.md § Topics](frontend-redesign.ko.md#topics) |
 | `questions/` 페이지 (열린 질문) | ✅ | `wiki_projector.py` | [frontend-redesign.md § Questions](frontend-redesign.ko.md#questions) |
-| `syntheses/` 페이지 | ✅ | [`llm_wiki/synthesis.py`](../../llm_wiki/synthesis.py) | [frontend-redesign.md § Syntheses](frontend-redesign.ko.md#syntheses) |
+| `syntheses/` 페이지 | ✅ | [`tesserae/synthesis.py`](../../tesserae/synthesis.py) | [frontend-redesign.md § Syntheses](frontend-redesign.ko.md#syntheses) |
 
 ### 합성 종류 (L2 → 파생)
 
@@ -38,13 +38,13 @@
 | `topic` | ✅ | `synthesis.py` | 논문 3편 이상인 `ResearchTopic` / `ApproachFamily` 클러스터마다 1개. |
 | `comparison` | ✅ | `synthesis.py` | 같은 작업에서 경쟁하는 `ApproachFamily` 쌍마다 1개. |
 | `field_overview` | ✅ | `synthesis.py` | `ResearchField`마다 1개. |
-| LLM으로 업그레이드된 요약 (환경 플래그) | ⚠ | 훅만 있음 | 휴리스틱 기준선은 제공됨; `LLM_WIKI_SYNTHESIS_LLM=1` 훅은 스텁으로 남겨둠. |
+| LLM으로 업그레이드된 요약 (환경 플래그) | ⚠ | 훅만 있음 | 휴리스틱 기준선은 제공됨; `TESSERAE_SYNTHESIS_LLM=1` 훅은 스텁으로 남겨둠. |
 
 ### 정적 사이트 경로
 
 | 경로 | 상태 | 소스 | 비고 |
 |---|---|---|---|
-| `/` (홈, 히어로 pulse) | ✅ | [`llm_wiki/site/pages.py`](../../llm_wiki/site/pages.py) `render_home` | 통계 행 + 큐레이션된 진입점 + 최근 활동. |
+| `/` (홈, 히어로 pulse) | ✅ | [`tesserae/site/pages.py`](../../tesserae/site/pages.py) `render_home` | 통계 행 + 큐레이션된 진입점 + 최근 활동. |
 | `/sources/`, `/sources/<slug>.html` | ✅ | `pages.py::render_sources_index`, `render_source_detail` | |
 | `/concepts/`, `/concepts/<slug>.html` | ✅ | `pages.py::render_concepts_index`, `render_concept_detail` | |
 | `/entities/`, `/entities/<slug>.html` | ✅ | `pages.py::render_entities_index`, `render_entity_detail` | |
@@ -62,13 +62,13 @@
 
 | 산출물 | 상태 | 소스 | 목적 |
 |---|---|---|---|
-| 페이지별 `<page>.txt` 형제 파일 | ✅ | [`llm_wiki/site/exports.py`](../../llm_wiki/site/exports.py) `write_siblings` | 한 페이지의 일반 텍스트 보기(내비게이션, 스타일 없음). |
+| 페이지별 `<page>.txt` 형제 파일 | ✅ | [`tesserae/site/exports.py`](../../tesserae/site/exports.py) `write_siblings` | 한 페이지의 일반 텍스트 보기(내비게이션, 스타일 없음). |
 | 페이지별 `<page>.json` 형제 파일 | ✅ | `exports.py::write_siblings` | `{title, kind, body, body_text, links, source_path, frontmatter}`. |
 | `llms.txt` | ✅ | `exports.py::render_llms_txt` | llmstxt.org 짧은 색인. |
 | `llms-full.txt` | ✅ | `exports.py::render_llms_full_txt` | 모든 페이지 본문, 5 MB로 제한. |
 | `graph.jsonld` | ✅ | `exports.py::render_graph_jsonld` | schema.org `Dataset`, 위키 계층 노드만. |
 | `graph.json` | ✅ | `__init__.py::write_site` | 전체 그래프 페이로드(도구용 코드 노드 포함). |
-| `search-index.json` | ✅ | [`llm_wiki/site/search.py`](../../llm_wiki/site/search.py) | 팔레트 + 페이지 검색; 위키 계층 종류만. |
+| `search-index.json` | ✅ | [`tesserae/site/search.py`](../../tesserae/site/search.py) | 팔레트 + 페이지 검색; 위키 계층 종류만. |
 | `sitemap.xml` | ✅ | `exports.py::render_sitemap_xml` | 생성된 모든 경로, `lastmod`는 frontmatter에서 가져옴. |
 | `rss.xml` | ✅ | `exports.py::render_rss_xml` | 최근 30개 syntheses. |
 | `robots.txt` | ✅ | `exports.py::render_robots_txt` | 허용적 — 크롤링 + 색인. |
@@ -79,8 +79,8 @@
 
 | 기능 | 상태 | 소스 | 비고 |
 |---|---|---|---|
-| 디자인 토큰(라이트 + 다크 테마, 테라코타 강조색) | ✅ | [`llm_wiki/site/tokens.py`](../../llm_wiki/site/tokens.py) | `assets/style.css`의 단일 CSS 번들. |
-| 테마 토글(지속 저장, 깜빡임 없음) | ✅ | [`llm_wiki/site/js.py`](../../llm_wiki/site/js.py) | `localStorage`의 `data-theme="dark"`, 페인트 전에 적용. |
+| 디자인 토큰(라이트 + 다크 테마, 테라코타 강조색) | ✅ | [`tesserae/site/tokens.py`](../../tesserae/site/tokens.py) | `assets/style.css`의 단일 CSS 번들. |
+| 테마 토글(지속 저장, 깜빡임 없음) | ✅ | [`tesserae/site/js.py`](../../tesserae/site/js.py) | `localStorage`의 `data-theme="dark"`, 페인트 전에 적용. |
 | 검색 팔레트(`cmd+k` / `ctrl+k` / `/`) | ✅ | `js.py` | `search-index.json`에 대한 퍼지 매칭; 최근 페이지 목록. |
 | 고정 오른쪽 TOC | ✅ | `pages.py` + `tokens.py` | 데스크톱 전용; 모바일은 `<details>` 기반 드로어. |
 | 월 + 요일 라벨이 있는 활동 히트맵 | ✅ | `components.py::heatmap_svg` | 26주 SVG, 셀은 해당 날짜의 `digest.md`로 연결. |
@@ -89,25 +89,25 @@
 | 페이지 전환(120 ms 불투명도, prefers-reduced-motion) | ✅ | `tokens.py` | |
 | 3D + 2D 그래프 보기(호버, 엣지 라벨, 커서 기준 줌) | ✅ | `pages.py::render_graph_view` + `js.py` | 3d-force-graph + Three.js, CDN 스냅샷으로 벤더링. |
 | 페이지별 AI 형제 파일 푸터 | ✅ | `components.py::ai_siblings_footer` | 현재 페이지의 `.txt` 및 `.json`으로 가는 인라인 링크. |
-| 하니스 세션 기록 페이지 | ✅ | [`llm_wiki/harness_sessions.py`](../../llm_wiki/harness_sessions.py) + [`llm_wiki/site/sessions.py`](../../llm_wiki/site/sessions.py) | 명시적 Claude Code/Codex 가져오기; markdown 턴, 왼쪽 턴 레일, 접힌 도구 사용, 검색 항목을 갖춘 `/sessions/` 색인 및 상세 페이지. |
+| 하니스 세션 기록 페이지 | ✅ | [`tesserae/harness_sessions.py`](../../tesserae/harness_sessions.py) + [`tesserae/site/sessions.py`](../../tesserae/site/sessions.py) | 명시적 Claude Code/Codex 가져오기; markdown 턴, 왼쪽 턴 레일, 접힌 도구 사용, 검색 항목을 갖춘 `/sessions/` 색인 및 상세 페이지. |
 
 ### 파이프라인 + CLI
 
 | 기능 | 상태 | 소스 | 비고 |
 |---|---|---|---|
-| `project compile`은 synthesis + wiki + site를 순서대로 호출 | ✅ | [`llm_wiki/project.py`](../../llm_wiki/project.py) | 재설계 계획의 3단계. |
-| `project build-site` 독립 실행 | ✅ | `project.py` + [`llm_wiki/cli.py`](../../llm_wiki/cli.py) | `wiki/` + `graph.json`을 읽고 `site/`를 작성. |
+| `project compile`은 synthesis + wiki + site를 순서대로 호출 | ✅ | [`tesserae/project.py`](../../tesserae/project.py) | 재설계 계획의 3단계. |
+| `project build-site` 독립 실행 | ✅ | `project.py` + [`tesserae/cli.py`](../../tesserae/cli.py) | `wiki/` + `graph.json`을 읽고 `site/`를 작성. |
 | `project serve` 로컬 HTTP | ✅ | `cli.py` | 순수 stdlib 서버. |
-| `project deploy` → GitHub Pages | ✅ | [`llm_wiki/deploy.py`](../../llm_wiki/deploy.py) | `gh-pages`로 worktree push; `gh` CLI를 통한 선택적 `--enable-pages`. `--build`, `--dry-run`, `--branch`, `--remote`, `--force`. |
-| `project sessions discover/import/list` | ✅ | [`llm_wiki/harness_sessions.py`](../../llm_wiki/harness_sessions.py) + `cli.py` | Claude Code/Codex용 인바운드 세션 기록; 탐색은 명시적이며 프로젝트 작업 디렉터리로 범위가 제한됨. |
-| `project watch` 변경 시 재빌드 | ⚠ | [`llm_wiki/cli.py`](../../llm_wiki/cli.py) | Subagent R이 폴링 watcher를 마무리 중 — `--interval`, `--debounce`, `--once`, `--paths`, `--quiet` 인자 표면은 준비됨; 재빌드 루프 본문은 이번 라운드에 반영 중. |
+| `project deploy` → GitHub Pages | ✅ | [`tesserae/deploy.py`](../../tesserae/deploy.py) | `gh-pages`로 worktree push; `gh` CLI를 통한 선택적 `--enable-pages`. `--build`, `--dry-run`, `--branch`, `--remote`, `--force`. |
+| `project sessions discover/import/list` | ✅ | [`tesserae/harness_sessions.py`](../../tesserae/harness_sessions.py) + `cli.py` | Claude Code/Codex용 인바운드 세션 기록; 탐색은 명시적이며 프로젝트 작업 디렉터리로 범위가 제한됨. |
+| `project watch` 변경 시 재빌드 | ⚠ | [`tesserae/cli.py`](../../tesserae/cli.py) | Subagent R이 폴링 watcher를 마무리 중 — `--interval`, `--debounce`, `--once`, `--paths`, `--quiet` 인자 표면은 준비됨; 재빌드 루프 본문은 이번 라운드에 반영 중. |
 
 ## 기존 기능 (변경 없이 유지)
 
 ### CLI 및 설치
 
 - ✅ `pyproject.toml`을 통한 설치 가능한 Python 패키지.
-- ✅ 콘솔 명령: `llm_wiki`, `llm-wiki`, `llm_wiki_mcp`.
+- ✅ 콘솔 명령: `tesserae`, `tesserae`, `tesserae_mcp`.
 - ✅ `curl | bash` 설치용 `scripts/install.sh`.
 - ✅ 빠른 로컬 개발을 위해 기본적으로 editable 설치.
 
@@ -140,19 +140,19 @@
 
 ### 프로젝트 로컬 워크플로
 
-- ✅ `llm_wiki project init`
-- ✅ `llm_wiki project ingest`
-- ✅ `llm_wiki project compile`
-- ✅ `llm_wiki project mcp-config`
-- ✅ `llm_wiki project build-site`
-- ✅ `llm_wiki project serve`
-- ✅ `llm_wiki project deploy` (신규 — GitHub Pages)
-- ✅ `llm_wiki project sessions discover/import/list` (명시적 로컬 에이전트 기록 가져오기)
-- ⚠ `llm_wiki project watch` (진행 중)
-- ✅ `llm_wiki project export-agent-harness`
-- ✅ `llm_wiki project export-obsidian`
-- ✅ `llm_wiki project export-graphiti`
-- ✅ `llm_wiki project sync-graphiti`
+- ✅ `tesserae project init`
+- ✅ `tesserae project ingest`
+- ✅ `tesserae project compile`
+- ✅ `tesserae project mcp-config`
+- ✅ `tesserae project build-site`
+- ✅ `tesserae project serve`
+- ✅ `tesserae project deploy` (신규 — GitHub Pages)
+- ✅ `tesserae project sessions discover/import/list` (명시적 로컬 에이전트 기록 가져오기)
+- ⚠ `tesserae project watch` (진행 중)
+- ✅ `tesserae project export-agent-harness`
+- ✅ `tesserae project export-obsidian`
+- ✅ `tesserae project export-graphiti`
+- ✅ `tesserae project sync-graphiti`
 
 ### Obsidian
 
@@ -189,7 +189,7 @@
 
 ### MCP 서버
 
-- ✅ stdio JSON-RPC 기반 `llm_wiki_mcp` / `python3 -m llm_wiki.mcp_server`.
+- ✅ stdio JSON-RPC 기반 `tesserae_mcp` / `python3 -m tesserae.mcp_server`.
 - ✅ 도구: `schema`, `graph_summary`, `search_nodes`, `node_context`, `search_facts`, `timeline`.
 - ✅ 다중 프로젝트 레지스트리.
 

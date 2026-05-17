@@ -1,7 +1,7 @@
 from pathlib import Path
 
-from llm_wiki.code_graph import CodeGraphExtractor
-from llm_wiki.research_graph import ResearchNodeType
+from tesserae.code_graph import CodeGraphExtractor
+from tesserae.research_graph import ResearchNodeType
 
 
 def test_code_graph_extractor_models_project_files_symbols_and_imports(tmp_path):
@@ -36,7 +36,7 @@ def helper(value):
     assert graph.has_edge_type("imports")
 
 
-def test_code_graph_extractor_respects_llm_wiki_philosophy_metadata(tmp_path):
+def test_code_graph_extractor_respects_tesserae_philosophy_metadata(tmp_path):
     project = tmp_path / "demo-app"
     src = project / "src"
     src.mkdir(parents=True)

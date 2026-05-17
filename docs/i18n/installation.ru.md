@@ -3,33 +3,33 @@
 <!-- translations:start -->
 <p align="center"><a href="../installation.md">English</a> · <a href="installation.ko.md">한국어</a> · <a href="installation.zh.md">中文</a> · <a href="installation.ja.md">日本語</a> · <a href="installation.ru.md">Русский</a> · <a href="installation.es.md">Español</a> · <a href="installation.fr.md">Français</a> · <a href="installation.de.md">Deutsch</a></p>
 <!-- translations:end -->
-LLM-Wiki опубликован в PyPI и предоставляет shell-команды, чтобы пользователям не приходилось вручную запускать `python3 -m llm_wiki.cli`.
+Tesserae опубликован в PyPI и предоставляет shell-команды, чтобы пользователям не приходилось вручную запускать `python3 -m tesserae.cli`.
 
 ## Установка из PyPI (рекомендуется)
 
 ```bash
-pip install llm-research-wiki
+pip install tesserae
 ```
 
 Готово. `pip` зарегистрирует три консольных скрипта в вашем `PATH`:
 
 ```bash
-llm_wiki --help
-llm-wiki --help
-llm_wiki_mcp --help
+tesserae --help
+tesserae --help
+tesserae_mcp --help
 ```
 
-Каноническая команда в документации — `llm_wiki`; `llm-wiki` (с дефисом) является псевдонимом. `llm_wiki_mcp` запускает MCP-сервер.
+Каноническая команда в документации — `tesserae`; `tesserae` (с дефисом) является псевдонимом. `tesserae_mcp` запускает MCP-сервер.
 
 > **pipx тоже подходит.** Если вы предпочитаете держать CLI-инструменты в отдельных изолированных venv:
 > ```bash
-> pipx install llm-research-wiki
+> pipx install tesserae
 > ```
 
 ## Обновление
 
 ```bash
-pip install --upgrade llm-research-wiki
+pip install --upgrade tesserae
 ```
 
 ## Необязательные интеграции
@@ -38,7 +38,7 @@ pip install --upgrade llm-research-wiki
 
 ```bash
 # Understand Anything companion graph + Cognee runtime memory
-llm_wiki project setup \
+tesserae project setup \
   --with-understand-anything \
   --install-understand-anything \
   --understand-anything-platform codex \
@@ -54,13 +54,13 @@ pip install kuzu cognee graphiti-core
 
 - `kuzu` — персистентность графа Kuzu.
 - `cognee` — runtime-процессы Cognee add/cognify; настройка сохраняет `{python} -m pip install cognee` и повторяет один раз, если Cognee отсутствует.
-- Understand Anything — устанавливается через upstream-инсталлятор, когда выбран `--install-understand-anything`; LLM-Wiki сохраняет управляемый refresh wrapper вместо того, чтобы просить пользователей придумывать shell-команду.
+- Understand Anything — устанавливается через upstream-инсталлятор, когда выбран `--install-understand-anything`; Tesserae сохраняет управляемый refresh wrapper вместо того, чтобы просить пользователей придумывать shell-команду.
 - `graphiti-core` — живая синхронизация Graphiti/Neo4j. `export-graphiti` и `sync-graphiti --dry-run` работают и без него.
 
 Путь синтеза на базе Anthropic использует маркер extras:
 
 ```bash
-pip install "llm-research-wiki[synthesis-llm]"
+pip install "tesserae[synthesis-llm]"
 ```
 
 ## Установка из исходного кода (для контрибьюторов)
@@ -68,8 +68,8 @@ pip install "llm-research-wiki[synthesis-llm]"
 Если вы хотите дорабатывать кодовую базу, установите editable checkout:
 
 ```bash
-git clone https://github.com/ca1773130n/LLM-Wiki.git
-cd LLM-Wiki
+git clone https://github.com/ca1773130n/Tesserae.git
+cd Tesserae
 pip install -e .
 ```
 
@@ -77,7 +77,7 @@ pip install -e .
 
 ```bash
 # Quick: clone + install in one shot
-curl -fsSL https://raw.githubusercontent.com/ca1773130n/LLM-Wiki/main/scripts/install.sh | bash
+curl -fsSL https://raw.githubusercontent.com/ca1773130n/Tesserae/main/scripts/install.sh | bash
 
 # From an existing checkout
 ./scripts/install.sh --dir "$PWD"
@@ -103,7 +103,7 @@ export PATH="$HOME/.local/bin:$PATH"
 ## Проверка установки
 
 ```bash
-llm_wiki project init --help
-llm_wiki project compile --help
-llm_wiki project build-site --help
+tesserae project init --help
+tesserae project compile --help
+tesserae project build-site --help
 ```

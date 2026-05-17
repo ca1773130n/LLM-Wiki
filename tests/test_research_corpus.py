@@ -1,5 +1,5 @@
-from llm_wiki.batch import merge_graphs
-from llm_wiki.research_graph import ResearchCorpusAnalyzer, ResearchGraphExtractor, ResearchNodeType
+from tesserae.batch import merge_graphs
+from tesserae.research_graph import ResearchCorpusAnalyzer, ResearchGraphExtractor, ResearchNodeType
 
 
 PAPER_DAY_1 = """
@@ -144,7 +144,7 @@ def test_arxiv_references_in_non_research_docs_do_not_create_papers():
 # README
 
 Extract a JSON graph from a paper note:
-`python -m llm_wiki data/research/daily/2026-04-26/papers/2601.17835/paper.md`
+`python -m tesserae data/research/daily/2026-04-26/papers/2601.17835/paper.md`
 """,
         source_path="/repo/README.md",
         source_kind="SourceDocument",

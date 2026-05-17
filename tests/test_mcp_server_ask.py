@@ -6,8 +6,8 @@ import pytest
 
 
 def _write_minimal_project(project: Path, *, raganything_enabled: bool = True, cognee_enabled: bool = False) -> None:
-    """Create a minimal .llm-wiki layout with a graph.json so the MCP registry accepts it."""
-    cfg_dir = project / ".llm-wiki"
+    """Create a minimal .tesserae layout with a graph.json so the MCP registry accepts it."""
+    cfg_dir = project / ".tesserae"
     cfg_dir.mkdir(parents=True, exist_ok=True)
     cfg = {
         "name": "demo",
@@ -30,7 +30,7 @@ def _write_minimal_project(project: Path, *, raganything_enabled: bool = True, c
 
 
 def test_mcp_lists_ask_tool():
-    from llm_wiki.mcp_server import LLMWikiMCPServer
+    from tesserae.mcp_server import LLMWikiMCPServer
 
     tools = LLMWikiMCPServer().list_tools()
     by_name = {tool["name"]: tool for tool in tools}
@@ -43,7 +43,7 @@ def test_mcp_lists_ask_tool():
 
 
 def test_mcp_ask_routes_to_raganything(tmp_path, monkeypatch):
-    from llm_wiki.mcp_server import LLMWikiMCPServer
+    from tesserae.mcp_server import LLMWikiMCPServer
 
     project = tmp_path / "demo"
     _write_minimal_project(project, raganything_enabled=True)
@@ -55,7 +55,7 @@ def test_mcp_ask_routes_to_raganything(tmp_path, monkeypatch):
         captured["backend_config"] = backend_config
         return f"answered:{question}"
 
-    import llm_wiki.raganything_query as rq
+    import tesserae.raganything_query as rq
     monkeypatch.setattr(rq, "query", fake_query)
 
     server = LLMWikiMCPServer(registry_path=tmp_path / "registry.json")
@@ -70,7 +70,7 @@ def test_mcp_ask_routes_to_raganything(tmp_path, monkeypatch):
 
 
 def test_mcp_ask_requires_question(tmp_path):
-    from llm_wiki.mcp_server import LLMWikiMCPServer
+    from tesserae.mcp_server import LLMWikiMCPServer
 
     server = LLMWikiMCPServer(registry_path=tmp_path / "registry.json")
     with pytest.raises(ValueError, match="ask requires 'question'"):
@@ -79,12 +79,12 @@ def test_mcp_ask_requires_question(tmp_path):
 
 def test_mcp_ask_falls_through_to_wiki_when_raganything_returns_none(tmp_path, monkeypatch):
     """auto mode + raganything returning None should fall through; cognee disabled means wiki search runs."""
-    from llm_wiki.mcp_server import LLMWikiMCPServer
+    from tesserae.mcp_server import LLMWikiMCPServer
 
     project = tmp_path / "demo"
     _write_minimal_project(project, raganything_enabled=True, cognee_enabled=False)
 
-    import llm_wiki.raganything_query as rq
+    import tesserae.raganything_query as rq
     monkeypatch.setattr(rq, "query", lambda q, *, backend_config: None)
 
     server = LLMWikiMCPServer(registry_path=tmp_path / "registry.json")
@@ -97,12 +97,12 @@ def test_mcp_ask_falls_through_to_wiki_when_raganything_returns_none(tmp_path, m
 
 
 def test_mcp_ask_explicit_raganything_returns_note_when_no_answer(tmp_path, monkeypatch):
-    from llm_wiki.mcp_server import LLMWikiMCPServer
+    from tesserae.mcp_server import LLMWikiMCPServer
 
     project = tmp_path / "demo"
     _write_minimal_project(project, raganything_enabled=True)
 
-    import llm_wiki.raganything_query as rq
+    import tesserae.raganything_query as rq
     monkeypatch.setattr(rq, "query", lambda q, *, backend_config: None)
 
     server = LLMWikiMCPServer(registry_path=tmp_path / "registry.json")

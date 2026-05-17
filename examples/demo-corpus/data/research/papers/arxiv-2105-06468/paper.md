@@ -10,7 +10,7 @@ authors:
   - "Jia-Bin Huang"
 date: 2021-05-13
 sub_topic: Dynamic and 4D Reconstruction
-license: "CC-BY-4.0 (LLM-Wiki demo prose)"
+license: "CC-BY-4.0 (Tesserae demo prose)"
 methods: [RadianceField, NeuralImplicitSurface, NovelViewSynthesis]
 datasets: []
 metrics: [PSNR, SSIM, LPIPS]

@@ -3795,7 +3795,7 @@
       ],
       [
         "Direct Sparse Odometry",
-        "LLM-Wiki Demo Corpus"
+        "Tesserae Demo Corpus"
       ],
       [
         "Direct Sparse Odometry Paper",
@@ -6290,7 +6290,7 @@
         "3D Gaussians"
       ],
       [
-        "LLM-Wiki Demo Corpus",
+        "Tesserae Demo Corpus",
         "graphdeco-inria/gaussian-splatting"
       ],
       [
@@ -6918,7 +6918,7 @@
         "Monocular Geometric Cues"
       ],
       [
-        "CC-BY-4.0 (LLM-Wiki Demo Prose)",
+        "CC-BY-4.0 (Tesserae Demo Prose)",
         "MonoSDF"
       ],
       [
@@ -9946,7 +9946,7 @@
         "Two-Phone Rig"
       ],
       [
-        "CC-BY-4.0 (LLM-Wiki Demo Prose)",
+        "CC-BY-4.0 (Tesserae Demo Prose)",
         "Nerfies: Deformable Neural Radiance Fields"
       ],
       [
@@ -10978,7 +10978,7 @@
   "doc-a3cbcbb17496b10f5be0214a50b95a7f": {
     "relation_pairs": [
       [
-        "LLM-Wiki Demo Corpus",
+        "Tesserae Demo Corpus",
         "NVIDIA Source Code License-NC"
       ],
       [
@@ -11730,7 +11730,7 @@
         "Video Tutorial"
       ],
       [
-        "LLM-Wiki Demo",
+        "Tesserae Demo",
         "README"
       ],
       [
@@ -11746,7 +11746,7 @@
         "Video"
       ],
       [
-        "LLM-Wiki Demo Corpus",
+        "Tesserae Demo Corpus",
         "README"
       ],
       [
@@ -13546,7 +13546,7 @@
         "TransformerArchitecture"
       ],
       [
-        "CC-BY-4.0 (LLM-Wiki Demo Prose)",
+        "CC-BY-4.0 (Tesserae Demo Prose)",
         "TripoSR: Fast 3D Object Reconstruction from a Single Image"
       ],
       [
@@ -14042,7 +14042,7 @@
         "Sparse COLMAP SfM Point Cloud"
       ],
       [
-        "LLM-Wiki Demo Corpus",
+        "Tesserae Demo Corpus",
         "Non-Commercial Research Only License"
       ],
       [
@@ -14059,7 +14059,7 @@
       ],
       [
         "Cross-Graph Linking",
-        "LLM-Wiki Demo Corpus"
+        "Tesserae Demo Corpus"
       ],
       [
         "Adaptive Density Control",
@@ -14086,7 +14086,7 @@
         "Cross-Graph Linking"
       ],
       [
-        "LLM-Wiki Demo Corpus",
+        "Tesserae Demo Corpus",
         "README"
       ],
       [

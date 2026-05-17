@@ -1,7 +1,7 @@
 import json
 
-from llm_wiki.batch import BatchIngestRunner, sha256_text
-from llm_wiki.research_graph import ResearchGraph, ResearchNode, ResearchNodeType
+from tesserae.batch import BatchIngestRunner, sha256_text
+from tesserae.research_graph import ResearchGraph, ResearchNode, ResearchNodeType
 
 
 class CountingExtractor:

@@ -14,7 +14,7 @@ authors:
   - "Steven M. Seitz"
 date: 2021-06-24
 sub_topic: Dynamic and 4D Reconstruction
-license: "CC-BY-4.0 (LLM-Wiki demo prose)"
+license: "CC-BY-4.0 (Tesserae demo prose)"
 methods: [RadianceField, DeformationField, NovelViewSynthesis]
 datasets: []
 metrics: [LPIPS]

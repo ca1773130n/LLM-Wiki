@@ -14,7 +14,7 @@ methods: [GaussianSplatting, RadianceField, NovelViewSynthesis, RealTimeRenderin
 datasets: []
 metrics: [FPS]
 oss_repo: graphdeco-inria/gaussian-splatting
-license: "CC-BY-4.0 (LLM-Wiki demo prose)"
+license: "CC-BY-4.0 (Tesserae demo prose)"
 ---
 
 # 3D Gaussian Splatting for Real-Time Radiance Field Rendering

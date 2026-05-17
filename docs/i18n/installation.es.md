@@ -3,33 +3,33 @@
 <!-- translations:start -->
 <p align="center"><a href="../installation.md">English</a> · <a href="installation.ko.md">한국어</a> · <a href="installation.zh.md">中文</a> · <a href="installation.ja.md">日本語</a> · <a href="installation.ru.md">Русский</a> · <a href="installation.es.md">Español</a> · <a href="installation.fr.md">Français</a> · <a href="installation.de.md">Deutsch</a></p>
 <!-- translations:end -->
-LLM-Wiki se publica en PyPI y expone comandos de shell para que los usuarios no tengan que ejecutar `python3 -m llm_wiki.cli` manualmente.
+Tesserae se publica en PyPI y expone comandos de shell para que los usuarios no tengan que ejecutar `python3 -m tesserae.cli` manualmente.
 
 ## Instalar desde PyPI (recomendado)
 
 ```bash
-pip install llm-research-wiki
+pip install tesserae
 ```
 
 Eso es todo. `pip` registra tres scripts de consola en tu `PATH`:
 
 ```bash
-llm_wiki --help
-llm-wiki --help
-llm_wiki_mcp --help
+tesserae --help
+tesserae --help
+tesserae_mcp --help
 ```
 
-El comando canónico en la documentación es `llm_wiki`; `llm-wiki` (con guion) es un alias. `llm_wiki_mcp` inicia el servidor MCP.
+El comando canónico en la documentación es `tesserae`; `tesserae` (con guion) es un alias. `tesserae_mcp` inicia el servidor MCP.
 
 > **pipx también sirve.** Si prefieres mantener las herramientas CLI en venvs aislados:
 > ```bash
-> pipx install llm-research-wiki
+> pipx install tesserae
 > ```
 
 ## Actualizar
 
 ```bash
-pip install --upgrade llm-research-wiki
+pip install --upgrade tesserae
 ```
 
 ## Integraciones opcionales
@@ -38,7 +38,7 @@ La wheel predeterminada es deliberadamente ligera. El asistente de configuració
 
 ```bash
 # Understand Anything companion graph + Cognee runtime memory
-llm_wiki project setup \
+tesserae project setup \
   --with-understand-anything \
   --install-understand-anything \
   --understand-anything-platform codex \
@@ -54,13 +54,13 @@ pip install kuzu cognee graphiti-core
 
 - `kuzu` — persistencia de grafos Kuzu.
 - `cognee` — flujos runtime add/cognify de Cognee; la configuración guarda `{python} -m pip install cognee` y reintenta una vez si falta Cognee.
-- Understand Anything — se instala mediante el instalador upstream cuando se selecciona `--install-understand-anything`; LLM-Wiki guarda un wrapper de actualización gestionado en lugar de pedir a los usuarios que inventen un comando shell.
+- Understand Anything — se instala mediante el instalador upstream cuando se selecciona `--install-understand-anything`; Tesserae guarda un wrapper de actualización gestionado en lugar de pedir a los usuarios que inventen un comando shell.
 - `graphiti-core` — sincronización en vivo Graphiti/Neo4j. `export-graphiti` y `sync-graphiti --dry-run` funcionan sin él.
 
 La ruta de síntesis respaldada por Anthropic usa un marcador extras:
 
 ```bash
-pip install "llm-research-wiki[synthesis-llm]"
+pip install "tesserae[synthesis-llm]"
 ```
 
 ## Instalar desde el código fuente (para contribuidores)
@@ -68,8 +68,8 @@ pip install "llm-research-wiki[synthesis-llm]"
 Si quieres trabajar en el código, instala el checkout editable:
 
 ```bash
-git clone https://github.com/ca1773130n/LLM-Wiki.git
-cd LLM-Wiki
+git clone https://github.com/ca1773130n/Tesserae.git
+cd Tesserae
 pip install -e .
 ```
 
@@ -77,7 +77,7 @@ También se incluye un instalador de conveniencia: clona, crea un `.venv` local 
 
 ```bash
 # Quick: clone + install in one shot
-curl -fsSL https://raw.githubusercontent.com/ca1773130n/LLM-Wiki/main/scripts/install.sh | bash
+curl -fsSL https://raw.githubusercontent.com/ca1773130n/Tesserae/main/scripts/install.sh | bash
 
 # From an existing checkout
 ./scripts/install.sh --dir "$PWD"
@@ -103,7 +103,7 @@ export PATH="$HOME/.local/bin:$PATH"
 ## Verificar la instalación
 
 ```bash
-llm_wiki project init --help
-llm_wiki project compile --help
-llm_wiki project build-site --help
+tesserae project init --help
+tesserae project compile --help
+tesserae project build-site --help
 ```

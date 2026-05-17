@@ -98,12 +98,12 @@ Permissive licenses (MIT / Apache-2.0 / BSD) allow README redistribution with at
 
 ## Internal synthetic content (Phases 4–5)
 
-The following content categories will be authored from scratch by the LLM-Wiki maintainers (Claude-drafted, human-reviewed) and are not mirrored from any external source. They are released under the same license as the rest of the LLM-Wiki repository (see top-level `LICENSE`).
+The following content categories will be authored from scratch by the Tesserae maintainers (Claude-drafted, human-reviewed) and are not mirrored from any external source. They are released under the same license as the rest of the Tesserae repository (see top-level `LICENSE`).
 
 - **Daily digests** (`data/research/daily/*/digest.md`, 6 files) — fabricated narrative roundups; cite real corpus papers/repos but the prose is original.
 - **Weekly syntheses** (`data/research/weekly/*/synthesis.md`, 2 files) — original essays synthesizing the digests.
 - **Open questions** (`data/research/questions/*.md`, 3 files) — original research-gap framings.
-- **Agent session transcripts** (`.agent-sessions/*/transcript.jsonl`) — fabricated demonstrations of MCP query workflows. Tool names are real (verified against `llm_wiki/mcp_server.py`); the conversation is scripted.
+- **Agent session transcripts** (`.agent-sessions/*/transcript.jsonl`) — fabricated demonstrations of MCP query workflows. Tool names are real (verified against `tesserae/mcp_server.py`); the conversation is scripted.
 - **Corpus README** (`README.md`) — original framing.
 - **Paper bodies** (`data/research/papers/<slug>/paper.md`, to be added in Phase 2) — original 200–400 word summaries of each paper's claims, NOT paragraph quotes from the paper body. No copyrighted text from the paper PDFs is reproduced.
 

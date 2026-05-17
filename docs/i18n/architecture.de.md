@@ -3,7 +3,7 @@
 <!-- translations:start -->
 <p align="center"><a href="../architecture.md">English</a> · <a href="architecture.ko.md">한국어</a> · <a href="architecture.zh.md">中文</a> · <a href="architecture.ja.md">日本語</a> · <a href="architecture.ru.md">Русский</a> · <a href="architecture.es.md">Español</a> · <a href="architecture.fr.md">Français</a></p>
 <!-- translations:end -->
-LLM-Wiki verwandelt ein Verzeichnis mit Quellmaterial in einen kontrollierten, typisierten Knowledge Graph und projiziert diesen Graph über eine langlebige Markdown-Wiki-Schicht in eine statische, KI-freundliche Website. Das Redesign vom April 2026 hat das System um ein dreischichtiges Modell nach Karpathy reorganisiert: Rohbelege bleiben roh, ein typisierter Graph regiert die Ontologie, und eine Markdown-Wiki-Schicht sitzt zwischen Graph und gerendertem Output. Die statische Site ist jetzt ein *Renderer* dieser Wiki-Schicht statt einer direkten Ausgabe des Graphen, mit der kontrollierten Ontologie in [`llm_wiki/research_graph.py`](../llm_wiki/research_graph.py) als Schema.
+Tesserae verwandelt ein Verzeichnis mit Quellmaterial in einen kontrollierten, typisierten Knowledge Graph und projiziert diesen Graph über eine langlebige Markdown-Wiki-Schicht in eine statische, KI-freundliche Website. Das Redesign vom April 2026 hat das System um ein dreischichtiges Modell nach Karpathy reorganisiert: Rohbelege bleiben roh, ein typisierter Graph regiert die Ontologie, und eine Markdown-Wiki-Schicht sitzt zwischen Graph und gerendertem Output. Die statische Site ist jetzt ein *Renderer* dieser Wiki-Schicht statt einer direkten Ausgabe des Graphen, mit der kontrollierten Ontologie in [`tesserae/research_graph.py`](../tesserae/research_graph.py) als Schema.
 
 ## Das dreischichtige Karpathy-Modell
 
@@ -11,15 +11,15 @@ Andrej Karpathys Framing für LLM-freundliche Wissensdatenbanken unterscheidet d
 
 | Schicht | Inhalt | Repo-Ort | Owner |
 |---|---|---|---|
-| L1 — Rohquellen | Die literalen Bytes, die der Nutzer geschrieben oder gesammelt hat. Append-only. | `data/`, `docs/`, in `.llm-wiki/config.json` referenzierte Projektbäume | der Nutzer |
-| L2 — Wiki | Typisierte Markdown-Seiten (sources, concepts, entities, papers, repos, topics, syntheses, questions) mit YAML-Frontmatter. Idempotent: bei jedem Compile neu erzeugt, aber nur überschrieben, wenn sich Content-Hashes ändern. | `.llm-wiki/wiki/` | `WikiPageStore`, `WikiLayerProjector`, `SynthesisProjector` |
-| L3 — Rendered | Die statische HTML-Site, AI-Sibling-Exporte, Suchindex, Sitemaps, JSON-LD. Wird bei jedem Compile gelöscht und neu geschrieben, aber Byte-stabil über Reruns. | `.llm-wiki/site/` | `StaticSiteBuilder` (`llm_wiki/site/`) |
+| L1 — Rohquellen | Die literalen Bytes, die der Nutzer geschrieben oder gesammelt hat. Append-only. | `data/`, `docs/`, in `.tesserae/config.json` referenzierte Projektbäume | der Nutzer |
+| L2 — Wiki | Typisierte Markdown-Seiten (sources, concepts, entities, papers, repos, topics, syntheses, questions) mit YAML-Frontmatter. Idempotent: bei jedem Compile neu erzeugt, aber nur überschrieben, wenn sich Content-Hashes ändern. | `.tesserae/wiki/` | `WikiPageStore`, `WikiLayerProjector`, `SynthesisProjector` |
+| L3 — Rendered | Die statische HTML-Site, AI-Sibling-Exporte, Suchindex, Sitemaps, JSON-LD. Wird bei jedem Compile gelöscht und neu geschrieben, aber Byte-stabil über Reruns. | `.tesserae/site/` | `StaticSiteBuilder` (`tesserae/site/`) |
 
-Das Schema spannt sich über alle drei Schichten als separate Achse: `ResearchGraph` in `graph.json` ist die kontrollierte Ontologie, gegen die L2-Seiten verlinken, und die `ResearchNodeType`-/Edge-Whitelist in [`llm_wiki/research_graph.py`](../llm_wiki/research_graph.py) ist die Source of Truth dafür, welche Typen überhaupt existieren.
+Das Schema spannt sich über alle drei Schichten als separate Achse: `ResearchGraph` in `graph.json` ist die kontrollierte Ontologie, gegen die L2-Seiten verlinken, und die `ResearchNodeType`-/Edge-Whitelist in [`tesserae/research_graph.py`](../tesserae/research_graph.py) ist die Source of Truth dafür, welche Typen überhaupt existieren.
 
 Das Redesign hat L2 explizit hinzugefügt. Vor April 2026 wurde die statische Site direkt aus `graph.json` projiziert; die Wiki-Schicht existierte nur innerhalb des Obsidian-Vault-Exports. Sie herauszulösen brachte uns:
 
-- Eine einzige menschenbearbeitbare Fläche (`.llm-wiki/wiki/` in Obsidian oder jedem Markdown-Editor öffnen).
+- Eine einzige menschenbearbeitbare Fläche (`.tesserae/wiki/` in Obsidian oder jedem Markdown-Editor öffnen).
 - Idempotente Rebuilds: ein erneutes `project compile` erzeugt null File-Diffs, solange sich der Source-Content nicht geändert hat.
 - Ein Evolutions-Log: Synthese-Seiten sammeln sich über die Zeit an und lassen das Projekt sich selbst erzählen.
 
@@ -28,7 +28,7 @@ Das Redesign hat L2 explizit hinzugefügt. Vor April 2026 wurde die statische Si
 ```
 data/, docs/, src/                                    (L1 raw)
         │
-        ▼  project compile  (llm_wiki/project.py)
+        ▼  project compile  (tesserae/project.py)
 ┌───────────────────────────┐
 │ ResearchGraphExtractor    │   deterministic + selective Claude
 │ + canonicalization        │
@@ -44,14 +44,14 @@ data/, docs/, src/                                    (L1 raw)
             │
             ▼
 ┌───────────────────────────┐
-│ .llm-wiki/wiki/  (L2 md)  │   sources/, concepts/, entities/,
+│ .tesserae/wiki/  (L2 md)  │   sources/, concepts/, entities/,
 │                            │   papers/, repos/, topics/,
 │                            │   syntheses/, questions/
 └───────────┬───────────────┘
             │
             ▼  StaticSiteBuilder.write_site
 ┌───────────────────────────┐
-│ .llm-wiki/site/  (L3 html)│   index.html, <kind>/index.html,
+│ .tesserae/site/  (L3 html)│   index.html, <kind>/index.html,
 │                            │   <kind>/<slug>.html,
 │                            │   per-page .txt + .json siblings,
 │                            │   llms.txt, llms-full.txt,
@@ -63,7 +63,7 @@ data/, docs/, src/                                    (L1 raw)
 └───────────────────────────┘
 ```
 
-Jeder Schritt ist inkrementell. Der Graph-Extraktor nutzt die Content-Hashes aus `manifest.json`, um unveränderte Quelldateien zu überspringen. `WikiPageStore.write_page` gibt `False` zurück (und überspringt den Write), wenn der Body-Hash mit dem auf der Festplatte übereinstimmt. `StaticSiteBuilder` löscht und überschreibt `.llm-wiki/site/`, aber sein Output ist deterministisch — siehe „Idempotenz-Story“ unten.
+Jeder Schritt ist inkrementell. Der Graph-Extraktor nutzt die Content-Hashes aus `manifest.json`, um unveränderte Quelldateien zu überspringen. `WikiPageStore.write_page` gibt `False` zurück (und überspringt den Write), wenn der Body-Hash mit dem auf der Festplatte übereinstimmt. `StaticSiteBuilder` löscht und überschreibt `.tesserae/site/`, aber sein Output ist deterministisch — siehe „Idempotenz-Story“ unten.
 
 ## Modul-Karte
 
@@ -71,57 +71,57 @@ Jeder Schritt ist inkrementell. Der Graph-Extraktor nutzt die Content-Hashes aus
 
 | Modul | Verantwortung |
 |---|---|
-| [`llm_wiki/wiki_store.py`](../llm_wiki/wiki_store.py) | `WikiPage`-Dataclass, `WikiPageStore` für Filesystem-I/O. Stdlib-only YAML-Subset-Frontmatter-Parser. Body-Hash-Idempotenz. |
-| [`llm_wiki/wiki_projector.py`](../llm_wiki/wiki_projector.py) | `WikiLayerProjector`: bildet jeden `ResearchGraph`-Knoten eines Wiki-Layer-Typs auf eine Markdown-Seite im richtigen `kind/`-Ordner ab. |
-| [`llm_wiki/synthesis.py`](../llm_wiki/synthesis.py) | `SynthesisProjector`: deterministische Templates für pulse, daily_digest, weekly, topic, comparison, field_overview. Fügt `Synthesis`-Knoten und `synthesizes`-/`summarizes`-Kanten zurück in den Graph. |
+| [`tesserae/wiki_store.py`](../tesserae/wiki_store.py) | `WikiPage`-Dataclass, `WikiPageStore` für Filesystem-I/O. Stdlib-only YAML-Subset-Frontmatter-Parser. Body-Hash-Idempotenz. |
+| [`tesserae/wiki_projector.py`](../tesserae/wiki_projector.py) | `WikiLayerProjector`: bildet jeden `ResearchGraph`-Knoten eines Wiki-Layer-Typs auf eine Markdown-Seite im richtigen `kind/`-Ordner ab. |
+| [`tesserae/synthesis.py`](../tesserae/synthesis.py) | `SynthesisProjector`: deterministische Templates für pulse, daily_digest, weekly, topic, comparison, field_overview. Fügt `Synthesis`-Knoten und `synthesizes`-/`summarizes`-Kanten zurück in den Graph. |
 
 ### Graph + Ontologie
 
 | Modul | Verantwortung |
 |---|---|
-| [`llm_wiki/research_graph.py`](../llm_wiki/research_graph.py) | `ResearchNodeType`-Enum (inkl. `SYNTHESIS`), Edge-Type-Whitelist (inkl. `synthesizes`, `summarizes`), Validierung. |
-| [`llm_wiki/canonicalization.py`](../llm_wiki/canonicalization.py) | Alias-Kanonisierung + Near-Duplicate-Review-Queue. |
-| [`llm_wiki/code_graph.py`](../llm_wiki/code_graph.py) | Deterministischer Python-AST-Extraktor für den Development-Slice. |
-| [`llm_wiki/llm_extractor.py`](../llm_wiki/llm_extractor.py) | Selektiver Extraktor via Claude CLI/OAuth. |
+| [`tesserae/research_graph.py`](../tesserae/research_graph.py) | `ResearchNodeType`-Enum (inkl. `SYNTHESIS`), Edge-Type-Whitelist (inkl. `synthesizes`, `summarizes`), Validierung. |
+| [`tesserae/canonicalization.py`](../tesserae/canonicalization.py) | Alias-Kanonisierung + Near-Duplicate-Review-Queue. |
+| [`tesserae/code_graph.py`](../tesserae/code_graph.py) | Deterministischer Python-AST-Extraktor für den Development-Slice. |
+| [`tesserae/llm_extractor.py`](../tesserae/llm_extractor.py) | Selektiver Extraktor via Claude CLI/OAuth. |
 
 ### Site-Renderer (L3)
 
 | Modul | Verantwortung |
 |---|---|
-| [`llm_wiki/site/__init__.py`](../llm_wiki/site/__init__.py) | `StaticSiteBuilder.write_site`: löscht und baut die Site neu, läuft jede Route durch, gibt Exporte + AI-Siblings + Manifest aus. |
-| [`llm_wiki/site/pages.py`](../llm_wiki/site/pages.py) | Ein Renderer pro Route (home, indexes, detail pages, timeline, graph, about). `SiteContext` trägt vorberechnete Indizes, damit Renderer pur bleiben. |
-| [`llm_wiki/site/components.py`](../llm_wiki/site/components.py) | HTML-Primitive: `breadcrumbs`, `card`, `badge`, `node_table`, `edge_list`, `sparkline_svg`, `heatmap_svg`, `toc`, `page_shell`, `ai_siblings_footer`. |
-| [`llm_wiki/site/tokens.py`](../llm_wiki/site/tokens.py) | Design Tokens — CSS-Variablen, Light- + Dark-Themes, Layout, Typografie, hier werden alle Komponenten gestylt. |
-| [`llm_wiki/site/js.py`](../llm_wiki/site/js.py) | Client-JS-Bundle: Search-Palette, Theme-Toggle, Sigma + 3D-Force-Graph-Ansicht. |
-| [`llm_wiki/site/markdown.py`](../llm_wiki/site/markdown.py) | Stdlib-only Markdown-Renderer (Links, Autolinks, Code, Hervorhebungen, Überschriften). Keine externe Abhängigkeit. |
-| [`llm_wiki/site/relevance.py`](../llm_wiki/site/relevance.py) | Vier-Signal-Relevanz-Scoring (direkter Link, Source-Overlap, Adamic-Adar, Typ-Affinität), das von jedem `Related`-Abschnitt benutzt wird. |
-| [`llm_wiki/site/search.py`](../llm_wiki/site/search.py) | Builder für `search-index.json`. Nur Wiki-Layer-Kinds. |
-| [`llm_wiki/site/sessions.py`](../llm_wiki/site/sessions.py) | Session-Index/Detail-Renderer für importierte Harness-Historie: Project-Memory-Summary-Sections, Conversation-Turn-Rail, Markdown-Transcript-Rendering und eingeklappte Tool-Use-Blöcke. |
-| [`llm_wiki/site/exports.py`](../llm_wiki/site/exports.py) | `llms.txt`, `llms-full.txt`, `graph.jsonld`, `sitemap.xml`, `rss.xml`, `robots.txt`, `ai-readme.md`, Per-Page-`.txt`/`.json`-Siblings. |
+| [`tesserae/site/__init__.py`](../tesserae/site/__init__.py) | `StaticSiteBuilder.write_site`: löscht und baut die Site neu, läuft jede Route durch, gibt Exporte + AI-Siblings + Manifest aus. |
+| [`tesserae/site/pages.py`](../tesserae/site/pages.py) | Ein Renderer pro Route (home, indexes, detail pages, timeline, graph, about). `SiteContext` trägt vorberechnete Indizes, damit Renderer pur bleiben. |
+| [`tesserae/site/components.py`](../tesserae/site/components.py) | HTML-Primitive: `breadcrumbs`, `card`, `badge`, `node_table`, `edge_list`, `sparkline_svg`, `heatmap_svg`, `toc`, `page_shell`, `ai_siblings_footer`. |
+| [`tesserae/site/tokens.py`](../tesserae/site/tokens.py) | Design Tokens — CSS-Variablen, Light- + Dark-Themes, Layout, Typografie, hier werden alle Komponenten gestylt. |
+| [`tesserae/site/js.py`](../tesserae/site/js.py) | Client-JS-Bundle: Search-Palette, Theme-Toggle, Sigma + 3D-Force-Graph-Ansicht. |
+| [`tesserae/site/markdown.py`](../tesserae/site/markdown.py) | Stdlib-only Markdown-Renderer (Links, Autolinks, Code, Hervorhebungen, Überschriften). Keine externe Abhängigkeit. |
+| [`tesserae/site/relevance.py`](../tesserae/site/relevance.py) | Vier-Signal-Relevanz-Scoring (direkter Link, Source-Overlap, Adamic-Adar, Typ-Affinität), das von jedem `Related`-Abschnitt benutzt wird. |
+| [`tesserae/site/search.py`](../tesserae/site/search.py) | Builder für `search-index.json`. Nur Wiki-Layer-Kinds. |
+| [`tesserae/site/sessions.py`](../tesserae/site/sessions.py) | Session-Index/Detail-Renderer für importierte Harness-Historie: Project-Memory-Summary-Sections, Conversation-Turn-Rail, Markdown-Transcript-Rendering und eingeklappte Tool-Use-Blöcke. |
+| [`tesserae/site/exports.py`](../tesserae/site/exports.py) | `llms.txt`, `llms-full.txt`, `graph.jsonld`, `sitemap.xml`, `rss.xml`, `robots.txt`, `ai-readme.md`, Per-Page-`.txt`/`.json`-Siblings. |
 
 ### Pipeline-Orchestrierung
 
 | Modul | Verantwortung |
 |---|---|
-| [`llm_wiki/project.py`](../llm_wiki/project.py) | `ProjectWiki.compile`: treibt Extraktion → Graph → Wiki-Layer → Site. Besitzt `ProjectPaths` (`config`, `graph`, `manifest`, `wiki`, `site`, etc.). |
-| [`llm_wiki/cli.py`](../llm_wiki/cli.py) | Alle `llm_wiki project …`-Subcommands, inklusive `compile`, `build-site`, `serve`, `watch`, `deploy`. |
-| [`llm_wiki/deploy.py`](../llm_wiki/deploy.py) | `project deploy`: pusht `.llm-wiki/site/` auf einen `gh-pages`-Branch via Worktree, aktiviert optional Pages via `gh`. |
+| [`tesserae/project.py`](../tesserae/project.py) | `ProjectWiki.compile`: treibt Extraktion → Graph → Wiki-Layer → Site. Besitzt `ProjectPaths` (`config`, `graph`, `manifest`, `wiki`, `site`, etc.). |
+| [`tesserae/cli.py`](../tesserae/cli.py) | Alle `tesserae project …`-Subcommands, inklusive `compile`, `build-site`, `serve`, `watch`, `deploy`. |
+| [`tesserae/deploy.py`](../tesserae/deploy.py) | `project deploy`: pusht `.tesserae/site/` auf einen `gh-pages`-Branch via Worktree, aktiviert optional Pages via `gh`. |
 
 ### Externe Adapter (in dieser Runde unverändert)
 
 | Modul | Verantwortung |
 |---|---|
-| [`llm_wiki/obsidian_adapter.py`](../llm_wiki/obsidian_adapter.py) | Obsidian-Vault-Projektion (Graph-Coloring, Dataview-Dashboard, Roh-Assets). |
-| [`llm_wiki/agent_harness.py`](../llm_wiki/agent_harness.py) | Harness-Exporte für Claude Code / Codex / Gemini / Kiro / Cursor / OpenCode. |
-| [`llm_wiki/harness_sessions.py`](../llm_wiki/harness_sessions.py) | Inbound Discovery, Normalisierung und Storage von Claude-Code-/Codex-Sessions unter `.llm-wiki/harness_sessions/` plus redigierte Markdown-Zusammenfassungen. |
-| [`llm_wiki/graphiti_adapter.py`](../llm_wiki/graphiti_adapter.py) | Temporal-Fact-JSONL + optionaler Live-Sync mit Graphiti. |
-| [`llm_wiki/cognee_adapter.py`](../llm_wiki/cognee_adapter.py) | Cognee-Nodes/Edges-JSONL-Bundle und direkter Add-/Cognify-Pfad. |
-| [`llm_wiki/mcp_server.py`](../llm_wiki/mcp_server.py) | MCP-Stdio-Server, der `schema`, `graph_summary`, `search_nodes`, `node_context`, `search_facts`, `timeline` exponiert. |
+| [`tesserae/obsidian_adapter.py`](../tesserae/obsidian_adapter.py) | Obsidian-Vault-Projektion (Graph-Coloring, Dataview-Dashboard, Roh-Assets). |
+| [`tesserae/agent_harness.py`](../tesserae/agent_harness.py) | Harness-Exporte für Claude Code / Codex / Gemini / Kiro / Cursor / OpenCode. |
+| [`tesserae/harness_sessions.py`](../tesserae/harness_sessions.py) | Inbound Discovery, Normalisierung und Storage von Claude-Code-/Codex-Sessions unter `.tesserae/harness_sessions/` plus redigierte Markdown-Zusammenfassungen. |
+| [`tesserae/graphiti_adapter.py`](../tesserae/graphiti_adapter.py) | Temporal-Fact-JSONL + optionaler Live-Sync mit Graphiti. |
+| [`tesserae/cognee_adapter.py`](../tesserae/cognee_adapter.py) | Cognee-Nodes/Edges-JSONL-Bundle und direkter Add-/Cognify-Pfad. |
+| [`tesserae/mcp_server.py`](../tesserae/mcp_server.py) | MCP-Stdio-Server, der `schema`, `graph_summary`, `search_nodes`, `node_context`, `search_facts`, `timeline` exponiert. |
 
 ## Projekt-Workspace-Layout
 
 ```text
-.llm-wiki/
+.tesserae/
   config.json                 project name, source kind, source list
   graph.json                  validated ResearchGraph (incl. Synthesis nodes)
   manifest.json               per-source content hashes (input dedup)
@@ -139,7 +139,7 @@ Jeder Schritt ist inkrementell. Der Graph-Extraktor nutzt die Content-Hashes aus
   site/                       L3 static site — see below
 ```
 
-### `.llm-wiki/wiki/` (L2)
+### `.tesserae/wiki/` (L2)
 
 ```text
 wiki/
@@ -153,9 +153,9 @@ wiki/
   questions/<slug>.md         OpenQuestion
 ```
 
-Jede Datei ist von Hand editierbar; der nächste Compile respektiert Nutzer-Edits, solange der Body-Hash von dem abweicht, was der Projector schreiben würde. (Nur den Body zu bearbeiten gewinnt; das Frontmatter zu bearbeiten verliert beim nächsten Compile, weil das Frontmatter neu erzeugt wird.) Obsidian-Nutzer können `.llm-wiki/wiki/` direkt öffnen; der bestehende `obsidian_vault/`-Adapter ist eine separate Projektion, kein Ersatz.
+Jede Datei ist von Hand editierbar; der nächste Compile respektiert Nutzer-Edits, solange der Body-Hash von dem abweicht, was der Projector schreiben würde. (Nur den Body zu bearbeiten gewinnt; das Frontmatter zu bearbeiten verliert beim nächsten Compile, weil das Frontmatter neu erzeugt wird.) Obsidian-Nutzer können `.tesserae/wiki/` direkt öffnen; der bestehende `obsidian_vault/`-Adapter ist eine separate Projektion, kein Ersatz.
 
-### `.llm-wiki/site/` (L3)
+### `.tesserae/site/` (L3)
 
 ```text
 site/
@@ -187,7 +187,7 @@ site/
 
 Das Redesign hat eine klare Linie gezogen: Code-Class- und Code-Function-Knoten bleiben in `graph.json` (damit MCP-, Cognee- und Graphiti-Consumer sie weiterhin sehen), bekommen aber nie HTML-Seiten, tauchen nie in `search-index.json` auf und erscheinen nie in der Navigation. Das ist der Vertrag nach außen — das Wiki ist eine dokument-zentrierte Wissensdatenbank, kein Function-Browser.
 
-Konkret überspringt `StaticSiteBuilder` jeden Knoten, dessen Typ nicht in der L2-Wiki-Kind-Map (`llm_wiki/wiki_projector.py::_KIND_FOR_TYPE`) steht:
+Konkret überspringt `StaticSiteBuilder` jeden Knoten, dessen Typ nicht in der L2-Wiki-Kind-Map (`tesserae/wiki_projector.py::_KIND_FOR_TYPE`) steht:
 
 - Ausgeschlossen aus L2 + L3: `CodeClass`, `CodeFunction`, `CodeModule`, `Dependency`, `EvidenceSpan`, `SourceFile`, alle `Claim`-Varianten (`Claim`, `ContributionClaim`, `PerformanceClaim`, `ComparisonClaim`, `LimitationClaim`, `CausalClaim`).
 - Flächen, wo sie weiterhin auftauchen: als Bullets, Badges, Neighbour-Counts oder Evidence-Excerpts inline auf verwandten Wiki-Seiten, und in `graph.json` für Downstream-Tooling.
@@ -207,8 +207,8 @@ Das wird durch `tests/test_site_pages.py` und den End-to-End-Smoke in `tests/tes
 
 ## Skalierungsnotizen
 
-- **Graph-View-Knoten-Cap.** [`MAX_GRAPH_NODES = 1500`](../llm_wiki/site/pages.py) begrenzt das in die Seite eingebettete Payload für das interaktive Force-Layout. Jenseits von ~1500 Knoten wird die Browser-Simulation auf Mid-Range-Hardware träge, daher droppt die Seite zuerst die Wiki-Layer-Knoten mit dem niedrigsten Grad, sobald der Count das Cap überschreitet. Die exportierte `graph.json` ist davon unberührt — sie enthält immer den vollen Graph. Code-Knoten werden vor dem Cap herausgefiltert.
-- **`llms-full.txt`-Cap.** Ein Safety-Cap von 5 MB greift in [`llm_wiki/site/exports.py`](../llm_wiki/site/exports.py); die Datei endet mit einem `[TRUNCATED — see graph.jsonld for the full set]`-Marker, wenn der Cap erreicht wird. `graph.jsonld` ist uncapped, weil JSON-LD-Consumer das volle Set erwarten.
+- **Graph-View-Knoten-Cap.** [`MAX_GRAPH_NODES = 1500`](../tesserae/site/pages.py) begrenzt das in die Seite eingebettete Payload für das interaktive Force-Layout. Jenseits von ~1500 Knoten wird die Browser-Simulation auf Mid-Range-Hardware träge, daher droppt die Seite zuerst die Wiki-Layer-Knoten mit dem niedrigsten Grad, sobald der Count das Cap überschreitet. Die exportierte `graph.json` ist davon unberührt — sie enthält immer den vollen Graph. Code-Knoten werden vor dem Cap herausgefiltert.
+- **`llms-full.txt`-Cap.** Ein Safety-Cap von 5 MB greift in [`tesserae/site/exports.py`](../tesserae/site/exports.py); die Datei endet mit einem `[TRUNCATED — see graph.jsonld for the full set]`-Marker, wenn der Cap erreicht wird. `graph.jsonld` ist uncapped, weil JSON-LD-Consumer das volle Set erwarten.
 - **Search-Index.** Nur Wiki-Layer-Kinds. Code-Graph-Knoten landen nie in `search-index.json`; das Redesign-Ziel ist < 500 KB für den Dogfood-Korpus und wir liegen heute deutlich darunter.
 - **Per-Page-Byte-Budget (Faustregel).** Jede Detailseite < 60 KB gz HTML, shared CSS < 30 KB, shared JS < 25 KB, Sigma-Vendor nur auf der Graph-Seite (~60 KB). Die Graph-Ansicht nutzt 3D-force-graph + Three.js, einmal geladen; alle anderen Seiten bleiben vanilla.
 - **Compile-Zeit auf Dogfood.** ~300 Markdown-Dateien extrahieren in unter 5 s auf einer aktuellen Dev-Maschine; das Site-Rendering fügt weitere ~2 s hinzu. Die Idempotenz der Wiki-Schicht sorgt dafür, dass nachfolgende Compiles nur die geänderten Pfade berühren.
@@ -235,4 +235,4 @@ Das wird durch `tests/test_site_pages.py` und den End-to-End-Smoke in `tests/tes
 - [Quickstart](quickstart.de.md) — minimaler Pfad von `project init` zu einer browserbaren Site.
 - [Frontend-Redesign-Walkthrough](frontend-redesign.de.md) — annotierte Tour durch jede Route.
 - [Feature-Map](feature-map.de.md) — was geliefert ist, was in Arbeit ist, mit File-Pointern.
-- [Self-Dogfood-Demo](self-dogfood.de.md) — LLM-Wiki gegen das eigene Repo laufen lassen.
+- [Self-Dogfood-Demo](self-dogfood.de.md) — Tesserae gegen das eigene Repo laufen lassen.

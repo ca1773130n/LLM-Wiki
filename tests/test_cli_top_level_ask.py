@@ -1,4 +1,4 @@
-"""Tests for the top-level ``llm_wiki ask`` and ``llm_wiki wiki`` commands.
+"""Tests for the top-level ``tesserae ask`` and ``tesserae wiki`` commands.
 
 These exercise the new project resolution surface that hits the persistent
 multi-project registry (``ProjectRegistry``) shared with the MCP server, and
@@ -13,10 +13,10 @@ from pathlib import Path
 
 
 def _bootstrap_project(tmp_path: Path) -> Path:
-    """Create a minimal .llm-wiki layout the registry will accept."""
+    """Create a minimal .tesserae layout the registry will accept."""
     project = tmp_path / "demo"
     project.mkdir()
-    cfg_dir = project / ".llm-wiki"
+    cfg_dir = project / ".tesserae"
     cfg_dir.mkdir()
     cfg = {
         "name": "demo",
@@ -41,8 +41,8 @@ def _bootstrap_project(tmp_path: Path) -> Path:
 
 
 def test_top_level_ask_resolves_project_via_path(tmp_path, monkeypatch, capsys):
-    from llm_wiki import cli
-    import llm_wiki.raganything_query as rq
+    from tesserae import cli
+    import tesserae.raganything_query as rq
 
     project = _bootstrap_project(tmp_path)
     monkeypatch.setattr(rq, "query", lambda q, *, backend_config: "by-path-answer")
@@ -63,9 +63,9 @@ def test_top_level_ask_resolves_project_via_path(tmp_path, monkeypatch, capsys):
 
 
 def test_top_level_ask_resolves_project_via_wiki_name(tmp_path, monkeypatch, capsys):
-    from llm_wiki import cli
-    import llm_wiki.mcp_server as mcp_server
-    import llm_wiki.raganything_query as rq
+    from tesserae import cli
+    import tesserae.mcp_server as mcp_server
+    import tesserae.raganything_query as rq
 
     project = _bootstrap_project(tmp_path)
     registry_path = tmp_path / "registry.json"
@@ -93,9 +93,9 @@ def test_top_level_ask_resolves_project_via_wiki_name(tmp_path, monkeypatch, cap
 
 
 def test_top_level_ask_uses_active_project_when_no_args(tmp_path, monkeypatch, capsys):
-    from llm_wiki import cli
-    import llm_wiki.mcp_server as mcp_server
-    import llm_wiki.raganything_query as rq
+    from tesserae import cli
+    import tesserae.mcp_server as mcp_server
+    import tesserae.raganything_query as rq
 
     project = _bootstrap_project(tmp_path)
     registry_path = tmp_path / "registry.json"
@@ -115,8 +115,8 @@ def test_top_level_ask_uses_active_project_when_no_args(tmp_path, monkeypatch, c
 
 
 def test_top_level_ask_fails_helpfully_when_no_project(tmp_path, monkeypatch, capsys):
-    from llm_wiki import cli
-    import llm_wiki.mcp_server as mcp_server
+    from tesserae import cli
+    import tesserae.mcp_server as mcp_server
 
     registry_path = tmp_path / "registry.json"
     monkeypatch.setattr(mcp_server, "DEFAULT_REGISTRY_PATH", registry_path)
@@ -128,8 +128,8 @@ def test_top_level_ask_fails_helpfully_when_no_project(tmp_path, monkeypatch, ca
 
 
 def test_top_level_ask_unknown_wiki_name(tmp_path, monkeypatch, capsys):
-    from llm_wiki import cli
-    import llm_wiki.mcp_server as mcp_server
+    from tesserae import cli
+    import tesserae.mcp_server as mcp_server
 
     registry_path = tmp_path / "registry.json"
     monkeypatch.setattr(mcp_server, "DEFAULT_REGISTRY_PATH", registry_path)
@@ -142,8 +142,8 @@ def test_top_level_ask_unknown_wiki_name(tmp_path, monkeypatch, capsys):
 
 
 def test_top_level_ask_json_envelope(tmp_path, monkeypatch, capsys):
-    from llm_wiki import cli
-    import llm_wiki.raganything_query as rq
+    from tesserae import cli
+    import tesserae.raganything_query as rq
 
     project = _bootstrap_project(tmp_path)
     monkeypatch.setattr(rq, "query", lambda q, *, backend_config: "json-answer")
@@ -167,8 +167,8 @@ def test_top_level_ask_json_envelope(tmp_path, monkeypatch, capsys):
 
 
 def test_wiki_list_command(tmp_path, monkeypatch, capsys):
-    from llm_wiki import cli
-    import llm_wiki.mcp_server as mcp_server
+    from tesserae import cli
+    import tesserae.mcp_server as mcp_server
 
     project = _bootstrap_project(tmp_path)
     registry_path = tmp_path / "registry.json"
@@ -185,8 +185,8 @@ def test_wiki_list_command(tmp_path, monkeypatch, capsys):
 
 
 def test_wiki_list_json(tmp_path, monkeypatch, capsys):
-    from llm_wiki import cli
-    import llm_wiki.mcp_server as mcp_server
+    from tesserae import cli
+    import tesserae.mcp_server as mcp_server
 
     project = _bootstrap_project(tmp_path)
     registry_path = tmp_path / "registry.json"
@@ -203,8 +203,8 @@ def test_wiki_list_json(tmp_path, monkeypatch, capsys):
 
 
 def test_wiki_unregister_command(tmp_path, monkeypatch, capsys):
-    from llm_wiki import cli
-    import llm_wiki.mcp_server as mcp_server
+    from tesserae import cli
+    import tesserae.mcp_server as mcp_server
 
     project = _bootstrap_project(tmp_path)
     registry_path = tmp_path / "registry.json"
@@ -224,8 +224,8 @@ def test_wiki_unregister_command(tmp_path, monkeypatch, capsys):
 
 
 def test_wiki_activate_command(tmp_path, monkeypatch, capsys):
-    from llm_wiki import cli
-    import llm_wiki.mcp_server as mcp_server
+    from tesserae import cli
+    import tesserae.mcp_server as mcp_server
 
     project = _bootstrap_project(tmp_path)
     registry_path = tmp_path / "registry.json"

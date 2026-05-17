@@ -6,9 +6,9 @@ from pathlib import Path
 
 import pytest
 
-from llm_wiki.markdown_projection import GraphMarkdownProjector
-from llm_wiki.research_graph import ResearchEdge, ResearchGraph, ResearchNode, ResearchNodeType
-from llm_wiki.vault_pull import (
+from tesserae.markdown_projection import GraphMarkdownProjector
+from tesserae.research_graph import ResearchEdge, ResearchGraph, ResearchNode, ResearchNodeType
+from tesserae.vault_pull import (
     VaultOverride,
     VaultUserLinkChange,
     apply_overrides,
@@ -21,8 +21,8 @@ from llm_wiki.vault_pull import (
     parse_frontmatter,
     write_diverged_fields_report,
 )
-from llm_wiki.research_graph import ResearchNodeType
-from llm_wiki.vault_snapshot import NodeSnapshot, write_snapshot
+from tesserae.research_graph import ResearchNodeType
+from tesserae.vault_snapshot import NodeSnapshot, write_snapshot
 
 
 # ----------------------------------------------------------------- parsing

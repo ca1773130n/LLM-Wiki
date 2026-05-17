@@ -20,14 +20,14 @@ from pathlib import Path
 
 import pytest
 
-from llm_wiki.research_graph import (
+from tesserae.research_graph import (
     ResearchEdge,
     ResearchGraph,
     ResearchNode,
     ResearchNodeType,
 )
-from llm_wiki.site import StaticSiteBuilder
-from llm_wiki.wiki_store import WikiPage, WikiPageStore
+from tesserae.site import StaticSiteBuilder
+from tesserae.wiki_store import WikiPage, WikiPageStore
 
 
 # --------------------------------------------------------------------- fixtures
@@ -270,7 +270,7 @@ def test_search_index_indexes_synthesis_body(built_site: Path) -> None:
 def test_gz_siblings_are_deterministic(tmp_path: Path) -> None:
     """Two compiles with identical content must yield byte-identical .gz files
     (i.e. ``gzip.GzipFile(mtime=0)`` was used). This is what keeps ``git
-    status .llm-wiki/site`` clean on a no-op recompile."""
+    status .tesserae/site`` clean on a no-op recompile."""
 
     wiki = tmp_path / "wiki"
     wiki.mkdir()

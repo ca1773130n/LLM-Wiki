@@ -15,7 +15,7 @@ __pycache__/
 *.egg-info/
 
 # Local graph/database outputs
-.llm-wiki/
+.tesserae/
 .understand-anything/
 *.sqlite
 *.kuzu/
@@ -27,5 +27,5 @@ __pycache__/
 !examples/demo-corpus/.agent-sessions/
 !examples/demo-corpus/.agent-sessions/**
 .hermes/
-.llm-wiki/external/raganything/working_dir/
-.llm-wiki/external/raganything/parsed/
+.tesserae/external/raganything/working_dir/
+.tesserae/external/raganything/parsed/

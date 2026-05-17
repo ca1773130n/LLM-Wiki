@@ -17,7 +17,7 @@ from pathlib import Path
 
 import pytest
 
-from llm_wiki.research_graph import (
+from tesserae.research_graph import (
     ResearchGraphExtractor,
     ResearchNodeType,
 )

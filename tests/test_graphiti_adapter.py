@@ -2,8 +2,8 @@ import json
 
 import pytest
 
-from llm_wiki.graphiti_adapter import GraphitiResearchGraphAdapter, GraphitiSyncUnavailableError
-from llm_wiki.research_graph import ResearchEdge, ResearchGraph, ResearchNode, ResearchNodeType
+from tesserae.graphiti_adapter import GraphitiResearchGraphAdapter, GraphitiSyncUnavailableError
+from tesserae.research_graph import ResearchEdge, ResearchGraph, ResearchNode, ResearchNodeType
 
 
 def graphiti_sample_graph():
@@ -34,8 +34,8 @@ def test_graphiti_adapter_exports_temporal_facts_as_episode_jsonl(tmp_path):
     rows = [json.loads(line) for line in output.read_text(encoding="utf-8").splitlines()]
     assert len(rows) == len(episodes) == 1
     assert rows[0]["group_id"] == "demo_project"
-    assert rows[0]["source"] == "llm_wiki"
-    assert rows[0]["source_description"] == "LLM-Wiki controlled research graph temporal fact"
+    assert rows[0]["source"] == "tesserae"
+    assert rows[0]["source_description"] == "Tesserae controlled research graph temporal fact"
     assert rows[0]["reference_time"] == "2026-04-27"
     assert "Demo Paper --uses--> Gaussian Splatting" in rows[0]["content"]
     assert "Demo Paper uses Gaussian Splatting." in rows[0]["content"]
@@ -44,7 +44,7 @@ def test_graphiti_adapter_exports_temporal_facts_as_episode_jsonl(tmp_path):
 
 
 def test_graphiti_sync_fails_helpfully_when_optional_dependency_missing(monkeypatch):
-    monkeypatch.setattr("llm_wiki.graphiti_adapter.find_spec", lambda name: None if name == "graphiti_core" else object())
+    monkeypatch.setattr("tesserae.graphiti_adapter.find_spec", lambda name: None if name == "graphiti_core" else object())
 
     with pytest.raises(GraphitiSyncUnavailableError) as exc:
         GraphitiResearchGraphAdapter().sync(graphiti_sample_graph(), neo4j_uri="bolt://localhost:7687", neo4j_user="neo4j", neo4j_password="password")

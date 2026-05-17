@@ -1,6 +1,6 @@
 from pathlib import Path
 
-from llm_wiki.research_graph import (
+from tesserae.research_graph import (
     ALLOWED_EDGE_TYPES,
     ALLOWED_NODE_TYPES,
     ResearchGraphExtractor,

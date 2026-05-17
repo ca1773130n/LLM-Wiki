@@ -1,6 +1,6 @@
-# Build and (optionally) deploy the LLM-Wiki dogfood demo.
+# Build and (optionally) deploy the Tesserae dogfood demo.
 #
-# Compiles LLM-Wiki against its own source tree using the default
+# Compiles Tesserae against its own source tree using the default
 # deterministic extractor (no LLM calls, no API keys required) and
 # builds the static site. The site is uploaded as a regular workflow
 # artifact (so it is always inspectable from the Actions tab) and,
@@ -50,25 +50,25 @@ jobs:
           python-version: "3.11"
           cache: pip
 
-      - name: Install LLM-Wiki (editable, synthesis-llm extras)
+      - name: Install Tesserae (editable, synthesis-llm extras)
         run: |
           python -m pip install --upgrade pip
           python -m pip install -e ".[synthesis-llm]"
 
       - name: Setup project (no Cognee, no RAG-Anything)
-        # `setup --yes` writes .llm-wiki/config.json non-interactively.
+        # `setup --yes` writes .tesserae/config.json non-interactively.
         # Every companion tool that would need network or LLM credentials
         # is disabled so the default compile path is fully offline.
         #
-        # `--source` is repeatable (action="append" in llm_wiki/cli.py).
+        # `--source` is repeatable (action="append" in tesserae/cli.py).
         # We pass the repo root AND the demo corpus tree so the deploy
-        # contains both the LLM-Wiki dogfood (`.`) and the 3D-reconstruction
+        # contains both the Tesserae dogfood (`.`) and the 3D-reconstruction
         # showcase corpus (50 papers, 12 repos, 6 daily digests, 2 weekly
         # syntheses, 3 open questions) seeded under examples/demo-corpus/data/.
         #
         # The .agent-sessions/ transcripts under examples/demo-corpus/
         # are intentionally NOT passed as a source: the harness session
-        # importer (llm_wiki/harness_sessions.py) only ingests native
+        # importer (tesserae/harness_sessions.py) only ingests native
         # Claude Code / Codex JSONL formats, not the synthetic showcase
         # format. Instead, those five transcripts are pre-converted to
         # harness-native HarnessSession JSON under
@@ -76,7 +76,7 @@ jobs:
         # harness session store by the "Seed demo agent sessions" step
         # below, so the build-site step renders them under /sessions/.
         run: |
-          python -m llm_wiki project setup \
+          python -m tesserae project setup \
             --yes \
             --no-color \
             --source-kind Repository \
@@ -91,27 +91,27 @@ jobs:
       - name: Compile (deterministic extractor, no LLM calls)
         # The default ResearchGraphExtractor is fully deterministic: it
         # builds the typed graph from filesystem walks + heuristics, with
-        # zero outbound network or LLM calls. See llm_wiki/research_graph.py.
-        run: python -m llm_wiki project compile
+        # zero outbound network or LLM calls. See tesserae/research_graph.py.
+        run: python -m tesserae project compile
 
       - name: Restore seeded RAG-Anything store
         # The 85-doc demo corpus was pre-ingested through LightRAG + Codex
         # locally and committed under examples/demo-corpus/raganything-store/.
         # Copy it into the runtime working_dir so a downstream consumer
         # (the workflow's raganything-store artifact, or anyone running
-        # `llm_wiki serve` against the build output) can query the index
+        # `tesserae serve` against the build output) can query the index
         # without re-burning Codex tokens on every push. See
         # examples/demo-corpus/scripts/seed_raganything_store.py for how
         # the store is rebuilt locally.
         run: |
-          mkdir -p .llm-wiki/external/raganything/working_dir
-          cp -R examples/demo-corpus/raganything-store/. .llm-wiki/external/raganything/working_dir/
+          mkdir -p .tesserae/external/raganything/working_dir
+          cp -R examples/demo-corpus/raganything-store/. .tesserae/external/raganything/working_dir/
           echo "store size:"
-          du -sh .llm-wiki/external/raganything/working_dir
+          du -sh .tesserae/external/raganything/working_dir
           echo "doc count:"
           python -c "
           import json, pathlib
-          p = pathlib.Path('.llm-wiki/external/raganything/working_dir/kv_store_doc_status.json')
+          p = pathlib.Path('.tesserae/external/raganything/working_dir/kv_store_doc_status.json')
           d = json.loads(p.read_text())
           processed = sum(1 for v in d.values() if v.get('status') == 'processed')
           print(f'  {processed}/{len(d)} docs processed')
@@ -133,7 +133,7 @@ jobs:
           import json, os, pathlib
           workspace = os.environ['GITHUB_WORKSPACE']
           src_root = pathlib.Path('examples/demo-corpus/.harness-sessions')
-          dst_root = pathlib.Path('.llm-wiki/harness_sessions')
+          dst_root = pathlib.Path('.tesserae/harness_sessions')
           dst_root.mkdir(parents=True, exist_ok=True)
           seeded = 0
           for src in sorted(src_root.rglob('*.json')):
@@ -150,10 +150,10 @@ jobs:
               print(f'  re-stamped + seeded {harness}/{src.name}')
           print(f'\nseeded {seeded} sessions with project_root={workspace}')
           PY
-          find .llm-wiki/harness_sessions -type f -name '*.json' | sort
+          find .tesserae/harness_sessions -type f -name '*.json' | sort
 
       - name: Build static site
-        run: python -m llm_wiki project build-site
+        run: python -m tesserae project build-site
 
       - name: Add a no-Jekyll marker and a banner file
         # GitHub Pages defaults to Jekyll processing; .nojekyll opts out so
@@ -161,9 +161,9 @@ jobs:
         # The banner is a tiny notice so visitors land knowing the demo is
         # the dogfood compile of this repo's own source.
         run: |
-          touch .llm-wiki/site/.nojekyll
-          cat > .llm-wiki/site/DEMO.txt <<'TXT'
-          This GitHub Pages deploy is LLM-Wiki compiled against its own source.
+          touch .tesserae/site/.nojekyll
+          cat > .tesserae/site/DEMO.txt <<'TXT'
+          This GitHub Pages deploy is Tesserae compiled against its own source.
           The compile uses the default deterministic extractor (no LLM, no API
           keys). To compile your own project, see the project README.
           TXT
@@ -173,14 +173,14 @@ jobs:
         # workflow run page even when Pages is not enabled.
         uses: actions/upload-artifact@v7
         with:
-          name: llm-wiki-site
-          path: .llm-wiki/site
+          name: tesserae-site
+          path: .tesserae/site
           retention-days: 14
 
       - name: Upload seeded RAG-Anything store as workflow artifact
         # ~32 MB pre-seeded LightRAG store (entities + relations + vector
         # indices for the 85-doc demo corpus). Downloadable from the
-        # workflow run page so anyone running `llm_wiki serve` locally
+        # workflow run page so anyone running `tesserae serve` locally
         # against this repo's `examples/demo-corpus/data/` tree gets a
         # populated /api/ask endpoint without re-burning Codex tokens.
         # Not bundled into the Pages deploy (which is static HTML only).
@@ -207,14 +207,14 @@ jobs:
         continue-on-error: true
         uses: actions/upload-pages-artifact@v5
         with:
-          path: .llm-wiki/site
+          path: .tesserae/site
 
       - name: Notice when Pages is not enabled
         if: steps.configure_pages.outcome != 'success'
         run: |
           echo "::warning::GitHub Pages is not enabled for this repository."
           echo "::warning::Enable it once at: ${{ github.server_url }}/${{ github.repository }}/settings/pages"
-          echo "::warning::Source: GitHub Actions. The build artifact 'llm-wiki-site' is downloadable above."
+          echo "::warning::Source: GitHub Actions. The build artifact 'tesserae-site' is downloadable above."
 
   deploy:
     name: Deploy to GitHub Pages

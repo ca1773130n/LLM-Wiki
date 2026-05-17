@@ -1,5 +1,5 @@
-from llm_wiki.selective_extractor import SelectiveClaudeResearchExtractor
-from llm_wiki.research_graph import ResearchGraph, ResearchNode, ResearchNodeType
+from tesserae.selective_extractor import SelectiveClaudeResearchExtractor
+from tesserae.research_graph import ResearchGraph, ResearchNode, ResearchNodeType
 
 
 class FakeExtractor:

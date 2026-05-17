@@ -15,7 +15,7 @@ methods: [GaussianSplatting, RadianceField, NovelViewSynthesis, RealTimeRenderin
 datasets: []
 metrics: [PSNR, SSIM, LPIPS]
 oss_repo: hbb1/2d-gaussian-splatting
-license: "CC-BY-4.0 (LLM-Wiki demo prose)"
+license: "CC-BY-4.0 (Tesserae demo prose)"
 ---
 
 # 2D Gaussian Splatting for Geometrically Accurate Radiance Fields

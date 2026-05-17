@@ -14,7 +14,7 @@ authors:
   - "Peter Hedman"
 date: 2023-02-23
 sub_topic: Neural Radiance Fields
-license: "CC-BY-4.0 (LLM-Wiki demo prose)"
+license: "CC-BY-4.0 (Tesserae demo prose)"
 methods: [RadianceField, NovelViewSynthesis, RealTimeRendering]
 datasets: []
 metrics: [PSNR, SSIM, LPIPS]

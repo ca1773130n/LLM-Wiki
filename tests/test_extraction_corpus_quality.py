@@ -1,13 +1,13 @@
 """Live-corpus regression tests for research-graph extraction (Codex F-14).
 
-These tests run :class:`llm_wiki.research_graph.ResearchGraphExtractor` against
+These tests run :class:`tesserae.research_graph.ResearchGraphExtractor` against
 the on-disk ``data/research/daily/`` corpus rather than synthetic snippets, so
 real failure modes the extractor currently produces become visible to CI.
 
 Most assertions are marked ``@pytest.mark.xfail(strict=True)`` and are expected
 to flip to passing once Subagents W and X land their refactors:
 
-* Subagent W rewrites :mod:`llm_wiki.research_graph` (title gate, typed
+* Subagent W rewrites :mod:`tesserae.research_graph` (title gate, typed
   extractors, term registry, claim types, paper/repo linker).
 * Subagent X splits artifacts so the public graph is no longer mixed with the
   code graph.
@@ -24,7 +24,7 @@ from typing import Dict, List, Tuple
 
 import pytest
 
-from llm_wiki.research_graph import (
+from tesserae.research_graph import (
     ResearchEdge,
     ResearchGraphExtractor,
     ResearchNode,
@@ -33,7 +33,7 @@ from llm_wiki.research_graph import (
 )
 
 try:  # The typed term registry is the canonical source of registered names.
-    from llm_wiki.term_registry import TermRegistry  # type: ignore
+    from tesserae.term_registry import TermRegistry  # type: ignore
 except Exception:  # pragma: no cover - registry shape may change in W's pass
     TermRegistry = None  # type: ignore[assignment]
 

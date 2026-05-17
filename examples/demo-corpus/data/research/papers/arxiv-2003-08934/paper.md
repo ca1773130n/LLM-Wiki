@@ -12,7 +12,7 @@ authors:
   - "Ren Ng"
 date: 2020-03-19
 sub_topic: Neural Radiance Fields
-license: "CC-BY-4.0 (LLM-Wiki demo prose)"
+license: "CC-BY-4.0 (Tesserae demo prose)"
 methods: [RadianceField, VolumeRendering, NovelViewSynthesis]
 datasets: []
 metrics: [PSNR, SSIM, LPIPS]

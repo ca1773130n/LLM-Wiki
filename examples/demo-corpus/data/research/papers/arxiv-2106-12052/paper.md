@@ -10,7 +10,7 @@ authors:
   - "Yaron Lipman"
 date: 2021-06-22
 sub_topic: Mesh and Surface Reconstruction
-license: "CC-BY-4.0 (LLM-Wiki demo prose)"
+license: "CC-BY-4.0 (Tesserae demo prose)"
 methods: [VolumeRendering, NeuralImplicitSurface]
 datasets: []
 metrics: [PSNR, SSIM, LPIPS]

@@ -30,7 +30,7 @@
       "wiki_page on guessed Synthesis node id 'Synthesis:weekly-2026-w18' returned 'not found'; recovered by searching the syntheses kind to find the correct id 'Synthesis:weekly-2026-W18'.",
       "Initial framing recycled LGM (a W18 paper) and missed surfacing the open question; the researcher pushed back, the agent dropped LGM, pulled the SLAM trio (MonoGS, GS-SLAM) tighter, and surfaced multi-view-consistency under fast motion as the W19 open question before writing the final synthesis."
     ],
-    "transcript": "/Users/neo/Developer/Projects/LLM-Wiki/examples/demo-corpus/.agent-sessions/2026-05-12-weekly-digest/transcript.jsonl",
+    "transcript": "/Users/neo/Developer/Projects/Tesserae/examples/demo-corpus/.agent-sessions/2026-05-12-weekly-digest/transcript.jsonl",
     "turn_count": 38,
     "turns": [
       {
@@ -175,7 +175,7 @@
     "user": "demo-researcher"
   },
   "model": "claude-opus-4-7",
-  "project_name": "LLM-Wiki",
+  "project_name": "Tesserae",
   "project_root": "",
   "raw_transcript_path": "examples/demo-corpus/.agent-sessions/2026-05-12-weekly-digest/transcript.jsonl",
   "redacted_preview": "Compiled W19 digest. First pass recycled LGM and missed surfacing an open question; the researcher pushed back twice. Agent dropped LGM, re-read the Splatting-SLAM trio (MonoGS, GS-SLAM, with DROID-SLAM as the tracking reference they all miss), surfaced multi-view-consistency under fast motion as the named open question, then wrote the corrected synthesis. Final digest anchors seven papers and reframes the W19 story around GS as a SLAM map representation rather than the feed-forward-vs-LGM angle the W18 digest already covered.",

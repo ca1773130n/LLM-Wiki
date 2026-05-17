@@ -16,7 +16,7 @@ from __future__ import annotations
 
 from pathlib import Path
 
-from llm_wiki.site.raw_view import (
+from tesserae.site.raw_view import (
     _unique_heading_anchors,
     _wrap_tables_in_scroll,
     is_markdown_source_path,
@@ -32,7 +32,7 @@ def test_raw_view_renders_root_readme_language_files_as_markdown(tmp_path: Path)
     assert is_markdown_source_path(md)
 
     out = render_raw_view(
-        site_title="LLM-Wiki",
+        site_title="Tesserae",
         project_relative_path="README.ko.md",
         absolute_path=md,
     )
@@ -56,7 +56,7 @@ def test_raw_view_renders_toc_when_body_has_headings(tmp_path: Path) -> None:
         encoding="utf-8",
     )
     out = render_raw_view(
-        site_title="LLM-Wiki",
+        site_title="Tesserae",
         project_relative_path="docs/doc.md",
         absolute_path=md,
     )
@@ -81,7 +81,7 @@ def test_raw_view_unique_heading_anchors_when_slugger_collides(
         encoding="utf-8",
     )
     out = render_raw_view(
-        site_title="LLM-Wiki",
+        site_title="Tesserae",
         project_relative_path="docs/dup.md",
         absolute_path=md,
     )
@@ -105,7 +105,7 @@ def test_raw_view_no_toc_when_body_has_no_anchored_headings(
         encoding="utf-8",
     )
     out = render_raw_view(
-        site_title="LLM-Wiki",
+        site_title="Tesserae",
         project_relative_path="docs/flat.md",
         absolute_path=md,
     )
@@ -127,7 +127,7 @@ def test_raw_markdown_wraps_tables_in_scroll_div(tmp_path: Path) -> None:
         encoding="utf-8",
     )
     out = render_raw_view(
-        site_title="LLM-Wiki",
+        site_title="Tesserae",
         project_relative_path="docs/table.md",
         absolute_path=md,
     )

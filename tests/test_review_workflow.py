@@ -1,7 +1,7 @@
 import json
 
-from llm_wiki.canonicalization import ReviewItem, ReviewQueue
-from llm_wiki.review_workflow import ReviewQueueExporter
+from tesserae.canonicalization import ReviewItem, ReviewQueue
+from tesserae.review_workflow import ReviewQueueExporter
 
 
 def sample_queue():

@@ -1,8 +1,8 @@
 import json
 from pathlib import Path
 
-from llm_wiki.cli import main
-from llm_wiki.research_graph import ResearchEdge, ResearchGraph, ResearchNode, ResearchNodeType
+from tesserae.cli import main
+from tesserae.research_graph import ResearchEdge, ResearchGraph, ResearchNode, ResearchNodeType
 
 
 def test_cli_can_emit_corpus_trends(tmp_path):
@@ -48,11 +48,11 @@ def test_cli_can_select_claude_cli_extractor(monkeypatch, tmp_path):
         def extract_file(self, path, source_kind="SourceDocument"):
             calls.append({"path": str(path), "source_kind": source_kind})
             return ResearchGraph(
-                nodes=[ResearchNode(id="Paper:llm-wiki-paper:test", name="LLM Wiki Paper", type=ResearchNodeType.PAPER)],
+                nodes=[ResearchNode(id="Paper:tesserae-paper:test", name="LLM Wiki Paper", type=ResearchNodeType.PAPER)],
                 edges=[],
             )
 
-    import llm_wiki.cli as cli
+    import tesserae.cli as cli
 
     monkeypatch.setattr(cli, "ClaudeCLIResearchExtractor", FakeClaudeExtractor)
 
@@ -94,7 +94,7 @@ def test_cli_can_use_selective_claude_extractor(monkeypatch, tmp_path):
         def extract_file(self, path, source_kind="SourceDocument"):
             return ResearchGraph(nodes=[ResearchNode(id="Paper:claude:test", name="Claude Selected", type=ResearchNodeType.PAPER)], edges=[])
 
-    import llm_wiki.cli as cli
+    import tesserae.cli as cli
 
     monkeypatch.setattr(cli, "ClaudeCLIResearchExtractor", FakeClaudeExtractor)
 
@@ -161,7 +161,7 @@ def test_cli_can_apply_review_decision_file(monkeypatch, tmp_path):
 
     class FakeCanonicalizer:
         def canonicalize(self, graph):
-            from llm_wiki.canonicalization import CanonicalizationResult, ReviewItem
+            from tesserae.canonicalization import CanonicalizationResult, ReviewItem
 
             return CanonicalizationResult(
                 graph=graph,
@@ -189,7 +189,7 @@ def test_cli_can_apply_review_decision_file(monkeypatch, tmp_path):
                 edges=[ResearchEdge(source="MethodologicalConcept:4dgs:test", target="MethodologicalConcept:gs:test", type="shares_concept_with")],
             )
 
-    import llm_wiki.cli as cli
+    import tesserae.cli as cli
 
     monkeypatch.setattr(cli, "ResearchGraphExtractor", lambda: FakeExtractor())
     monkeypatch.setattr(cli, "GraphCanonicalizer", lambda: FakeCanonicalizer())
@@ -269,7 +269,7 @@ def test_cli_can_write_kuzu_graph_store(tmp_path):
         str(graph_output),
     ]) == 0
 
-    from llm_wiki.persistence import KuzuResearchGraphStore
+    from tesserae.persistence import KuzuResearchGraphStore
 
     counts = KuzuResearchGraphStore(kuzu_output).counts()
     assert counts["nodes"] > 0
@@ -358,11 +358,11 @@ def test_cli_can_add_cognee_bundle_directly(monkeypatch, tmp_path):
     calls = []
 
     class FakeCogneeDirectImporter:
-        async def add_bundle(self, bundle_dir, dataset_name="llm_wiki_research_graph", cognify=False, system_root=None, data_root=None):
+        async def add_bundle(self, bundle_dir, dataset_name="tesserae_research_graph", cognify=False, system_root=None, data_root=None):
             calls.append({"bundle_dir": str(bundle_dir), "dataset_name": dataset_name, "cognify": cognify, "system_root": system_root, "data_root": data_root})
             return {"dataset_name": dataset_name, "files_added": 2, "cognified": cognify}
 
-    import llm_wiki.cli as cli
+    import tesserae.cli as cli
 
     monkeypatch.setattr(cli, "CogneeDirectImporter", FakeCogneeDirectImporter)
 
@@ -374,12 +374,12 @@ def test_cli_can_add_cognee_bundle_directly(monkeypatch, tmp_path):
         str(cognee_output),
         "--cognee-add",
         "--cognee-dataset",
-        "llm_wiki_test",
+        "tesserae_test",
         "-o",
         str(graph_output),
     ]) == 0
 
-    assert calls == [{"bundle_dir": str(cognee_output), "dataset_name": "llm_wiki_test", "cognify": False, "system_root": None, "data_root": None}]
+    assert calls == [{"bundle_dir": str(cognee_output), "dataset_name": "tesserae_test", "cognify": False, "system_root": None, "data_root": None}]
 
 
 def test_cli_can_cognify_cognee_bundle_with_codex_patch(monkeypatch, tmp_path):
@@ -391,7 +391,7 @@ def test_cli_can_cognify_cognee_bundle_with_codex_patch(monkeypatch, tmp_path):
     patches = []
 
     class FakeCogneeDirectImporter:
-        async def add_bundle(self, bundle_dir, dataset_name="llm_wiki_research_graph", cognify=False, system_root=None, data_root=None):
+        async def add_bundle(self, bundle_dir, dataset_name="tesserae_research_graph", cognify=False, system_root=None, data_root=None):
             calls.append({"bundle_dir": str(bundle_dir), "dataset_name": dataset_name, "cognify": cognify, "system_root": str(system_root) if system_root else None, "data_root": str(data_root) if data_root else None})
             return {"dataset_name": dataset_name, "files_added": 2, "cognified": cognify}
 
@@ -407,7 +407,7 @@ def test_cli_can_cognify_cognee_bundle_with_codex_patch(monkeypatch, tmp_path):
             patches.append({"event": "exit"})
             return False
 
-    import llm_wiki.cli as cli
+    import tesserae.cli as cli
 
     monkeypatch.setattr(cli, "CogneeDirectImporter", FakeCogneeDirectImporter)
     monkeypatch.setattr(cli, "CogneeCodexPatch", FakeCogneeCodexPatch)
@@ -420,7 +420,7 @@ def test_cli_can_cognify_cognee_bundle_with_codex_patch(monkeypatch, tmp_path):
         str(cognee_output),
         "--cognee-codex-cognify",
         "--cognee-dataset",
-        "llm_wiki_codex_test",
+        "tesserae_codex_test",
         "--cognee-codex-model",
         "gpt-5.4",
         "--cognee-codex-timeout",
@@ -441,7 +441,7 @@ def test_cli_can_cognify_cognee_bundle_with_codex_patch(monkeypatch, tmp_path):
         str(graph_output),
     ]) == 0
 
-    assert calls == [{"bundle_dir": str(cognee_output), "dataset_name": "llm_wiki_codex_test", "cognify": True, "system_root": str(tmp_path / "cognee_system"), "data_root": str(tmp_path / "cognee_data")}]
+    assert calls == [{"bundle_dir": str(cognee_output), "dataset_name": "tesserae_codex_test", "cognify": True, "system_root": str(tmp_path / "cognee_system"), "data_root": str(tmp_path / "cognee_data")}]
     assert patches == [{"model": "gpt-5.4", "timeout": 11, "deterministic_embeddings": False, "ollama_embeddings": True, "ollama_model": "qwen3-embedding:0.6b", "ollama_endpoint": "http://127.0.0.1:11434/api/embed", "ollama_timeout": 44, "embedding_dimensions": 1024, "event": "init"}, {"event": "enter"}, {"event": "exit"}]
 
 

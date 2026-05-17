@@ -14,7 +14,7 @@ sub_topic: 3D Gaussian Splatting
 methods: [GaussianSplatting, Variational]
 datasets: []
 metrics: [PSNR, SSIM, LPIPS]
-license: "CC-BY-4.0 (LLM-Wiki demo prose)"
+license: "CC-BY-4.0 (Tesserae demo prose)"
 ---
 
 # latentSplat: Autoencoding Variational Gaussians for Fast Generalizable 3D Reconstruction

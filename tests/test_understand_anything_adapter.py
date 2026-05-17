@@ -1,9 +1,9 @@
 import json
 from pathlib import Path
 
-from llm_wiki.project import ProjectWiki, load_graph_file
-from llm_wiki.research_graph import ResearchGraph, ResearchNode, ResearchNodeType
-from llm_wiki.understand_anything_adapter import UnderstandAnythingGraphAdapter, merge_understand_anything_graph
+from tesserae.project import ProjectWiki, load_graph_file
+from tesserae.research_graph import ResearchGraph, ResearchNode, ResearchNodeType
+from tesserae.understand_anything_adapter import UnderstandAnythingGraphAdapter, merge_understand_anything_graph
 
 
 def test_understand_anything_adapter_imports_nodes_edges_and_manifest(tmp_path):
@@ -45,7 +45,7 @@ def test_understand_anything_adapter_imports_nodes_edges_and_manifest(tmp_path):
     assert result.manifest["imported_nodes"]["concept:Mermaid rendering"] == concept.id
 
 
-def test_understand_anything_concepts_merge_with_existing_llm_wiki_concepts(tmp_path):
+def test_understand_anything_concepts_merge_with_existing_tesserae_concepts(tmp_path):
     project = tmp_path / "demo"
     project.mkdir()
     ua_graph = ResearchGraph(
@@ -101,7 +101,7 @@ def test_project_compile_merges_configured_understand_anything_native_graph(tmp_
         {
             "id": "understand-anything",
             "artifact": ".understand-anything/knowledge-graph.json",
-            "source": ".llm-wiki/external/understand-anything.md",
+            "source": ".tesserae/external/understand-anything.md",
             "sync_mode": "native_graph",
             "enabled": True,
             "auto_refresh": False,
@@ -115,7 +115,7 @@ def test_project_compile_merges_configured_understand_anything_native_graph(tmp_
     graph = load_graph_file(wiki.paths.graph)
     concept = next(node for node in graph.nodes if node.name == "Mermaid rendering" and node.type == ResearchNodeType.CONCEPT)
     assert concept.metadata["external_refs"][0]["system"] == "understand-anything"
-    sync_manifest = project / ".llm-wiki" / "external" / "understand-anything-sync.json"
+    sync_manifest = project / ".tesserae" / "external" / "understand-anything-sync.json"
     assert sync_manifest.exists()
     manifest = json.loads(sync_manifest.read_text(encoding="utf-8"))
     assert manifest["imported_nodes"]["ua-concept"] == concept.id

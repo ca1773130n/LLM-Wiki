@@ -3,7 +3,7 @@
 <!-- translations:start -->
 <p align="center"><a href="../synthesis-llm.md">English</a> · <a href="synthesis-llm.ko.md">한국어</a> · <a href="synthesis-llm.zh.md">中文</a> · <a href="synthesis-llm.ja.md">日本語</a> · <a href="synthesis-llm.ru.md">Русский</a> · <a href="synthesis-llm.es.md">Español</a> · <a href="synthesis-llm.fr.md">Français</a> · <a href="synthesis-llm.de.md">Deutsch</a></p>
 <!-- translations:end -->
-LLM-Wiki fournit deux chemins de synthèse. Le chemin par défaut est une heuristique déterministe qui n’appelle jamais le réseau : elle produit des modèles Markdown prévisibles et idempotents à partir du graphe de recherche. Le **chemin optionnel de mise à niveau LLM** remplace ces modèles par une prose écrite par Claude à chaque compile, tout en conservant tous les autres invariants (idempotence, suivi des citation, corps hash-stable).
+Tesserae fournit deux chemins de synthèse. Le chemin par défaut est une heuristique déterministe qui n’appelle jamais le réseau : elle produit des modèles Markdown prévisibles et idempotents à partir du graphe de recherche. Le **chemin optionnel de mise à niveau LLM** remplace ces modèles par une prose écrite par Claude à chaque compile, tout en conservant tous les autres invariants (idempotence, suivi des citation, corps hash-stable).
 
 Cette page explique quand l’activer, combien cela coûte, quelles données quittent votre machine et comment inspecter la sortie.
 
@@ -27,7 +27,7 @@ Les deux chemins consomment les mêmes entrées `_PagePlan` (node ids, noms, typ
 ...
 
 ## Tagline
-LLM-Wiki — a self-evolving research notebook.
+Tesserae — a self-evolving research notebook.
 ```
 
 Cela se lit comme un dump de base de données. Utile, déterministe et disponible aujourd’hui.
@@ -54,7 +54,7 @@ Deux blocs : un long system block stable enveloppé dans `cache_control: ephemer
 ### System block (cached, identique entre les pages)
 
 ```
-You are an LLM-Wiki synthesis writer. Your job is to summarize a controlled
+You are an Tesserae synthesis writer. Your job is to summarize a controlled
 knowledge graph into a single Markdown page. Rules you follow ABSOLUTELY:
 
   RULE 1 — DO NOT INVENT FACTS. Restate or summarize ONLY material you find
@@ -85,7 +85,7 @@ The current ontology is:
 A node id has the shape ``Type:slug:hash``.
 ```
 
-Le bloc complet fait environ 500 tokens. Voir [`llm_wiki/llm_synthesis.py`](../../llm_wiki/llm_synthesis.py) pour le texte canonique. Toute modification de byte à cet endroit invalide le prompt cache pour chaque page suivante d’une exécution ; le rule text est donc intentionnellement figé.
+Le bloc complet fait environ 500 tokens. Voir [`tesserae/llm_synthesis.py`](../../tesserae/llm_synthesis.py) pour le texte canonique. Toute modification de byte à cet endroit invalide le prompt cache pour chaque page suivante d’une exécution ; le rule text est donc intentionnellement figé.
 
 ### User message (par page, NOT cached)
 
@@ -113,7 +113,7 @@ CONTEXT:
   total edges: 4394
   field name: 3D Reconstruction
   contributing days/weeks: 2026-04-25, 2026-04-26
-  site title: LLM-Wiki
+  site title: Tesserae
   page summary: Topic synthesis for Gaussian Splatting.
 
 EDITORIAL ANGLE (HEURISTIC FALLBACK BODY for the model to consult):
@@ -135,21 +135,21 @@ Le bloc EDITORIAL ANGLE est le corps heuristique déterministe : le modèle reç
 ## Comment l’activer
 
 ```sh
-pip install llm-research-wiki[synthesis-llm]
-export LLM_WIKI_SYNTHESIS_LLM=1
+pip install tesserae[synthesis-llm]
+export TESSERAE_SYNTHESIS_LLM=1
 export ANTHROPIC_API_KEY=sk-...
-python -m llm_wiki.cli project compile
+python -m tesserae.cli project compile
 ```
 
-Remplacez le model avec `LLM_WIKI_SYNTHESIS_MODEL` (par défaut `claude-sonnet-4-6`). Anthropic SDK ≥ 0.40 est requis.
+Remplacez le model avec `TESSERAE_SYNTHESIS_MODEL` (par défaut `claude-sonnet-4-6`). Anthropic SDK ≥ 0.40 est requis.
 
 Le chemin ne s’active que lorsque **les trois** conditions sont vraies :
 
-1. `LLM_WIKI_SYNTHESIS_LLM` vaut `1`/`true`/`yes`/`on`.
-2. `ANTHROPIC_API_KEY` n’est pas vide (ou vous définissez `synthesis.api_key` dans le `.llm-wiki/config.json` de votre projet).
+1. `TESSERAE_SYNTHESIS_LLM` vaut `1`/`true`/`yes`/`on`.
+2. `ANTHROPIC_API_KEY` n’est pas vide (ou vous définissez `synthesis.api_key` dans le `.tesserae/config.json` de votre projet).
 3. Le package `anthropic` peut être importé.
 
-Si l’un de ces éléments manque, une ligne informative est écrite sur stderr (`[llm-wiki] LLM synthesis disabled (...)`) et le système fallback vers l’heuristique.
+Si l’un de ces éléments manque, une ligne informative est écrite sur stderr (`[tesserae] LLM synthesis disabled (...)`) et le système fallback vers l’heuristique.
 
 Si le chemin LLM est actif mais qu’une seule page échoue — network blip, 401, 429 — cette page fallback vers l’heuristique avec un unique log stderr par error class et par compile. Le compile continue.
 
@@ -175,7 +175,7 @@ per page (uncached): ~1300 * $3/1M + ~270 * $15/1M ≈ $0.0080
                      × 10 pages              total ≈ $0.080
 ```
 
-Si vous passez à Haiku 4.5 (`$1/M` input, `$5/M` output), le même compile coûte environ `~$0.027`. Lancez d’abord avec `LLM_WIKI_SYNTHESIS_DRY_RUN=1` si vous voulez confirmer la forme du prompt sans dépenser de tokens.
+Si vous passez à Haiku 4.5 (`$1/M` input, `$5/M` output), le même compile coûte environ `~$0.027`. Lancez d’abord avec `TESSERAE_SYNTHESIS_DRY_RUN=1` si vous voulez confirmer la forme du prompt sans dépenser de tokens.
 
 ## Privacy
 
@@ -188,8 +188,8 @@ Si c’est encore trop pour votre cas d’usage, laissez la env var non définie
 Unset la env var (ou mettez-la à `0`) puis relancez :
 
 ```sh
-unset LLM_WIKI_SYNTHESIS_LLM
-python -m llm_wiki.cli project compile
+unset TESSERAE_SYNTHESIS_LLM
+python -m tesserae.cli project compile
 ```
 
 Les compiles suivants régénèrent les synthesis pages affectées avec le generator heuristique. Comme les page rewrites sont gated par `content_hash`, seules les pages dont le body a effectivement changé seront réécrites.
@@ -214,8 +214,8 @@ Le moyen le plus simple de comparer les sorties entre deux compiles est un diff 
 
 ```sh
 git diff --no-index \
-  baseline/.llm-wiki/wiki/syntheses/pulse.md \
-  upgraded/.llm-wiki/wiki/syntheses/pulse.md
+  baseline/.tesserae/wiki/syntheses/pulse.md \
+  upgraded/.tesserae/wiki/syntheses/pulse.md
 ```
 
-Le ledger append-only `.history.jsonl` dans `.llm-wiki/wiki/syntheses/` enregistre le generator label de chaque rewrite, ce qui permet d’audit quand une page est passée de l’heuristique au LLM (ou inversement).
+Le ledger append-only `.history.jsonl` dans `.tesserae/wiki/syntheses/` enregistre le generator label de chaque rewrite, ce qui permet d’audit quand une page est passée de l’heuristique au LLM (ou inversement).

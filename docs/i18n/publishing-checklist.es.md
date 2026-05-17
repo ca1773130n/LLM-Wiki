@@ -3,13 +3,13 @@
 <!-- translations:start -->
 <p align="center"><a href="../publishing-checklist.md">English</a> · <a href="publishing-checklist.ko.md">한국어</a> · <a href="publishing-checklist.zh.md">中文</a> · <a href="publishing-checklist.ja.md">日本語</a> · <a href="publishing-checklist.ru.md">Русский</a> · <a href="publishing-checklist.es.md">Español</a> · <a href="publishing-checklist.fr.md">Français</a> · <a href="publishing-checklist.de.md">Deutsch</a></p>
 <!-- translations:end -->
-Usa esta lista antes de presentar LLM-Wiki públicamente.
+Usa esta lista antes de presentar Tesserae públicamente.
 
 ## Higiene del repositorio
 
 - [ ] El README explica qué es el proyecto y qué problema resuelve.
 - [ ] El comando de instalación funciona desde una shell nueva.
-- [ ] El Quickstart usa `llm_wiki`, no `python3 -m`.
+- [ ] El Quickstart usa `tesserae`, no `python3 -m`.
 - [ ] La documentación de arquitectura explica raw evidence → graph → projections.
 - [ ] El mapa de funciones enumera las funciones implementadas sin exagerar el trabajo futuro.
 - [ ] La documentación del historial de sesiones explica la importación explícita, la revisión de privacidad, las routes generadas y la transcript typography.
@@ -21,19 +21,19 @@ Usa esta lista antes de presentar LLM-Wiki públicamente.
 ```bash
 PYTEST_DISABLE_PLUGIN_AUTOLOAD=1 python3 -m pytest tests/ -q
 ./scripts/install.sh --help
-llm_wiki project setup --help
-llm_wiki project compile --help
+tesserae project setup --help
+tesserae project compile --help
 ```
 
 ## Self-dogfood
 
 ```bash
-llm_wiki project setup \
+tesserae project setup \
   --yes \
-  --name llm_wiki_self \
+  --name tesserae_self \
   --source README.md \
   --source docs \
-  --source llm_wiki \
+  --source tesserae \
   --source tests \
   --source scripts \
   --with-understand-anything \
@@ -41,15 +41,15 @@ llm_wiki project setup \
   --understand-anything-platform codex \
   --run-cognee \
   --install-cognee
-llm_wiki project compile
-llm_wiki project sessions list
-llm_wiki project build-site
-llm_wiki project serve --port 8765
+tesserae project compile
+tesserae project sessions list
+tesserae project build-site
+tesserae project serve --port 8765
 ```
 
 ## Puntos para la demo
 
-- LLM-Wiki no es un grafo genérico de frases nominales. Usa una ontology controlada.
+- Tesserae no es un grafo genérico de frases nominales. Usa una ontology controlada.
 - El código de investigación y el de desarrollo comparten infraestructura, pero mantienen schema distintos.
 - Markdown y HTML son proyecciones, no almacenes autoritativos de la verdad.
 - La ruta por defecto es local y amigable sin API key.

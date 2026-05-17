@@ -16,7 +16,7 @@ sub_topic: 3D Gaussian Splatting
 methods: [GaussianSplatting]
 datasets: []
 metrics: [PSNR, SSIM, LPIPS]
-license: "CC-BY-4.0 (LLM-Wiki demo prose)"
+license: "CC-BY-4.0 (Tesserae demo prose)"
 ---
 
 # Scaffold-GS: Structured 3D Gaussians for View-Adaptive Rendering

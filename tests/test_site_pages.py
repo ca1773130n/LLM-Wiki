@@ -1,4 +1,4 @@
-"""Structural tests for the site page renderers in :mod:`llm_wiki.site.pages`.
+"""Structural tests for the site page renderers in :mod:`tesserae.site.pages`.
 
 The tests build a small ``SiteContext`` from the ``wiki_sample_graph`` fixture
 (see ``tests/conftest.py``) and synthesize a couple of ``WikiPage`` objects so
@@ -16,9 +16,9 @@ from pathlib import Path
 
 import pytest
 
-from llm_wiki.research_graph import ResearchGraph, ResearchNode, ResearchNodeType
-from llm_wiki.site.js import JS_BUNDLE, JS_GRAPH, JS_SEARCH_PALETTE, JS_THEME_TOGGLE
-from llm_wiki.site.pages import (
+from tesserae.research_graph import ResearchGraph, ResearchNode, ResearchNodeType
+from tesserae.site.js import JS_BUNDLE, JS_GRAPH, JS_SEARCH_PALETTE, JS_THEME_TOGGLE
+from tesserae.site.pages import (
     SiteContext,
     page_href,
     render_about,
@@ -43,7 +43,7 @@ from llm_wiki.site.pages import (
     render_topic_detail,
     render_topics_index,
 )
-from llm_wiki.wiki_store import WikiPage
+from tesserae.wiki_store import WikiPage
 
 
 # ---------------------------------------------------------------------------
@@ -178,7 +178,7 @@ def site_ctx(wiki_sample_graph: ResearchGraph) -> SiteContext:
     return SiteContext.build(
         graph=wiki_sample_graph,
         wiki_pages_by_kind=_wiki_pages_for(wiki_sample_graph),
-        site_title="LLM-Wiki",
+        site_title="Tesserae",
     )
 
 
@@ -467,7 +467,7 @@ def test_render_timeline_renders_full_doc(site_ctx: SiteContext) -> None:
 
 
 def test_render_graph_view_includes_payload_script(site_ctx: SiteContext) -> None:
-    from llm_wiki.site.pages import build_graph_payload
+    from tesserae.site.pages import build_graph_payload
 
     out = render_graph_view(site_ctx)
     _assert_doc_shape(out)
@@ -519,7 +519,7 @@ def test_graph_payload_uses_actual_synthesis_page_slug() -> None:
     )
     ctx = SiteContext.build(graph=graph, wiki_pages_by_kind={"syntheses": [page]})
 
-    from llm_wiki.site.pages import build_graph_payload
+    from tesserae.site.pages import build_graph_payload
 
     payload = build_graph_payload(ctx)
 
@@ -652,8 +652,8 @@ def test_paper_detail_activity_svg_has_nonzero_rect_when_activity_exists(
 
 def test_paper_detail_renders_default_site_title_when_unset() -> None:
     """When ``SiteContext`` is built with the default site_title we render
-    ``LLM-Wiki`` in the page chrome, not the project's MCP server name."""
-    from llm_wiki.research_graph import ResearchGraph
+    ``Tesserae`` in the page chrome, not the project's MCP server name."""
+    from tesserae.research_graph import ResearchGraph
     ctx = SiteContext.build(
         graph=ResearchGraph(nodes=[], edges=[]),
         wiki_pages_by_kind={
@@ -661,7 +661,7 @@ def test_paper_detail_renders_default_site_title_when_unset() -> None:
             "repos": [], "topics": [], "syntheses": [], "questions": [],
         },
     )
-    assert ctx.site_title == "LLM-Wiki"
+    assert ctx.site_title == "Tesserae"
 
 
 def test_paper_detail_autolinks_bare_arxiv_url(site_ctx: SiteContext) -> None:
@@ -707,7 +707,7 @@ def test_paper_detail_autolinks_arxiv_id_token(site_ctx: SiteContext) -> None:
 
 def test_no_public_renderer_for_code_layer_types() -> None:
     """``pages.py`` exports no renderer for CodeClass/CodeFunction/etc."""
-    import llm_wiki.site.pages as pages_module
+    import tesserae.site.pages as pages_module
 
     for forbidden in ("render_codeclass_detail", "render_codefunction_detail",
                       "render_codemodule_detail", "render_evidence_span",
@@ -717,7 +717,7 @@ def test_no_public_renderer_for_code_layer_types() -> None:
 
 def test_page_href_kinds_are_wiki_layer_only() -> None:
     """page_href must refuse to mint URLs for code-layer kinds."""
-    from llm_wiki.site.pages import ROUTE_FOR_KIND
+    from tesserae.site.pages import ROUTE_FOR_KIND
 
     forbidden = {"codeclass", "codefunction", "codemodule", "evidence", "claim"}
     overlap = forbidden & set(ROUTE_FOR_KIND)
@@ -921,7 +921,7 @@ def test_paper_detail_runs_auto_link_post_pass(
     ctx = SiteContext.build(
         graph=wiki_sample_graph,
         wiki_pages_by_kind=pages_by_kind,
-        site_title="LLM-Wiki",
+        site_title="Tesserae",
     )
     out = render_paper_detail(ctx, rich_page)
     # The body must now contain an auto-link wrapper for the concept.
@@ -1000,7 +1000,7 @@ def test_about_page_uses_canonical_article_shell(site_ctx: SiteContext) -> None:
 def test_timeline_day_uses_canonical_article_shell(site_ctx: SiteContext) -> None:
     """Per-day timeline detail pages share the same article shell as the
     other detail kinds — they are detail pages, not index pages."""
-    from llm_wiki.site.pages import render_timeline_day
+    from tesserae.site.pages import render_timeline_day
     # Pick any date that has activity in the fixture; if none, the empty
     # state must still emit the canonical shell.
     day = next(iter(site_ctx.activity_by_day.keys()), "2026-04-27")
@@ -1137,7 +1137,7 @@ def test_index_pages_emit_canonical_main_wide_not_article_shell(
 ) -> None:
     """Index/listing pages keep the wide layout — they do NOT pick up the
     detail-page canonical article shell."""
-    from llm_wiki.site.pages import (
+    from tesserae.site.pages import (
         render_concepts_index,
         render_papers_index,
     )
@@ -1157,7 +1157,7 @@ def test_build_graph_payload_node_sizing_uses_in_degree(site_ctx: SiteContext) -
     the payload's own ``in_degree`` field which the build step exposes
     alongside total ``degree`` for this assertion."""
 
-    from llm_wiki.site.pages import build_graph_payload
+    from tesserae.site.pages import build_graph_payload
 
     payload = build_graph_payload(site_ctx)
     nodes = payload["nodes"]
@@ -1183,8 +1183,8 @@ def test_build_graph_payload_hides_person_nodes_and_authored_by_edges() -> None:
     ``graph.json`` (MCP / cognee see them); they only disappear from the
     on-page visualization so the canvas isn't drowned by author chrome.
     """
-    from llm_wiki.site.pages import _GRAPH_HIDDEN_TYPES, build_graph_payload
-    from llm_wiki.research_graph import ResearchEdge
+    from tesserae.site.pages import _GRAPH_HIDDEN_TYPES, build_graph_payload
+    from tesserae.research_graph import ResearchEdge
 
     # Sanity-check the hidden-types contract.
     assert "Person" in _GRAPH_HIDDEN_TYPES
@@ -1241,7 +1241,7 @@ def test_is_translation_sibling_matches_localized_md_pairs() -> None:
       * ``docs/foo.md`` <-> ``docs/i18n/foo.<lang>.md`` (i18n subdir)
       * ``paper.md`` <-> ``paper_<lang>.md`` (scraped-paper convention)
     """
-    from llm_wiki.site.pages import _is_translation_sibling
+    from tesserae.site.pages import _is_translation_sibling
 
     # Root READMEs (dot suffix).
     assert _is_translation_sibling("README.md", "README.ko.md") is True
@@ -1278,8 +1278,8 @@ def test_build_graph_payload_filters_translation_sibling_edges() -> None:
     siblings and are dropped from the interactive payload. They stay in
     ``ctx.graph.edges`` so MCP/Cognee consumers see them; only the
     visual graph loses them."""
-    from llm_wiki.research_graph import ResearchEdge
-    from llm_wiki.site.pages import build_graph_payload
+    from tesserae.research_graph import ResearchEdge
+    from tesserae.site.pages import build_graph_payload
 
     # Two SourceDocument nodes — one canonical, one Korean translation
     # — share a canonical path stem. The Concept node carries a normal
@@ -1360,8 +1360,8 @@ def test_build_graph_payload_hides_source_nodes_by_default() -> None:
     Underlying ``ctx.graph`` is untouched — the SourceDocument node is
     still present for MCP, Cognee, search, and per-page wiki views.
     """
-    from llm_wiki.research_graph import ResearchEdge
-    from llm_wiki.site.pages import build_graph_payload
+    from tesserae.research_graph import ResearchEdge
+    from tesserae.site.pages import build_graph_payload
 
     source = ResearchNode(
         id="SourceDocument:whitepaper",
@@ -1410,8 +1410,8 @@ def test_build_graph_payload_includes_sources_when_show_sources_true() -> None:
     flipped on — the SourceDocument node AND its incident edge appear
     in the visual payload.
     """
-    from llm_wiki.research_graph import ResearchEdge
-    from llm_wiki.site.pages import build_graph_payload
+    from tesserae.research_graph import ResearchEdge
+    from tesserae.site.pages import build_graph_payload
 
     source = ResearchNode(
         id="SourceDocument:whitepaper",
@@ -1449,8 +1449,8 @@ def test_build_graph_payload_drops_edges_incident_to_hidden_sources() -> None:
     """When ``sources`` are hidden, every edge incident to a dropped
     source node is filtered too — we never ship dangling edges. The
     concept-to-concept edge survives because both endpoints survive."""
-    from llm_wiki.research_graph import ResearchEdge
-    from llm_wiki.site.pages import build_graph_payload
+    from tesserae.research_graph import ResearchEdge
+    from tesserae.site.pages import build_graph_payload
 
     source_a = ResearchNode(
         id="SourceDocument:a",
@@ -1502,8 +1502,8 @@ def test_build_graph_payload_legend_drops_zero_source_pill() -> None:
     """The graph-view legend never ships a ``0 Sources`` chip. When sources
     are hidden the chip is omitted; a small "Sources hidden" note
     explains the absence so users aren't left wondering."""
-    from llm_wiki.research_graph import ResearchEdge
-    from llm_wiki.site.pages import render_graph_view
+    from tesserae.research_graph import ResearchEdge
+    from tesserae.site.pages import render_graph_view
 
     source = ResearchNode(
         id="SourceDocument:whitepaper",
@@ -1540,7 +1540,7 @@ def test_detail_page_keeps_sticky_toc_aside_for_long_articles(
     the inner aside the rail collapses to the wrapper which has no
     sticky declaration of its own (the wrapper is just ``align-self:
     start`` on the grid)."""
-    from llm_wiki.site.pages import render_concept_detail
+    from tesserae.site.pages import render_concept_detail
 
     # Pick the first concept node from the fixture.
     concept = next(

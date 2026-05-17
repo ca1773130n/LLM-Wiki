@@ -1,7 +1,7 @@
-"""Tests for ``llm_wiki.lint``.
+"""Tests for ``tesserae.lint``.
 
 Each check is exercised in isolation by hand-building a minimal
-``.llm-wiki/`` workspace under ``tmp_path``. We never depend on
+``.tesserae/`` workspace under ``tmp_path``. We never depend on
 ``ProjectWiki.compile()`` here so the tests stay fast and the linter's
 contract is verified independently of the rest of the pipeline.
 """
@@ -14,24 +14,24 @@ from pathlib import Path
 
 import pytest
 
-from llm_wiki.cli import main as cli_main
-from llm_wiki.lint import (
+from tesserae.cli import main as cli_main
+from tesserae.lint import (
     LintFinding,
     LintReport,
     SEVERITIES,
     WikiLinter,
 )
-from llm_wiki.project import ProjectWiki
+from tesserae.project import ProjectWiki
 
 
 # --------------------------------------------------------------------------- helpers
 
 
 def _scaffold(tmp_path: Path, *, graph: dict | None = None) -> Path:
-    """Create a minimal `.llm-wiki/` layout and return the project root."""
+    """Create a minimal `.tesserae/` layout and return the project root."""
     project = tmp_path / "demo"
     project.mkdir()
-    wiki_root = project / ".llm-wiki"
+    wiki_root = project / ".tesserae"
     (wiki_root / "wiki" / "papers").mkdir(parents=True)
     (wiki_root / "wiki" / "concepts").mkdir(parents=True)
     (wiki_root / "wiki" / "repos").mkdir(parents=True)
@@ -46,7 +46,7 @@ def _scaffold(tmp_path: Path, *, graph: dict | None = None) -> Path:
 def _write_synthesis(
     project_root: Path, slug: str, inputs: list[str], body: str = "# synth\n"
 ) -> Path:
-    path = project_root / ".llm-wiki" / "wiki" / "syntheses" / f"{slug}.md"
+    path = project_root / ".tesserae" / "wiki" / "syntheses" / f"{slug}.md"
     lines = ["---", "synthesis_kind: daily", f"slug: {slug}"]
     if inputs:
         lines.append("inputs:")
@@ -128,7 +128,7 @@ def test_missing_implemented_in_emits_one_warning(tmp_path: Path) -> None:
 
 def test_stale_citation_in_wiki_body(tmp_path: Path) -> None:
     project = _scaffold(tmp_path)
-    page = project / ".llm-wiki" / "wiki" / "concepts" / "concept-a.md"
+    page = project / ".tesserae" / "wiki" / "concepts" / "concept-a.md"
     page.write_text(
         "# Concept A\n\nSee [Paper](papers/missing-paper.md) for details.\n",
         encoding="utf-8",
@@ -141,7 +141,7 @@ def test_stale_citation_in_wiki_body(tmp_path: Path) -> None:
 
 def test_dangling_html_link_in_site(tmp_path: Path) -> None:
     project = _scaffold(tmp_path)
-    site_index = project / ".llm-wiki" / "site" / "index.html"
+    site_index = project / ".tesserae" / "site" / "index.html"
     site_index.write_text(
         '<a href="papers/ghost.html">ghost</a>',
         encoding="utf-8",
@@ -160,7 +160,7 @@ def test_drift_graph_to_wiki_and_back(tmp_path: Path) -> None:
     }
     project = _scaffold(tmp_path, graph=graph)
     # Wiki page exists for an unrelated concept (reverse drift).
-    (project / ".llm-wiki" / "wiki" / "concepts" / "stranger.md").write_text(
+    (project / ".tesserae" / "wiki" / "concepts" / "stranger.md").write_text(
         "# Stranger\n", encoding="utf-8"
     )
     report = WikiLinter(project).run()
@@ -269,7 +269,7 @@ def test_suggested_merge_for_two_repositories_with_same_url(tmp_path: Path) -> N
 
 def test_stale_build_history_emits_info(tmp_path: Path) -> None:
     project = _scaffold(tmp_path)
-    history = project / ".llm-wiki" / ".build-history.jsonl"
+    history = project / ".tesserae" / ".build-history.jsonl"
     old_ts = (datetime.now(timezone.utc) - timedelta(days=120)).strftime("%Y-%m-%dT%H:%M:%SZ")
     fresh_ts = datetime.now(timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ")
     history.write_text(
@@ -357,13 +357,13 @@ def test_project_wiki_lint_returns_report(tmp_path: Path) -> None:
     # Need a config for ProjectWiki.load.
     ProjectWiki.init(project, name="demo_lint")
     # The init call wrote a fresh empty graph — restore ours.
-    (project / ".llm-wiki" / "graph.json").write_text(json.dumps(graph), encoding="utf-8")
+    (project / ".tesserae" / "graph.json").write_text(json.dumps(graph), encoding="utf-8")
     wiki = ProjectWiki.load(project)
     report = wiki.lint()
     assert isinstance(report, LintReport)
     assert any(f.code == "ORPHAN_PAPER" for f in report.findings)
-    assert (project / ".llm-wiki" / "lint-report.md").exists()
-    assert (project / ".llm-wiki" / "lint-report.json").exists()
+    assert (project / ".tesserae" / "lint-report.md").exists()
+    assert (project / ".tesserae" / "lint-report.json").exists()
 
 
 def test_cli_lint_returns_warning_exit_code(tmp_path: Path, capsys: pytest.CaptureFixture[str]) -> None:
@@ -373,7 +373,7 @@ def test_cli_lint_returns_warning_exit_code(tmp_path: Path, capsys: pytest.Captu
     }
     project = _scaffold(tmp_path, graph=graph)
     ProjectWiki.init(project, name="demo_lint")
-    (project / ".llm-wiki" / "graph.json").write_text(json.dumps(graph), encoding="utf-8")
+    (project / ".tesserae" / "graph.json").write_text(json.dumps(graph), encoding="utf-8")
     code = cli_main(["project", "lint", "--project", str(project)])
     assert code == 1
 
@@ -382,7 +382,7 @@ def test_cli_lint_clean_exits_zero(tmp_path: Path) -> None:
     project = _scaffold(tmp_path)
     ProjectWiki.init(project, name="demo_clean")
     # Replace whatever init wrote with an empty graph.
-    (project / ".llm-wiki" / "graph.json").write_text(
+    (project / ".tesserae" / "graph.json").write_text(
         json.dumps({"nodes": [], "edges": []}), encoding="utf-8"
     )
     code = cli_main(["project", "lint", "--project", str(project)])
@@ -396,7 +396,7 @@ def test_cli_lint_json_flag_prints_json(tmp_path: Path, capsys: pytest.CaptureFi
     }
     project = _scaffold(tmp_path, graph=graph)
     ProjectWiki.init(project, name="demo_json")
-    (project / ".llm-wiki" / "graph.json").write_text(json.dumps(graph), encoding="utf-8")
+    (project / ".tesserae" / "graph.json").write_text(json.dumps(graph), encoding="utf-8")
     cli_main(["project", "lint", "--project", str(project), "--json"])
     captured = capsys.readouterr()
     payload = json.loads(captured.out)
@@ -410,6 +410,6 @@ def test_cli_lint_severity_error_only_fails_on_errors(tmp_path: Path) -> None:
     }
     project = _scaffold(tmp_path, graph=graph)
     ProjectWiki.init(project, name="demo_sev")
-    (project / ".llm-wiki" / "graph.json").write_text(json.dumps(graph), encoding="utf-8")
+    (project / ".tesserae" / "graph.json").write_text(json.dumps(graph), encoding="utf-8")
     code = cli_main(["project", "lint", "--project", str(project), "--severity", "error"])
     assert code == 0

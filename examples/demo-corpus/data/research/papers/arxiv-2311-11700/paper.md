@@ -16,7 +16,7 @@ sub_topic: Visual SLAM and MVS
 methods: [GaussianSplatting, NeuralImplicitSurface, SLAM, RealTimeRendering]
 datasets: [Replica, TUM-RGBD]
 metrics: [PSNR, SSIM, LPIPS]
-license: "CC-BY-4.0 (LLM-Wiki demo prose)"
+license: "CC-BY-4.0 (Tesserae demo prose)"
 ---
 
 # GS-SLAM: Dense Visual SLAM with 3D Gaussian Splatting

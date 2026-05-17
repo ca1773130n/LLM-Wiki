@@ -14,7 +14,7 @@ methods: [GaussianSplatting, SLAM, StructureFromMotion, NovelViewSynthesis]
 datasets: []
 metrics: [PSNR, SSIM, LPIPS]
 oss_repo: muskie82/MonoGS
-license: "CC-BY-4.0 (LLM-Wiki demo prose)"
+license: "CC-BY-4.0 (Tesserae demo prose)"
 ---
 
 # Gaussian Splatting SLAM

@@ -7,8 +7,8 @@ from pathlib import Path
 
 import pytest
 
-from llm_wiki.research_graph import ResearchNode, ResearchNodeType
-from llm_wiki.vault_snapshot import (
+from tesserae.research_graph import ResearchNode, ResearchNodeType
+from tesserae.vault_snapshot import (
     SNAPSHOT_VERSION,
     NodeSnapshot,
     read_snapshot,

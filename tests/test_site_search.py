@@ -1,4 +1,4 @@
-"""Tests for :mod:`llm_wiki.site.search`."""
+"""Tests for :mod:`tesserae.site.search`."""
 
 from __future__ import annotations
 
@@ -7,12 +7,12 @@ from typing import List
 
 import pytest
 
-from llm_wiki.research_graph import (
+from tesserae.research_graph import (
     ResearchGraph,
     ResearchGraphBuilder,
     ResearchNodeType,
 )
-from llm_wiki.site.search import (
+from tesserae.site.search import (
     EXCLUDED_TYPES,
     STOP_WORDS,
     WIKI_LAYER_TYPES,
@@ -20,7 +20,7 @@ from llm_wiki.site.search import (
     is_wiki_layer,
     tokenize,
 )
-from llm_wiki.wiki_store import WikiPage
+from tesserae.wiki_store import WikiPage
 
 
 # --------------------------------------------------------- type-set guarantees

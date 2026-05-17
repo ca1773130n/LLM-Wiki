@@ -12,7 +12,7 @@ authors:
   - "Carl Vondrick"
 date: 2023-03-20
 sub_topic: Diffusion-based 3D Generation
-license: "CC-BY-4.0 (LLM-Wiki demo prose)"
+license: "CC-BY-4.0 (Tesserae demo prose)"
 methods: [Diffusion, ImageTo3D, NovelViewSynthesis]
 datasets: []
 metrics: [PSNR, SSIM, LPIPS]

@@ -1,4 +1,4 @@
-from llm_wiki.project_setup import build_setup_plan
+from tesserae.project_setup import build_setup_plan
 
 
 def _make_version_info(major, minor, micro=0, releaselevel="final", serial=0):
@@ -29,7 +29,7 @@ def test_build_setup_plan_with_raganything_appends_external_tool_and_backend(tmp
     assert raga["sync_mode"] == "native_graph"
     assert raga["parser"] == "mineru"
     assert raga["auto_refresh"] is True
-    assert raga["artifact"] == ".llm-wiki/external/raganything/manifest.json"
+    assert raga["artifact"] == ".tesserae/external/raganything/manifest.json"
     assert raga["install"]["auto_install"] is True
     assert "docling" in raga["install"]["command"]
     assert plan.memory_backends["raganything"]["enabled"] is True

@@ -16,7 +16,7 @@ canonical_paper_url: https://arxiv.org/abs/2201.05989
 
 > **License notice (non-permissive):** This README is mirrored under the upstream
 > *NVIDIA Source Code License-NC (non-commercial research)*, which restricts use of the upstream code to non-commercial
-> research. The LLM-Wiki demo corpus mirrors only the README text under fair-use
+> research. The Tesserae demo corpus mirrors only the README text under fair-use
 > citation with full attribution; **no code from the upstream repository is
 > redistributed here**. See https://github.com/NVlabs/instant-ngp for the full license terms.
 
@@ -322,4 +322,4 @@ If you cannot find your problem in the table, try searching [the discussions boa
 
 ## Thanks
 
-> Truncated at 300 lines for the LLM-Wiki demo. See upstream for the full README.
+> Truncated at 300 lines for the Tesserae demo. See upstream for the full README.

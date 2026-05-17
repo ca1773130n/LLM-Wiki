@@ -17,7 +17,7 @@ import pytest
 
 _REAL_SUBPROCESS_RUN = subprocess.run
 
-from llm_wiki.deploy import (
+from tesserae.deploy import (
     DeployError,
     GitHubPagesDeployer,
     parse_remote_url,
@@ -31,9 +31,9 @@ def _git(*args: str, cwd: Path) -> subprocess.CompletedProcess:
     env = dict(os.environ)
     # Make commits deterministic / non-interactive in case the runner has no
     # global git identity configured.
-    env.setdefault("GIT_AUTHOR_NAME", "LLM-Wiki Test")
+    env.setdefault("GIT_AUTHOR_NAME", "Tesserae Test")
     env.setdefault("GIT_AUTHOR_EMAIL", "test@example.com")
-    env.setdefault("GIT_COMMITTER_NAME", "LLM-Wiki Test")
+    env.setdefault("GIT_COMMITTER_NAME", "Tesserae Test")
     env.setdefault("GIT_COMMITTER_EMAIL", "test@example.com")
     env.setdefault("GIT_TERMINAL_PROMPT", "0")
     return subprocess.run(
@@ -54,10 +54,10 @@ def _make_project_with_remote(tmp_path: Path) -> tuple[Path, Path]:
     project.mkdir()
     _git("init", "-b", "main", cwd=project)
     _git("config", "user.email", "test@example.com", cwd=project)
-    _git("config", "user.name", "LLM-Wiki Test", cwd=project)
+    _git("config", "user.name", "Tesserae Test", cwd=project)
     _git("config", "commit.gpgsign", "false", cwd=project)
     (project / "README.md").write_text("# project\n", encoding="utf-8")
-    (project / ".gitignore").write_text(".llm-wiki/\n", encoding="utf-8")
+    (project / ".gitignore").write_text(".tesserae/\n", encoding="utf-8")
     _git("add", "README.md", ".gitignore", cwd=project)
     _git("commit", "-m", "initial", cwd=project)
     _git("remote", "add", "origin", str(bare), cwd=project)
@@ -66,7 +66,7 @@ def _make_project_with_remote(tmp_path: Path) -> tuple[Path, Path]:
 
 
 def _make_site(project: Path) -> Path:
-    site = project / ".llm-wiki" / "site"
+    site = project / ".tesserae" / "site"
     site.mkdir(parents=True)
     (site / "index.html").write_text("<html>hello</html>", encoding="utf-8")
     (site / "graph.json").write_text("{}", encoding="utf-8")
@@ -157,10 +157,10 @@ def test_refuses_when_site_dir_missing_or_empty(tmp_path):
     deployer = GitHubPagesDeployer(project)
 
     with pytest.raises(DeployError) as exc_missing:
-        deployer.deploy(project / ".llm-wiki" / "site")
+        deployer.deploy(project / ".tesserae" / "site")
     assert "compile" in str(exc_missing.value).lower()
 
-    empty = project / ".llm-wiki" / "site"
+    empty = project / ".tesserae" / "site"
     empty.mkdir(parents=True)
     with pytest.raises(DeployError) as exc_empty:
         deployer.deploy(empty)
@@ -212,8 +212,8 @@ def test_enable_pages_reports_unsupported_private_repo_plan(tmp_path):
             return failed
         return _REAL_SUBPROCESS_RUN(args, *run_args, **run_kwargs)
 
-    with patch("llm_wiki.deploy.shutil.which", return_value="/usr/bin/gh"), patch(
-        "llm_wiki.deploy.subprocess.run", side_effect=fake_run
+    with patch("tesserae.deploy.shutil.which", return_value="/usr/bin/gh"), patch(
+        "tesserae.deploy.subprocess.run", side_effect=fake_run
     ):
         with pytest.raises(DeployError) as exc:
             deployer.deploy(site, enable_pages=True)

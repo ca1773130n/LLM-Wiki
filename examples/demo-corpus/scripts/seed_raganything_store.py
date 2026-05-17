@@ -3,14 +3,14 @@
 Walks ``examples/demo-corpus/data/research/`` markdown documents, batches
 all texts into a single ``LightRAG.ainsert`` call, and persists the result
 to ``examples/demo-corpus/raganything-store/`` so CI can copy it into
-``.llm-wiki/external/raganything/working_dir/`` at deploy time without
+``.tesserae/external/raganything/working_dir/`` at deploy time without
 re-burning Codex tokens.
 
 Why direct ``ainsert`` instead of ``RAGAnything.insert_content_list``:
 the wrapper's first-insert path mis-flags content as duplicate against an
 empty store and skips chunking. Driving LightRAG's primitive directly
 avoids that — confirmed via the 1-doc smoke at
-``/tmp/llm-wiki-demo-raga2/smoke_one_doc.py``.
+``/tmp/tesserae-demo-raga2/smoke_one_doc.py``.
 
 Budget: ~85 docs (50 papers + 24 repo pages + 11 synthesis pages),
 ~170 Codex calls at async-LLM concurrency 8, ~15-25 min wall time.
@@ -56,7 +56,7 @@ def collect_docs() -> list[Path]:
 async def main() -> int:
     from raganything import RAGAnything, RAGAnythingConfig
     from lightrag import LightRAG
-    from llm_wiki.raganything_llm import build_runtime_funcs
+    from tesserae.raganything_llm import build_runtime_funcs
 
     cfg = {
         "working_dir": str(STORE_OUT),

@@ -1,7 +1,7 @@
 import json
 
-from llm_wiki.project import ProjectWiki, load_graph_file
-from llm_wiki.research_graph import ResearchNodeType
+from tesserae.project import ProjectWiki, load_graph_file
+from tesserae.research_graph import ResearchNodeType
 
 
 def _payload():
@@ -14,7 +14,7 @@ def _payload():
                 "id": "doc-deadbeef",
                 "path": "data/paper.pdf",
                 "sha256": "deadbeef" * 8,
-                "parsed_dir": ".llm-wiki/external/raganything/parsed/deadbeef",
+                "parsed_dir": ".tesserae/external/raganything/parsed/deadbeef",
                 "content_list": [
                     {"type": "text", "page_idx": 0, "text": "Mermaid rendering pipeline"},
                     {"type": "image", "page_idx": 0, "img_path": "x.png", "img_caption": ["Pipeline"]},
@@ -28,7 +28,7 @@ def test_project_compile_merges_configured_raganything_native_graph(tmp_path):
     project = tmp_path / "demo"
     project.mkdir()
     (project / "README.md").write_text("# demo\n", encoding="utf-8")
-    artifact = project / ".llm-wiki" / "external" / "raganything" / "manifest.json"
+    artifact = project / ".tesserae" / "external" / "raganything" / "manifest.json"
     artifact.parent.mkdir(parents=True)
     artifact.write_text(json.dumps(_payload()), encoding="utf-8")
 
@@ -37,7 +37,7 @@ def test_project_compile_merges_configured_raganything_native_graph(tmp_path):
     cfg["external_tools"] = [
         {
             "id": "raganything",
-            "artifact": ".llm-wiki/external/raganything/manifest.json",
+            "artifact": ".tesserae/external/raganything/manifest.json",
             "sync_mode": "native_graph",
             "enabled": True,
             "auto_refresh": False,
@@ -58,5 +58,5 @@ def test_project_compile_merges_configured_raganything_native_graph(tmp_path):
     ]
     assert len(sources) == 1
     assert sources[0].metadata["external_refs"][0]["system"] == "rag-anything"
-    sync = json.loads((project / ".llm-wiki" / "external" / "raganything-sync.json").read_text())
+    sync = json.loads((project / ".tesserae" / "external" / "raganything-sync.json").read_text())
     assert sync["imported_documents"]["doc-deadbeef"] == sources[0].id

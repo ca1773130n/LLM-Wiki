@@ -4,9 +4,9 @@
 <p align="center"><a href="../i18n/integrations/obsidian-sync.ko.md">한국어</a> · <a href="../i18n/integrations/obsidian-sync.zh.md">中文</a> · <a href="../i18n/integrations/obsidian-sync.ja.md">日本語</a> · <a href="../i18n/integrations/obsidian-sync.ru.md">Русский</a> · <a href="../i18n/integrations/obsidian-sync.es.md">Español</a> · <a href="../i18n/integrations/obsidian-sync.fr.md">Français</a> · <a href="../i18n/integrations/obsidian-sync.de.md">Deutsch</a></p>
 <!-- translations:end -->
 
-> **Status: Proposed (2026-05-17).** This document is a design spec, not yet a feature. It describes how LLM-Wiki could let users edit projected wiki pages in Obsidian and have those edits survive the next `project compile`. Implementation is gated on this design landing.
+> **Status: Proposed (2026-05-17).** This document is a design spec, not yet a feature. It describes how Tesserae could let users edit projected wiki pages in Obsidian and have those edits survive the next `project compile`. Implementation is gated on this design landing.
 
-Today the [Obsidian export](obsidian.md) is strictly one-way: the typed graph in `.llm-wiki/graph.json` projects to the vault, and `project compile` overwrites projected files. Users have asked for the opposite direction too — edit a description in Obsidian, see it survive recompile.
+Today the [Obsidian export](obsidian.md) is strictly one-way: the typed graph in `.tesserae/graph.json` projects to the vault, and `project compile` overwrites projected files. Users have asked for the opposite direction too — edit a description in Obsidian, see it survive recompile.
 
 This document spells out how that would work without making the data model incoherent.
 
@@ -14,7 +14,7 @@ This document spells out how that would work without making the data model incoh
 
 The current README disclaims live editing:
 
-> LLM-Wiki picks compile-from-source over live editing. If you want to edit notes in a UI, use Logseq or Obsidian.
+> Tesserae picks compile-from-source over live editing. If you want to edit notes in a UI, use Logseq or Obsidian.
 
 Bidirectional sync **changes that contract** for a subset of fields. Worth being deliberate. The goal is not "Obsidian becomes the editor" — it's "the user's Obsidian edits aren't silently destroyed on recompile".
 
@@ -30,7 +30,7 @@ source markdown  ──extract──▶  base_graph
                               final_graph  ──project──▶  vault (.md files)
 ```
 
-`vault_overrides.json` lives in `.llm-wiki/` and is **computed**, not authored. On each compile, LLM-Wiki walks the vault, compares each projected page against what the previous projection wrote, and records every user-introduced change as an overlay entry. The final graph is `base_graph` with overlays applied. The next projection writes the result back to disk.
+`vault_overrides.json` lives in `.tesserae/` and is **computed**, not authored. On each compile, Tesserae walks the vault, compares each projected page against what the previous projection wrote, and records every user-introduced change as an overlay entry. The final graph is `base_graph` with overlays applied. The next projection writes the result back to disk.
 
 Round-trip stable. Recompiling the same vault with no source-side changes produces no diffs.
 
@@ -55,8 +55,8 @@ Each field on a node has an owner. Ownership decides what happens when source an
 
 | Case | Default | Why |
 |---|---|---|
-| Vault `description` differs from re-extracted source `description` | **Vault wins**, log to `.llm-wiki/lint-report.md` under "diverged fields" | User-edit-respects: the user clearly intended the edit. Audit trail lets you review later. |
-| Source file deleted, projected page still in vault | Remove node from graph, list in `.llm-wiki/orphans.md` | Source is authoritative for existence; orphan log lets you decide whether to restore or accept |
+| Vault `description` differs from re-extracted source `description` | **Vault wins**, log to `.tesserae/lint-report.md` under "diverged fields" | User-edit-respects: the user clearly intended the edit. Audit trail lets you review later. |
+| Source file deleted, projected page still in vault | Remove node from graph, list in `.tesserae/orphans.md` | Source is authoritative for existence; orphan log lets you decide whether to restore or accept |
 | User wrote a wikilink to a slug that doesn't exist | Create tombstone node (type `Stub`), surface in lint report | Don't drop the user intent; flag it for cleanup |
 | User added a frontmatter key the schema doesn't know | Preserve as `metadata.user.<key>`, never overwrite | Forward-compatible without polluting the typed graph |
 | Two vaults on different machines edit the same node, both synced via Obsidian Sync | **Out of scope for v1.** Last-writer wins at the filesystem level. | True multi-vault federation is Tier 3; defer until a real use case |
@@ -86,7 +86,7 @@ Two practical effects:
 
 ## Remote transport — explicit non-goal
 
-LLM-Wiki does **not** build a sync server, auth layer, conflict-resolution daemon, or hosted vault. "Bidirectional" here means "compile reads from the vault" — what gets the vault to the machine doing the compile is the user's problem, solved by tools that already exist:
+Tesserae does **not** build a sync server, auth layer, conflict-resolution daemon, or hosted vault. "Bidirectional" here means "compile reads from the vault" — what gets the vault to the machine doing the compile is the user's problem, solved by tools that already exist:
 
 | Stack | Cost | Notes |
 |---|---|---|
@@ -96,22 +96,22 @@ LLM-Wiki does **not** build a sync server, auth layer, conflict-resolution daemo
 | Git (vault committed) | Free | Conflict UX is best for technical users |
 | LiveSync (CouchDB plugin) | Free, requires server | Real-time multi-device |
 
-All five are compatible with the overlay model because LLM-Wiki sees the vault as files-on-disk, not as a stream of mutations.
+All five are compatible with the overlay model because Tesserae sees the vault as files-on-disk, not as a stream of mutations.
 
 ## CLI surface (proposed)
 
 ```bash
 # Pull-only sync (Tier 1a): overlay reader runs as part of compile by default.
-llm_wiki project compile                  # always pulls vault overrides if vault exists
+tesserae project compile                  # always pulls vault overrides if vault exists
 
 # Inspect what would change before letting compile apply
-llm_wiki project obsidian-sync --dry-run
+tesserae project obsidian-sync --dry-run
 
 # Skip the pull for a single compile (recovery mode)
-llm_wiki project compile --no-vault-pull
+tesserae project compile --no-vault-pull
 
 # Long-running watch (Tier 2)
-llm_wiki project obsidian-sync --watch --vault ~/Documents/llm-wiki-vault
+tesserae project obsidian-sync --watch --vault ~/Documents/tesserae-vault
 ```
 
 ## Phasing
@@ -134,10 +134,10 @@ llm_wiki project obsidian-sync --watch --vault ~/Documents/llm-wiki-vault
 
 These have proposed defaults but warrant a final pass before code lands:
 
-1. **Lint report shape.** Should diverged fields surface as a separate `.llm-wiki/diverged-fields.md` file, or as a new section in the existing `lint-report.md`? Proposed: dedicated file so it can be diffed in git.
+1. **Lint report shape.** Should diverged fields surface as a separate `.tesserae/diverged-fields.md` file, or as a new section in the existing `lint-report.md`? Proposed: dedicated file so it can be diffed in git.
 2. **Tombstone node type.** Add `Stub` as a real schema type, or piggyback on `OpenQuestion` with a `_kind: stub` discriminator? Proposed: real type, named `Stub`, hidden from public indexes.
 3. **Pull-on-compile default.** Default ON or default OFF? Proposed: ON when a vault exists at the configured path, with a one-time confirmation prompt the first time it activates so users opt-in deliberately.
-4. **What counts as "the previous projection" for diffing?** Snapshot stored in `.llm-wiki/vault_snapshot.json`, or re-project on the fly each compile? Proposed: snapshot, written at end of every compile. Cheaper and avoids extractor non-determinism leaking into the overlay.
+4. **What counts as "the previous projection" for diffing?** Snapshot stored in `.tesserae/vault_snapshot.json`, or re-project on the fly each compile? Proposed: snapshot, written at end of every compile. Cheaper and avoids extractor non-determinism leaking into the overlay.
 5. **Multi-language vault projection.** Today's projection is single-language (the source). Should overlays be locale-aware (e.g. an edit to `description` in a Korean vault overlay applies only to the Korean projection)? Proposed: out of scope for v1; vault is single-language matching the project's primary language.
 
 ## How this shows up in `obsidian.md`

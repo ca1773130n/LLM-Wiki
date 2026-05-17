@@ -1,4 +1,4 @@
-"""Unit tests for :mod:`llm_wiki.wiki_store`."""
+"""Unit tests for :mod:`tesserae.wiki_store`."""
 
 from __future__ import annotations
 
@@ -6,7 +6,7 @@ from pathlib import Path
 
 import pytest
 
-from llm_wiki.wiki_store import WikiPage, WikiPageStore
+from tesserae.wiki_store import WikiPage, WikiPageStore
 
 
 # --------------------------------------------------------------------- helpers

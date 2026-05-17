@@ -4,8 +4,8 @@ from pathlib import Path
 
 import pytest
 
-from llm_wiki.mcp_server import LLMWikiMCPServer
-from llm_wiki.research_graph import ResearchEdge, ResearchGraph, ResearchNode, ResearchNodeType
+from tesserae.mcp_server import LLMWikiMCPServer
+from tesserae.research_graph import ResearchEdge, ResearchGraph, ResearchNode, ResearchNodeType
 
 
 def _write_graph(graph_dir: Path) -> Path:
@@ -30,9 +30,9 @@ def _write_graph(graph_dir: Path) -> Path:
 
 
 def _make_project(tmp_path: Path, name: str) -> Path:
-    """Create <tmp>/<name>/.llm-wiki/graph.json and return the project root."""
+    """Create <tmp>/<name>/.tesserae/graph.json and return the project root."""
     root = tmp_path / name
-    _write_graph(root / ".llm-wiki")
+    _write_graph(root / ".tesserae")
     return root
 
 
@@ -94,7 +94,7 @@ def test_register_project_from_dotllmwiki_dir(tmp_path):
     server = _server_with_registry(tmp_path)
 
     entry = server.call_tool(
-        "register_project", {"path": str(project_root / ".llm-wiki")}
+        "register_project", {"path": str(project_root / ".tesserae")}
     )
 
     assert entry["name"] == "beta"
@@ -103,7 +103,7 @@ def test_register_project_from_dotllmwiki_dir(tmp_path):
 
 def test_register_project_from_graph_json_path(tmp_path):
     project_root = _make_project(tmp_path, "gamma")
-    graph_json = project_root / ".llm-wiki" / "graph.json"
+    graph_json = project_root / ".tesserae" / "graph.json"
     server = _server_with_registry(tmp_path)
 
     entry = server.call_tool("register_project", {"path": str(graph_json)})
@@ -155,7 +155,7 @@ def test_register_project_rejects_path_without_graph(tmp_path):
 
     with pytest.raises(Exception) as excinfo:
         server.call_tool("register_project", {"path": str(bare)})
-    assert "graph" in str(excinfo.value).lower() or "no .llm-wiki" in str(excinfo.value).lower()
+    assert "graph" in str(excinfo.value).lower() or "no .tesserae" in str(excinfo.value).lower()
 
 
 # ---------------------------------------------------------------------------
@@ -249,7 +249,7 @@ def test_explicit_graph_path_takes_priority_over_active(tmp_path):
 
     summary = server.call_tool(
         "graph_summary",
-        {"graph_path": str(p_other / ".llm-wiki" / "graph.json")},
+        {"graph_path": str(p_other / ".tesserae" / "graph.json")},
     )
 
     # Both fixtures have the same shape (2/1) — but explicit-path branch must not
@@ -271,7 +271,7 @@ def test_no_resolution_sources_raises(tmp_path):
 
 def test_default_graph_path_still_works_when_no_registry_used(tmp_path):
     p_root = _make_project(tmp_path, "xi")
-    graph = p_root / ".llm-wiki" / "graph.json"
+    graph = p_root / ".tesserae" / "graph.json"
     server = LLMWikiMCPServer(
         default_graph_path=graph, registry_path=tmp_path / "registry.json"
     )

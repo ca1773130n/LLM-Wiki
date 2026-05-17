@@ -3,33 +3,33 @@
 <!-- translations:start -->
 <p align="center"><a href="../installation.md">English</a> · <a href="installation.ko.md">한국어</a> · <a href="installation.zh.md">中文</a> · <a href="installation.ja.md">日本語</a> · <a href="installation.ru.md">Русский</a> · <a href="installation.es.md">Español</a> · <a href="installation.fr.md">Français</a> · <a href="installation.de.md">Deutsch</a></p>
 <!-- translations:end -->
-LLM-Wiki 已发布到 PyPI，并提供 shell 命令，因此用户无需手动运行 `python3 -m llm_wiki.cli`。
+Tesserae 已发布到 PyPI，并提供 shell 命令，因此用户无需手动运行 `python3 -m tesserae.cli`。
 
 ## 从 PyPI 安装（推荐）
 
 ```bash
-pip install llm-research-wiki
+pip install tesserae
 ```
 
 就这样。`pip` 会在你的 `PATH` 中注册三个控制台脚本：
 
 ```bash
-llm_wiki --help
-llm-wiki --help
-llm_wiki_mcp --help
+tesserae --help
+tesserae --help
+tesserae_mcp --help
 ```
 
-文档中的规范命令是 `llm_wiki`；`llm-wiki`（带短横线）是别名。`llm_wiki_mcp` 用于启动 MCP 服务器。
+文档中的规范命令是 `tesserae`；`tesserae`（带短横线）是别名。`tesserae_mcp` 用于启动 MCP 服务器。
 
 > **也可以使用 pipx。** 如果你希望把 CLI 工具保存在各自隔离的 venv 中：
 > ```bash
-> pipx install llm-research-wiki
+> pipx install tesserae
 > ```
 
 ## 升级
 
 ```bash
-pip install --upgrade llm-research-wiki
+pip install --upgrade tesserae
 ```
 
 ## 可选集成
@@ -38,7 +38,7 @@ pip install --upgrade llm-research-wiki
 
 ```bash
 # Understand Anything companion graph + Cognee runtime memory
-llm_wiki project setup \
+tesserae project setup \
   --with-understand-anything \
   --install-understand-anything \
   --understand-anything-platform codex \
@@ -54,13 +54,13 @@ pip install kuzu cognee graphiti-core
 
 - `kuzu` — Kuzu 图持久化。
 - `cognee` — 运行时 Cognee add/cognify 工作流；设置会保存 `{python} -m pip install cognee`，如果缺少 Cognee 会重试一次。
-- Understand Anything — 选择 `--install-understand-anything` 时通过上游安装器安装；LLM-Wiki 会保存一个托管的刷新 wrapper，而不是要求用户自己发明 shell 命令。
+- Understand Anything — 选择 `--install-understand-anything` 时通过上游安装器安装；Tesserae 会保存一个托管的刷新 wrapper，而不是要求用户自己发明 shell 命令。
 - `graphiti-core` — 实时 Graphiti/Neo4j 同步。没有它时，`export-graphiti` 和 `sync-graphiti --dry-run` 仍可工作。
 
 Anthropic 支持的合成路径使用 extras 标记：
 
 ```bash
-pip install "llm-research-wiki[synthesis-llm]"
+pip install "tesserae[synthesis-llm]"
 ```
 
 ## 从源码安装（贡献者）
@@ -68,8 +68,8 @@ pip install "llm-research-wiki[synthesis-llm]"
 如果你想修改代码库，请改用可编辑 checkout 安装：
 
 ```bash
-git clone https://github.com/ca1773130n/LLM-Wiki.git
-cd LLM-Wiki
+git clone https://github.com/ca1773130n/Tesserae.git
+cd Tesserae
 pip install -e .
 ```
 
@@ -77,7 +77,7 @@ pip install -e .
 
 ```bash
 # Quick: clone + install in one shot
-curl -fsSL https://raw.githubusercontent.com/ca1773130n/LLM-Wiki/main/scripts/install.sh | bash
+curl -fsSL https://raw.githubusercontent.com/ca1773130n/Tesserae/main/scripts/install.sh | bash
 
 # From an existing checkout
 ./scripts/install.sh --dir "$PWD"
@@ -103,7 +103,7 @@ export PATH="$HOME/.local/bin:$PATH"
 ## 验证安装
 
 ```bash
-llm_wiki project init --help
-llm_wiki project compile --help
-llm_wiki project build-site --help
+tesserae project init --help
+tesserae project compile --help
+tesserae project build-site --help
 ```

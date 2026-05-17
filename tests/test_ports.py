@@ -7,8 +7,8 @@ from uuid import UUID
 
 import pytest
 
-from llm_wiki.ports import GraphStore, Source, SourceLoader
-from llm_wiki.research_graph import ResearchEdge, ResearchGraph, ResearchNode
+from tesserae.ports import GraphStore, Source, SourceLoader
+from tesserae.research_graph import ResearchEdge, ResearchGraph, ResearchNode
 
 
 def test_source_constructs_with_required_fields() -> None:

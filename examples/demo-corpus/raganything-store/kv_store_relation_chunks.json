@@ -8151,14 +8151,14 @@
     "update_time": 1778875086,
     "_id": "Direct Sparse Odometry Paper<SEP>PSNR"
   },
-  "Direct Sparse Odometry<SEP>LLM-Wiki Demo Corpus": {
+  "Direct Sparse Odometry<SEP>Tesserae Demo Corpus": {
     "chunk_ids": [
       "chunk-c5ec848be5aa6ee5cc0be08acd6f5935"
     ],
     "count": 1,
     "create_time": 1778875086,
     "update_time": 1778875086,
-    "_id": "Direct Sparse Odometry<SEP>LLM-Wiki Demo Corpus"
+    "_id": "Direct Sparse Odometry<SEP>Tesserae Demo Corpus"
   },
   "Direct Sparse Odometry Paper<SEP>SSIM": {
     "chunk_ids": [
@@ -12140,14 +12140,14 @@
     "update_time": 1778875512,
     "_id": "3D Gaussian Splatting for Real-Time Radiance Field Rendering<SEP>Established Datasets"
   },
-  "LLM-Wiki Demo Corpus<SEP>graphdeco-inria/gaussian-splatting": {
+  "Tesserae Demo Corpus<SEP>graphdeco-inria/gaussian-splatting": {
     "chunk_ids": [
       "chunk-41e2a18164d88d58975577aab63d7325"
     ],
     "count": 1,
     "create_time": 1778875512,
     "update_time": 1778875512,
-    "_id": "LLM-Wiki Demo Corpus<SEP>graphdeco-inria/gaussian-splatting"
+    "_id": "Tesserae Demo Corpus<SEP>graphdeco-inria/gaussian-splatting"
   },
   "3D Gaussian Splatting for Real-Time Radiance Field Rendering<SEP>Bernhard Kerbl": {
     "chunk_ids": [
@@ -15213,14 +15213,14 @@
     "update_time": 1778875662,
     "_id": "Image-Conditioned 3D Generation<SEP>Monocular Depth Estimation"
   },
-  "CC-BY-4.0 (LLM-Wiki Demo Prose)<SEP>MonoSDF": {
+  "CC-BY-4.0 (Tesserae Demo Prose)<SEP>MonoSDF": {
     "chunk_ids": [
       "chunk-39dac1db0f50be2348ba37c8912fe321"
     ],
     "count": 1,
     "create_time": 1778875662,
     "update_time": 1778875662,
-    "_id": "CC-BY-4.0 (LLM-Wiki Demo Prose)<SEP>MonoSDF"
+    "_id": "CC-BY-4.0 (Tesserae Demo Prose)<SEP>MonoSDF"
   },
   "GUI<SEP>main.py": {
     "chunk_ids": [
@@ -20583,14 +20583,14 @@
     "update_time": 1778876157,
     "_id": "Handheld Phone<SEP>Nerfies"
   },
-  "CC-BY-4.0 (LLM-Wiki Demo Prose)<SEP>Nerfies: Deformable Neural Radiance Fields": {
+  "CC-BY-4.0 (Tesserae Demo Prose)<SEP>Nerfies: Deformable Neural Radiance Fields": {
     "chunk_ids": [
       "chunk-640801c18546ebea4632cd80bbad0951"
     ],
     "count": 1,
     "create_time": 1778876157,
     "update_time": 1778876157,
-    "_id": "CC-BY-4.0 (LLM-Wiki Demo Prose)<SEP>Nerfies: Deformable Neural Radiance Fields"
+    "_id": "CC-BY-4.0 (Tesserae Demo Prose)<SEP>Nerfies: Deformable Neural Radiance Fields"
   },
   "Elastic Energy Regularizer<SEP>Physical-Simulation Literature": {
     "chunk_ids": [
@@ -22945,14 +22945,14 @@
     "update_time": 1778876522,
     "_id": "Instant-NGP<SEP>NVIDIA Research Licensing Form"
   },
-  "LLM-Wiki Demo Corpus<SEP>README": {
+  "Tesserae Demo Corpus<SEP>README": {
     "chunk_ids": [
       "chunk-eea3b682e8bd992578c8df7af80e379d",
       "chunk-a77bbc3a5c1fbf4a8a4029857b6fa01b"
     ],
     "count": 2,
     "update_time": 1778876966,
-    "_id": "LLM-Wiki Demo Corpus<SEP>README"
+    "_id": "Tesserae Demo Corpus<SEP>README"
   },
   "Instant-NGP<SEP>Windows": {
     "chunk_ids": [
@@ -22964,14 +22964,14 @@
     "update_time": 1778876522,
     "_id": "Instant-NGP<SEP>Windows"
   },
-  "LLM-Wiki Demo Corpus<SEP>NVIDIA Source Code License-NC": {
+  "Tesserae Demo Corpus<SEP>NVIDIA Source Code License-NC": {
     "chunk_ids": [
       "chunk-eea3b682e8bd992578c8df7af80e379d"
     ],
     "count": 1,
     "create_time": 1778876522,
     "update_time": 1778876522,
-    "_id": "LLM-Wiki Demo Corpus<SEP>NVIDIA Source Code License-NC"
+    "_id": "Tesserae Demo Corpus<SEP>NVIDIA Source Code License-NC"
   },
   "Instant-NGP<SEP>Linux": {
     "chunk_ids": [
@@ -24255,14 +24255,14 @@
     "update_time": 1778876523,
     "_id": "Instant-NGP<SEP>Volume Of Interest"
   },
-  "LLM-Wiki Demo<SEP>README": {
+  "Tesserae Demo<SEP>README": {
     "chunk_ids": [
       "chunk-5d77e66aa7cc152f532934b3e4405857"
     ],
     "count": 1,
     "create_time": 1778876523,
     "update_time": 1778876523,
-    "_id": "LLM-Wiki Demo<SEP>README"
+    "_id": "Tesserae Demo<SEP>README"
   },
   "Issue<SEP>Issues Area": {
     "chunk_ids": [
@@ -27705,14 +27705,14 @@
     "update_time": 1778876895,
     "_id": "2403.02151<SEP>TripoSR: Fast 3D Object Reconstruction from a Single Image"
   },
-  "CC-BY-4.0 (LLM-Wiki Demo Prose)<SEP>TripoSR: Fast 3D Object Reconstruction from a Single Image": {
+  "CC-BY-4.0 (Tesserae Demo Prose)<SEP>TripoSR: Fast 3D Object Reconstruction from a Single Image": {
     "chunk_ids": [
       "chunk-da7ad32a7899b18880ae81f4444362ce"
     ],
     "count": 1,
     "create_time": 1778876895,
     "update_time": 1778876895,
-    "_id": "CC-BY-4.0 (LLM-Wiki Demo Prose)<SEP>TripoSR: Fast 3D Object Reconstruction from a Single Image"
+    "_id": "CC-BY-4.0 (Tesserae Demo Prose)<SEP>TripoSR: Fast 3D Object Reconstruction from a Single Image"
   },
   "NeRF<SEP>Render Demo.ipynb": {
     "chunk_ids": [
@@ -28561,14 +28561,14 @@
     "update_time": 1778876966,
     "_id": "Adaptive Density Control<SEP>graphdeco-inria/gaussian-splatting"
   },
-  "Cross-Graph Linking<SEP>LLM-Wiki Demo Corpus": {
+  "Cross-Graph Linking<SEP>Tesserae Demo Corpus": {
     "chunk_ids": [
       "chunk-a77bbc3a5c1fbf4a8a4029857b6fa01b"
     ],
     "count": 1,
     "create_time": 1778876966,
     "update_time": 1778876966,
-    "_id": "Cross-Graph Linking<SEP>LLM-Wiki Demo Corpus"
+    "_id": "Cross-Graph Linking<SEP>Tesserae Demo Corpus"
   },
   "3D Gaussian Splatting for Real-Time Radiance Field Rendering<SEP>Cross-Graph Linking": {
     "chunk_ids": [
@@ -28642,14 +28642,14 @@
     "update_time": 1778876966,
     "_id": "Cross-Graph Linking<SEP>graphdeco-inria/gaussian-splatting"
   },
-  "LLM-Wiki Demo Corpus<SEP>Non-Commercial Research Only License": {
+  "Tesserae Demo Corpus<SEP>Non-Commercial Research Only License": {
     "chunk_ids": [
       "chunk-a77bbc3a5c1fbf4a8a4029857b6fa01b"
     ],
     "count": 1,
     "create_time": 1778876966,
     "update_time": 1778876966,
-    "_id": "LLM-Wiki Demo Corpus<SEP>Non-Commercial Research Only License"
+    "_id": "Tesserae Demo Corpus<SEP>Non-Commercial Research Only License"
   },
   "Reference CUDA Kernels<SEP>graphdeco-inria/gaussian-splatting": {
     "chunk_ids": [

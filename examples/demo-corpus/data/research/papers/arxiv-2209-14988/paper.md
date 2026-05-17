@@ -10,7 +10,7 @@ authors:
   - "Ben Mildenhall"
 date: 2022-09-29
 sub_topic: Diffusion-based 3D Generation
-license: "CC-BY-4.0 (LLM-Wiki demo prose)"
+license: "CC-BY-4.0 (Tesserae demo prose)"
 methods: [RadianceField, Diffusion, TextTo3D]
 datasets: []
 metrics: [PSNR, SSIM, LPIPS]

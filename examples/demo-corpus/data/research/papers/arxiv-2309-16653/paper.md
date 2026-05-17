@@ -15,7 +15,7 @@ methods: [GaussianSplatting, RadianceField, Diffusion, ScoreDistillation]
 datasets: []
 metrics: [PSNR, SSIM, LPIPS]
 oss_repo: dreamgaussian/dreamgaussian
-license: "CC-BY-4.0 (LLM-Wiki demo prose)"
+license: "CC-BY-4.0 (Tesserae demo prose)"
 ---
 
 # DreamGaussian: Generative Gaussian Splatting for Efficient 3D Content Creation

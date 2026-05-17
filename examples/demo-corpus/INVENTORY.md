@@ -1,6 +1,6 @@
-# LLM-Wiki Demo Corpus — Inventory
+# Tesserae Demo Corpus — Inventory
 
-A human-readable index of the curated 3D-reconstruction corpus that powers the LLM-Wiki GitHub Pages demo. See `LICENSES.md` for provenance and `README.md` for context.
+A human-readable index of the curated 3D-reconstruction corpus that powers the Tesserae GitHub Pages demo. See `LICENSES.md` for provenance and `README.md` for context.
 
 ## At a glance
 

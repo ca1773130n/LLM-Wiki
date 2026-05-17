@@ -1,8 +1,8 @@
 """Tests for the per-page ask widget (Bet B3).
 
-The widget is a small JS island emitted by ``llm_wiki.site.ask_widget``
+The widget is a small JS island emitted by ``tesserae.site.ask_widget``
 and mounted at the bottom of every detail page's article body by
-``llm_wiki.site.pages._detail_page``. These tests cover the asset
+``tesserae.site.pages._detail_page``. These tests cover the asset
 shape (JS + CSS surface), the page integration (mount point on every
 detail kind), and the static-site asset wiring (hashed filename + CSS
 appended to ``style.css``).
@@ -14,10 +14,10 @@ from pathlib import Path
 
 import pytest
 
-from llm_wiki.research_graph import ResearchGraph, ResearchNodeType
-from llm_wiki.site import StaticSiteBuilder
-from llm_wiki.site.ask_widget import ask_widget_css, ask_widget_js
-from llm_wiki.site.pages import (
+from tesserae.research_graph import ResearchGraph, ResearchNodeType
+from tesserae.site import StaticSiteBuilder
+from tesserae.site.ask_widget import ask_widget_css, ask_widget_js
+from tesserae.site.pages import (
     SiteContext,
     render_concept_detail,
     render_entity_detail,
@@ -28,7 +28,7 @@ from llm_wiki.site.pages import (
     render_synthesis_detail,
     render_topic_detail,
 )
-from llm_wiki.wiki_store import WikiPage
+from tesserae.wiki_store import WikiPage
 
 
 # ---------------------------------------------------------------------------
@@ -50,7 +50,7 @@ def test_ask_widget_js_degrades_gracefully() -> None:
     """On health-check failure the widget collapses to a static footer."""
     js = ask_widget_js()
     assert "renderDegraded" in js
-    assert "llm_wiki project serve" in js
+    assert "tesserae project serve" in js
 
 
 def test_ask_widget_js_renders_envelope_shapes() -> None:
@@ -168,7 +168,7 @@ def site_ctx(wiki_sample_graph: ResearchGraph) -> SiteContext:
     return SiteContext.build(
         graph=wiki_sample_graph,
         wiki_pages_by_kind=_wiki_pages_for(wiki_sample_graph),
-        site_title="LLM-Wiki",
+        site_title="Tesserae",
     )
 
 
@@ -222,9 +222,9 @@ def test_ask_widget_concept_uses_frontmatter_node_id(site_ctx: SiteContext) -> N
 def test_static_site_builder_emits_hashed_ask_widget_asset(
     tmp_path: Path, wiki_sample_graph: ResearchGraph
 ) -> None:
-    """``llm_wiki project build-site`` writes the hashed widget JS bundle."""
+    """``tesserae project build-site`` writes the hashed widget JS bundle."""
     out = tmp_path / "site"
-    builder = StaticSiteBuilder(site_title="LLM-Wiki")
+    builder = StaticSiteBuilder(site_title="Tesserae")
     # Legacy two-arg shape — no wiki layer, only the graph. The asset
     # block runs regardless of whether the wiki has any pages, so this is
     # enough to exercise the hashed bundle write.

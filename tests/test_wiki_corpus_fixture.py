@@ -1,7 +1,7 @@
 """Smoke test for the wiki_sample_graph fixture."""
 from __future__ import annotations
 
-from llm_wiki.research_graph import ResearchNodeType
+from tesserae.research_graph import ResearchNodeType
 
 
 def test_wiki_sample_graph_has_minimum_size(wiki_sample_graph) -> None:

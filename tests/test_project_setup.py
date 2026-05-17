@@ -1,7 +1,7 @@
 import json
 
-from llm_wiki.cli import main
-from llm_wiki.project_setup import build_setup_plan, render_setup_summary, expand_tool_command
+from tesserae.cli import main
+from tesserae.project_setup import build_setup_plan, render_setup_summary, expand_tool_command
 
 
 def test_setup_plan_detects_common_sources_and_understand_anything(tmp_path):
@@ -16,15 +16,15 @@ def test_setup_plan_detects_common_sources_and_understand_anything(tmp_path):
 
     plan = build_setup_plan(project, include_understand_anything=True)
 
-    assert plan.sources == ["README.md", "docs", "src", ".llm-wiki/external/understand-anything.md"]
+    assert plan.sources == ["README.md", "docs", "src", ".tesserae/external/understand-anything.md"]
     assert plan.external_tools[0]["id"] == "understand-anything"
     assert plan.external_tools[0]["artifact"] == ".understand-anything/knowledge-graph.json"
-    assert plan.external_tools[0]["source"] == ".llm-wiki/external/understand-anything.md"
+    assert plan.external_tools[0]["source"] == ".tesserae/external/understand-anything.md"
     assert plan.external_tools[0]["auto_refresh"] is True
     assert plan.external_tools[0]["sync_mode"] == "native_graph"
     assert plan.external_tools[0]["preserve_markdown_projection"] is True
     assert plan.external_tools[0]["managed_refresh"] is True
-    assert "llm_wiki.understand_anything_refresh" in plan.external_tools[0]["refresh_command"]
+    assert "tesserae.understand_anything_refresh" in plan.external_tools[0]["refresh_command"]
 
 
 def test_managed_understand_anything_refresh_command_expands_to_current_python(tmp_path):
@@ -35,7 +35,7 @@ def test_managed_understand_anything_refresh_command_expands_to_current_python(t
     tool = plan.external_tools[0]
     command = expand_tool_command(tool["refresh_command"], project, tool)
 
-    assert "llm_wiki.understand_anything_refresh" in command
+    assert "tesserae.understand_anything_refresh" in command
     assert f"--project {project}" in command
     assert "--platform opencode" in command
 
@@ -59,20 +59,20 @@ def test_setup_command_yes_writes_config_with_external_tool_metadata(tmp_path, c
     ])
 
     assert code == 0
-    cfg = json.loads((project / ".llm-wiki" / "config.json").read_text(encoding="utf-8"))
-    assert cfg["sources"] == ["README.md", ".llm-wiki/external/understand-anything.md"]
-    assert cfg["setup"]["wizard"] == "llm_wiki project setup"
+    cfg = json.loads((project / ".tesserae" / "config.json").read_text(encoding="utf-8"))
+    assert cfg["sources"] == ["README.md", ".tesserae/external/understand-anything.md"]
+    assert cfg["setup"]["wizard"] == "tesserae project setup"
     assert cfg["external_tools"][0]["id"] == "understand-anything"
     assert cfg["external_tools"][0]["install"]["enabled"] is True
     assert cfg["external_tools"][0]["auto_refresh"] is True
     assert cfg["external_tools"][0]["sync_mode"] == "native_graph"
     assert cfg["external_tools"][0]["preserve_markdown_projection"] is True
     assert cfg["external_tools"][0]["managed_refresh"] is True
-    assert "llm_wiki.understand_anything_refresh" in cfg["external_tools"][0]["refresh_command"]
+    assert "tesserae.understand_anything_refresh" in cfg["external_tools"][0]["refresh_command"]
     assert "install.sh" in cfg["external_tools"][0]["install"]["command"]
-    assert (project / ".llm-wiki" / "external" / "understand-anything.md").exists()
+    assert (project / ".tesserae" / "external" / "understand-anything.md").exists()
     out = capsys.readouterr().out
-    assert "LLM-Wiki setup" in out
+    assert "Tesserae setup" in out
     assert "Understand Anything" in out
 
 
@@ -86,7 +86,7 @@ def test_setup_installs_understand_anything_when_requested(tmp_path, monkeypatch
         calls.append((project_root, tools, only_auto, fail_fast, run_installers))
         return [{"id": "understand-anything", "status": "installed", "command": tools[0]["install"]["command"]}]
 
-    monkeypatch.setattr("llm_wiki.project_setup.run_tool_configs", fake_run_tool_configs)
+    monkeypatch.setattr("tesserae.project_setup.run_tool_configs", fake_run_tool_configs)
 
     assert main([
         "project",
@@ -125,10 +125,10 @@ def test_setup_persists_config_even_when_initial_external_refresh_fails(tmp_path
         "--no-color",
     ]) == 0
 
-    cfg = json.loads((project / ".llm-wiki" / "config.json").read_text(encoding="utf-8"))
+    cfg = json.loads((project / ".tesserae" / "config.json").read_text(encoding="utf-8"))
     assert cfg["external_tools"][0]["refresh_command"] == "definitely_missing_understand_command"
     assert cfg["external_tools"][0]["auto_refresh"] is True
-    assert (project / ".llm-wiki" / "external" / "understand-anything.md").exists()
+    assert (project / ".tesserae" / "external" / "understand-anything.md").exists()
     out = capsys.readouterr().out
     assert "External tool" in out and "warnings" in out
     assert "definitely_missing_understand_command" in out
@@ -186,7 +186,7 @@ def test_compile_warns_and_continues_when_auto_refresh_command_is_missing(tmp_pa
     assert "External tool" in out and "warnings" in out
     assert "definitely_missing_understand_command" in out
     assert "Compiled project wiki" in out
-    assert (project / ".llm-wiki" / "graph.json").exists()
+    assert (project / ".tesserae" / "graph.json").exists()
 
 
 def test_render_setup_summary_contains_ansi_when_color_enabled(tmp_path):

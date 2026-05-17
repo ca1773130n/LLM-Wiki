@@ -1,7 +1,7 @@
-# LLM-Wiki
+# Tesserae
 
 <p align="center">
-  <img src="docs/assets/llm-wiki-graph-view.png" alt="LLM-Wiki graph view showing concepts, papers, repos, syntheses, and entities clustered around a focused node" width="100%" />
+  <img src="docs/assets/tesserae-graph-view.png" alt="Tesserae graph view showing concepts, papers, repos, syntheses, and entities clustered around a focused node" width="100%" />
 </p>
 
 <p align="center">
@@ -17,23 +17,23 @@
 > Kompiliere deine Quellen zu einem typisierten Wiki, das Agenten lesen können.
 
 <p align="center">
-  <img src="docs/screencasts/showcase.gif" alt="Three-step screencast: llm_wiki project setup -> compile -> ask, recorded against the 135-doc demo corpus" width="100%" />
+  <img src="docs/screencasts/showcase.gif" alt="Three-step screencast: tesserae project setup -> compile -> ask, recorded against the 135-doc demo corpus" width="100%" />
 </p>
 
-<!-- TODO: replace https://ca1773130n.github.io/LLM-Wiki with the real
+<!-- TODO: replace https://ca1773130n.github.io/Tesserae with the real
 GitHub Pages URL once the maintainer enables Pages for this repo. The
-.github/workflows/build-demo.yml workflow publishes .llm-wiki/site/ on every
+.github/workflows/build-demo.yml workflow publishes .tesserae/site/ on every
 push to main. -->
 
-[Live-Demo](https://ca1773130n.github.io/LLM-Wiki) · [Dokumentation](docs/) · [MCP-Setup](docs/i18n/integrations/mcp.de.md) · [Obsidian-Export](docs/i18n/integrations/obsidian.de.md)
+[Live-Demo](https://ca1773130n.github.io/Tesserae) · [Dokumentation](docs/) · [MCP-Setup](docs/i18n/integrations/mcp.de.md) · [Obsidian-Export](docs/i18n/integrations/obsidian.de.md)
 
-LLM-Wiki ist ein Compiler für Projektgedächtnis. Richte ihn auf ein Verzeichnis mit Markdown, Quelldateien und (optional) PDFs/Office-Dokumenten/Bildern, und er extrahiert einen typisierten Knowledge Graph, schreibt ein abfragbares Wiki und erzeugt portierbare Artefakte: eine Markdown-Projektion, ein Cognee-fertiges Bundle, ein Agent-Harness sowie einen MCP-Server, den du in Claude Code, Codex oder jeden MCP-Client einbinden kannst. Es ist ein Build-Schritt für Projektkontext, kein Hosted Service.
+Tesserae ist ein Compiler für Projektgedächtnis. Richte ihn auf ein Verzeichnis mit Markdown, Quelldateien und (optional) PDFs/Office-Dokumenten/Bildern, und er extrahiert einen typisierten Knowledge Graph, schreibt ein abfragbares Wiki und erzeugt portierbare Artefakte: eine Markdown-Projektion, ein Cognee-fertiges Bundle, ein Agent-Harness sowie einen MCP-Server, den du in Claude Code, Codex oder jeden MCP-Client einbinden kannst. Es ist ein Build-Schritt für Projektkontext, kein Hosted Service.
 
 ## Wie es sich vergleicht
 
 Ein nüchterner Vergleich gegen die vier nächstliegenden Open-Source-Alternativen. Ohne Beschönigung:
 
-| Feature | LLM-Wiki | Quartz | Logseq | Cognee | Foam |
+| Feature | Tesserae | Quartz | Logseq | Cognee | Foam |
 |---|---|---|---|---|---|
 | Static HTML output | yes | yes | partial (export) | no | partial (publish) |
 | Built-in graph view | yes | yes | yes | yes (separate UI) | yes (VSCode) |
@@ -51,7 +51,7 @@ Ein nüchterner Vergleich gegen die vier nächstliegenden Open-Source-Alternativ
 | Mobile-first reading | no | yes | yes | n/a | n/a |
 | Real-time collaboration | no | no | yes (DB beta) | no | no |
 
-LLM-Wiki entscheidet sich für Compile-from-Source statt Live-Editing. Wenn du Notizen
+Tesserae entscheidet sich für Compile-from-Source statt Live-Editing. Wenn du Notizen
 in einer UI bearbeiten willst, nimm Logseq oder Obsidian. Wenn du ein Build-Tool für deinen
 Knowledge Graph willst, ist das hier dein Projekt.
 
@@ -85,16 +85,16 @@ Dies ist ein sich entwickelndes Forschungs- und Agent-Tooling-Projekt. Bekannte 
 Erfordert Python 3.9+. RAG-Anything benötigt Python 3.10+, wenn aktiviert.
 
 ```bash
-pip install llm-wiki
+pip install tesserae
 
 cd /path/to/my-project
-llm_wiki project setup
-llm_wiki project compile
-llm_wiki project ask "Where is Mermaid rendering implemented?"
-llm_wiki project build-site && llm_wiki project serve --port 8765
+tesserae project setup
+tesserae project compile
+tesserae project ask "Where is Mermaid rendering implemented?"
+tesserae project build-site && tesserae project serve --port 8765
 ```
 
-Der Setup-Wizard erkennt gängige Quellen (`README.md`, `docs/`, `src/`, `data/`) und schreibt `.llm-wiki/config.json`. LLM-aufrufende Features verwenden standardmäßig das `codex`-CLI über OAuth, sodass für den üblichen Pfad keine API-Keys nötig sind. Die ausführlichere Variante findest du in [docs/quickstart.md](docs/quickstart.md) und [docs/installation.md](docs/installation.md).
+Der Setup-Wizard erkennt gängige Quellen (`README.md`, `docs/`, `src/`, `data/`) und schreibt `.tesserae/config.json`. LLM-aufrufende Features verwenden standardmäßig das `codex`-CLI über OAuth, sodass für den üblichen Pfad keine API-Keys nötig sind. Die ausführlichere Variante findest du in [docs/quickstart.md](docs/quickstart.md) und [docs/installation.md](docs/installation.md).
 
 ### Walkthrough
 
@@ -106,25 +106,25 @@ aufgenommen haben und welches Workspace sie voraussetzen.
 <details>
 <summary><strong>1. Setup</strong> — auf ein Forschungsverzeichnis zeigen, ein Projekt-Wiki-Scaffold bekommen</summary>
 <br/>
-<img src="docs/screencasts/setup.gif" alt="llm_wiki project setup --source ./research running non-interactively and writing .llm-wiki/" width="100%" />
+<img src="docs/screencasts/setup.gif" alt="tesserae project setup --source ./research running non-interactively and writing .tesserae/" width="100%" />
 </details>
 
 <details>
 <summary><strong>2. Compile + Site bauen</strong> — deterministisch, keine LLM-Calls</summary>
 <br/>
-<img src="docs/screencasts/compile.gif" alt="llm_wiki project compile followed by llm_wiki project build-site, emitting graph.json and the static site tree" width="100%" />
+<img src="docs/screencasts/compile.gif" alt="tesserae project compile followed by tesserae project build-site, emitting graph.json and the static site tree" width="100%" />
 </details>
 
 <details>
 <summary><strong>3. Ask</strong> — das kompilierte Wiki über das CLI abfragen</summary>
 <br/>
-<img src="docs/screencasts/ask.gif" alt="llm_wiki project ask --backend wiki returning top-3 hits with score, kind, and outbound relations" width="100%" />
+<img src="docs/screencasts/ask.gif" alt="tesserae project ask --backend wiki returning top-3 hits with score, kind, and outbound relations" width="100%" />
 </details>
 
 ## Was du nach dem Compile bekommst
 
 ```text
-.llm-wiki/
+.tesserae/
   config.json
   graph.json              # typed nodes/edges
   manifest.json           # source fingerprints (used by --changed-only)
@@ -141,42 +141,42 @@ aufgenommen haben und welches Workspace sie voraussetzen.
   external/               # companion-tool outputs (UA, RAG-Anything)
 ```
 
-`ls .llm-wiki/` nach `project compile`, um zu prüfen, was gelandet ist.
+`ls .tesserae/` nach `project compile`, um zu prüfen, was gelandet ist.
 
 ## CLI-Übersicht
 
-Befehle für den Alltag. Führe `llm_wiki <subcommand> --help` für alle Flags aus.
+Befehle für den Alltag. Führe `tesserae <subcommand> --help` für alle Flags aus.
 
 | Befehl | Was er tut |
 |---|---|
-| `llm_wiki project setup` | Interaktiver Wizard. Schreibt `.llm-wiki/config.json`. Akzeptiert `--with-understand-anything`, `--with-raganything`, `--run-cognee` etc. |
-| `llm_wiki project compile` | Liest die konfigurierten Quellen, führt Companion-Refreshes aus und schreibt alle Artefakte unter `.llm-wiki/`. Nutze `--changed-only` für inkrementelle Rebuilds. |
-| `llm_wiki project build-site` | Baut das statische Frontend unter `.llm-wiki/site/`. |
-| `llm_wiki project serve --port 8765` | Serviert die statische Site lokal und exponiert `/api/ask`, damit das Inline-Ask-Widget jeder Detailseite Fragen an `ask_project` routen kann. Auf jedem anderen Host (file://, GitHub Pages, S3) klappt das Widget elegant zu einem einzeiligen statischen Footer zusammen. |
-| `llm_wiki project refresh-understand-anything` | Führt den von LLM-Wiki verwalteten Refresh-Wrapper für Understand Anything aus. |
-| `llm_wiki project refresh-raganything --parser mineru` | Re-parst Nicht-Code-Quellen (PDFs, Office, Bilder) via RAG-Anything. |
-| `llm_wiki project ask "<question>"` | Fragt das konfigurierte Backend (`auto`/`raganything`/`cognee`/`wiki`). |
-| `llm_wiki project mcp-config` | Druckt ein MCP-Server-Config-Snippet, das du in Claude Code, Codex oder Hermes einfügen kannst. |
-| `llm_wiki wiki register <path> --name <alias>` | Registriert ein Projekt in der gemeinsamen Registry. |
-| `llm_wiki wiki list` / `llm_wiki wiki activate <name>` | Listet registrierte Projekte; setzt das aktive. |
-| `llm_wiki ask "<question>" [--wiki <name>]` | Top-Level-Ask, der über die Registry auflöst. |
+| `tesserae project setup` | Interaktiver Wizard. Schreibt `.tesserae/config.json`. Akzeptiert `--with-understand-anything`, `--with-raganything`, `--run-cognee` etc. |
+| `tesserae project compile` | Liest die konfigurierten Quellen, führt Companion-Refreshes aus und schreibt alle Artefakte unter `.tesserae/`. Nutze `--changed-only` für inkrementelle Rebuilds. |
+| `tesserae project build-site` | Baut das statische Frontend unter `.tesserae/site/`. |
+| `tesserae project serve --port 8765` | Serviert die statische Site lokal und exponiert `/api/ask`, damit das Inline-Ask-Widget jeder Detailseite Fragen an `ask_project` routen kann. Auf jedem anderen Host (file://, GitHub Pages, S3) klappt das Widget elegant zu einem einzeiligen statischen Footer zusammen. |
+| `tesserae project refresh-understand-anything` | Führt den von Tesserae verwalteten Refresh-Wrapper für Understand Anything aus. |
+| `tesserae project refresh-raganything --parser mineru` | Re-parst Nicht-Code-Quellen (PDFs, Office, Bilder) via RAG-Anything. |
+| `tesserae project ask "<question>"` | Fragt das konfigurierte Backend (`auto`/`raganything`/`cognee`/`wiki`). |
+| `tesserae project mcp-config` | Druckt ein MCP-Server-Config-Snippet, das du in Claude Code, Codex oder Hermes einfügen kannst. |
+| `tesserae wiki register <path> --name <alias>` | Registriert ein Projekt in der gemeinsamen Registry. |
+| `tesserae wiki list` / `tesserae wiki activate <name>` | Listet registrierte Projekte; setzt das aktive. |
+| `tesserae ask "<question>" [--wiki <name>]` | Top-Level-Ask, der über die Registry auflöst. |
 
 ## Integrationen
 
-Alle Integrationen sind opt-in. Keine ist erforderlich, um LLM-Wiki auf einem reinen Markdown/Code-Projekt einzusetzen.
+Alle Integrationen sind opt-in. Keine ist erforderlich, um Tesserae auf einem reinen Markdown/Code-Projekt einzusetzen.
 
-- **Understand Anything** — ein separates Projekt ([Lum1104/Understand-Anything](https://github.com/Lum1104/Understand-Anything)), das einen Code-Knowledge-Graph unter `.understand-anything/knowledge-graph.json` produziert. Aktivieren mit `--with-understand-anything`. LLM-Wiki hinterlegt einen verwalteten Refresh-Wrapper, sodass `project compile` den Graph aktuell hält. Siehe [docs/integrations/understand-anything.md](docs/integrations/understand-anything.md).
+- **Understand Anything** — ein separates Projekt ([Lum1104/Understand-Anything](https://github.com/Lum1104/Understand-Anything)), das einen Code-Knowledge-Graph unter `.understand-anything/knowledge-graph.json` produziert. Aktivieren mit `--with-understand-anything`. Tesserae hinterlegt einen verwalteten Refresh-Wrapper, sodass `project compile` den Graph aktuell hält. Siehe [docs/integrations/understand-anything.md](docs/integrations/understand-anything.md).
 - **RAG-Anything** — Multimodale Ingestion ([HKUDS/RAG-Anything](https://github.com/HKUDS/RAG-Anything)) für PDFs, Office-Dokumente und Bilder via MinerU/Docling/PaddleOCR. Aktivieren mit `--with-raganything`. Dient auch als Runtime-Question-Backend (LightRAG). Erfordert Python 3.10+. Siehe [docs/integrations/rag-anything.md](docs/integrations/rag-anything.md).
-- **Cognee** — Graph- und Vector-Memory-Backend. Aktivieren mit `--run-cognee --install-cognee`. Der normale Compile schreibt immer `.llm-wiki/cognee_bundle/`; der Runtime-`cognify`-Pass ist Best-Effort und läuft nur, wenn explizit aktiviert.
+- **Cognee** — Graph- und Vector-Memory-Backend. Aktivieren mit `--run-cognee --install-cognee`. Der normale Compile schreibt immer `.tesserae/cognee_bundle/`; der Runtime-`cognify`-Pass ist Best-Effort und läuft nur, wenn explizit aktiviert.
 
 ## Multi-Project-Registry
 
-Eine persistente Registry unter `~/.llm-wiki/registry.json` lässt das Top-Level-`ask`-CLI und den MCP-Server Projektnamen zu Roots auflösen, ohne bei jedem Aufruf `--project` zu setzen.
+Eine persistente Registry unter `~/.tesserae/registry.json` lässt das Top-Level-`ask`-CLI und den MCP-Server Projektnamen zu Roots auflösen, ohne bei jedem Aufruf `--project` zu setzen.
 
 ```bash
-llm_wiki wiki register /path/to/my-project --name myproj
-llm_wiki wiki activate myproj
-llm_wiki ask "Where is the parser entry point?"
+tesserae wiki register /path/to/my-project --name myproj
+tesserae wiki activate myproj
+tesserae ask "Where is the parser entry point?"
 ```
 
 Dieselbe Registry liest auch der MCP-Server, sodass MCP-Clients `list_projects`, `activate_project` und `ask` gegen jedes registrierte Wiki aufrufen können.
@@ -199,31 +199,31 @@ Zur Compile-Zeit werden diese URIs zu *Bridge-Knoten* in der Graph-Ansicht (Grou
 
 ### Vault-übergreifende Abfragen (`--scope all-registered`)
 
-`llm_wiki ask` und das MCP-Tool `ask` akzeptieren ein `--scope`-Flag:
+`tesserae ask` und das MCP-Tool `ask` akzeptieren ein `--scope`-Flag:
 
 ```bash
 # Default — just the active/named project.
-llm_wiki ask "..."
+tesserae ask "..."
 
 # Fan out across every registered project; aggregate envelopes by alias.
-llm_wiki ask "..." --scope all-registered
+tesserae ask "..." --scope all-registered
 
 # Restrict to a hand-picked subset of registered aliases.
-llm_wiki ask "..." --scope all-registered --scope-aliases research work
+tesserae ask "..." --scope all-registered --scope-aliases research work
 ```
 
 Die aggregierte JSON-Form ist `{"scope": "all-registered", "question": ..., "by_project": {"<alias>": <envelope>, ...}}`. Per-Projekt-Fehler werden als `{"error": "..."}`-Einträge erfasst; ein einzelnes fehlschlagendes Projekt bricht das Fan-out nie ab.
 
 ## MCP
 
-`llm_wiki project mcp-config` druckt einen Servereintrag, den du in Claude Code, Codex oder jeden MCP-fähigen Client einfügen kannst. Der Server exponiert Tools wie `schema`, `graph_summary`, `search_nodes`, `node_context`, `search_facts`, `timeline`, `wiki_page`, `raw_source`, `lint_report`, `ask` sowie die Registry-Tools `list_projects` / `register_project` / `activate_project` / `unregister_project`. Tools, die ein bestimmtes Projekt brauchen, lösen über dieselbe Registry auf wie das CLI.
+`tesserae project mcp-config` druckt einen Servereintrag, den du in Claude Code, Codex oder jeden MCP-fähigen Client einfügen kannst. Der Server exponiert Tools wie `schema`, `graph_summary`, `search_nodes`, `node_context`, `search_facts`, `timeline`, `wiki_page`, `raw_source`, `lint_report`, `ask` sowie die Registry-Tools `list_projects` / `register_project` / `activate_project` / `unregister_project`. Tools, die ein bestimmtes Projekt brauchen, lösen über dieselbe Registry auf wie das CLI.
 
 ## Authentifizierung und LLM-Provider
 
 Der übliche Pfad nutzt keine API-Keys:
 
 - **Codex CLI** (Default) über OAuth. `--raganything-llm-provider codex` ist der Default; der Cognee-`codex_cognify`-Modus patcht den LLM-Client von Cognee auf das Codex-CLI.
-- **Claude Code CLI** über OAuth. Setze `--raganything-llm-provider claude` für RAG-Anything-Runtime-Queries. Multi-Account-Setups verwenden `--raganything-claude-config-dir ~/.claude-personal2` (LLM-Wiki exportiert `CLAUDE_CONFIG_DIR` vor jedem Aufruf).
+- **Claude Code CLI** über OAuth. Setze `--raganything-llm-provider claude` für RAG-Anything-Runtime-Queries. Multi-Account-Setups verwenden `--raganything-claude-config-dir ~/.claude-personal2` (Tesserae exportiert `CLAUDE_CONFIG_DIR` vor jedem Aufruf).
 - **Embeddings** verwenden standardmäßig einen deterministischen In-Process-Provider. Wechsle zu Ollama mit `--cognee-embedding-provider ollama --cognee-ollama-embedding-model qwen3-embedding:0.6b` oder verdrahte OpenAI-kompatible Endpoints — beides in den Integrations-Seiten dokumentiert.
 
 Wenn du `ANTHROPIC_API_KEY` oder `OPENAI_API_KEY` setzt, werden sie von den entsprechenden Pfaden aufgegriffen, sie sind aber nicht erforderlich.
@@ -231,7 +231,7 @@ Wenn du `ANTHROPIC_API_KEY` oder `OPENAI_API_KEY` setzt, werden sie von den ents
 ## Projekt-Layout
 
 ```text
-llm_wiki/        # the package (CLI, compiler, MCP server, adapters)
+tesserae/        # the package (CLI, compiler, MCP server, adapters)
 docs/            # English docs + docs/i18n/ for the six other languages
 ontology/        # node/edge schemas the compiler validates against
 prompts/         # extraction and synthesis prompts

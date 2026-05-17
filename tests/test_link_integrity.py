@@ -19,14 +19,14 @@ from urllib.parse import urldefrag
 
 import pytest
 
-from llm_wiki.site import StaticSiteBuilder
-from llm_wiki.research_graph import (
+from tesserae.site import StaticSiteBuilder
+from tesserae.research_graph import (
     ResearchEdge,
     ResearchGraph,
     ResearchNode,
     ResearchNodeType,
 )
-from llm_wiki.wiki_store import WikiPage, WikiPageStore
+from tesserae.wiki_store import WikiPage, WikiPageStore
 
 
 def _toy_graph() -> ResearchGraph:
@@ -228,7 +228,7 @@ def test_wiki_corpus_site_has_no_broken_links(
     real file. This catches the "graph nodes named X, wiki pages named Y"
     bug class that motivated the redesign hot-fix.
     """
-    from llm_wiki.wiki_projector import WikiLayerProjector
+    from tesserae.wiki_projector import WikiLayerProjector
 
     wiki = tmp_path / "wiki"
     wiki.mkdir()
@@ -279,7 +279,7 @@ def test_every_raw_html_link_resolves_to_a_file(
     Issue 4: the Source link is now a clickable raw-viewer URL, so a typo
     in the slug helper would silently break every detail page in the site.
     """
-    from llm_wiki.wiki_projector import WikiLayerProjector
+    from tesserae.wiki_projector import WikiLayerProjector
 
     wiki = tmp_path / "wiki"
     wiki.mkdir()
@@ -321,7 +321,7 @@ def test_cross_references_emit_only_valid_internal_hrefs(
     has no matching wiki page. Those must be rendered as ``link-broken``
     spans (not anchors), so the link walker never sees a 404.
     """
-    from llm_wiki.wiki_projector import WikiLayerProjector
+    from tesserae.wiki_projector import WikiLayerProjector
 
     wiki = tmp_path / "wiki"
     wiki.mkdir()

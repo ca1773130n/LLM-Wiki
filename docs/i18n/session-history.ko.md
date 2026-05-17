@@ -3,16 +3,16 @@
 <!-- translations:start -->
 <p align="center"><a href="../session-history.md">English</a> · <a href="session-history.ko.md">한국어</a> · <a href="session-history.zh.md">中文</a> · <a href="session-history.ja.md">日本語</a> · <a href="session-history.ru.md">Русский</a> · <a href="session-history.es.md">Español</a> · <a href="session-history.fr.md">Français</a> · <a href="session-history.de.md">Deutsch</a></p>
 <!-- translations:end -->
-LLM-Wiki는 로컬 AI-agent transcript를 가져와 정적 사이트의 `sessions/` 섹션 아래 프로젝트 메모리로 렌더링할 수 있습니다.
+Tesserae는 로컬 AI-agent transcript를 가져와 정적 사이트의 `sessions/` 섹션 아래 프로젝트 메모리로 렌더링할 수 있습니다.
 
 이 기능은 의도적으로 `export-agent-harness`와 분리되어 있습니다.
 
 - `export-agent-harness`는 Claude Code, Codex, Gemini, Cursor, Kiro, OpenCode 같은 도구에 전달하는 outbound context입니다.
-- `project sessions ...`는 inbound history입니다. 현재 프로젝트의 이전 Claude Code/Codex 세션을 정규화하고 `.llm-wiki/harness_sessions/` 아래 저장하며, `project build-site`가 세션 index/detail 페이지를 게시하게 합니다.
+- `project sessions ...`는 inbound history입니다. 현재 프로젝트의 이전 Claude Code/Codex 세션을 정규화하고 `.tesserae/harness_sessions/` 아래 저장하며, `project build-site`가 세션 index/detail 페이지를 게시하게 합니다.
 
 ## 개인정보 모델
 
-세션 가져오기는 명시적입니다. 일반 `project compile` 또는 `project build-site`는 `.llm-wiki/harness_sessions/`의 이미 정규화된 세션을 읽지만, 비공개 harness transcript 디렉터리를 몰래 스크랩하지 않습니다.
+세션 가져오기는 명시적입니다. 일반 `project compile` 또는 `project build-site`는 `.tesserae/harness_sessions/`의 이미 정규화된 세션을 읽지만, 비공개 harness transcript 디렉터리를 몰래 스크랩하지 않습니다.
 
 가져온 세션 레코드는 로컬 프로젝트 산출물입니다. 공개 사이트에 게시하기 전에 검토하세요. transcript에 비밀, 비공개 경로, 고객 데이터, 미공개 코드가 포함될 수 있다면 특히 중요합니다.
 
@@ -21,13 +21,13 @@ LLM-Wiki는 로컬 AI-agent transcript를 가져와 정적 사이트의 `session
 프로젝트 루트에서:
 
 ```bash
-llm_wiki project sessions discover --import
+tesserae project sessions discover --import
 ```
 
 Discovery는 현재 프로젝트 working directory에 속한 로컬 Claude Code 및 Codex transcript root를 스캔합니다. 특정 config 디렉터리를 스캔하려면 `--root`를 사용하고, discovery를 제한하려면 `--harness`를 반복하세요.
 
 ```bash
-llm_wiki project sessions discover \
+tesserae project sessions discover \
   --root ~/.claude \
   --root ~/.codex \
   --harness claude-code \
@@ -42,7 +42,7 @@ llm_wiki project sessions discover \
 다른 도구가 이미 정규화된 `HarnessSession` JSON을 만들었다면 파일 하나 또는 파일 목록을 가져올 수 있습니다.
 
 ```bash
-llm_wiki project sessions import path/to/session.json path/to/more-sessions.json
+tesserae project sessions import path/to/session.json path/to/more-sessions.json
 ```
 
 각 입력은 하나의 세션 객체 또는 세션 객체 목록을 포함할 수 있습니다.
@@ -50,13 +50,13 @@ llm_wiki project sessions import path/to/session.json path/to/more-sessions.json
 ## 가져온 세션 목록 보기
 
 ```bash
-llm_wiki project sessions list
+tesserae project sessions list
 ```
 
 세션은 아래에 저장됩니다.
 
 ```text
-.llm-wiki/harness_sessions/
+.tesserae/harness_sessions/
   manifest.json
   <harness>/
     <session>.json
@@ -68,14 +68,14 @@ llm_wiki project sessions list
 세션을 가져온 뒤 사이트를 다시 빌드하세요.
 
 ```bash
-llm_wiki project build-site
+tesserae project build-site
 ```
 
 사이트는 다음을 생성합니다.
 
 ```text
-.llm-wiki/site/sessions/index.html
-.llm-wiki/site/sessions/<project>/<session>.html
+.tesserae/site/sessions/index.html
+.tesserae/site/sessions/<project>/<session>.html
 ```
 
 생성된 사이트는 전역 rail, 홈 Browse 카드, 검색 항목, 각 세션 detail 페이지의 breadcrumb trail에서 Sessions로 연결합니다.
@@ -110,9 +110,9 @@ llm_wiki project build-site
 
 세션을 포함한 공개 사이트를 배포하기 전에:
 
-1. `llm_wiki project sessions list`를 실행하고 개수가 예상과 맞는지 확인합니다.
-2. 민감한 내용이 있는지 `.llm-wiki/harness_sessions/`를 검사합니다.
-3. `llm_wiki project build-site`로 다시 빌드합니다.
+1. `tesserae project sessions list`를 실행하고 개수가 예상과 맞는지 확인합니다.
+2. 민감한 내용이 있는지 `.tesserae/harness_sessions/`를 검사합니다.
+3. `tesserae project build-site`로 다시 빌드합니다.
 4. 로컬에서 `sessions/index.html`과 최소 하나의 세션 detail 페이지를 엽니다.
 5. tool block이 기본적으로 접혀 있고 raw tool payload를 공개해도 되는지 확인합니다.
-6. source tree가 commit된 뒤 `llm_wiki project deploy --build`로 배포합니다.
+6. source tree가 commit된 뒤 `tesserae project deploy --build`로 배포합니다.

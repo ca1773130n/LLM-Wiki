@@ -1,6 +1,6 @@
 import asyncio
 
-from llm_wiki.cognee_direct import CogneeDirectImporter
+from tesserae.cognee_direct import CogneeDirectImporter
 
 
 def test_cognee_direct_importer_adds_bundle_files_with_dataset_name(tmp_path):
@@ -13,10 +13,10 @@ def test_cognee_direct_importer_adds_bundle_files_with_dataset_name(tmp_path):
     async def fake_add(data, dataset_name="main_dataset", user=None):
         calls.append({"data": data, "dataset_name": dataset_name, "user": user})
 
-    result = asyncio.run(CogneeDirectImporter(add_func=fake_add).add_bundle(bundle, dataset_name="llm_wiki_test"))
+    result = asyncio.run(CogneeDirectImporter(add_func=fake_add).add_bundle(bundle, dataset_name="tesserae_test"))
 
-    assert result == {"dataset_name": "llm_wiki_test", "files_added": 2, "cognified": False}
-    assert calls == [{"data": [str(bundle / "nodes.jsonl"), str(bundle / "edges.jsonl")], "dataset_name": "llm_wiki_test", "user": None}]
+    assert result == {"dataset_name": "tesserae_test", "files_added": 2, "cognified": False}
+    assert calls == [{"data": [str(bundle / "nodes.jsonl"), str(bundle / "edges.jsonl")], "dataset_name": "tesserae_test", "user": None}]
 
 
 def test_cognee_direct_importer_can_optionally_cognify(tmp_path):
@@ -33,10 +33,10 @@ def test_cognee_direct_importer_can_optionally_cognify(tmp_path):
         calls.append(("cognify", datasets))
         return ["ok"]
 
-    result = asyncio.run(CogneeDirectImporter(add_func=fake_add, cognify_func=fake_cognify).add_bundle(bundle, dataset_name="llm_wiki_test", cognify=True))
+    result = asyncio.run(CogneeDirectImporter(add_func=fake_add, cognify_func=fake_cognify).add_bundle(bundle, dataset_name="tesserae_test", cognify=True))
 
     assert result["cognified"] is True
-    assert calls == [("add", "llm_wiki_test"), ("cognify", ["llm_wiki_test"])]
+    assert calls == [("add", "tesserae_test"), ("cognify", ["tesserae_test"])]
 
 
 def test_cognee_direct_importer_applies_isolated_roots_before_add(tmp_path):
@@ -54,10 +54,10 @@ def test_cognee_direct_importer_applies_isolated_roots_before_add(tmp_path):
 
     result = asyncio.run(CogneeDirectImporter(add_func=fake_add, configure_func=fake_configure).add_bundle(
         bundle,
-        dataset_name="llm_wiki_test",
+        dataset_name="tesserae_test",
         system_root=tmp_path / "system",
         data_root=tmp_path / "data",
     ))
 
     assert result["cognified"] is False
-    assert calls == [("configure", str(tmp_path / "system"), str(tmp_path / "data")), ("add", "llm_wiki_test")]
+    assert calls == [("configure", str(tmp_path / "system"), str(tmp_path / "data")), ("add", "tesserae_test")]

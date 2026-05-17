@@ -10,7 +10,7 @@ authors:
   - "Simon Lucey"
 date: 2021-04-13
 sub_topic: Neural Radiance Fields
-license: "CC-BY-4.0 (LLM-Wiki demo prose)"
+license: "CC-BY-4.0 (Tesserae demo prose)"
 methods: [RadianceField, SLAM, BundleAdjustment, NovelViewSynthesis]
 datasets: []
 metrics: [PSNR, SSIM, LPIPS]

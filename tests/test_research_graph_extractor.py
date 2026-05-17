@@ -12,7 +12,7 @@ import os
 
 import pytest
 
-from llm_wiki.research_graph import (
+from tesserae.research_graph import (
     ResearchGraphExtractor,
     ResearchNodeType,
     TitleQuality,
@@ -30,7 +30,7 @@ from llm_wiki.research_graph import (
     link_paper_repo_pairs,
     resolve_missing_paper_title,
 )
-from llm_wiki.term_registry import TermEntry, TermRegistry
+from tesserae.term_registry import TermEntry, TermRegistry
 
 
 # ---------------------------------------------------------------------------
@@ -182,7 +182,7 @@ def test_resolve_missing_paper_title_uses_offline_cache(tmp_path, monkeypatch) -
         json.dumps({"2604.02996": {"title": "Cached Real Title"}}),
         encoding="utf-8",
     )
-    monkeypatch.setenv("LLM_WIKI_ARXIV_CACHE", str(cache))
+    monkeypatch.setenv("TESSERAE_ARXIV_CACHE", str(cache))
 
     resolved = resolve_missing_paper_title("2604.02996", "no title here", {})
     assert resolved.title == "Cached Real Title"
@@ -192,7 +192,7 @@ def test_resolve_missing_paper_title_uses_offline_cache(tmp_path, monkeypatch) -
 def test_resolve_missing_paper_title_returns_needs_metadata_when_no_cache(
     monkeypatch, tmp_path
 ) -> None:
-    monkeypatch.setenv("LLM_WIKI_ARXIV_CACHE", str(tmp_path / "missing.json"))
+    monkeypatch.setenv("TESSERAE_ARXIV_CACHE", str(tmp_path / "missing.json"))
     resolved = resolve_missing_paper_title("2604.02996", "no title", {})
     assert resolved.title is None
     assert resolved.quality == TitleQuality.NEEDS_METADATA
@@ -201,7 +201,7 @@ def test_resolve_missing_paper_title_returns_needs_metadata_when_no_cache(
 def test_resolve_missing_paper_title_does_not_invent_from_abstract(
     monkeypatch, tmp_path
 ) -> None:
-    monkeypatch.setenv("LLM_WIKI_ARXIV_CACHE", str(tmp_path / "missing.json"))
+    monkeypatch.setenv("TESSERAE_ARXIV_CACHE", str(tmp_path / "missing.json"))
     abstract = "We propose a method called ABCNet for cool things."
     resolved = resolve_missing_paper_title("2604.99999", abstract, {})
     assert resolved.title is None
@@ -343,7 +343,7 @@ def test_registry_construction_rejects_generic_uses_without_optin() -> None:
         )
         # Re-validate via the public API path
     with pytest.raises(ValueError):
-        from llm_wiki.term_registry import _validate_entry  # type: ignore
+        from tesserae.term_registry import _validate_entry  # type: ignore
 
         _validate_entry(
             TermEntry(
@@ -444,7 +444,7 @@ def test_link_paper_repo_pairs_post_pass_is_idempotent() -> None:
         source_path="data/research/daily/2026-04-27/papers/2604.20329/repo.md",
         source_kind="Repository",
     )
-    from llm_wiki.batch import merge_graphs
+    from tesserae.batch import merge_graphs
 
     merged = merge_graphs([paper_graph, repo_graph])
     impls = [e for e in merged.edges if e.type == "implemented_in"]

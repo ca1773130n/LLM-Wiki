@@ -5,7 +5,7 @@
   "ended_at": "2026-05-14T10:50:20Z",
   "user": "demo-researcher",
   "agent": "claude-opus-4-7",
-  "project": "llm-wiki-demo-corpus",
+  "project": "tesserae-demo-corpus",
   "tools_used": ["search_nodes", "node_context", "search_facts", "timeline", "wiki_page"],
   "papers_cited": [
     "arxiv-2003-08934",

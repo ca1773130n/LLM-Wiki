@@ -1,8 +1,8 @@
 import json
 
-from llm_wiki.harness_sessions import discover_harness_roots, discover_harness_sessions
-from llm_wiki.project import ProjectWiki
-from llm_wiki.cli import main
+from tesserae.harness_sessions import discover_harness_roots, discover_harness_sessions
+from tesserae.project import ProjectWiki
+from tesserae.cli import main
 
 
 def test_discover_claude_code_sessions_from_project_cwd(tmp_path):
@@ -16,7 +16,7 @@ def test_discover_claude_code_sessions_from_project_cwd(tmp_path):
         "\n".join([
             json.dumps({"type": "permission-mode", "sessionId": "abc"}),
             json.dumps({"type": "user", "timestamp": "2026-05-05T10:00:00Z", "cwd": str(project), "sessionId": "abc", "gitBranch": "main", "message": {"role": "user", "content": "Add project memory pages\nwith details"}}),
-            json.dumps({"type": "assistant", "timestamp": "2026-05-05T10:01:00Z", "cwd": str(project), "sessionId": "abc", "message": {"role": "assistant", "content": [{"type": "text", "text": "Implemented it."}, {"type": "tool_use", "name": "Write", "input": {"file_path": str(project / "llm_wiki/site/sessions.py")}}]}}),
+            json.dumps({"type": "assistant", "timestamp": "2026-05-05T10:01:00Z", "cwd": str(project), "sessionId": "abc", "message": {"role": "assistant", "content": [{"type": "text", "text": "Implemented it."}, {"type": "tool_use", "name": "Write", "input": {"file_path": str(project / "tesserae/site/sessions.py")}}]}}),
             json.dumps({"type": "attachment", "timestamp": "2026-05-05T10:02:00Z", "cwd": str(project), "sessionId": "abc", "attachment": {"type": "hook_success", "command": "pytest tests/test_harness_sessions.py -q"}}),
         ]) + "\n",
         encoding="utf-8",
@@ -32,7 +32,7 @@ def test_discover_claude_code_sessions_from_project_cwd(tmp_path):
     assert session.message_count == 2
     assert session.tool_call_count == 2
     assert "Write" in session.tools_used
-    assert "llm_wiki/site/sessions.py" in session.files_touched
+    assert "tesserae/site/sessions.py" in session.files_touched
     assert "pytest tests/test_harness_sessions.py -q" in session.commands_run
 
 
@@ -48,7 +48,7 @@ def test_discover_codex_sessions_from_session_meta_cwd(tmp_path):
             json.dumps({"timestamp": "2026-05-05T11:00:00Z", "type": "session_meta", "payload": {"id": "codex-abc", "cwd": str(project), "model_provider": "openai"}}),
             json.dumps({"timestamp": "2026-05-05T11:00:01Z", "type": "response_item", "payload": {"type": "message", "role": "user", "content": [{"type": "input_text", "text": "Review graph UX"}]}}),
             json.dumps({"timestamp": "2026-05-05T11:00:02Z", "type": "response_item", "payload": {"type": "function_call", "name": "exec_command", "arguments": json.dumps({"cmd": "python3 -m pytest tests/ -q", "workdir": str(project)})}}),
-            json.dumps({"timestamp": "2026-05-05T11:00:03Z", "type": "response_item", "payload": {"type": "message", "role": "assistant", "content": [{"type": "output_text", "text": "Found issues in llm_wiki/site/js.py"}]}}),
+            json.dumps({"timestamp": "2026-05-05T11:00:03Z", "type": "response_item", "payload": {"type": "message", "role": "assistant", "content": [{"type": "output_text", "text": "Found issues in tesserae/site/js.py"}]}}),
         ]) + "\n",
         encoding="utf-8",
     )
@@ -63,7 +63,7 @@ def test_discover_codex_sessions_from_session_meta_cwd(tmp_path):
     assert session.tool_call_count == 1
     assert "exec_command" in session.tools_used
     assert "python3 -m pytest tests/ -q" in session.commands_run
-    assert "llm_wiki/site/js.py" in session.files_touched
+    assert "tesserae/site/js.py" in session.files_touched
 
 
 def test_discovers_dynamic_claude_and_codex_account_roots_without_fixed_names(tmp_path):

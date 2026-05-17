@@ -2,7 +2,7 @@
 
 These tests are the production-ready proof of §13's "byte-identical site
 output" definition: running ``project compile`` twice in a row over the same
-corpus must leave every file under ``.llm-wiki/site/`` and ``.llm-wiki/wiki/``
+corpus must leave every file under ``.tesserae/site/`` and ``.tesserae/wiki/``
 byte-identical, except for the two append-only history ledgers
 (``.build-history.jsonl`` and ``.history.jsonl``) which intentionally record
 each build / each rewrite.
@@ -17,7 +17,7 @@ from typing import Dict, Iterable, Set
 
 import pytest
 
-from llm_wiki.project import ProjectWiki
+from tesserae.project import ProjectWiki
 
 
 WIKI_CORPUS_ROOT = Path(__file__).parent / "fixtures" / "wiki_corpus"
@@ -79,12 +79,12 @@ def test_compile_is_byte_idempotent(tmp_path: Path) -> None:
     snapshot_wiki_b = _hash_tree(wiki_dir, exclude={".history.jsonl"})
 
     assert snapshot_site_b == snapshot_site_a, (
-        "second compile should leave .llm-wiki/site/ byte-identical (excluding "
+        "second compile should leave .tesserae/site/ byte-identical (excluding "
         ".build-history.jsonl); diff: "
         f"{_diff_keys(snapshot_site_a, snapshot_site_b)}"
     )
     assert snapshot_wiki_b == snapshot_wiki_a, (
-        "second compile should leave .llm-wiki/wiki/ byte-identical (excluding "
+        "second compile should leave .tesserae/wiki/ byte-identical (excluding "
         ".history.jsonl); diff: "
         f"{_diff_keys(snapshot_wiki_a, snapshot_wiki_b)}"
     )
@@ -131,7 +131,7 @@ def test_build_history_ledger_grows_each_compile(tmp_path: Path) -> None:
     """The build-history ledger appends one line per compile, even if nothing changed.
 
     Codex review F-11 fixed: the ledger now lives at the project-wiki root
-    (``.llm-wiki/.build-history.jsonl``) so it survives the rebuild of
+    (``.tesserae/.build-history.jsonl``) so it survives the rebuild of
     ``site/``. ``ProjectWiki._append_build_history`` writes one line per
     compile recording node/edge counts of both partitions.
     """

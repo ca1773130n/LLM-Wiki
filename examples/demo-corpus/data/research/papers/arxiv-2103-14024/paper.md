@@ -12,7 +12,7 @@ authors:
   - "Angjoo Kanazawa"
 date: 2021-03-25
 sub_topic: Neural Radiance Fields
-license: "CC-BY-4.0 (LLM-Wiki demo prose)"
+license: "CC-BY-4.0 (Tesserae demo prose)"
 methods: [RadianceField, Octree, RealTimeRendering]
 datasets: []
 metrics: [FPS]

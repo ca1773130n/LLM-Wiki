@@ -19,7 +19,7 @@ methods: [GaussianSplatting, RealTimeRendering]
 datasets: []
 metrics: [FPS]
 oss_repo: hustvl/4DGaussians
-license: "CC-BY-4.0 (LLM-Wiki demo prose)"
+license: "CC-BY-4.0 (Tesserae demo prose)"
 ---
 
 # 4D Gaussian Splatting for Real-Time Dynamic Scene Rendering

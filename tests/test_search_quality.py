@@ -3,7 +3,7 @@ extended ``search-index.json`` schema.
 
 These lock the Python-side cross-checks for the JS palette behaviour: the JS
 implementation in ``JS_SEARCH_PALETTE`` is meant to mirror the helpers in
-``llm_wiki.site.search`` (BM25 norm, recency factor, stop-word stripping), so
+``tesserae.site.search`` (BM25 norm, recency factor, stop-word stripping), so
 these tests pin the contract.
 """
 
@@ -15,12 +15,12 @@ from typing import Dict, List
 
 import pytest
 
-from llm_wiki.research_graph import (
+from tesserae.research_graph import (
     ResearchGraph,
     ResearchGraphBuilder,
     ResearchNodeType,
 )
-from llm_wiki.site.search import (
+from tesserae.site.search import (
     STOP_WORDS,
     average_doc_len,
     bm25_score,
@@ -30,7 +30,7 @@ from llm_wiki.site.search import (
     tokenize,
     token_set,
 )
-from llm_wiki.wiki_store import WikiPage
+from tesserae.wiki_store import WikiPage
 
 
 # ---------------------------------------------------------------- tokenizer

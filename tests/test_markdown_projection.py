@@ -1,5 +1,5 @@
-from llm_wiki.markdown_projection import GraphMarkdownProjector, slugify
-from llm_wiki.research_graph import ResearchEdge, ResearchGraph, ResearchNode, ResearchNodeType
+from tesserae.markdown_projection import GraphMarkdownProjector, slugify
+from tesserae.research_graph import ResearchEdge, ResearchGraph, ResearchNode, ResearchNodeType
 
 
 def sample_graph():

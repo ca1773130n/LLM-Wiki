@@ -19,7 +19,7 @@ sub_topic: Generative 3D Representations
 methods: [RadianceField, Diffusion, ScoreDistillation, TextTo3D, TransformerArchitecture, LargeReconstructionModel]
 datasets: []
 metrics: [PSNR, SSIM, LPIPS]
-license: "CC-BY-4.0 (LLM-Wiki demo prose)"
+license: "CC-BY-4.0 (Tesserae demo prose)"
 ---
 
 # Instant3D: Fast Text-to-3D with Sparse-View Generation and Large Reconstruction Model

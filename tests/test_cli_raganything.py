@@ -3,20 +3,20 @@ from types import SimpleNamespace
 
 
 def test_cli_setup_passes_raganything_flags_to_plan(tmp_path, monkeypatch):
-    from llm_wiki import cli
+    from tesserae import cli
 
     captured = {}
 
     def fake_build(root, **kwargs):
         captured["root"] = root
         captured.update(kwargs)
-        from llm_wiki.project_setup import SetupPlan
+        from tesserae.project_setup import SetupPlan
         return SetupPlan(project_root=Path(root), name="demo", sources=["README.md"])
 
     def fake_apply(plan):
         return SimpleNamespace(
             wiki=SimpleNamespace(root=plan.project_root),
-            config_path=plan.project_root / ".llm-wiki" / "config.json",
+            config_path=plan.project_root / ".tesserae" / "config.json",
             ran_tools=[],
         )
 
@@ -40,20 +40,20 @@ def test_cli_setup_passes_raganything_flags_to_plan(tmp_path, monkeypatch):
 
 
 def test_cli_with_raganything_alone_passes_none_for_install(tmp_path, monkeypatch):
-    from llm_wiki import cli
+    from tesserae import cli
 
     captured = {}
 
     def fake_build(root, **kwargs):
         captured.update(kwargs)
-        from llm_wiki.project_setup import SetupPlan
+        from tesserae.project_setup import SetupPlan
         from pathlib import Path
         return SetupPlan(project_root=Path(root), name="demo", sources=["README.md"])
 
     monkeypatch.setattr(cli, "build_setup_plan", fake_build)
     monkeypatch.setattr(cli, "apply_setup_plan", lambda *a, **kw: SimpleNamespace(
         wiki=SimpleNamespace(root=Path(str(tmp_path))),
-        config_path=Path(str(tmp_path)) / ".llm-wiki" / "config.json",
+        config_path=Path(str(tmp_path)) / ".tesserae" / "config.json",
         ran_tools=[],
     ))
 
@@ -70,11 +70,11 @@ def test_cli_with_raganything_alone_passes_none_for_install(tmp_path, monkeypatc
 
 def test_cli_ask_routes_raganything_when_backend_explicit(tmp_path, monkeypatch, capsys):
     """--backend raganything calls raganything_query.query directly."""
-    from llm_wiki import cli
+    from tesserae import cli
     import json as _json
 
     # Set up a minimal project on disk
-    cfg_dir = tmp_path / ".llm-wiki"
+    cfg_dir = tmp_path / ".tesserae"
     cfg_dir.mkdir()
     cfg = {
         "name": "demo",
@@ -83,7 +83,7 @@ def test_cli_ask_routes_raganything_when_backend_explicit(tmp_path, monkeypatch,
         "memory_backends": {
             "raganything": {
                 "enabled": True,
-                "working_dir": ".llm-wiki/external/raganything/working_dir",
+                "working_dir": ".tesserae/external/raganything/working_dir",
                 "parser": "docling",
                 "query_mode": "hybrid",
             }
@@ -99,7 +99,7 @@ def test_cli_ask_routes_raganything_when_backend_explicit(tmp_path, monkeypatch,
         captured["backend_config"] = backend_config
         return "raganything-answer"
 
-    import llm_wiki.raganything_query as rq
+    import tesserae.raganything_query as rq
     monkeypatch.setattr(rq, "query", fake_query)
     # The CLI imports `query` symbolically; patch the cli reference too if it's bound at call time.
     monkeypatch.setattr(cli, "_raganything_refresh_main", lambda argv: 0, raising=False)
@@ -120,10 +120,10 @@ def test_cli_ask_routes_raganything_when_backend_explicit(tmp_path, monkeypatch,
 
 def test_cli_ask_falls_through_when_raganything_returns_none(tmp_path, monkeypatch, capsys):
     """auto mode: raganything returning None falls through to cognee/wiki."""
-    from llm_wiki import cli
+    from tesserae import cli
     import json as _json
 
-    cfg_dir = tmp_path / ".llm-wiki"
+    cfg_dir = tmp_path / ".tesserae"
     cfg_dir.mkdir()
     cfg = {
         "name": "demo",
@@ -137,7 +137,7 @@ def test_cli_ask_falls_through_when_raganything_returns_none(tmp_path, monkeypat
     (cfg_dir / "config.json").write_text(_json.dumps(cfg), encoding="utf-8")
     (tmp_path / "README.md").write_text("# demo\n\nSome content.", encoding="utf-8")
 
-    import llm_wiki.raganything_query as rq
+    import tesserae.raganything_query as rq
     monkeypatch.setattr(rq, "query", lambda q, *, backend_config: None)
 
     # The wiki fallback must run; it should not crash even with minimal corpus.
@@ -154,7 +154,7 @@ def test_cli_ask_falls_through_when_raganything_returns_none(tmp_path, monkeypat
 
 
 def test_cli_refresh_raganything_invokes_refresh_main(monkeypatch):
-    from llm_wiki import cli
+    from tesserae import cli
     captured = {}
 
     def fake_refresh_main(argv):

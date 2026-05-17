@@ -17,7 +17,7 @@ sub_topic: 3D Gaussian Splatting
 methods: [GaussianSplatting, FeedForward]
 datasets: []
 metrics: [FPS]
-license: "CC-BY-4.0 (LLM-Wiki demo prose)"
+license: "CC-BY-4.0 (Tesserae demo prose)"
 ---
 
 # MVSplat: Efficient 3D Gaussian Splatting from Sparse Multi-View Images

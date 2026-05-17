@@ -2,10 +2,10 @@ import json
 
 import pytest
 
-from llm_wiki.graph_stores import SqliteGraphStore
-from llm_wiki.graph_stores.url_resolver import resolve_graph_store
-from llm_wiki.mcp_server import LLMWikiMCPServer, MCPRequestHandler
-from llm_wiki.research_graph import ResearchEdge, ResearchGraph, ResearchNode, ResearchNodeType
+from tesserae.graph_stores import SqliteGraphStore
+from tesserae.graph_stores.url_resolver import resolve_graph_store
+from tesserae.mcp_server import LLMWikiMCPServer, MCPRequestHandler
+from tesserae.research_graph import ResearchEdge, ResearchGraph, ResearchNode, ResearchNodeType
 
 
 def sample_graph_path(tmp_path):
@@ -95,7 +95,7 @@ def test_json_rpc_handler_responds_to_initialize_tools_list_and_tools_call(tmp_p
         {"jsonrpc": "2.0", "id": 3, "method": "tools/call", "params": {"name": "graph_summary", "arguments": {}}}
     )
 
-    assert init_response["result"]["serverInfo"]["name"] == "llm-wiki"
+    assert init_response["result"]["serverInfo"]["name"] == "tesserae"
     assert any(tool["name"] == "search_nodes" for tool in list_response["result"]["tools"])
     payload = json.loads(call_response["result"]["content"][0]["text"])
     assert payload["node_count"] == 3
@@ -166,7 +166,7 @@ def test_resolve_graph_store_sqlite_url(tmp_path):
 def test_resolve_graph_store_postgres_url_requires_hypepaper(monkeypatch):
     """Postgres URLs lazy-import the HypePaper backend.
 
-    When the HypePaper backend is NOT importable (the LLM-Wiki repo's
+    When the HypePaper backend is NOT importable (the Tesserae repo's
     standalone test environment), resolve_graph_store should raise
     ImportError with a clear message pointing at the HypePaper
     integration. When it IS importable, it should return a
@@ -245,7 +245,7 @@ def test_mcp_server_node_context_with_graph_store(tmp_path):
 
 def test_main_accepts_graph_store_url_flag(tmp_path, monkeypatch):
     """The CLI accepts --graph-store-url and resolves it without erroring before serve."""
-    from llm_wiki import mcp_server as mcp_module
+    from tesserae import mcp_server as mcp_module
 
     db = tmp_path / "g.db"
     _seed_sqlite_graph_store(db)
@@ -267,9 +267,9 @@ def test_main_auth_token_resolves_user_and_scopes_postgres_store(monkeypatch):
 
     Mocks both the HypePaper-side token lookup and the resolver so we
     exercise the CLI plumbing without needing the HypePaper backend
-    importable in the LLM-Wiki test environment.
+    importable in the Tesserae test environment.
     """
-    from llm_wiki import mcp_server as mcp_module
+    from tesserae import mcp_server as mcp_module
 
     captured = {}
 
@@ -289,7 +289,7 @@ def test_main_auth_token_resolves_user_and_scopes_postgres_store(monkeypatch):
         return sentinel
 
     monkeypatch.setattr(
-        "llm_wiki.graph_stores.url_resolver.resolve_graph_store",
+        "tesserae.graph_stores.url_resolver.resolve_graph_store",
         fake_resolve_graph_store,
     )
 
@@ -314,7 +314,7 @@ def test_main_auth_token_resolves_user_and_scopes_postgres_store(monkeypatch):
 
 def test_main_auth_token_rejects_invalid_token(monkeypatch):
     """When --auth-token is invalid, main exits with a clear RuntimeError."""
-    from llm_wiki import mcp_server as mcp_module
+    from tesserae import mcp_server as mcp_module
 
     def fake_resolver(token):
         raise RuntimeError("Auth token is invalid, expired, or revoked.")
@@ -338,9 +338,9 @@ def test_main_auth_token_rejects_invalid_token(monkeypatch):
 
 
 def _project_with_wiki_and_lint(tmp_path):
-    """Build a tmp project with .llm-wiki/graph.json + a wiki page + lint-report.
+    """Build a tmp project with .tesserae/graph.json + a wiki page + lint-report.
 
-    Mirrors the canonical layout (``<root>/.llm-wiki/...``) so the MCP
+    Mirrors the canonical layout (``<root>/.tesserae/...``) so the MCP
     server's project-root inference and filesystem-backed tools (wiki_page,
     raw_source, lint_report) all resolve correctly. Includes a ``Synthesis``
     node with both ``synthesizes`` and ``summarizes`` edges and a
@@ -368,7 +368,7 @@ def _project_with_wiki_and_lint(tmp_path):
     )
     # Code-graph node — must never appear in MCP search results.
     code_fn = ResearchNode(
-        id="CodeFunction:llm_wiki/example.py:vision_helper",
+        id="CodeFunction:tesserae/example.py:vision_helper",
         name="vision_helper",
         type=ResearchNodeType.CODE_FUNCTION,
         description="Helper for the Vision Paper code path.",
@@ -382,7 +382,7 @@ def _project_with_wiki_and_lint(tmp_path):
         ],
     )
     project_root = tmp_path / "proj"
-    wiki_dir = project_root / ".llm-wiki"
+    wiki_dir = project_root / ".tesserae"
     wiki_dir.mkdir(parents=True, exist_ok=True)
     graph_path = wiki_dir / "graph.json"
     graph_path.write_text(graph.to_json(indent=2), encoding="utf-8")
@@ -518,7 +518,7 @@ def test_wiki_page_for_node_without_public_kind_raises(tmp_path):
     with pytest.raises(ValueError, match="no public wiki page|wiki_page"):
         server.call_tool(
             "wiki_page",
-            {"node_id": "CodeFunction:llm_wiki/example.py:vision_helper"},
+            {"node_id": "CodeFunction:tesserae/example.py:vision_helper"},
         )
 
 
@@ -558,7 +558,7 @@ def test_lint_report_returns_body_when_present(tmp_path):
 def test_lint_report_returns_empty_when_absent(tmp_path):
     """A project with no lint-report.md returns exists=False with empty body."""
     project_root, graph_path = _project_with_wiki_and_lint(tmp_path)
-    (project_root / ".llm-wiki" / "lint-report.md").unlink()
+    (project_root / ".tesserae" / "lint-report.md").unlink()
     server = LLMWikiMCPServer(default_graph_path=graph_path)
 
     out = server.call_tool("lint_report", {})

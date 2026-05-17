@@ -3,12 +3,12 @@
 <!-- translations:start -->
 <p align="center"><a href="../frontend-redesign.md">English</a> · <a href="frontend-redesign.ko.md">한국어</a> · <a href="frontend-redesign.zh.md">中文</a> · <a href="frontend-redesign.ja.md">日本語</a> · <a href="frontend-redesign.ru.md">Русский</a> · <a href="frontend-redesign.es.md">Español</a> · <a href="frontend-redesign.fr.md">Français</a> · <a href="frontend-redesign.de.md">Deutsch</a></p>
 <!-- translations:end -->
-Ce document propose une visite guidée de toutes les routes visibles du site statique LLM-Wiki refondu. Il complète le modèle de haut niveau dans [`architecture.md`](architecture.fr.md) et le tableau d’état dans [`feature-map.md`](feature-map.fr.md).
+Ce document propose une visite guidée de toutes les routes visibles du site statique Tesserae refondu. Il complète le modèle de haut niveau dans [`architecture.md`](architecture.fr.md) et le tableau d’état dans [`feature-map.md`](feature-map.fr.md).
 
-Après `llm_wiki project compile`, le site se trouve dans `.llm-wiki/site/`. Pour l’explorer localement :
+Après `tesserae project compile`, le site se trouve dans `.tesserae/site/`. Pour l’explorer localement :
 
 ```bash
-llm_wiki project serve --port 8765
+tesserae project serve --port 8765
 # open http://127.0.0.1:8765/
 ```
 
@@ -58,7 +58,7 @@ C’est la première page sur laquelle poser un agent LLM ; elle fournit le rés
 
 ## Sources
 
-Ce sont les documents bruts L1 — fichiers dans `data/`, `docs/` et dans l’arborescence du projet référencée par `.llm-wiki/config.json`. Chaque source devient un nœud `SourceDocument` (ou `Paper` / `Repository`) et reçoit une page wiki projetée par `WikiLayerProjector`.
+Ce sont les documents bruts L1 — fichiers dans `data/`, `docs/` et dans l’arborescence du projet référencée par `.tesserae/config.json`. Chaque source devient un nœud `SourceDocument` (ou `Paper` / `Repository`) et reçoit une page wiki projetée par `WikiLayerProjector`.
 
 ### `/sources/` ✅
 
@@ -74,7 +74,7 @@ C’est l’index de l’agent lorsqu’il doit énumérer les preuves littéral
 
 > _Screenshot: source-detail.png_
 
-Un document source unique, rendu par le pipeline markdown stdlib (`llm_wiki/site/markdown.py`). Le corps est le markdown original avec rendu sûr des liens et images. Sous le corps :
+Un document source unique, rendu par le pipeline markdown stdlib (`tesserae/site/markdown.py`). Le corps est le markdown original avec rendu sûr des liens et images. Sous le corps :
 
 - **Mentions** — chaque concept / entity / paper extrait de cette source, avec badges de type d’arête.
 - **Backlinks** — toutes les autres pages wiki qui pointent ici.
@@ -153,7 +153,7 @@ Une mise en page de carte d’article : titre, auteurs, année, extrait d’abst
 - **Related concepts** — arêtes `introduces` / `extends` / `uses`.
 - **Open questions** — `OpenQuestion` liées via l’article.
 
-Les liens arXiv s’auto-lient via `llm_wiki/site/markdown.py` ; le TOC du rail droit reflète la liste de sections ci-dessus.
+Les liens arXiv s’auto-lient via `tesserae/site/markdown.py` ; le TOC du rail droit reflète la liste de sections ci-dessus.
 
 ## Repos
 
@@ -205,7 +205,7 @@ Une page de thème commence par un paragraphe de synthèse (lorsqu’il existe d
 
 ## Syntheses
 
-Syntheses sont les pages de niveau supérieur produites par `SynthesisProjector`. Sept types (pulse, daily_digest, weekly, topic, comparison, field_overview) couvrent les découpages temporels et structurels du corpus. Aujourd’hui, les corps de synthèse sont des templates déterministes ; `LLM_WIKI_SYNTHESIS_LLM=1` est le hook d’upgrade LLM (stub).
+Syntheses sont les pages de niveau supérieur produites par `SynthesisProjector`. Sept types (pulse, daily_digest, weekly, topic, comparison, field_overview) couvrent les découpages temporels et structurels du corpus. Aujourd’hui, les corps de synthèse sont des templates déterministes ; `TESSERAE_SYNTHESIS_LLM=1` est le hook d’upgrade LLM (stub).
 
 ### `/syntheses/` ✅
 
@@ -250,7 +250,7 @@ C’est la page sur laquelle arriver lorsqu’on demande à un agent « qu’est
 
 ## Sessions
 
-Sessions sont des transcripts locaux AI-harness importés, normalisés dans `.llm-wiki/harness_sessions/`, puis rendus comme mémoire de projet consultable. L’import est explicite via `llm_wiki project sessions discover --import` ou `llm_wiki project sessions import ...` ; les builds de site normales ne consomment que des enregistrements déjà normalisés.
+Sessions sont des transcripts locaux AI-harness importés, normalisés dans `.tesserae/harness_sessions/`, puis rendus comme mémoire de projet consultable. L’import est explicite via `tesserae project sessions discover --import` ou `tesserae project sessions import ...` ; les builds de site normales ne consomment que des enregistrements déjà normalisés.
 
 ### `/sessions/` ✅
 
@@ -288,7 +288,7 @@ C’est la page à mettre en favori pour la question « qu’est-ce qui s’est 
 
 > _Screenshot: timeline-day.png_
 
-Les pages de détail par jour — listant chaque paper / repo / concept / synthesis lié à ce jour calendaire — sont un follow-up explicite. Subagent P câble l’émission du détail par jour via `StaticSiteBuilder`. En attendant, les cellules heatmap pointent vers la page source `digest.md` du jour comme solution provisoire. (Voir `render_timeline` dans `llm_wiki/site/pages.py` pour le TODO inline.)
+Les pages de détail par jour — listant chaque paper / repo / concept / synthesis lié à ce jour calendaire — sont un follow-up explicite. Subagent P câble l’émission du détail par jour via `StaticSiteBuilder`. En attendant, les cellules heatmap pointent vers la page source `digest.md` du jour comme solution provisoire. (Voir `render_timeline` dans `tesserae/site/pages.py` pour le TODO inline.)
 
 ## Graph view
 
@@ -307,7 +307,7 @@ La vue graphe interactive est un 3D force layout (3d-force-graph + Three.js, ven
 - Glisser → orbit (3D) ou pan (2D).
 - Basculer 2D/3D en haut à droite.
 
-Le payload intégré à la page est plafonné à `MAX_GRAPH_NODES = 1500` (voir [`pages.py`](../../llm_wiki/site/pages.py)). Le graphe complet est toujours disponible à `/graph.json` pour l’outillage. Les nœuds code-graph (`CodeClass`, `CodeFunction`, `Dependency`, …) sont filtrés de la visualisation par design.
+Le payload intégré à la page est plafonné à `MAX_GRAPH_NODES = 1500` (voir [`pages.py`](../../tesserae/site/pages.py)). Le graphe complet est toujours disponible à `/graph.json` pour l’outillage. Les nœuds code-graph (`CodeClass`, `CodeFunction`, `Dependency`, …) sont filtrés de la visualisation par design.
 
 **Routes liées.** Chaque page wiki renvoie vers une vue ciblée du sous-graphe.
 
@@ -323,7 +323,7 @@ C’est la bonne page pour ancrer un nouveau contributeur : quels types existent
 
 ## AI siblings — comment chaque page est aussi de la donnée
 
-LLM-Wiki livre chaque page sous trois formes : le HTML humain, un voisin texte brut et un voisin JSON structuré. Plus des exports à l’échelle du site pour crawlers et agents.
+Tesserae livre chaque page sous trois formes : le HTML humain, un voisin texte brut et un voisin JSON structuré. Plus des exports à l’échelle du site pour crawlers et agents.
 
 ### Per-page `<page>.txt` ✅
 
@@ -415,4 +415,4 @@ Un enregistrement sha256 + size pour chaque emitted file du site. Utilisé par :
 - [Architecture](architecture.fr.md) — le modèle à trois couches, la carte des modules, l’histoire d’idempotence.
 - [Feature map](feature-map.fr.md) — chaque fonctionnalité avec statut, fichiers sources et liens ici.
 - [Quickstart](quickstart.fr.md) — chemin minimal de `project init` à un site navigable.
-- [Self-dogfood demo](self-dogfood.fr.md) — exécuter LLM-Wiki sur son propre repo, y compris ce site.
+- [Self-dogfood demo](self-dogfood.fr.md) — exécuter Tesserae sur son propre repo, y compris ce site.

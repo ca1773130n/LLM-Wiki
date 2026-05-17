@@ -6701,7 +6701,7 @@
     "update_time": 1778875086,
     "_id": "Joint Windowed Bundle Adjustment"
   },
-  "LLM-Wiki Demo Corpus": {
+  "Tesserae Demo Corpus": {
     "chunk_ids": [
       "chunk-c5ec848be5aa6ee5cc0be08acd6f5935",
       "chunk-41e2a18164d88d58975577aab63d7325",
@@ -6710,7 +6710,7 @@
     ],
     "count": 4,
     "update_time": 1778876958,
-    "_id": "LLM-Wiki Demo Corpus"
+    "_id": "Tesserae Demo Corpus"
   },
   "SLAM-to-Radiance-Field Continuum": {
     "chunk_ids": [
@@ -10910,7 +10910,7 @@
     "update_time": 1778875634,
     "_id": "2206.00665"
   },
-  "CC-BY-4.0 (LLM-Wiki Demo Prose)": {
+  "CC-BY-4.0 (Tesserae Demo Prose)": {
     "chunk_ids": [
       "chunk-39dac1db0f50be2348ba37c8912fe321",
       "chunk-640801c18546ebea4632cd80bbad0951",
@@ -10918,7 +10918,7 @@
     ],
     "count": 3,
     "update_time": 1778876872,
-    "_id": "CC-BY-4.0 (LLM-Wiki Demo Prose)"
+    "_id": "CC-BY-4.0 (Tesserae Demo Prose)"
   },
   "2022-06-01": {
     "chunk_ids": [
@@ -16568,14 +16568,14 @@
     "update_time": 1778876505,
     "_id": "Volume Of Interest"
   },
-  "LLM-Wiki Demo": {
+  "Tesserae Demo": {
     "chunk_ids": [
       "chunk-5d77e66aa7cc152f532934b3e4405857"
     ],
     "count": 1,
     "create_time": 1778876505,
     "update_time": 1778876505,
-    "_id": "LLM-Wiki Demo"
+    "_id": "Tesserae Demo"
   },
   "Implicit Geometric Regularization for Learning Shapes": {
     "chunk_ids": [

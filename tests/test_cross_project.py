@@ -1,7 +1,7 @@
 """Tests for the cross-project ``wiki://`` URI resolver.
 
 Bet B2 — the registry is a graph substrate. Source markdown in one
-LLM-Wiki project can reference a node in a sibling registered project by
+Tesserae project can reference a node in a sibling registered project by
 stable URI; this module is the resolver layer those bridges depend on.
 """
 
@@ -12,7 +12,7 @@ from pathlib import Path
 
 
 def test_parse_wiki_uri_accepts_standard_form():
-    from llm_wiki.cross_project import parse_wiki_uri
+    from tesserae.cross_project import parse_wiki_uri
 
     assert parse_wiki_uri("wiki://research/concepts/rlhf") == (
         "research", "concepts", "rlhf",
@@ -28,7 +28,7 @@ def test_parse_wiki_uri_accepts_standard_form():
 
 
 def test_parse_wiki_uri_strips_trailing_html_extension():
-    from llm_wiki.cross_project import parse_wiki_uri
+    from tesserae.cross_project import parse_wiki_uri
 
     assert parse_wiki_uri("wiki://research/concepts/rlhf.html") == (
         "research", "concepts", "rlhf",
@@ -36,7 +36,7 @@ def test_parse_wiki_uri_strips_trailing_html_extension():
 
 
 def test_parse_wiki_uri_rejects_garbage():
-    from llm_wiki.cross_project import parse_wiki_uri
+    from tesserae.cross_project import parse_wiki_uri
 
     assert parse_wiki_uri("http://example.com") is None
     assert parse_wiki_uri("wiki://") is None
@@ -47,8 +47,8 @@ def test_parse_wiki_uri_rejects_garbage():
 
 def test_cross_project_resolve_unregistered_alias_returns_tombstone(tmp_path):
     """Tombstone path: the alias is not in the registry."""
-    from llm_wiki.cross_project import cross_project_resolve
-    from llm_wiki.mcp_server import ProjectRegistry
+    from tesserae.cross_project import cross_project_resolve
+    from tesserae.mcp_server import ProjectRegistry
 
     registry = ProjectRegistry(path=tmp_path / "registry.json")
     ref = cross_project_resolve(
@@ -66,17 +66,17 @@ def test_cross_project_resolve_unregistered_alias_returns_tombstone(tmp_path):
 
 def test_cross_project_resolve_registered_and_built(tmp_path):
     """Happy path: alias registered, page exists on disk."""
-    from llm_wiki.cross_project import cross_project_resolve
-    from llm_wiki.mcp_server import ProjectRegistry
+    from tesserae.cross_project import cross_project_resolve
+    from tesserae.mcp_server import ProjectRegistry
 
     sibling = tmp_path / "sibling"
     sibling.mkdir()
-    page_dir = sibling / ".llm-wiki" / "site" / "concepts"
+    page_dir = sibling / ".tesserae" / "site" / "concepts"
     page_dir.mkdir(parents=True)
     (page_dir / "rlhf.html").write_text("<html>...</html>", encoding="utf-8")
-    # ProjectRegistry.register() expects ``.llm-wiki/graph.json`` so the
+    # ProjectRegistry.register() expects ``.tesserae/graph.json`` so the
     # discovery path picks the root up.
-    (sibling / ".llm-wiki" / "graph.json").write_text("{}", encoding="utf-8")
+    (sibling / ".tesserae" / "graph.json").write_text("{}", encoding="utf-8")
 
     registry = ProjectRegistry(path=tmp_path / "registry.json")
     registry.register(str(sibling), name="sibling")
@@ -93,13 +93,13 @@ def test_cross_project_resolve_registered_and_built(tmp_path):
 
 def test_cross_project_resolve_registered_but_unbuilt(tmp_path):
     """Registered but page not built yet — returns is_built=False."""
-    from llm_wiki.cross_project import cross_project_resolve
-    from llm_wiki.mcp_server import ProjectRegistry
+    from tesserae.cross_project import cross_project_resolve
+    from tesserae.mcp_server import ProjectRegistry
 
     sibling = tmp_path / "sibling"
     sibling.mkdir()
-    (sibling / ".llm-wiki").mkdir()
-    (sibling / ".llm-wiki" / "graph.json").write_text("{}", encoding="utf-8")
+    (sibling / ".tesserae").mkdir()
+    (sibling / ".tesserae" / "graph.json").write_text("{}", encoding="utf-8")
 
     registry = ProjectRegistry(path=tmp_path / "registry.json")
     registry.register(str(sibling), name="sibling")
@@ -114,7 +114,7 @@ def test_cross_project_resolve_registered_but_unbuilt(tmp_path):
 
 
 def test_cross_project_resolve_invalid_uri_raises():
-    from llm_wiki.cross_project import cross_project_resolve
+    from tesserae.cross_project import cross_project_resolve
 
     import pytest
 
@@ -124,8 +124,8 @@ def test_cross_project_resolve_invalid_uri_raises():
 
 def test_cross_project_resolve_never_raises_on_corrupt_registry(tmp_path, monkeypatch):
     """Registry corruption must NOT crash compile or serve."""
-    from llm_wiki.cross_project import cross_project_resolve
-    from llm_wiki.mcp_server import ProjectRegistry
+    from tesserae.cross_project import cross_project_resolve
+    from tesserae.mcp_server import ProjectRegistry
 
     registry_path = tmp_path / "registry.json"
     registry_path.write_text("{not valid json", encoding="utf-8")
@@ -139,9 +139,9 @@ def test_cross_project_resolve_never_raises_on_corrupt_registry(tmp_path, monkey
 
 def test_render_cross_project_link_emits_tombstone_when_unregistered(tmp_path, monkeypatch):
     """Tombstone styling kicks in when the alias is unregistered."""
-    from llm_wiki.cross_project import render_cross_project_link
-    import llm_wiki.cross_project as cp
-    from llm_wiki.mcp_server import ProjectRegistry
+    from tesserae.cross_project import render_cross_project_link
+    import tesserae.cross_project as cp
+    from tesserae.mcp_server import ProjectRegistry
 
     monkeypatch.setattr(
         cp,
@@ -156,15 +156,15 @@ def test_render_cross_project_link_emits_tombstone_when_unregistered(tmp_path, m
 
 def test_render_cross_project_link_emits_anchor_when_built(tmp_path, monkeypatch):
     """Live link styling when the sibling has built the target page."""
-    from llm_wiki.cross_project import render_cross_project_link
-    import llm_wiki.cross_project as cp
-    from llm_wiki.mcp_server import ProjectRegistry
+    from tesserae.cross_project import render_cross_project_link
+    import tesserae.cross_project as cp
+    from tesserae.mcp_server import ProjectRegistry
 
     sibling = tmp_path / "sibling"
-    page_dir = sibling / ".llm-wiki" / "site" / "concepts"
+    page_dir = sibling / ".tesserae" / "site" / "concepts"
     page_dir.mkdir(parents=True)
     (page_dir / "rlhf.html").write_text("<html>x</html>", encoding="utf-8")
-    (sibling / ".llm-wiki" / "graph.json").write_text("{}", encoding="utf-8")
+    (sibling / ".tesserae" / "graph.json").write_text("{}", encoding="utf-8")
 
     registry = ProjectRegistry(path=tmp_path / "registry.json")
     registry.register(str(sibling), name="sibling")
@@ -182,14 +182,14 @@ def test_render_cross_project_link_emits_anchor_when_built(tmp_path, monkeypatch
 
 
 def test_render_cross_project_link_emits_broken_for_bad_uri():
-    from llm_wiki.cross_project import render_cross_project_link
+    from tesserae.cross_project import render_cross_project_link
 
     out = render_cross_project_link("not a uri", label="X")
     assert "wiki-link-broken" in out
 
 
 def test_find_wiki_uris_in_text_handles_markdown_and_bare():
-    from llm_wiki.cross_project import find_wiki_uris_in_text
+    from tesserae.cross_project import find_wiki_uris_in_text
 
     body = (
         "See [RLHF](wiki://research/concepts/rlhf) for details. "
@@ -208,24 +208,24 @@ def test_find_wiki_uris_in_text_handles_markdown_and_bare():
 
 
 def test_find_wiki_uris_in_text_empty_body_returns_empty():
-    from llm_wiki.cross_project import find_wiki_uris_in_text
+    from tesserae.cross_project import find_wiki_uris_in_text
     assert find_wiki_uris_in_text("") == []
     assert find_wiki_uris_in_text("nothing here") == []
 
 
 def test_build_graph_payload_emits_bridge_node_and_edge(tmp_path, monkeypatch):
     """End-to-end: source markdown with wiki:// URI -> bridge node + edge in payload."""
-    from llm_wiki.mcp_server import ProjectRegistry
-    from llm_wiki.research_graph import ResearchGraph, ResearchNode, ResearchNodeType
-    from llm_wiki.site.pages import SiteContext, build_graph_payload
-    import llm_wiki.cross_project as cp
+    from tesserae.mcp_server import ProjectRegistry
+    from tesserae.research_graph import ResearchGraph, ResearchNode, ResearchNodeType
+    from tesserae.site.pages import SiteContext, build_graph_payload
+    import tesserae.cross_project as cp
 
     # Sibling project: register so the bridge node resolves to is_built=True.
     sibling = tmp_path / "sibling"
-    page_dir = sibling / ".llm-wiki" / "site" / "concepts"
+    page_dir = sibling / ".tesserae" / "site" / "concepts"
     page_dir.mkdir(parents=True)
     (page_dir / "rlhf.html").write_text("<html>x</html>", encoding="utf-8")
-    (sibling / ".llm-wiki" / "graph.json").write_text("{}", encoding="utf-8")
+    (sibling / ".tesserae" / "graph.json").write_text("{}", encoding="utf-8")
 
     registry_path = tmp_path / "registry.json"
     registry = ProjectRegistry(path=registry_path)

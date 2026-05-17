@@ -2,12 +2,12 @@
 
 from __future__ import annotations
 
-from llm_wiki.site.markdown import render_markdown
+from tesserae.site.markdown import render_markdown
 
 
 def test_markdown_preserves_safe_readme_html_blocks() -> None:
     html, _ = render_markdown(
-        '<h1 align="center">LLM-Wiki</h1>\n\n'
+        '<h1 align="center">Tesserae</h1>\n\n'
         '<p align="center">\n'
         '  <strong>Turn docs into a graph.</strong>\n'
         '  <br />\n'
@@ -16,7 +16,7 @@ def test_markdown_preserves_safe_readme_html_blocks() -> None:
         '<p align="center"><img src="https://img.shields.io/badge/Demo-green" alt="Demo" /></p>'
     )
 
-    assert '<h1 align="center">LLM-Wiki</h1>' in html
+    assert '<h1 align="center">Tesserae</h1>' in html
     assert '<p align="center">' in html
     assert '<strong>Turn docs into a graph.</strong>' in html
     assert '<br />' in html or '<br>' in html

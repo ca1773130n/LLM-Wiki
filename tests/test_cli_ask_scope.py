@@ -1,4 +1,4 @@
-"""Tests for ``llm_wiki ask --scope`` (B2 — cross-project fan-out).
+"""Tests for ``tesserae ask --scope`` (B2 — cross-project fan-out).
 
 The ``--scope all-registered`` mode iterates every registered project
 in the persistent registry, calls ``ask_project`` against each, and
@@ -12,10 +12,10 @@ from pathlib import Path
 
 
 def _bootstrap_project(root: Path, name: str) -> Path:
-    """Create a minimal .llm-wiki layout the registry will accept."""
+    """Create a minimal .tesserae layout the registry will accept."""
     proj = root / name
     proj.mkdir()
-    cfg_dir = proj / ".llm-wiki"
+    cfg_dir = proj / ".tesserae"
     cfg_dir.mkdir()
     cfg = {
         "name": name,
@@ -35,8 +35,8 @@ def test_top_level_ask_scope_all_registered_iterates_each_project(
     tmp_path, monkeypatch, capsys,
 ):
     """Each registered project gets exactly one ask_project call."""
-    from llm_wiki import cli
-    import llm_wiki.mcp_server as mcp_server
+    from tesserae import cli
+    import tesserae.mcp_server as mcp_server
 
     p1 = _bootstrap_project(tmp_path, "p1")
     p2 = _bootstrap_project(tmp_path, "p2")
@@ -59,8 +59,8 @@ def test_top_level_ask_scope_all_registered_iterates_each_project(
             "used_llm": False,
         }
 
-    monkeypatch.setattr("llm_wiki.cli.ask_project", fake_ask, raising=False)
-    monkeypatch.setattr("llm_wiki.query.ask_project", fake_ask)
+    monkeypatch.setattr("tesserae.cli.ask_project", fake_ask, raising=False)
+    monkeypatch.setattr("tesserae.query.ask_project", fake_ask)
 
     rc = cli.main(["ask", "hello?", "--scope", "all-registered", "--json"])
     assert rc == 0
@@ -77,8 +77,8 @@ def test_top_level_ask_scope_aliases_restricts_subset(
     tmp_path, monkeypatch, capsys,
 ):
     """--scope-aliases restricts the fan-out to a hand-picked subset."""
-    from llm_wiki import cli
-    import llm_wiki.mcp_server as mcp_server
+    from tesserae import cli
+    import tesserae.mcp_server as mcp_server
 
     p1 = _bootstrap_project(tmp_path, "p1")
     p2 = _bootstrap_project(tmp_path, "p2")
@@ -97,7 +97,7 @@ def test_top_level_ask_scope_aliases_restricts_subset(
         called.append(wiki.project_root.name)
         return {"backend": "wiki", "question": question, "answer": "x", "hits": []}
 
-    monkeypatch.setattr("llm_wiki.query.ask_project", fake_ask)
+    monkeypatch.setattr("tesserae.query.ask_project", fake_ask)
 
     rc = cli.main([
         "ask", "hello?",
@@ -115,8 +115,8 @@ def test_top_level_ask_scope_all_registered_handles_per_project_failure(
     tmp_path, monkeypatch, capsys,
 ):
     """One project failing must not abort the fan-out."""
-    from llm_wiki import cli
-    import llm_wiki.mcp_server as mcp_server
+    from tesserae import cli
+    import tesserae.mcp_server as mcp_server
 
     p1 = _bootstrap_project(tmp_path, "p1")
     p2 = _bootstrap_project(tmp_path, "p2")
@@ -132,7 +132,7 @@ def test_top_level_ask_scope_all_registered_handles_per_project_failure(
             raise RuntimeError("p1 backend exploded")
         return {"backend": "wiki", "question": question, "answer": "ok", "hits": []}
 
-    monkeypatch.setattr("llm_wiki.query.ask_project", fake_ask)
+    monkeypatch.setattr("tesserae.query.ask_project", fake_ask)
 
     rc = cli.main(["ask", "hello?", "--scope", "all-registered", "--json"])
     assert rc == 0
@@ -145,8 +145,8 @@ def test_top_level_ask_scope_all_registered_handles_per_project_failure(
 def test_top_level_ask_scope_all_registered_fails_when_empty(
     tmp_path, monkeypatch, capsys,
 ):
-    from llm_wiki import cli
-    import llm_wiki.mcp_server as mcp_server
+    from tesserae import cli
+    import tesserae.mcp_server as mcp_server
 
     registry_path = tmp_path / "registry.json"
     monkeypatch.setattr(mcp_server, "DEFAULT_REGISTRY_PATH", registry_path)
@@ -159,8 +159,8 @@ def test_top_level_ask_scope_all_registered_fails_when_empty(
 
 def test_top_level_ask_scope_default_is_current(tmp_path, monkeypatch, capsys):
     """Default scope is 'current' so existing call sites do not regress."""
-    from llm_wiki import cli
-    import llm_wiki.mcp_server as mcp_server
+    from tesserae import cli
+    import tesserae.mcp_server as mcp_server
 
     p1 = _bootstrap_project(tmp_path, "p1")
     registry_path = tmp_path / "registry.json"
@@ -174,7 +174,7 @@ def test_top_level_ask_scope_default_is_current(tmp_path, monkeypatch, capsys):
         called.append(wiki.project_root.name)
         return {"backend": "wiki", "question": question, "answer": "single", "hits": []}
 
-    monkeypatch.setattr("llm_wiki.query.ask_project", fake_ask)
+    monkeypatch.setattr("tesserae.query.ask_project", fake_ask)
 
     rc = cli.main(["ask", "hello?", "--json"])
     assert rc == 0
@@ -187,8 +187,8 @@ def test_top_level_ask_scope_default_is_current(tmp_path, monkeypatch, capsys):
 
 def test_mcp_ask_scope_all_registered(tmp_path, monkeypatch):
     """The MCP ask tool exposes the same fan-out behaviour as the CLI."""
-    import llm_wiki.mcp_server as mcp_server
-    from llm_wiki.mcp_server import LLMWikiMCPServer
+    import tesserae.mcp_server as mcp_server
+    from tesserae.mcp_server import LLMWikiMCPServer
 
     p1 = _bootstrap_project(tmp_path, "p1")
     p2 = _bootstrap_project(tmp_path, "p2")
@@ -207,7 +207,7 @@ def test_mcp_ask_scope_all_registered(tmp_path, monkeypatch):
             "hits": [],
         }
 
-    monkeypatch.setattr("llm_wiki.query.ask_project", fake_ask)
+    monkeypatch.setattr("tesserae.query.ask_project", fake_ask)
 
     result = server.call_tool(
         "ask",

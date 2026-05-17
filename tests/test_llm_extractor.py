@@ -2,13 +2,13 @@ import json
 
 import pytest
 
-from llm_wiki.llm_extractor import (
+from tesserae.llm_extractor import (
     ClaudeCLIResearchExtractor,
     GraphJSONValidationError,
     extract_json_object,
     graph_from_llm_payload,
 )
-from llm_wiki.research_graph import ResearchNodeType
+from tesserae.research_graph import ResearchNodeType
 
 
 def test_graph_from_llm_payload_validates_controlled_schema_and_resolves_keys():

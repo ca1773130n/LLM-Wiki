@@ -3,13 +3,13 @@
 These tests pin the partition that ``ProjectWiki._write_artifacts`` performs
 on the in-memory ``ResearchGraph`` before it lands on disk:
 
-* ``.llm-wiki/graph.json`` — research-layer nodes only (no ``CodeProject``,
+* ``.tesserae/graph.json`` — research-layer nodes only (no ``CodeProject``,
   ``SourceFile``, ``CodeModule``, ``CodeClass``, ``CodeFunction``,
   ``Dependency``).
-* ``.llm-wiki/code-graph.json`` — code-graph nodes only (the same six types).
-* ``.llm-wiki/combined-graph.json`` — only present when
+* ``.tesserae/code-graph.json`` — code-graph nodes only (the same six types).
+* ``.tesserae/combined-graph.json`` — only present when
   ``combined_graph: true`` is in the project config (or the
-  ``LLM_WIKI_INCLUDE_COMBINED_GRAPH`` env var is set).
+  ``TESSERAE_INCLUDE_COMBINED_GRAPH`` env var is set).
 
 We avoid the full ``compile()`` path here because it round-trips through
 ``ResearchGraphExtractor`` which is being overhauled in parallel by Subagent
@@ -24,8 +24,8 @@ from pathlib import Path
 
 import pytest
 
-from llm_wiki.project import ProjectWiki
-from llm_wiki.research_graph import (
+from tesserae.project import ProjectWiki
+from tesserae.research_graph import (
     ResearchEdge,
     ResearchGraph,
     ResearchNode,
@@ -77,8 +77,8 @@ def _mixed_graph() -> ResearchGraph:
         ),
         # Code-graph layer
         ResearchNode(
-            id="CodeProject:LLM-Wiki",
-            name="LLM-Wiki",
+            id="CodeProject:Tesserae",
+            name="Tesserae",
             type=ResearchNodeType.CODE_PROJECT,
             metadata={"layer": "project"},
         ),
@@ -98,8 +98,8 @@ def _mixed_graph() -> ResearchGraph:
             type=ResearchNodeType.CODE_FUNCTION,
         ),
         ResearchNode(
-            id="CodeModule:llm_wiki",
-            name="llm_wiki",
+            id="CodeModule:tesserae",
+            name="tesserae",
             type=ResearchNodeType.CODE_MODULE,
         ),
         ResearchNode(
@@ -115,7 +115,7 @@ def _mixed_graph() -> ResearchGraph:
         ResearchEdge(source="Synthesis:pulse", target="Paper:demo", type="synthesizes"),
         # code-only
         ResearchEdge(
-            source="CodeProject:LLM-Wiki", target="SourceFile:project.py", type="contains"
+            source="CodeProject:Tesserae", target="SourceFile:project.py", type="contains"
         ),
         ResearchEdge(
             source="SourceFile:project.py",
@@ -129,7 +129,7 @@ def _mixed_graph() -> ResearchGraph:
         ),
         # cross-layer (research node → code node, e.g. paper "implemented_in" project)
         ResearchEdge(
-            source="Paper:demo", target="CodeProject:LLM-Wiki", type="implemented_in"
+            source="Paper:demo", target="CodeProject:Tesserae", type="implemented_in"
         ),
     ]
     return ResearchGraph(nodes=nodes, edges=edges)
@@ -145,7 +145,7 @@ def _seed_project(project_root: Path) -> ProjectWiki:
 
 def test_partition_graph_separates_layers() -> None:
     """``partition_graph`` returns two disjoint ResearchGraph objects."""
-    from llm_wiki.wiki_projector import partition_graph
+    from tesserae.wiki_projector import partition_graph
 
     research, code = partition_graph(_mixed_graph())
 
@@ -172,10 +172,10 @@ def test_partition_graph_separates_layers() -> None:
     # rebuild a union still see them); research graph drops anything pointing
     # at a code-layer endpoint.
     research_edges = [(e.source, e.target, e.type) for e in research.edges]
-    assert ("Paper:demo", "CodeProject:LLM-Wiki", "implemented_in") not in research_edges
+    assert ("Paper:demo", "CodeProject:Tesserae", "implemented_in") not in research_edges
 
     code_edges = [(e.source, e.target, e.type) for e in code.edges]
-    assert ("Paper:demo", "CodeProject:LLM-Wiki", "implemented_in") in code_edges
+    assert ("Paper:demo", "CodeProject:Tesserae", "implemented_in") in code_edges
 
 
 # ------------------------------------------------------------ artifact files
@@ -250,7 +250,7 @@ def test_combined_graph_via_config(tmp_path: Path) -> None:
 def test_combined_graph_via_env_var(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> None:
     project_root = tmp_path / "project"
     wiki = _seed_project(project_root)
-    monkeypatch.setenv("LLM_WIKI_INCLUDE_COMBINED_GRAPH", "1")
+    monkeypatch.setenv("TESSERAE_INCLUDE_COMBINED_GRAPH", "1")
 
     wiki._write_artifacts(_mixed_graph())
 
@@ -278,7 +278,7 @@ def test_combined_graph_cleaned_when_flag_flips_off(tmp_path: Path) -> None:
 
 
 def test_build_history_lives_at_project_root(tmp_path: Path) -> None:
-    """The build-history ledger lives at ``.llm-wiki/.build-history.jsonl``,
+    """The build-history ledger lives at ``.tesserae/.build-history.jsonl``,
     *not* inside the wiped ``site/`` directory.
     """
     project_root = tmp_path / "project"
@@ -286,7 +286,7 @@ def test_build_history_lives_at_project_root(tmp_path: Path) -> None:
     wiki._write_artifacts(_mixed_graph())
 
     assert wiki.paths.build_history.exists()
-    # Path lives directly under .llm-wiki/, not inside site/.
+    # Path lives directly under .tesserae/, not inside site/.
     assert wiki.paths.build_history.parent == wiki.root
     # And nothing inside site/ matches the legacy in-site name.
     assert not (wiki.paths.site / ".build-history.jsonl").exists()

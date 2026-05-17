@@ -3,33 +3,33 @@
 <!-- translations:start -->
 <p align="center"><a href="../installation.md">English</a> · <a href="installation.ko.md">한국어</a> · <a href="installation.zh.md">中文</a> · <a href="installation.ja.md">日本語</a> · <a href="installation.ru.md">Русский</a> · <a href="installation.es.md">Español</a> · <a href="installation.fr.md">Français</a> · <a href="installation.de.md">Deutsch</a></p>
 <!-- translations:end -->
-LLM-Wiki は PyPI で公開されており、ユーザーが `python3 -m llm_wiki.cli` を手動で実行しなくて済むように shell コマンドを提供します。
+Tesserae は PyPI で公開されており、ユーザーが `python3 -m tesserae.cli` を手動で実行しなくて済むように shell コマンドを提供します。
 
 ## PyPI からインストール（推奨）
 
 ```bash
-pip install llm-research-wiki
+pip install tesserae
 ```
 
 これだけです。`pip` は `PATH` に 3 つのコンソールスクリプトを登録します。
 
 ```bash
-llm_wiki --help
-llm-wiki --help
-llm_wiki_mcp --help
+tesserae --help
+tesserae --help
+tesserae_mcp --help
 ```
 
-ドキュメントでの正式なコマンドは `llm_wiki` です。`llm-wiki`（ダッシュ付き）はエイリアスです。`llm_wiki_mcp` は MCP サーバーを起動します。
+ドキュメントでの正式なコマンドは `tesserae` です。`tesserae`（ダッシュ付き）はエイリアスです。`tesserae_mcp` は MCP サーバーを起動します。
 
 > **pipx でも問題ありません。** CLI ツールをそれぞれ独立した venv に置きたい場合:
 > ```bash
-> pipx install llm-research-wiki
+> pipx install tesserae
 > ```
 
 ## アップグレード
 
 ```bash
-pip install --upgrade llm-research-wiki
+pip install --upgrade tesserae
 ```
 
 ## 任意の統合
@@ -38,7 +38,7 @@ pip install --upgrade llm-research-wiki
 
 ```bash
 # Understand Anything companion graph + Cognee runtime memory
-llm_wiki project setup \
+tesserae project setup \
   --with-understand-anything \
   --install-understand-anything \
   --understand-anything-platform codex \
@@ -54,13 +54,13 @@ pip install kuzu cognee graphiti-core
 
 - `kuzu` — Kuzu グラフ永続化。
 - `cognee` — ランタイム Cognee add/cognify ワークフロー。セットアップは `{python} -m pip install cognee` を保存し、Cognee が見つからない場合は一度だけ再試行します。
-- Understand Anything — `--install-understand-anything` が選択された場合、upstream インストーラーでインストールされます。LLM-Wiki はユーザーに shell コマンドを作らせる代わりに、管理された refresh wrapper を保存します。
+- Understand Anything — `--install-understand-anything` が選択された場合、upstream インストーラーでインストールされます。Tesserae はユーザーに shell コマンドを作らせる代わりに、管理された refresh wrapper を保存します。
 - `graphiti-core` — ライブ Graphiti/Neo4j 同期。`export-graphiti` と `sync-graphiti --dry-run` はこれなしでも動作します。
 
 Anthropic ベースの合成パスは extras マーカーを使います。
 
 ```bash
-pip install "llm-research-wiki[synthesis-llm]"
+pip install "tesserae[synthesis-llm]"
 ```
 
 ## ソースからインストール（コントリビューター向け）
@@ -68,8 +68,8 @@ pip install "llm-research-wiki[synthesis-llm]"
 コードベースを編集したい場合は、editable checkout としてインストールしてください。
 
 ```bash
-git clone https://github.com/ca1773130n/LLM-Wiki.git
-cd LLM-Wiki
+git clone https://github.com/ca1773130n/Tesserae.git
+cd Tesserae
 pip install -e .
 ```
 
@@ -77,7 +77,7 @@ pip install -e .
 
 ```bash
 # Quick: clone + install in one shot
-curl -fsSL https://raw.githubusercontent.com/ca1773130n/LLM-Wiki/main/scripts/install.sh | bash
+curl -fsSL https://raw.githubusercontent.com/ca1773130n/Tesserae/main/scripts/install.sh | bash
 
 # From an existing checkout
 ./scripts/install.sh --dir "$PWD"
@@ -103,7 +103,7 @@ export PATH="$HOME/.local/bin:$PATH"
 ## インストールの確認
 
 ```bash
-llm_wiki project init --help
-llm_wiki project compile --help
-llm_wiki project build-site --help
+tesserae project init --help
+tesserae project compile --help
+tesserae project build-site --help
 ```

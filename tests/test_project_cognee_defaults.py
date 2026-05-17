@@ -1,8 +1,8 @@
 import json
 
-from llm_wiki.cli import main
-from llm_wiki.project import ProjectWiki, cognify_options_from_config
-from llm_wiki.project_setup import build_setup_plan, apply_setup_plan
+from tesserae.cli import main
+from tesserae.project import ProjectWiki, cognify_options_from_config
+from tesserae.project_setup import build_setup_plan, apply_setup_plan
 
 
 def test_setup_enables_cognee_backend_by_default(tmp_path):
@@ -19,8 +19,8 @@ def test_setup_enables_cognee_backend_by_default(tmp_path):
     assert cognee["mode"] == "codex_cognify"
     assert cognee["auto_cognify"] is False
     assert cognee["dataset"] == "demo_memory"
-    assert cognee["system_root"] == ".llm-wiki/cognee_system"
-    assert cognee["data_root"] == ".llm-wiki/cognee_data"
+    assert cognee["system_root"] == ".tesserae/cognee_system"
+    assert cognee["data_root"] == ".tesserae/cognee_data"
     assert cognee["fail_fast"] is False
     assert cognee["install"]["enabled"] is True
     assert cognee["install"]["auto_install"] is False
@@ -58,8 +58,8 @@ def test_compile_uses_configured_cognee_when_auto_cognify_enabled(tmp_path, monk
             "mode": "add",
             "auto_cognify": True,
             "dataset": "demo_memory",
-            "system_root": ".llm-wiki/cognee_system",
-            "data_root": ".llm-wiki/cognee_data",
+            "system_root": ".tesserae/cognee_system",
+            "data_root": ".tesserae/cognee_data",
         }
     }
     wiki.paths.config.write_text(json.dumps(cfg, indent=2) + "\n", encoding="utf-8")
@@ -71,8 +71,8 @@ def test_compile_uses_configured_cognee_when_auto_cognify_enabled(tmp_path, monk
     assert calls
     assert calls[0].mode == "add"
     assert calls[0].dataset == "demo_memory"
-    assert calls[0].system_root == ".llm-wiki/cognee_system"
-    assert calls[0].data_root == ".llm-wiki/cognee_data"
+    assert calls[0].system_root == ".tesserae/cognee_system"
+    assert calls[0].data_root == ".tesserae/cognee_data"
 
 
 def test_compile_cli_cognee_flags_override_config(tmp_path, monkeypatch):
@@ -105,7 +105,7 @@ def test_cognify_options_from_config_ignores_disabled_or_manual_cognee(tmp_path)
 
 
 def test_legacy_project_config_gets_default_cognee_backend():
-    from llm_wiki.project import cognee_backend_config
+    from tesserae.project import cognee_backend_config
 
     cognee = cognee_backend_config({"name": "legacy_demo"})
 
@@ -188,7 +188,7 @@ def test_project_ask_uses_configured_cognee_backend(tmp_path, monkeypatch, capsy
     wiki.paths.config.write_text(json.dumps(cfg, indent=2) + "\n", encoding="utf-8")
 
     monkeypatch.setattr(
-        "llm_wiki.cognee_query.search_cognee",
+        "tesserae.cognee_query.search_cognee",
         lambda question, dataset=None, search_type="INSIGHTS", top_k=8: [f"answer for {question} in {dataset}"],
     )
 

@@ -1,5 +1,5 @@
-from llm_wiki.report import GraphReporter
-from llm_wiki.research_graph import ResearchEdge, ResearchGraph, ResearchNode, ResearchNodeType
+from tesserae.report import GraphReporter
+from tesserae.research_graph import ResearchEdge, ResearchGraph, ResearchNode, ResearchNodeType
 
 
 def sample_graph():

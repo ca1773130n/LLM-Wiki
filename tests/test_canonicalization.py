@@ -1,5 +1,5 @@
-from llm_wiki.canonicalization import GraphCanonicalizer, ReviewDecision, ReviewQueue
-from llm_wiki.research_graph import ResearchEdge, ResearchGraph, ResearchNode, ResearchNodeType
+from tesserae.canonicalization import GraphCanonicalizer, ReviewDecision, ReviewQueue
+from tesserae.research_graph import ResearchEdge, ResearchGraph, ResearchNode, ResearchNodeType
 
 
 def test_canonicalizer_merges_alias_nodes_and_rewires_edges():

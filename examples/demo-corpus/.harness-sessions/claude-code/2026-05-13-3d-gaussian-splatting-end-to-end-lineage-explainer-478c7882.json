@@ -23,7 +23,7 @@
     ],
     "questions_referenced": [],
     "stumbles": [],
-    "transcript": "/Users/neo/Developer/Projects/LLM-Wiki/examples/demo-corpus/.agent-sessions/2026-05-13-paper-deep-dive/transcript.jsonl",
+    "transcript": "/Users/neo/Developer/Projects/Tesserae/examples/demo-corpus/.agent-sessions/2026-05-13-paper-deep-dive/transcript.jsonl",
     "turn_count": 35,
     "turns": [
       {
@@ -157,7 +157,7 @@
     "user": "demo-researcher"
   },
   "model": "claude-opus-4-7",
-  "project_name": "LLM-Wiki",
+  "project_name": "Tesserae",
   "project_root": "",
   "raw_transcript_path": "examples/demo-corpus/.agent-sessions/2026-05-13-paper-deep-dive/transcript.jsonl",
   "redacted_preview": "Walked the 3D Gaussian Splatting dependency graph from the Kerbl 2023 anchor in both directions. Read NeRF as the only upstream prerequisite, then six direct extensions (SuGaR, 2DGS, Scaffold-GS, MonoGS, 4DGS, gsplat math supplement) plus the Bulo revision paper. Returned a lineage explainer organised by geometry / structure / SLAM / dynamic branches. The researcher then asked a clarifying technical question about adaptive density control, and a follow-up about SH-coefficient inheritance on clone; agent re-pulled the gsplat math supplement and derived the early-window SH-decorrelation effect that explains why Bulo's variance criterion fires harder than mean-magnitude on the same scene.",

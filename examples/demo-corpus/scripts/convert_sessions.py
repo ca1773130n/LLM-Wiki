@@ -5,11 +5,11 @@ Reads:   examples/demo-corpus/.agent-sessions/<slug>/transcript.jsonl
 Writes:  examples/demo-corpus/.harness-sessions/claude-code/<filename>.json
 
 The output JSON files are consumable by
-:class:`llm_wiki.harness_sessions.HarnessSession.from_dict` and discoverable by
-:meth:`llm_wiki.harness_sessions.HarnessSessionStore.list_sessions`, which
+:class:`tesserae.harness_sessions.HarnessSession.from_dict` and discoverable by
+:meth:`tesserae.harness_sessions.HarnessSessionStore.list_sessions`, which
 globs ``<root>/*/*.json``. They are placed under a ``claude-code/`` subdir so
 the store glob picks them up after CI copies the tree into
-``.llm-wiki/harness_sessions/``.
+``.tesserae/harness_sessions/``.
 
 The original JSONL transcripts under ``.agent-sessions/`` remain the
 human-readable showcase content; the JSON files emitted here are derived
@@ -31,7 +31,7 @@ OUT_DIR = REPO_ROOT / "examples" / "demo-corpus" / ".harness-sessions" / "claude
 
 HARNESS = "claude-code"
 AGENT_LABEL = "Claude Code"
-PROJECT_NAME = "LLM-Wiki"
+PROJECT_NAME = "Tesserae"
 
 
 def _safe_slug(value: str) -> str:
@@ -82,7 +82,7 @@ def _tool_arguments_text(row: Dict[str, object]) -> str:
 
 def _build_turns(rows: List[Dict[str, object]]) -> List[Dict[str, object]]:
     """Map transcript rows to the {role, text, timestamp, name?} shape the
-    site renderer expects (see llm_wiki.site.sessions._turns)."""
+    site renderer expects (see tesserae.site.sessions._turns)."""
 
     turns: List[Dict[str, object]] = []
     for row in rows:

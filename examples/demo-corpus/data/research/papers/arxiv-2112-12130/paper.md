@@ -14,7 +14,7 @@ authors:
   - "Marc Pollefeys"
 date: 2021-12-22
 sub_topic: Visual SLAM and MVS
-license: "CC-BY-4.0 (LLM-Wiki demo prose)"
+license: "CC-BY-4.0 (Tesserae demo prose)"
 methods: [NeuralImplicitSurface, SLAM]
 datasets: []
 metrics: [PSNR, SSIM, LPIPS]

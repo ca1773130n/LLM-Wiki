@@ -1,12 +1,12 @@
-"""Shared pytest fixtures for the LLM-Wiki test suite."""
+"""Shared pytest fixtures for the Tesserae test suite."""
 from __future__ import annotations
 
 from pathlib import Path
 
 import pytest
 
-from llm_wiki.project import merge_graphs
-from llm_wiki.research_graph import ResearchGraph, ResearchGraphExtractor
+from tesserae.project import merge_graphs
+from tesserae.research_graph import ResearchGraph, ResearchGraphExtractor
 
 
 WIKI_CORPUS_ROOT = Path(__file__).parent / "fixtures" / "wiki_corpus"
