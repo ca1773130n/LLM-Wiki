@@ -570,7 +570,112 @@ def write_diverged_fields_report(
     path.write_text("\n".join(lines).rstrip() + "\n", encoding="utf-8")
 
 
+@dataclass(frozen=True)
+class PruneResult:
+    """Outcome of a one-shot vault prune pass.
+
+    ``deleted`` is every orphan page actually unlinked. ``skipped_with_user_notes``
+    is orphans we deliberately KEPT because their ``<!-- user-notes -->`` block
+    is non-empty — the operator may want to migrate the notes before losing
+    them. Re-run with ``force=True`` to delete those too.
+    """
+
+    deleted: List[Path]
+    skipped_with_user_notes: List[Path]
+    removed_empty_dirs: List[Path]
+
+
+# Vault files that are always projector-regenerated each compile. They never
+# count as "orphan" because the next compile/sync will overwrite them anyway.
+_ALWAYS_REGENERATED = frozenset({
+    "README.md",
+    "index.md",
+    "_bridges.md",
+    "_meta/dashboard.md",
+})
+
+
+def prune_orphan_pages(
+    vault_dir: Path,
+    graph: ResearchGraph,
+    *,
+    force: bool = False,
+) -> PruneResult:
+    """Delete projected pages whose ``node_id`` is no longer in ``graph``.
+
+    The projector only OVERWRITES files; it never deletes. After any compile
+    that shrinks the source set (e.g. an exclusion landed, a data dir got
+    pruned), the vault accumulates stale projected pages whose
+    ``node_id:`` frontmatter points at nodes that no longer exist. This
+    function removes them.
+
+    Safety rules:
+
+    * Files without ``node_id`` in frontmatter are user-authored; never touched.
+    * Files under dot-prefix dirs (e.g. ``.obsidian/``) are never touched.
+    * Files matching :data:`_ALWAYS_REGENERATED` (README, index, _bridges,
+      _meta/dashboard) are kept — they get refreshed each compile.
+    * Orphans with non-empty user-notes content are kept by default and
+      surfaced separately so the operator can review. Pass ``force=True``
+      to delete those too.
+    * Empty directories left after deletion are pruned.
+
+    Designed to be safe to re-run: any state where vault matches the graph
+    is a no-op.
+    """
+    node_ids = {n.id for n in graph.nodes}
+    deleted: List[Path] = []
+    skipped: List[Path] = []
+
+    if not vault_dir.is_dir():
+        return PruneResult(deleted=[], skipped_with_user_notes=[], removed_empty_dirs=[])
+
+    for md in vault_dir.rglob("*.md"):
+        rel = md.relative_to(vault_dir)
+        if str(rel) in _ALWAYS_REGENERATED:
+            continue
+        if any(part.startswith(".") for part in rel.parts):
+            continue
+        try:
+            text = md.read_text(encoding="utf-8", errors="replace")
+        except OSError:
+            continue
+        frontmatter = parse_frontmatter(text)
+        if not frontmatter or "node_id" not in frontmatter:
+            continue  # user-authored, leave alone
+        node_id = str(frontmatter["node_id"])
+        if node_id in node_ids:
+            continue  # still in graph, keep
+        # Orphan. Check for user-notes content before deleting.
+        notes = extract_user_notes_block(_split_body(text))
+        if notes and not force:
+            skipped.append(md)
+            continue
+        try:
+            md.unlink()
+            deleted.append(md)
+        except OSError:
+            continue
+
+    # Sweep empty directories bottom-up.
+    removed_dirs: List[Path] = []
+    for d in sorted(vault_dir.rglob("*"), reverse=True):
+        if not d.is_dir():
+            continue
+        if any(part.startswith(".") for part in d.relative_to(vault_dir).parts):
+            continue
+        try:
+            if not any(d.iterdir()):
+                d.rmdir()
+                removed_dirs.append(d)
+        except OSError:
+            continue
+
+    return PruneResult(deleted=deleted, skipped_with_user_notes=skipped, removed_empty_dirs=removed_dirs)
+
+
 __all__ = [
+    "PruneResult",
     "VaultOverride",
     "VaultUserLinkChange",
     "apply_overrides",
@@ -581,5 +686,6 @@ __all__ = [
     "extract_user_notes_block",
     "extract_wikilink_slugs",
     "parse_frontmatter",
+    "prune_orphan_pages",
     "write_diverged_fields_report",
 ]

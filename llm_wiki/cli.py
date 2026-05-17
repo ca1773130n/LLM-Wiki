@@ -542,7 +542,13 @@ def _wiki_command_handler(args) -> int:
         return 0
 
     if sub == "obsidian-sync-all":
-        return _wiki_obsidian_sync_all(registry, poll_interval=args.poll_interval)
+        return _wiki_obsidian_sync_all(
+            registry,
+            poll_interval=args.poll_interval,
+            prune_orphans=args.prune_orphans,
+            force_prune_with_notes=args.force_prune_with_notes,
+            no_watch=args.no_watch,
+        )
 
     print(
         "Usage: llm_wiki wiki {list|register|activate|unregister|obsidian-set-root|obsidian-sync-all}",
@@ -551,14 +557,29 @@ def _wiki_command_handler(args) -> int:
     return 2
 
 
-def _wiki_obsidian_sync_all(registry, *, poll_interval: float) -> int:
+def _wiki_obsidian_sync_all(
+    registry,
+    *,
+    poll_interval: float,
+    prune_orphans: bool = False,
+    force_prune_with_notes: bool = False,
+    no_watch: bool = False,
+) -> int:
     """Spawn one VaultWatcher thread per registered project.
 
     Each thread owns its own ProjectWiki + VaultWatcher and polls only its
     own vault subdir. Ctrl-C cleanly signals all threads to stop.
+
+    When ``prune_orphans`` is set, every project's vault is swept for
+    stale projected pages (node_id no longer in that project's graph)
+    BEFORE the watchers start. This handles the case where a previous
+    compile shrank the source set and left orphan pages behind in the
+    vault — the projector overwrites but never deletes.
     """
     import threading
-    from .project import ProjectWiki
+    from .project import ProjectWiki, load_graph_file
+    from .vault_pull import prune_orphan_pages
+    from .vault_snapshot import write_snapshot
     from .vault_watch import VaultWatcher
 
     projects = list(registry.iter_registered_projects())
@@ -569,6 +590,36 @@ def _wiki_obsidian_sync_all(registry, *, poll_interval: float) -> int:
     vault_root = registry.get_vault_root()
     if vault_root is None:
         print("error: no registry vault root. Run `llm_wiki wiki obsidian-set-root <PATH>` first.", file=sys.stderr)
+        return 2
+
+    if prune_orphans:
+        total_deleted = 0
+        total_skipped = 0
+        for alias, root in projects:
+            try:
+                wiki = ProjectWiki.load(str(root))
+            except Exception as exc:
+                print(f"[{alias}] skip prune: {exc}", file=sys.stderr)
+                continue
+            vault = wiki.effective_obsidian_vault()
+            if not wiki.paths.graph.is_file():
+                print(f"[{alias}] no graph yet; skip prune")
+                continue
+            graph = load_graph_file(wiki.paths.graph)
+            result = prune_orphan_pages(vault, graph, force=force_prune_with_notes)
+            total_deleted += len(result.deleted)
+            total_skipped += len(result.skipped_with_user_notes)
+            note = ""
+            if result.skipped_with_user_notes:
+                note = f", {len(result.skipped_with_user_notes)} kept-with-notes"
+            print(f"[{alias}] pruned {len(result.deleted)} orphan(s){note}")
+            # Refresh snapshot so subsequent watcher doesn't replay the deletes
+            write_snapshot(graph.nodes, wiki.paths.vault_snapshot)
+        print(f"total: {total_deleted} deleted, {total_skipped} kept-with-notes across {len(projects)} project(s)")
+        if no_watch:
+            return 0
+    elif no_watch:
+        print("error: --no-watch is only meaningful with --prune-orphans", file=sys.stderr)
         return 2
 
     print(f"watching {len(projects)} registered project(s) under {vault_root}")
@@ -722,6 +773,21 @@ def _build_top_level_wiki_parser() -> argparse.ArgumentParser:
     wiki_watch_all.add_argument(
         "--poll-interval", type=float, default=1.5,
         help="Per-watcher poll interval in seconds (default: 1.5).",
+    )
+    wiki_watch_all.add_argument(
+        "--prune-orphans",
+        action="store_true",
+        help="Prune stale projected pages in every project's vault before starting watchers.",
+    )
+    wiki_watch_all.add_argument(
+        "--force-prune-with-notes",
+        action="store_true",
+        help="With --prune-orphans, also delete orphans with user-notes content.",
+    )
+    wiki_watch_all.add_argument(
+        "--no-watch",
+        action="store_true",
+        help="Run prune-only (requires --prune-orphans); skip the watch phase.",
     )
     return parser
 
@@ -888,6 +954,22 @@ def project_main(argv: List[str] | None = None) -> int:
             "obsidian.vault_path so future commands (`project compile`, "
             "`project obsidian-sync` without --vault) use it automatically."
         ),
+    )
+    obsidian_sync_parser.add_argument(
+        "--prune-orphans",
+        action="store_true",
+        help=(
+            "Delete projected pages in the vault whose node_id no longer exists "
+            "in the current graph. Useful after the source set shrinks "
+            "(exclusions, deleted directories) — the projector only overwrites, "
+            "never deletes. Files with user-notes content are kept by default; "
+            "pass --force-prune-with-notes to delete those too."
+        ),
+    )
+    obsidian_sync_parser.add_argument(
+        "--force-prune-with-notes",
+        action="store_true",
+        help="With --prune-orphans, also delete orphan pages that have user-notes content.",
     )
 
     refresh_raga_parser = subparsers.add_parser(
@@ -1223,6 +1305,30 @@ def project_main(argv: List[str] | None = None) -> int:
                 f"See {wiki.paths.diverged_fields.relative_to(wiki.project_root)}."
             )
             return 0
+        if args.prune_orphans:
+            from .vault_pull import prune_orphan_pages
+            graph = _load_graph_file(wiki.paths.graph)
+            vault = wiki.effective_obsidian_vault()
+            result = prune_orphan_pages(vault, graph, force=args.force_prune_with_notes)
+            print(
+                f"pruned {len(result.deleted)} orphan page(s), "
+                f"removed {len(result.removed_empty_dirs)} empty dir(s)"
+            )
+            if result.skipped_with_user_notes:
+                print(
+                    f"  ⚠ kept {len(result.skipped_with_user_notes)} orphan(s) with "
+                    f"user-notes content (re-run with --force-prune-with-notes to delete)"
+                )
+                for p in result.skipped_with_user_notes[:5]:
+                    print(f"    - {p.relative_to(vault)}")
+                if len(result.skipped_with_user_notes) > 5:
+                    print(f"    ... and {len(result.skipped_with_user_notes) - 5} more")
+            # Refresh snapshot so subsequent watcher/sync doesn't flag the
+            # deletions as "user removed file" overrides.
+            from .vault_snapshot import write_snapshot
+            write_snapshot(graph.nodes, wiki.paths.vault_snapshot)
+            if not args.watch:
+                return 0
         if args.watch:
             from .vault_watch import VaultWatcher
             VaultWatcher(wiki, poll_interval=args.poll_interval).run()
