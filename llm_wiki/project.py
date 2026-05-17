@@ -701,6 +701,67 @@ class ProjectWiki:
             dry_run=dry_run,
         )
 
+    def reproject_after_vault_change(self) -> "VaultWatchResult":
+        """Fast path used by ``obsidian-sync --watch``: re-apply vault overlay + re-project.
+
+        Loads the existing ``graph.json`` instead of re-extracting from
+        sources, so it's seconds rather than the 30+ a full
+        :meth:`compile` takes. Used by the polling watcher in
+        :mod:`llm_wiki.vault_watch` to react to user edits live.
+
+        Steps:
+
+        1. Load research_graph from ``.llm-wiki/graph.json``.
+        2. Apply vault overlay (Tier 1a + 1b — both diff streams).
+        3. Re-project to markdown_projection/ + Obsidian vault/.
+        4. Write fresh vault_snapshot.json so the next watch tick has a
+           current baseline.
+
+        Returns a :class:`VaultWatchResult` summarising what happened.
+        """
+        from .markdown_projection import GraphMarkdownProjector
+        from .vault_snapshot import write_snapshot
+        from .vault_watch import VaultWatchResult
+
+        if not self.paths.graph.is_file():
+            raise RuntimeError(
+                f"No graph at {self.paths.graph}; run `llm_wiki project compile` first."
+            )
+        graph = load_graph_file(self.paths.graph)
+
+        before_node_count = len(graph.nodes)
+        before_edge_count = len(graph.edges)
+        graph = self._apply_vault_overlay(graph)
+        new_stubs = sum(
+            1 for n in graph.nodes if n.type == ResearchNodeType.STUB
+        ) - sum(1 for n in graph.nodes[:before_node_count] if n.type == ResearchNodeType.STUB)
+
+        # Re-project: markdown + the obsidian vault itself. Cognee bundle,
+        # site, harness, etc. are intentionally NOT touched here — those are
+        # compile-time concerns. The watcher exists to make vault edits
+        # round-trip; everything else stays static between compiles.
+        GraphMarkdownProjector().write_projection(graph, self.paths.markdown_projection)
+        self.export_obsidian()
+        write_snapshot(graph.nodes, self.paths.vault_snapshot)
+
+        # Count changes by re-reading the diverged-fields report that
+        # _apply_vault_overlay just wrote. The report is the source of truth
+        # for "what happened this round" anyway.
+        return VaultWatchResult(
+            overrides_applied=self._count_diverged_field_overrides(),
+            user_link_changes_applied=max(0, len(graph.edges) - before_edge_count),
+            stubs_minted=max(0, new_stubs),
+        )
+
+    def _count_diverged_field_overrides(self) -> int:
+        """Parse diverged-fields.md to count `Field overrides — N across M node(s)`."""
+        if not self.paths.diverged_fields.is_file():
+            return 0
+        import re
+        text = self.paths.diverged_fields.read_text(encoding="utf-8", errors="replace")
+        m = re.search(r"Field overrides — (\d+) across \d+ node\(s\)", text)
+        return int(m.group(1)) if m else 0
+
     def _apply_vault_overlay(self, graph: ResearchGraph) -> ResearchGraph:
         """Read user edits out of the Obsidian vault and apply them onto the graph.
 

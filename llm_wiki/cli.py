@@ -20,7 +20,7 @@ from .llm_extractor import ClaudeCLIResearchExtractor
 from .markdown_projection import GraphMarkdownProjector
 from .persistence import KuzuResearchGraphStore, SQLiteResearchGraphStore
 from .graphiti_adapter import GraphitiSyncUnavailableError
-from .project import CognifyOptions, ProjectWiki, cognify_options_from_config, cognee_backend_config, iter_markdown_files
+from .project import CognifyOptions, ProjectWiki, cognify_options_from_config, cognee_backend_config, iter_markdown_files, load_graph_file as _load_graph_file
 from .project_setup import apply_setup_plan, build_setup_plan, interactive_setup_plan, refresh_configured_external_tools, render_setup_summary
 from .report import GraphReporter
 from .understand_anything_refresh import refresh_understand_anything
@@ -727,6 +727,35 @@ def project_main(argv: List[str] | None = None) -> int:
     ua_refresh_parser.add_argument("--force", action="store_true", help="Run even if the existing graph appears current")
     ua_refresh_parser.add_argument("--timeout", type=int, help="Optional timeout in seconds")
 
+    obsidian_sync_parser = subparsers.add_parser(
+        "obsidian-sync",
+        help="Apply vault edits onto the typed graph and re-project. Pass --watch for live mode.",
+    )
+    obsidian_sync_parser.add_argument("--project", default=".", help="Project root; defaults to cwd")
+    obsidian_sync_parser.add_argument(
+        "--watch",
+        action="store_true",
+        help=(
+            "Run a long-lived poll loop that re-applies the overlay every time "
+            "the vault changes. Press Ctrl-C to stop."
+        ),
+    )
+    obsidian_sync_parser.add_argument(
+        "--dry-run",
+        action="store_true",
+        help=(
+            "Compute the overlay diff and write .llm-wiki/diverged-fields.md, "
+            "but DON'T apply changes to the graph or re-project. Useful for "
+            "previewing what a compile would do."
+        ),
+    )
+    obsidian_sync_parser.add_argument(
+        "--poll-interval",
+        type=float,
+        default=1.5,
+        help="Watch-mode poll interval in seconds (default: 1.5).",
+    )
+
     refresh_raga_parser = subparsers.add_parser(
         "refresh-raganything",
         help="Run the managed RAG-Anything refresh wrapper",
@@ -1005,6 +1034,53 @@ def project_main(argv: List[str] | None = None) -> int:
             force=args.force,
             timeout=args.timeout,
         )
+    if args.command == "obsidian-sync":
+        wiki = ProjectWiki.load(args.project)
+        if args.dry_run and args.watch:
+            print("error: --dry-run and --watch are mutually exclusive", file=sys.stderr)
+            return 2
+        if args.dry_run:
+            # Compute overlay + write the diverged-fields report but skip the
+            # apply step. Loads the existing graph; never re-projects.
+            from .markdown_projection import unique_slugs
+            from .vault_pull import (
+                compute_overrides,
+                compute_user_link_changes,
+                write_diverged_fields_report,
+            )
+            from .vault_snapshot import read_snapshot
+            if not wiki.paths.graph.is_file():
+                print("error: no compiled graph yet — run `project compile` first.", file=sys.stderr)
+                return 2
+            graph = _load_graph_file(wiki.paths.graph)
+            snap = read_snapshot(wiki.paths.vault_snapshot)
+            overrides = (
+                compute_overrides(wiki.paths.obsidian_vault, snap, {n.id: n for n in graph.nodes})
+                if snap is not None else []
+            )
+            link_changes = compute_user_link_changes(
+                wiki.paths.obsidian_vault, graph, unique_slugs(graph.nodes),
+            )
+            write_diverged_fields_report(overrides, wiki.paths.diverged_fields, link_changes)
+            print(
+                f"dry-run: {len(overrides)} field override(s), "
+                f"{len(link_changes)} user-link change(s). "
+                f"See {wiki.paths.diverged_fields.relative_to(wiki.project_root)}."
+            )
+            return 0
+        if args.watch:
+            from .vault_watch import VaultWatcher
+            VaultWatcher(wiki, poll_interval=args.poll_interval).run()
+            return 0
+        # No flag: one-shot apply (same as a compile, but skipping extraction).
+        result = wiki.reproject_after_vault_change()
+        print(
+            f"applied: {result.overrides_applied} override(s), "
+            f"{result.user_link_changes_applied} user-link change(s), "
+            f"{result.stubs_minted} Stub node(s) minted."
+        )
+        return 0
+
     if args.command == "refresh-raganything":
         forwarded = ["--project", args.project, "--parser", args.parser, "--parse-method", args.parse_method]
         for r in (args.roots or []):
