@@ -1,7 +1,7 @@
 # Obsidian — コンパイル済み wiki を本物のヴォルトとして開く
 
 <!-- translations:start -->
-<p align="center"><a href="../../integrations/obsidian.md">English</a> · <a href="obsidian.ko.md">한국어</a> · <a href="obsidian.zh.md">中文</a> · <a href="obsidian.ru.md">Русский</a> · <a href="obsidian.es.md">Español</a> · <a href="obsidian.fr.md">Français</a></p>
+<p align="center"><a href="../../integrations/obsidian.md">English</a> · <a href="obsidian.ko.md">한국어</a> · <a href="obsidian.zh.md">中文</a> · <a href="obsidian.ru.md">Русский</a> · <a href="obsidian.es.md">Español</a> · <a href="obsidian.fr.md">Français</a> · <a href="obsidian.de.md">Deutsch</a></p>
 <!-- translations:end -->
 
 LLM-Wiki の Obsidian エクスポートは、コンパイル済みの型付きグラフを、意見のある本物の [Obsidian](https://obsidian.md) ヴォルトに変換します。単なる markdown のディレクトリではなく、`.obsidian/` 設定、型を意識した [callouts](https://help.obsidian.md/Editing+and+formatting/Callouts)、[Dataview](https://blacksmithgu.github.io/obsidian-dataview/) でクエリ可能な frontmatter、ヴォルトダッシュボード、そしてヴォルト横断の `wiki://` 参照インデックスを備えたヴォルトです。

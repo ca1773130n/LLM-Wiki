@@ -1,7 +1,7 @@
 # Self-dogfood Demo
 
 <!-- translations:start -->
-<p align="center"><a href="i18n/self-dogfood.ko.md">한국어</a> · <a href="i18n/self-dogfood.zh.md">中文</a> · <a href="i18n/self-dogfood.ja.md">日本語</a> · <a href="i18n/self-dogfood.ru.md">Русский</a> · <a href="i18n/self-dogfood.es.md">Español</a> · <a href="i18n/self-dogfood.fr.md">Français</a></p>
+<p align="center"><a href="i18n/self-dogfood.ko.md">한국어</a> · <a href="i18n/self-dogfood.zh.md">中文</a> · <a href="i18n/self-dogfood.ja.md">日本語</a> · <a href="i18n/self-dogfood.ru.md">Русский</a> · <a href="i18n/self-dogfood.es.md">Español</a> · <a href="i18n/self-dogfood.fr.md">Français</a> · <a href="../i18n/self-dogfood.de.md">Deutsch</a></p>
 <!-- translations:end -->
 This project can index itself. The self-dogfood flow proves that LLM-Wiki can be installed, set up inside its own repository, ingest its own docs/source/tests/scripts, optionally refresh Understand Anything and Cognee, compile graph artifacts, and build the static web frontend.
 

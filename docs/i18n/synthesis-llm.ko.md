@@ -1,7 +1,7 @@
 # LLM 기반 합성 prose
 
 <!-- translations:start -->
-<p align="center"><a href="../synthesis-llm.md">English</a> · <a href="synthesis-llm.ko.md">한국어</a> · <a href="synthesis-llm.zh.md">中文</a> · <a href="synthesis-llm.ja.md">日本語</a> · <a href="synthesis-llm.ru.md">Русский</a> · <a href="synthesis-llm.es.md">Español</a> · <a href="synthesis-llm.fr.md">Français</a></p>
+<p align="center"><a href="../synthesis-llm.md">English</a> · <a href="synthesis-llm.ko.md">한국어</a> · <a href="synthesis-llm.zh.md">中文</a> · <a href="synthesis-llm.ja.md">日本語</a> · <a href="synthesis-llm.ru.md">Русский</a> · <a href="synthesis-llm.es.md">Español</a> · <a href="synthesis-llm.fr.md">Français</a> · <a href="synthesis-llm.de.md">Deutsch</a></p>
 <!-- translations:end -->
 LLM-Wiki에는 두 가지 합성 경로가 있습니다. 기본값은 네트워크를 전혀 호출하지 않는 결정적 휴리스틱입니다. 연구 그래프에서 예측 가능하고 멱등적인 Markdown 템플릿을 생성합니다. 선택 사항인 **LLM 업그레이드 경로**는 다른 모든 불변성(멱등성, citation 추적, hash-stable 본문)을 그대로 유지하면서, 매 compile마다 Claude가 작성한 prose로 해당 템플릿을 대체합니다.
 

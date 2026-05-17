@@ -1,7 +1,7 @@
 # 前端重新设计 — 带注释的路由导览
 
 <!-- translations:start -->
-<p align="center"><a href="../frontend-redesign.md">English</a> · <a href="frontend-redesign.ko.md">한국어</a> · <a href="frontend-redesign.zh.md">中文</a> · <a href="frontend-redesign.ja.md">日本語</a> · <a href="frontend-redesign.ru.md">Русский</a> · <a href="frontend-redesign.es.md">Español</a> · <a href="frontend-redesign.fr.md">Français</a></p>
+<p align="center"><a href="../frontend-redesign.md">English</a> · <a href="frontend-redesign.ko.md">한국어</a> · <a href="frontend-redesign.zh.md">中文</a> · <a href="frontend-redesign.ja.md">日本語</a> · <a href="frontend-redesign.ru.md">Русский</a> · <a href="frontend-redesign.es.md">Español</a> · <a href="frontend-redesign.fr.md">Français</a> · <a href="frontend-redesign.de.md">Deutsch</a></p>
 <!-- translations:end -->
 本文档是对重新设计后的 LLM-Wiki 静态站点中每个可见路由的导览。它补充了 [`architecture.md`](architecture.zh.md) 中的高层模型，以及 [`feature-map.md`](feature-map.zh.md) 中的状态表。
 

@@ -1,7 +1,7 @@
 # Refonte du frontend — parcours annoté des routes
 
 <!-- translations:start -->
-<p align="center"><a href="../frontend-redesign.md">English</a> · <a href="frontend-redesign.ko.md">한국어</a> · <a href="frontend-redesign.zh.md">中文</a> · <a href="frontend-redesign.ja.md">日本語</a> · <a href="frontend-redesign.ru.md">Русский</a> · <a href="frontend-redesign.es.md">Español</a> · <a href="frontend-redesign.fr.md">Français</a></p>
+<p align="center"><a href="../frontend-redesign.md">English</a> · <a href="frontend-redesign.ko.md">한국어</a> · <a href="frontend-redesign.zh.md">中文</a> · <a href="frontend-redesign.ja.md">日本語</a> · <a href="frontend-redesign.ru.md">Русский</a> · <a href="frontend-redesign.es.md">Español</a> · <a href="frontend-redesign.fr.md">Français</a> · <a href="frontend-redesign.de.md">Deutsch</a></p>
 <!-- translations:end -->
 Ce document propose une visite guidée de toutes les routes visibles du site statique LLM-Wiki refondu. Il complète le modèle de haut niveau dans [`architecture.md`](architecture.fr.md) et le tableau d’état dans [`feature-map.md`](feature-map.fr.md).
 

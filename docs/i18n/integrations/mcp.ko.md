@@ -1,7 +1,7 @@
 # MCP — LLM-Wiki를 Claude Code, Codex, Cursor에 연결하기
 
 <!-- translations:start -->
-<p align="center"><a href="../../integrations/mcp.md">English</a> · <a href="mcp.zh.md">中文</a> · <a href="mcp.ja.md">日本語</a> · <a href="mcp.ru.md">Русский</a> · <a href="mcp.es.md">Español</a> · <a href="mcp.fr.md">Français</a></p>
+<p align="center"><a href="../../integrations/mcp.md">English</a> · <a href="mcp.zh.md">中文</a> · <a href="mcp.ja.md">日本語</a> · <a href="mcp.ru.md">Русский</a> · <a href="mcp.es.md">Español</a> · <a href="mcp.fr.md">Français</a> · <a href="mcp.de.md">Deutsch</a></p>
 <!-- translations:end -->
 
 LLM-Wiki는 컴파일된 타입 그래프를 MCP를 지원하는 모든 클라이언트(Claude Code, Codex CLI, Cursor, Claude Desktop 등)에 노출하는 [Model Context Protocol](https://modelcontextprotocol.io) stdio 서버를 함께 제공합니다. 이 서버는 세 가지 MCP 표면(**tools**, **resources**, **prompts**)을 모두 광고하므로, 클라이언트는 필요에 따라 그래프를 쿼리할 수도 있고 정형 URI로부터 저렴하게 컨텍스트를 시드할 수도 있습니다.

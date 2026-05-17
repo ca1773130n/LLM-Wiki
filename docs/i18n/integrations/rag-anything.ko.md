@@ -1,7 +1,7 @@
 # RAG-Anything 멀티모달 동반 도구
 
 <!-- translations:start -->
-<p align="center"><a href="../../integrations/rag-anything.md">English</a> · <a href="rag-anything.zh.md">中文</a> · <a href="rag-anything.ja.md">日本語</a> · <a href="rag-anything.ru.md">Русский</a> · <a href="rag-anything.es.md">Español</a> · <a href="rag-anything.fr.md">Français</a></p>
+<p align="center"><a href="../../integrations/rag-anything.md">English</a> · <a href="rag-anything.zh.md">中文</a> · <a href="rag-anything.ja.md">日本語</a> · <a href="rag-anything.ru.md">Русский</a> · <a href="rag-anything.es.md">Español</a> · <a href="rag-anything.fr.md">Français</a> · <a href="rag-anything.de.md">Deutsch</a></p>
 <!-- translations:end -->
 
 [RAG-Anything](https://github.com/HKUDS/RAG-Anything)은 PDF, Office 문서, 이미지, 수식을 MinerU/Docling/PaddleOCR을 통해 파싱하는 멀티모달 RAG 프레임워크(LightRAG 기반)입니다. LLM-Wiki는 이를 멀티모달 수집 파이프라인(UA 스타일 네이티브 그래프 투영)이자 Cognee와 함께 동작하는 런타임 메모리 백엔드로 통합합니다.

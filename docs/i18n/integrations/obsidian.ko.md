@@ -1,7 +1,7 @@
 # Obsidian — 컴파일된 위키를 실제 vault로 열기
 
 <!-- translations:start -->
-<p align="center"><a href="../../integrations/obsidian.md">English</a> · <a href="obsidian.zh.md">中文</a> · <a href="obsidian.ja.md">日本語</a> · <a href="obsidian.ru.md">Русский</a> · <a href="obsidian.es.md">Español</a> · <a href="obsidian.fr.md">Français</a></p>
+<p align="center"><a href="../../integrations/obsidian.md">English</a> · <a href="obsidian.zh.md">中文</a> · <a href="obsidian.ja.md">日本語</a> · <a href="obsidian.ru.md">Русский</a> · <a href="obsidian.es.md">Español</a> · <a href="obsidian.fr.md">Français</a> · <a href="obsidian.de.md">Deutsch</a></p>
 <!-- translations:end -->
 
 LLM-Wiki의 Obsidian export는 컴파일된 타입 그래프를 실질적이고 의견이 반영된 [Obsidian](https://obsidian.md) vault로 변환합니다. 단순한 markdown 디렉터리가 아니라 `.obsidian/` 설정, 타입을 인식하는 [callouts](https://help.obsidian.md/Editing+and+formatting/Callouts), [Dataview](https://blacksmithgu.github.io/obsidian-dataview/)로 쿼리 가능한 frontmatter, vault 대시보드, 그리고 vault 간 `wiki://` 참조 인덱스를 갖춘 진짜 vault입니다.

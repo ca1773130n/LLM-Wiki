@@ -1,7 +1,7 @@
 # MCP — connecter LLM-Wiki à Claude Code, Codex, Cursor
 
 <!-- translations:start -->
-<p align="center"><a href="../../integrations/mcp.md">English</a> · <a href="mcp.ko.md">한국어</a> · <a href="mcp.zh.md">中文</a> · <a href="mcp.ja.md">日本語</a> · <a href="mcp.ru.md">Русский</a> · <a href="mcp.es.md">Español</a></p>
+<p align="center"><a href="../../integrations/mcp.md">English</a> · <a href="mcp.ko.md">한국어</a> · <a href="mcp.zh.md">中文</a> · <a href="mcp.ja.md">日本語</a> · <a href="mcp.ru.md">Русский</a> · <a href="mcp.es.md">Español</a> · <a href="mcp.de.md">Deutsch</a></p>
 <!-- translations:end -->
 
 LLM-Wiki fournit un serveur stdio [Model Context Protocol](https://modelcontextprotocol.io) qui expose le graphe typé compilé à tout client compatible MCP : Claude Code, Codex CLI, Cursor, Claude Desktop, et d'autres. Le serveur annonce trois surfaces MCP complètes — **tools**, **resources** et **prompts** — afin que les clients puissent à la fois interroger le graphe à la demande et amorcer le contexte à moindre coût depuis des URI canoniques.

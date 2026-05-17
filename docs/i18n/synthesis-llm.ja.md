@@ -1,7 +1,7 @@
 # LLM による合成 prose
 
 <!-- translations:start -->
-<p align="center"><a href="../synthesis-llm.md">English</a> · <a href="synthesis-llm.ko.md">한국어</a> · <a href="synthesis-llm.zh.md">中文</a> · <a href="synthesis-llm.ja.md">日本語</a> · <a href="synthesis-llm.ru.md">Русский</a> · <a href="synthesis-llm.es.md">Español</a> · <a href="synthesis-llm.fr.md">Français</a></p>
+<p align="center"><a href="../synthesis-llm.md">English</a> · <a href="synthesis-llm.ko.md">한국어</a> · <a href="synthesis-llm.zh.md">中文</a> · <a href="synthesis-llm.ja.md">日本語</a> · <a href="synthesis-llm.ru.md">Русский</a> · <a href="synthesis-llm.es.md">Español</a> · <a href="synthesis-llm.fr.md">Français</a> · <a href="synthesis-llm.de.md">Deutsch</a></p>
 <!-- translations:end -->
 LLM-Wiki には 2 つの合成経路があります。デフォルトはネットワークを一切呼び出さない決定的なヒューリスティックです。研究グラフから、予測可能で冪等な Markdown テンプレートを生成します。任意の **LLM アップグレード経路** は、他のすべての不変条件（冪等性、citation tracking、hash-stable な本文）を保ったまま、compile のたびにそれらのテンプレートを Claude が書いた prose に置き換えます。
 

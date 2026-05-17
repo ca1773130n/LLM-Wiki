@@ -1,7 +1,7 @@
 # LLM 支持的合成 prose
 
 <!-- translations:start -->
-<p align="center"><a href="../synthesis-llm.md">English</a> · <a href="synthesis-llm.ko.md">한국어</a> · <a href="synthesis-llm.zh.md">中文</a> · <a href="synthesis-llm.ja.md">日本語</a> · <a href="synthesis-llm.ru.md">Русский</a> · <a href="synthesis-llm.es.md">Español</a> · <a href="synthesis-llm.fr.md">Français</a></p>
+<p align="center"><a href="../synthesis-llm.md">English</a> · <a href="synthesis-llm.ko.md">한국어</a> · <a href="synthesis-llm.zh.md">中文</a> · <a href="synthesis-llm.ja.md">日本語</a> · <a href="synthesis-llm.ru.md">Русский</a> · <a href="synthesis-llm.es.md">Español</a> · <a href="synthesis-llm.fr.md">Français</a> · <a href="synthesis-llm.de.md">Deutsch</a></p>
 <!-- translations:end -->
 LLM-Wiki 提供两条合成路径。默认路径是确定性的启发式方法，完全不调用网络：它从研究图生成可预测、幂等的 Markdown 模板。可选的 **LLM 升级路径** 会在每次 compile 时用 Claude 编写的 prose 替换这些模板，同时保持其他所有不变量（幂等性、citation 跟踪、hash-stable 正文）不变。
 

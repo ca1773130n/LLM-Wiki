@@ -1,7 +1,7 @@
 # MCP — wire LLM-Wiki into Claude Code, Codex, Cursor
 
 <!-- translations:start -->
-<p align="center"><a href="../i18n/integrations/mcp.ko.md">한국어</a> · <a href="../i18n/integrations/mcp.zh.md">中文</a> · <a href="../i18n/integrations/mcp.ja.md">日本語</a> · <a href="../i18n/integrations/mcp.ru.md">Русский</a> · <a href="../i18n/integrations/mcp.es.md">Español</a> · <a href="../i18n/integrations/mcp.fr.md">Français</a></p>
+<p align="center"><a href="../i18n/integrations/mcp.ko.md">한국어</a> · <a href="../i18n/integrations/mcp.zh.md">中文</a> · <a href="../i18n/integrations/mcp.ja.md">日本語</a> · <a href="../i18n/integrations/mcp.ru.md">Русский</a> · <a href="../i18n/integrations/mcp.es.md">Español</a> · <a href="../i18n/integrations/mcp.fr.md">Français</a> · <a href="../i18n/integrations/mcp.de.md">Deutsch</a></p>
 <!-- translations:end -->
 
 LLM-Wiki ships a [Model Context Protocol](https://modelcontextprotocol.io) stdio server that exposes the compiled typed graph to any MCP-aware client: Claude Code, Codex CLI, Cursor, Claude Desktop, and others. The server advertises three full MCP surfaces — **tools**, **resources**, and **prompts** — so clients can both query the graph on demand and seed context cheaply from canonical URIs.

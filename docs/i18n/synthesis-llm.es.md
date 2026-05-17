@@ -1,7 +1,7 @@
 # Prosa de síntesis respaldada por LLM
 
 <!-- translations:start -->
-<p align="center"><a href="../synthesis-llm.md">English</a> · <a href="synthesis-llm.ko.md">한국어</a> · <a href="synthesis-llm.zh.md">中文</a> · <a href="synthesis-llm.ja.md">日本語</a> · <a href="synthesis-llm.ru.md">Русский</a> · <a href="synthesis-llm.es.md">Español</a> · <a href="synthesis-llm.fr.md">Français</a></p>
+<p align="center"><a href="../synthesis-llm.md">English</a> · <a href="synthesis-llm.ko.md">한국어</a> · <a href="synthesis-llm.zh.md">中文</a> · <a href="synthesis-llm.ja.md">日本語</a> · <a href="synthesis-llm.ru.md">Русский</a> · <a href="synthesis-llm.es.md">Español</a> · <a href="synthesis-llm.fr.md">Français</a> · <a href="synthesis-llm.de.md">Deutsch</a></p>
 <!-- translations:end -->
 LLM-Wiki incluye dos rutas de síntesis. La predeterminada es una heurística determinista que nunca llama a la red: produce plantillas Markdown predecibles e idempotentes a partir del grafo de investigación. La **ruta opcional de actualización con LLM** reemplaza esas plantillas con prosa escrita por Claude en cada compile, manteniendo intactas todas las demás invariantes (idempotencia, seguimiento de citation, cuerpos hash-stable).
 

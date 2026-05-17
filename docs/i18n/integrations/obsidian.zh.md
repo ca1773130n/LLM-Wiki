@@ -1,7 +1,7 @@
 # Obsidian —— 把编译好的 wiki 作为真正的 vault 打开
 
 <!-- translations:start -->
-<p align="center"><a href="../../integrations/obsidian.md">English</a> · <a href="obsidian.ko.md">한국어</a> · <a href="obsidian.ja.md">日本語</a> · <a href="obsidian.ru.md">Русский</a> · <a href="obsidian.es.md">Español</a> · <a href="obsidian.fr.md">Français</a></p>
+<p align="center"><a href="../../integrations/obsidian.md">English</a> · <a href="obsidian.ko.md">한국어</a> · <a href="obsidian.ja.md">日本語</a> · <a href="obsidian.ru.md">Русский</a> · <a href="obsidian.es.md">Español</a> · <a href="obsidian.fr.md">Français</a> · <a href="obsidian.de.md">Deutsch</a></p>
 <!-- translations:end -->
 
 LLM-Wiki 的 Obsidian 导出会把你编译好的类型化图谱转化为一个真正的、有明确风格的 [Obsidian](https://obsidian.md) vault。不是一个普通的 markdown 目录 —— 而是带有 `.obsidian/` 配置、类型感知的 [callouts](https://help.obsidian.md/Editing+and+formatting/Callouts)、可被 [Dataview](https://blacksmithgu.github.io/obsidian-dataview/) 查询的 frontmatter、vault 仪表盘，以及跨 vault `wiki://` 引用索引的完整 vault。

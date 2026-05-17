@@ -10,7 +10,8 @@
   <a href="./README.ja.md">日本語</a> ·
   <a href="./README.ru.md">Русский</a> ·
   <a href="./README.es.md">Español</a> ·
-  <a href="./README.fr.md">Français</a>
+  <a href="./README.fr.md">Français</a> ·
+  <a href="./README.de.md">Deutsch</a>
 </p>
 
 [在线演示](https://ca1773130n.github.io/LLM-Wiki) · [文档](docs/) · [MCP 配置](docs/i18n/integrations/mcp.zh.md) · [Obsidian 导出](docs/i18n/integrations/obsidian.zh.md)

@@ -1,7 +1,7 @@
 # Архитектура
 
 <!-- translations:start -->
-<p align="center"><a href="../architecture.md">English</a> · <a href="architecture.ko.md">한국어</a> · <a href="architecture.zh.md">中文</a> · <a href="architecture.ja.md">日本語</a> · <a href="architecture.ru.md">Русский</a> · <a href="architecture.es.md">Español</a> · <a href="architecture.fr.md">Français</a></p>
+<p align="center"><a href="../architecture.md">English</a> · <a href="architecture.ko.md">한국어</a> · <a href="architecture.zh.md">中文</a> · <a href="architecture.ja.md">日本語</a> · <a href="architecture.ru.md">Русский</a> · <a href="architecture.es.md">Español</a> · <a href="architecture.fr.md">Français</a> · <a href="architecture.de.md">Deutsch</a></p>
 <!-- translations:end -->
 LLM-Wiki превращает каталог исходных материалов в контролируемый типизированный граф знаний и проецирует этот граф через долговечный слой markdown-wiki в статический, удобный для ИИ сайт. Редизайн апреля 2026 года реорганизовал систему вокруг трехслойной модели Karpathy: сырые свидетельства остаются сырыми, типизированный граф управляет онтологией, а слой markdown-wiki находится между графом и любым отрендеренным выводом. Статический сайт теперь является *рендерером* этого wiki-слоя, а не прямой выгрузкой графа; контролируемая онтология в [`llm_wiki/research_graph.py`](../../llm_wiki/research_graph.py) служит схемой.
 

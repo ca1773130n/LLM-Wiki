@@ -1,7 +1,7 @@
 # 프런트엔드 재설계 — 주석이 있는 라우트 둘러보기
 
 <!-- translations:start -->
-<p align="center"><a href="../frontend-redesign.md">English</a> · <a href="frontend-redesign.ko.md">한국어</a> · <a href="frontend-redesign.zh.md">中文</a> · <a href="frontend-redesign.ja.md">日本語</a> · <a href="frontend-redesign.ru.md">Русский</a> · <a href="frontend-redesign.es.md">Español</a> · <a href="frontend-redesign.fr.md">Français</a></p>
+<p align="center"><a href="../frontend-redesign.md">English</a> · <a href="frontend-redesign.ko.md">한국어</a> · <a href="frontend-redesign.zh.md">中文</a> · <a href="frontend-redesign.ja.md">日本語</a> · <a href="frontend-redesign.ru.md">Русский</a> · <a href="frontend-redesign.es.md">Español</a> · <a href="frontend-redesign.fr.md">Français</a> · <a href="frontend-redesign.de.md">Deutsch</a></p>
 <!-- translations:end -->
 이 문서는 재설계된 LLM-Wiki 정적 사이트에서 보이는 모든 라우트를 안내하는 투어입니다. [`architecture.md`](architecture.ko.md)의 상위 수준 모델과 [`feature-map.md`](feature-map.ko.md)의 상태 표를 보완합니다.
 

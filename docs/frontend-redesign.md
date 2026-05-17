@@ -1,7 +1,7 @@
 # Frontend redesign — annotated route walkthrough
 
 <!-- translations:start -->
-<p align="center"><a href="i18n/frontend-redesign.ko.md">한국어</a> · <a href="i18n/frontend-redesign.zh.md">中文</a> · <a href="i18n/frontend-redesign.ja.md">日本語</a> · <a href="i18n/frontend-redesign.ru.md">Русский</a> · <a href="i18n/frontend-redesign.es.md">Español</a> · <a href="i18n/frontend-redesign.fr.md">Français</a></p>
+<p align="center"><a href="i18n/frontend-redesign.ko.md">한국어</a> · <a href="i18n/frontend-redesign.zh.md">中文</a> · <a href="i18n/frontend-redesign.ja.md">日本語</a> · <a href="i18n/frontend-redesign.ru.md">Русский</a> · <a href="i18n/frontend-redesign.es.md">Español</a> · <a href="i18n/frontend-redesign.fr.md">Français</a> · <a href="../i18n/frontend-redesign.de.md">Deutsch</a></p>
 <!-- translations:end -->
 This document is a guided tour of every visible route on the redesigned LLM-Wiki static site. It complements the high-level model in [`architecture.md`](architecture.md) and the status table in [`feature-map.md`](feature-map.md).
 

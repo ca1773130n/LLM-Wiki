@@ -1,7 +1,7 @@
 # Harness session history
 
 <!-- translations:start -->
-<p align="center"><a href="i18n/session-history.ko.md">한국어</a> · <a href="i18n/session-history.zh.md">中文</a> · <a href="i18n/session-history.ja.md">日本語</a> · <a href="i18n/session-history.ru.md">Русский</a> · <a href="i18n/session-history.es.md">Español</a> · <a href="i18n/session-history.fr.md">Français</a></p>
+<p align="center"><a href="i18n/session-history.ko.md">한국어</a> · <a href="i18n/session-history.zh.md">中文</a> · <a href="i18n/session-history.ja.md">日本語</a> · <a href="i18n/session-history.ru.md">Русский</a> · <a href="i18n/session-history.es.md">Español</a> · <a href="i18n/session-history.fr.md">Français</a> · <a href="../i18n/session-history.de.md">Deutsch</a></p>
 <!-- translations:end -->
 LLM-Wiki can import local AI-agent transcripts and render them as project memory under the static site's `sessions/` section.
 

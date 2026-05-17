@@ -1,7 +1,7 @@
 # Architecture
 
 <!-- translations:start -->
-<p align="center"><a href="../architecture.md">English</a> · <a href="architecture.ko.md">한국어</a> · <a href="architecture.zh.md">中文</a> · <a href="architecture.ja.md">日本語</a> · <a href="architecture.ru.md">Русский</a> · <a href="architecture.es.md">Español</a> · <a href="architecture.fr.md">Français</a></p>
+<p align="center"><a href="../architecture.md">English</a> · <a href="architecture.ko.md">한국어</a> · <a href="architecture.zh.md">中文</a> · <a href="architecture.ja.md">日本語</a> · <a href="architecture.ru.md">Русский</a> · <a href="architecture.es.md">Español</a> · <a href="architecture.fr.md">Français</a> · <a href="architecture.de.md">Deutsch</a></p>
 <!-- translations:end -->
 LLM-Wiki transforme un répertoire de matériaux sources en graphe de connaissances contrôlé et typé, puis projette ce graphe à travers une couche wiki markdown durable vers un site web statique adapté à l’IA. La refonte d’avril 2026 a réorganisé le système autour d’un modèle Karpathy à trois couches : les preuves brutes restent brutes, un graphe typé gouverne l’ontologie, et une couche wiki markdown se place entre le graphe et toute sortie rendue. Le site statique est désormais un *moteur de rendu* de cette couche wiki, plutôt qu’un dump direct du graphe, avec l’ontologie contrôlée dans [`llm_wiki/research_graph.py`](../../llm_wiki/research_graph.py) comme schéma.
 

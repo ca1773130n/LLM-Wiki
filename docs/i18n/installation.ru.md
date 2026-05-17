@@ -1,7 +1,7 @@
 # Установка
 
 <!-- translations:start -->
-<p align="center"><a href="../installation.md">English</a> · <a href="installation.ko.md">한국어</a> · <a href="installation.zh.md">中文</a> · <a href="installation.ja.md">日本語</a> · <a href="installation.ru.md">Русский</a> · <a href="installation.es.md">Español</a> · <a href="installation.fr.md">Français</a></p>
+<p align="center"><a href="../installation.md">English</a> · <a href="installation.ko.md">한국어</a> · <a href="installation.zh.md">中文</a> · <a href="installation.ja.md">日本語</a> · <a href="installation.ru.md">Русский</a> · <a href="installation.es.md">Español</a> · <a href="installation.fr.md">Français</a> · <a href="installation.de.md">Deutsch</a></p>
 <!-- translations:end -->
 LLM-Wiki опубликован в PyPI и предоставляет shell-команды, чтобы пользователям не приходилось вручную запускать `python3 -m llm_wiki.cli`.
 

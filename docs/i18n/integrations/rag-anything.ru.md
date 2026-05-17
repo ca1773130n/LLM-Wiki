@@ -1,7 +1,7 @@
 # Мультимодальный сопутствующий инструмент RAG-Anything
 
 <!-- translations:start -->
-<p align="center"><a href="../../integrations/rag-anything.md">English</a> · <a href="rag-anything.ko.md">한국어</a> · <a href="rag-anything.zh.md">中文</a> · <a href="rag-anything.ja.md">日本語</a> · <a href="rag-anything.es.md">Español</a> · <a href="rag-anything.fr.md">Français</a></p>
+<p align="center"><a href="../../integrations/rag-anything.md">English</a> · <a href="rag-anything.ko.md">한국어</a> · <a href="rag-anything.zh.md">中文</a> · <a href="rag-anything.ja.md">日本語</a> · <a href="rag-anything.es.md">Español</a> · <a href="rag-anything.fr.md">Français</a> · <a href="rag-anything.de.md">Deutsch</a></p>
 <!-- translations:end -->
 
 [RAG-Anything](https://github.com/HKUDS/RAG-Anything) — мультимодальный RAG-фреймворк (на базе LightRAG), который разбирает PDF, Office-документы, изображения и формулы через MinerU/Docling/PaddleOCR. LLM-Wiki интегрирует его и как мультимодальный конвейер загрузки (UA-стиль нативной проекции графа), и как runtime-бэкенд памяти наряду с Cognee.

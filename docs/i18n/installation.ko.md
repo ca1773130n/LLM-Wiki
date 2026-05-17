@@ -1,7 +1,7 @@
 # 설치
 
 <!-- translations:start -->
-<p align="center"><a href="../installation.md">English</a> · <a href="installation.ko.md">한국어</a> · <a href="installation.zh.md">中文</a> · <a href="installation.ja.md">日本語</a> · <a href="installation.ru.md">Русский</a> · <a href="installation.es.md">Español</a> · <a href="installation.fr.md">Français</a></p>
+<p align="center"><a href="../installation.md">English</a> · <a href="installation.ko.md">한국어</a> · <a href="installation.zh.md">中文</a> · <a href="installation.ja.md">日本語</a> · <a href="installation.ru.md">Русский</a> · <a href="installation.es.md">Español</a> · <a href="installation.fr.md">Français</a> · <a href="installation.de.md">Deutsch</a></p>
 <!-- translations:end -->
 LLM-Wiki는 PyPI에 게시되어 있으며, 사용자가 `python3 -m llm_wiki.cli`를 직접 실행하지 않아도 되도록 셸 명령을 제공합니다.
 

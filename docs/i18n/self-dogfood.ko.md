@@ -1,7 +1,7 @@
 # Self-dogfood 데모
 
 <!-- translations:start -->
-<p align="center"><a href="../self-dogfood.md">English</a> · <a href="self-dogfood.ko.md">한국어</a> · <a href="self-dogfood.zh.md">中文</a> · <a href="self-dogfood.ja.md">日本語</a> · <a href="self-dogfood.ru.md">Русский</a> · <a href="self-dogfood.es.md">Español</a> · <a href="self-dogfood.fr.md">Français</a></p>
+<p align="center"><a href="../self-dogfood.md">English</a> · <a href="self-dogfood.ko.md">한국어</a> · <a href="self-dogfood.zh.md">中文</a> · <a href="self-dogfood.ja.md">日本語</a> · <a href="self-dogfood.ru.md">Русский</a> · <a href="self-dogfood.es.md">Español</a> · <a href="self-dogfood.fr.md">Français</a> · <a href="self-dogfood.de.md">Deutsch</a></p>
 <!-- translations:end -->
 이 프로젝트는 자기 자신을 인덱싱할 수 있습니다. self-dogfood 흐름은 LLM-Wiki를 설치하고, 자체 저장소 안에서 설정하고, 자체 docs/source/tests/scripts를 수집하며, 선택적으로 Understand Anything과 Cognee를 새로고침하고, 그래프 아티팩트를 컴파일하고, 정적 웹 프론트엔드를 빌드할 수 있음을 증명합니다.
 

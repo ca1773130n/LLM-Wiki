@@ -1,7 +1,7 @@
 # Obsidian — открытие скомпилированной wiki как настоящего vault
 
 <!-- translations:start -->
-<p align="center"><a href="../../integrations/obsidian.md">English</a> · <a href="obsidian.ko.md">한국어</a> · <a href="obsidian.zh.md">中文</a> · <a href="obsidian.ja.md">日本語</a> · <a href="obsidian.es.md">Español</a> · <a href="obsidian.fr.md">Français</a></p>
+<p align="center"><a href="../../integrations/obsidian.md">English</a> · <a href="obsidian.ko.md">한국어</a> · <a href="obsidian.zh.md">中文</a> · <a href="obsidian.ja.md">日本語</a> · <a href="obsidian.es.md">Español</a> · <a href="obsidian.fr.md">Français</a> · <a href="obsidian.de.md">Deutsch</a></p>
 <!-- translations:end -->
 
 Экспорт LLM-Wiki в Obsidian превращает ваш скомпилированный типизированный граф в настоящий, заранее продуманный vault [Obsidian](https://obsidian.md). Не каталог markdown-файлов — а vault с конфигом `.obsidian/`, типозависимыми [callouts](https://help.obsidian.md/Editing+and+formatting/Callouts), frontmatter, запрашиваемым через [Dataview](https://blacksmithgu.github.io/obsidian-dataview/), дашбордом vault и индексом межхранилищных ссылок `wiki://`.

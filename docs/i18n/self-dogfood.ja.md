@@ -1,7 +1,7 @@
 # Self-dogfood デモ
 
 <!-- translations:start -->
-<p align="center"><a href="../self-dogfood.md">English</a> · <a href="self-dogfood.ko.md">한국어</a> · <a href="self-dogfood.zh.md">中文</a> · <a href="self-dogfood.ja.md">日本語</a> · <a href="self-dogfood.ru.md">Русский</a> · <a href="self-dogfood.es.md">Español</a> · <a href="self-dogfood.fr.md">Français</a></p>
+<p align="center"><a href="../self-dogfood.md">English</a> · <a href="self-dogfood.ko.md">한국어</a> · <a href="self-dogfood.zh.md">中文</a> · <a href="self-dogfood.ja.md">日本語</a> · <a href="self-dogfood.ru.md">Русский</a> · <a href="self-dogfood.es.md">Español</a> · <a href="self-dogfood.fr.md">Français</a> · <a href="self-dogfood.de.md">Deutsch</a></p>
 <!-- translations:end -->
 このプロジェクトは自分自身をインデックスできます。self-dogfood フローは、LLM-Wiki をインストールし、自身のリポジトリ内で設定し、自身の docs/source/tests/scripts を取り込み、任意で Understand Anything と Cognee を更新し、グラフ成果物をコンパイルし、静的 Web フロントエンドをビルドできることを証明します。
 

@@ -1,7 +1,7 @@
 # MCP —— 把 LLM-Wiki 接入 Claude Code、Codex、Cursor
 
 <!-- translations:start -->
-<p align="center"><a href="../../integrations/mcp.md">English</a> · <a href="mcp.ko.md">한국어</a> · <a href="mcp.ja.md">日本語</a> · <a href="mcp.ru.md">Русский</a> · <a href="mcp.es.md">Español</a> · <a href="mcp.fr.md">Français</a></p>
+<p align="center"><a href="../../integrations/mcp.md">English</a> · <a href="mcp.ko.md">한국어</a> · <a href="mcp.ja.md">日本語</a> · <a href="mcp.ru.md">Русский</a> · <a href="mcp.es.md">Español</a> · <a href="mcp.fr.md">Français</a> · <a href="mcp.de.md">Deutsch</a></p>
 <!-- translations:end -->
 
 LLM-Wiki 自带一个 [Model Context Protocol](https://modelcontextprotocol.io) stdio 服务器，把编译好的类型化图谱暴露给任何支持 MCP 的客户端：Claude Code、Codex CLI、Cursor、Claude Desktop 等。该服务器同时提供三个完整的 MCP 表面 —— **tools**、**resources** 和 **prompts** —— 因此客户端既可以按需查询图谱，也可以从规范化的 URI 廉价地预热上下文。

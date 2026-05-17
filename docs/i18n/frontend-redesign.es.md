@@ -1,7 +1,7 @@
 # Rediseño del frontend — recorrido anotado de rutas
 
 <!-- translations:start -->
-<p align="center"><a href="../frontend-redesign.md">English</a> · <a href="frontend-redesign.ko.md">한국어</a> · <a href="frontend-redesign.zh.md">中文</a> · <a href="frontend-redesign.ja.md">日本語</a> · <a href="frontend-redesign.ru.md">Русский</a> · <a href="frontend-redesign.es.md">Español</a> · <a href="frontend-redesign.fr.md">Français</a></p>
+<p align="center"><a href="../frontend-redesign.md">English</a> · <a href="frontend-redesign.ko.md">한국어</a> · <a href="frontend-redesign.zh.md">中文</a> · <a href="frontend-redesign.ja.md">日本語</a> · <a href="frontend-redesign.ru.md">Русский</a> · <a href="frontend-redesign.es.md">Español</a> · <a href="frontend-redesign.fr.md">Français</a> · <a href="frontend-redesign.de.md">Deutsch</a></p>
 <!-- translations:end -->
 Este documento es una visita guiada por todas las rutas visibles del sitio estático rediseñado de LLM-Wiki. Complementa el modelo de alto nivel en [`architecture.md`](architecture.es.md) y la tabla de estado en [`feature-map.md`](feature-map.es.md).
 

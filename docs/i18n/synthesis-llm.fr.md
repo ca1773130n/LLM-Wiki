@@ -1,7 +1,7 @@
 # Prose de synthèse appuyée par un LLM
 
 <!-- translations:start -->
-<p align="center"><a href="../synthesis-llm.md">English</a> · <a href="synthesis-llm.ko.md">한국어</a> · <a href="synthesis-llm.zh.md">中文</a> · <a href="synthesis-llm.ja.md">日本語</a> · <a href="synthesis-llm.ru.md">Русский</a> · <a href="synthesis-llm.es.md">Español</a> · <a href="synthesis-llm.fr.md">Français</a></p>
+<p align="center"><a href="../synthesis-llm.md">English</a> · <a href="synthesis-llm.ko.md">한국어</a> · <a href="synthesis-llm.zh.md">中文</a> · <a href="synthesis-llm.ja.md">日本語</a> · <a href="synthesis-llm.ru.md">Русский</a> · <a href="synthesis-llm.es.md">Español</a> · <a href="synthesis-llm.fr.md">Français</a> · <a href="synthesis-llm.de.md">Deutsch</a></p>
 <!-- translations:end -->
 LLM-Wiki fournit deux chemins de synthèse. Le chemin par défaut est une heuristique déterministe qui n’appelle jamais le réseau : elle produit des modèles Markdown prévisibles et idempotents à partir du graphe de recherche. Le **chemin optionnel de mise à niveau LLM** remplace ces modèles par une prose écrite par Claude à chaque compile, tout en conservant tous les autres invariants (idempotence, suivi des citation, corps hash-stable).
 

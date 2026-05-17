@@ -1,7 +1,7 @@
 # RAG-Anything マルチモーダル連携ツール
 
 <!-- translations:start -->
-<p align="center"><a href="../../integrations/rag-anything.md">English</a> · <a href="rag-anything.ko.md">한국어</a> · <a href="rag-anything.zh.md">中文</a> · <a href="rag-anything.ru.md">Русский</a> · <a href="rag-anything.es.md">Español</a> · <a href="rag-anything.fr.md">Français</a></p>
+<p align="center"><a href="../../integrations/rag-anything.md">English</a> · <a href="rag-anything.ko.md">한국어</a> · <a href="rag-anything.zh.md">中文</a> · <a href="rag-anything.ru.md">Русский</a> · <a href="rag-anything.es.md">Español</a> · <a href="rag-anything.fr.md">Français</a> · <a href="rag-anything.de.md">Deutsch</a></p>
 <!-- translations:end -->
 
 [RAG-Anything](https://github.com/HKUDS/RAG-Anything) は、MinerU/Docling/PaddleOCR を介して PDF、Office 文書、画像、数式を解析するマルチモーダル RAG フレームワーク（LightRAG ベース）です。LLM-Wiki はこれを、マルチモーダル取り込みパイプライン（UA スタイルのネイティブグラフ投影）として、また Cognee と並ぶランタイムメモリバックエンドとして統合します。

@@ -1,7 +1,7 @@
 # Feature Map
 
 <!-- translations:start -->
-<p align="center"><a href="i18n/feature-map.ko.md">한국어</a> · <a href="i18n/feature-map.zh.md">中文</a> · <a href="i18n/feature-map.ja.md">日本語</a> · <a href="i18n/feature-map.ru.md">Русский</a> · <a href="i18n/feature-map.es.md">Español</a> · <a href="i18n/feature-map.fr.md">Français</a></p>
+<p align="center"><a href="i18n/feature-map.ko.md">한국어</a> · <a href="i18n/feature-map.zh.md">中文</a> · <a href="i18n/feature-map.ja.md">日本語</a> · <a href="i18n/feature-map.ru.md">Русский</a> · <a href="i18n/feature-map.es.md">Español</a> · <a href="i18n/feature-map.fr.md">Français</a> · <a href="../i18n/feature-map.de.md">Deutsch</a></p>
 <!-- translations:end -->
 This document summarizes the features currently implemented in LLM-Wiki, with status, source files, and where they're documented.
 

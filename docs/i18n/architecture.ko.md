@@ -1,7 +1,7 @@
 # 건축학
 
 <!-- translations:start -->
-<p align="center"><a href="../architecture.md">English</a> · <a href="architecture.ko.md">한국어</a> · <a href="architecture.zh.md">中文</a> · <a href="architecture.ja.md">日本語</a> · <a href="architecture.ru.md">Русский</a> · <a href="architecture.es.md">Español</a> · <a href="architecture.fr.md">Français</a></p>
+<p align="center"><a href="../architecture.md">English</a> · <a href="architecture.ko.md">한국어</a> · <a href="architecture.zh.md">中文</a> · <a href="architecture.ja.md">日本語</a> · <a href="architecture.ru.md">Русский</a> · <a href="architecture.es.md">Español</a> · <a href="architecture.fr.md">Français</a> · <a href="architecture.de.md">Deutsch</a></p>
 <!-- translations:end -->
 LLM-Wiki는 소스 자료의 디렉토리를 제어되고 입력된 지식 그래프로 바꾸고 내구성 있는 마크다운 위키 레이어를 통해 해당 그래프를 정적 AI 친화적인 웹 사이트로 프로젝트합니다. 2026년 4월 재설계에서는 Karpathy 3계층 모델을 중심으로 시스템을 재구성했습니다. 원시 증거는 원시 상태로 유지되고, 입력된 그래프는 온톨로지를 관리하며, 마크다운 위키 계층은 그래프와 렌더링된 출력 사이에 위치합니다. 정적 사이트는 이제 스키마로 [`llm_wiki/research_graph.py`](../../llm_wiki/research_graph.py)의 제어된 온톨로지를 사용하여 그래프를 직접 덤프하는 것이 아니라 위키 레이어의 *렌더러*입니다.
 

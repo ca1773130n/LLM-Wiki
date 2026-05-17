@@ -1,7 +1,7 @@
 # フロントエンド再設計 — 注釈付きルートウォークスルー
 
 <!-- translations:start -->
-<p align="center"><a href="../frontend-redesign.md">English</a> · <a href="frontend-redesign.ko.md">한국어</a> · <a href="frontend-redesign.zh.md">中文</a> · <a href="frontend-redesign.ja.md">日本語</a> · <a href="frontend-redesign.ru.md">Русский</a> · <a href="frontend-redesign.es.md">Español</a> · <a href="frontend-redesign.fr.md">Français</a></p>
+<p align="center"><a href="../frontend-redesign.md">English</a> · <a href="frontend-redesign.ko.md">한국어</a> · <a href="frontend-redesign.zh.md">中文</a> · <a href="frontend-redesign.ja.md">日本語</a> · <a href="frontend-redesign.ru.md">Русский</a> · <a href="frontend-redesign.es.md">Español</a> · <a href="frontend-redesign.fr.md">Français</a> · <a href="frontend-redesign.de.md">Deutsch</a></p>
 <!-- translations:end -->
 このドキュメントは、再設計された LLM-Wiki 静的サイトで表示されるすべてのルートを案内するガイドです。[`architecture.md`](architecture.ja.md) の高レベルモデルと、[`feature-map.md`](feature-map.ja.md) のステータス表を補完します。
 

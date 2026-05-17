@@ -1,7 +1,7 @@
 # Obsidian — ouvrir le wiki compilé comme un vrai vault
 
 <!-- translations:start -->
-<p align="center"><a href="../../integrations/obsidian.md">English</a> · <a href="obsidian.ko.md">한국어</a> · <a href="obsidian.zh.md">中文</a> · <a href="obsidian.ja.md">日本語</a> · <a href="obsidian.ru.md">Русский</a> · <a href="obsidian.es.md">Español</a></p>
+<p align="center"><a href="../../integrations/obsidian.md">English</a> · <a href="obsidian.ko.md">한국어</a> · <a href="obsidian.zh.md">中文</a> · <a href="obsidian.ja.md">日本語</a> · <a href="obsidian.ru.md">Русский</a> · <a href="obsidian.es.md">Español</a> · <a href="obsidian.de.md">Deutsch</a></p>
 <!-- translations:end -->
 
 L'export Obsidian de LLM-Wiki transforme votre graphe typé compilé en un vrai vault [Obsidian](https://obsidian.md) avec un parti pris assumé. Pas un simple dossier de markdown — un vault avec une configuration `.obsidian/`, des [callouts](https://help.obsidian.md/Editing+and+formatting/Callouts) sensibles au type, du frontmatter interrogeable via [Dataview](https://blacksmithgu.github.io/obsidian-dataview/), un tableau de bord de vault, et un index des références `wiki://` inter-vaults.

@@ -1,7 +1,7 @@
 # Синтез prose с опорой на LLM
 
 <!-- translations:start -->
-<p align="center"><a href="../synthesis-llm.md">English</a> · <a href="synthesis-llm.ko.md">한국어</a> · <a href="synthesis-llm.zh.md">中文</a> · <a href="synthesis-llm.ja.md">日本語</a> · <a href="synthesis-llm.ru.md">Русский</a> · <a href="synthesis-llm.es.md">Español</a> · <a href="synthesis-llm.fr.md">Français</a></p>
+<p align="center"><a href="../synthesis-llm.md">English</a> · <a href="synthesis-llm.ko.md">한국어</a> · <a href="synthesis-llm.zh.md">中文</a> · <a href="synthesis-llm.ja.md">日本語</a> · <a href="synthesis-llm.ru.md">Русский</a> · <a href="synthesis-llm.es.md">Español</a> · <a href="synthesis-llm.fr.md">Français</a> · <a href="synthesis-llm.de.md">Deutsch</a></p>
 <!-- translations:end -->
 LLM-Wiki поставляется с двумя путями синтеза. По умолчанию используется детерминированная эвристика, которая никогда не обращается к сети: она создает предсказуемые, идемпотентные Markdown-шаблоны из исследовательского графа. Опциональный **путь LLM-апгрейда** заменяет эти шаблоны prose, написанной Claude при каждом compile, сохраняя все остальные инварианты (идемпотентность, отслеживание citation, hash-stable тела) неизменными.
 

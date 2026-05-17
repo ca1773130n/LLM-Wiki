@@ -1,7 +1,7 @@
 # Understand Anything companion workflow
 
 <!-- translations:start -->
-<p align="center"><a href="../i18n/integrations/understand-anything.ko.md">한국어</a> · <a href="../i18n/integrations/understand-anything.zh.md">中文</a> · <a href="../i18n/integrations/understand-anything.ja.md">日本語</a> · <a href="../i18n/integrations/understand-anything.ru.md">Русский</a> · <a href="../i18n/integrations/understand-anything.es.md">Español</a> · <a href="../i18n/integrations/understand-anything.fr.md">Français</a></p>
+<p align="center"><a href="../i18n/integrations/understand-anything.ko.md">한국어</a> · <a href="../i18n/integrations/understand-anything.zh.md">中文</a> · <a href="../i18n/integrations/understand-anything.ja.md">日本語</a> · <a href="../i18n/integrations/understand-anything.ru.md">Русский</a> · <a href="../i18n/integrations/understand-anything.es.md">Español</a> · <a href="../i18n/integrations/understand-anything.fr.md">Français</a> · <a href="../i18n/integrations/understand-anything.de.md">Deutsch</a></p>
 <!-- translations:end -->
 [Understand Anything](https://github.com/Lum1104/Understand-Anything) and LLM-Wiki are complementary projects.
 

@@ -1,7 +1,7 @@
 # Демо Self-dogfood
 
 <!-- translations:start -->
-<p align="center"><a href="../self-dogfood.md">English</a> · <a href="self-dogfood.ko.md">한국어</a> · <a href="self-dogfood.zh.md">中文</a> · <a href="self-dogfood.ja.md">日本語</a> · <a href="self-dogfood.ru.md">Русский</a> · <a href="self-dogfood.es.md">Español</a> · <a href="self-dogfood.fr.md">Français</a></p>
+<p align="center"><a href="../self-dogfood.md">English</a> · <a href="self-dogfood.ko.md">한국어</a> · <a href="self-dogfood.zh.md">中文</a> · <a href="self-dogfood.ja.md">日本語</a> · <a href="self-dogfood.ru.md">Русский</a> · <a href="self-dogfood.es.md">Español</a> · <a href="self-dogfood.fr.md">Français</a> · <a href="self-dogfood.de.md">Deutsch</a></p>
 <!-- translations:end -->
 Этот проект может индексировать сам себя. Поток self-dogfood доказывает, что LLM-Wiki можно установить, настроить внутри собственного репозитория, загрузить собственные docs/source/tests/scripts, при необходимости обновить Understand Anything и Cognee, скомпилировать графовые артефакты и собрать статический веб-фронтенд.
 

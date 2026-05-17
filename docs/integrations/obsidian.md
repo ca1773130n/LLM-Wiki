@@ -1,7 +1,7 @@
 # Obsidian — open the compiled wiki as a real vault
 
 <!-- translations:start -->
-<p align="center"><a href="../i18n/integrations/obsidian.ko.md">한국어</a> · <a href="../i18n/integrations/obsidian.zh.md">中文</a> · <a href="../i18n/integrations/obsidian.ja.md">日本語</a> · <a href="../i18n/integrations/obsidian.ru.md">Русский</a> · <a href="../i18n/integrations/obsidian.es.md">Español</a> · <a href="../i18n/integrations/obsidian.fr.md">Français</a></p>
+<p align="center"><a href="../i18n/integrations/obsidian.ko.md">한국어</a> · <a href="../i18n/integrations/obsidian.zh.md">中文</a> · <a href="../i18n/integrations/obsidian.ja.md">日本語</a> · <a href="../i18n/integrations/obsidian.ru.md">Русский</a> · <a href="../i18n/integrations/obsidian.es.md">Español</a> · <a href="../i18n/integrations/obsidian.fr.md">Français</a> · <a href="../i18n/integrations/obsidian.de.md">Deutsch</a></p>
 <!-- translations:end -->
 
 LLM-Wiki's Obsidian export turns your compiled typed graph into a real, opinionated [Obsidian](https://obsidian.md) vault. Not a directory of markdown — a vault with `.obsidian/` config, type-aware [callouts](https://help.obsidian.md/Editing+and+formatting/Callouts), [Dataview](https://blacksmithgu.github.io/obsidian-dataview/)-queryable frontmatter, a vault dashboard, and an index of cross-vault `wiki://` references.

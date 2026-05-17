@@ -1,7 +1,7 @@
 # RAG-Anything 多模态配套工具
 
 <!-- translations:start -->
-<p align="center"><a href="../../integrations/rag-anything.md">English</a> · <a href="rag-anything.ko.md">한국어</a> · <a href="rag-anything.ja.md">日本語</a> · <a href="rag-anything.ru.md">Русский</a> · <a href="rag-anything.es.md">Español</a> · <a href="rag-anything.fr.md">Français</a></p>
+<p align="center"><a href="../../integrations/rag-anything.md">English</a> · <a href="rag-anything.ko.md">한국어</a> · <a href="rag-anything.ja.md">日本語</a> · <a href="rag-anything.ru.md">Русский</a> · <a href="rag-anything.es.md">Español</a> · <a href="rag-anything.fr.md">Français</a> · <a href="rag-anything.de.md">Deutsch</a></p>
 <!-- translations:end -->
 
 [RAG-Anything](https://github.com/HKUDS/RAG-Anything) 是一个基于 LightRAG 的多模态 RAG 框架，通过 MinerU/Docling/PaddleOCR 解析 PDF、Office 文档、图像和公式。LLM-Wiki 同时把它作为多模态摄取流水线（UA 风格的原生图投影）和与 Cognee 并行的运行时记忆后端进行集成。

@@ -1,7 +1,7 @@
 # Self-dogfood 演示
 
 <!-- translations:start -->
-<p align="center"><a href="../self-dogfood.md">English</a> · <a href="self-dogfood.ko.md">한국어</a> · <a href="self-dogfood.zh.md">中文</a> · <a href="self-dogfood.ja.md">日本語</a> · <a href="self-dogfood.ru.md">Русский</a> · <a href="self-dogfood.es.md">Español</a> · <a href="self-dogfood.fr.md">Français</a></p>
+<p align="center"><a href="../self-dogfood.md">English</a> · <a href="self-dogfood.ko.md">한국어</a> · <a href="self-dogfood.zh.md">中文</a> · <a href="self-dogfood.ja.md">日本語</a> · <a href="self-dogfood.ru.md">Русский</a> · <a href="self-dogfood.es.md">Español</a> · <a href="self-dogfood.fr.md">Français</a> · <a href="self-dogfood.de.md">Deutsch</a></p>
 <!-- translations:end -->
 此项目可以索引自身。self-dogfood 流程证明 LLM-Wiki 可以被安装、在自己的仓库内设置、摄取自己的 docs/source/tests/scripts、可选地刷新 Understand Anything 和 Cognee、编译图谱产物，并构建静态 Web 前端。
 
