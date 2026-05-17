@@ -13,6 +13,8 @@
   <a href="./README.fr.md">Français</a>
 </p>
 
+[라이브 데모](https://ca1773130n.github.io/LLM-Wiki) · [문서](docs/) · [MCP 설정](docs/i18n/integrations/mcp.ko.md) · [Obsidian 내보내기](docs/i18n/integrations/obsidian.ko.md)
+
 LLM-Wiki는 프로젝트 메모리 컴파일러입니다. 마크다운, 소스 파일, 선택적으로 PDF/Office 문서/이미지가 들어 있는 디렉터리를 입력으로 받아 타입이 지정된 지식 그래프를 추출하고, 쿼리 가능한 위키를 작성하며, 이식 가능한 아티팩트를 함께 생성합니다: 마크다운 프로젝션, Cognee용 번들, 에이전트 하니스, 그리고 Claude Code, Codex 또는 모든 MCP 클라이언트에 연결할 수 있는 MCP 서버. 호스팅 서비스가 아니라 프로젝트 컨텍스트를 위한 빌드 단계입니다.
 
 ## 언제 사용하고, 언제 사용하지 않을지

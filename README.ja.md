@@ -13,6 +13,8 @@
   <a href="./README.fr.md">Français</a>
 </p>
 
+[ライブデモ](https://ca1773130n.github.io/LLM-Wiki) · [ドキュメント](docs/) · [MCP セットアップ](docs/i18n/integrations/mcp.ja.md) · [Obsidian エクスポート](docs/i18n/integrations/obsidian.ja.md)
+
 LLM-Wiki はプロジェクトメモリのコンパイラです。Markdown、ソースファイル、必要に応じて PDF/Office 文書/画像が入ったディレクトリを与えると、型付きの知識グラフを抽出し、クエリ可能な wiki を書き出し、ポータブルな成果物を生成します: Markdown プロジェクション、Cognee 向けの bundle、エージェント harness、そして Claude Code、Codex、任意の MCP クライアントに接続できる MCP サーバ。ホスティングサービスではなく、プロジェクトコンテキストのためのビルドステップです。
 
 ## 使うべきとき（と使うべきでないとき）

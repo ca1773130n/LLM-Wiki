@@ -13,6 +13,8 @@
   <a href="./README.fr.md">Français</a>
 </p>
 
+[在线演示](https://ca1773130n.github.io/LLM-Wiki) · [文档](docs/) · [MCP 配置](docs/i18n/integrations/mcp.zh.md) · [Obsidian 导出](docs/i18n/integrations/obsidian.zh.md)
+
 LLM-Wiki 是一个项目记忆编译器。把一个包含 Markdown、源代码以及可选 PDF/Office 文档/图片的目录交给它，它会提取一个类型化的知识图谱，写出一份可查询的 wiki，并产出可移植的工件：Markdown 投影、面向 Cognee 的 bundle、智能体 harness，以及一个 MCP 服务器——你可以把它接到 Claude Code、Codex 或任何 MCP 客户端。它是为项目上下文准备的构建步骤，而不是托管服务。
 
 ## 何时使用（以及何时不要使用）

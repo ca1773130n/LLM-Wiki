@@ -13,6 +13,8 @@
   <a href="./README.es.md">Español</a>
 </p>
 
+[Démo en direct](https://ca1773130n.github.io/LLM-Wiki) · [Documentation](docs/) · [Configuration MCP](docs/i18n/integrations/mcp.fr.md) · [Export Obsidian](docs/i18n/integrations/obsidian.fr.md)
+
 LLM-Wiki est un compilateur de mémoire de projet. Pointez-le vers un répertoire contenant du Markdown, des fichiers source et, en option, des PDF/documents Office/images : il extrait un graphe de connaissances typé, écrit un wiki interrogeable et produit des artefacts portables — projection Markdown, bundle prêt pour Cognee, agent harness, et un serveur MCP que vous pouvez brancher sur Claude Code, Codex ou n’importe quel client MCP. C’est une étape de build pour le contexte de projet, pas un service hébergé.
 
 ## Quand l’utiliser (et quand ne pas l’utiliser)
