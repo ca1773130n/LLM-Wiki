@@ -81,6 +81,15 @@ _CALLOUT_BY_NODE_TYPE: Dict[ResearchNodeType, tuple[str, str]] = {
     ResearchNodeType.CAUSAL_CLAIM: ("important", "Causal claim"),
     ResearchNodeType.OPEN_QUESTION: ("question", "Open question"),
     ResearchNodeType.EVIDENCE_SPAN: ("example", "Evidence"),
+    # Session-derived findings. Each gets its own page; the callout tag
+    # tells the reader at a glance what flavour of finding they're looking
+    # at without having to read the type field.
+    ResearchNodeType.SESSION_INSIGHT: ("note", "Insight"),
+    ResearchNodeType.SESSION_DECISION: ("important", "Decision"),
+    ResearchNodeType.SESSION_QUESTION: ("question", "Question"),
+    ResearchNodeType.SESSION_TODO: ("todo", "TODO"),
+    ResearchNodeType.SESSION_HYPOTHESIS: ("example", "Hypothesis"),
+    ResearchNodeType.SESSION_TAKEAWAY: ("summary", "Takeaway"),
 }
 
 
@@ -226,7 +235,30 @@ def directory_for_node(node: ResearchNode) -> str:
         return "papers"
     if node.type in CLAIM_TYPES:
         return "claims"
+    # Session-derived findings live under a per-session subdirectory so
+    # the vault has a visually-grouped layout. The subdir name is
+    # ``sessions/<session-id-slug>/`` — the parent Session node's
+    # ``session_id`` metadata is what gets slugified. When the metadata
+    # is missing (defensive fallback) we drop to plain ``sessions/``.
+    if node.type in _SESSION_FINDING_NODE_TYPES:
+        sid = (node.metadata or {}).get("session_id") if isinstance(node.metadata, dict) else None
+        if sid:
+            return f"sessions/{slugify(str(sid))}"
+        return "sessions"
     return "concepts"
+
+
+# Local mirror of SESSION_FINDING_TYPES so we don't reach into research_graph
+# at projection time. Kept in sync with the canonical set in
+# tesserae.research_graph (Phase 1).
+_SESSION_FINDING_NODE_TYPES = {
+    ResearchNodeType.SESSION_INSIGHT,
+    ResearchNodeType.SESSION_DECISION,
+    ResearchNodeType.SESSION_QUESTION,
+    ResearchNodeType.SESSION_TODO,
+    ResearchNodeType.SESSION_HYPOTHESIS,
+    ResearchNodeType.SESSION_TAKEAWAY,
+}
 
 
 # Type priority for slug-collision tie-breaking. When two nodes claim the same
