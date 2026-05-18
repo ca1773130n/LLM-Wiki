@@ -104,6 +104,36 @@ class CognifyOptions:
 
 
 @dataclass(frozen=True)
+class SessionExtractionOptions:
+    """Configuration for the session graph extractor.
+
+    See ``docs/superpowers/specs/2026-05-19-session-graph-extractor-design.md``
+    for the full design. Defaults match the spec's "auto" mode: the
+    structural pass runs whenever sessions exist; the LLM pass runs
+    only when a backend is configured. Setting ``enabled = False``
+    skips both passes entirely (graph identical to today).
+    """
+
+    enabled: bool = True
+    llm_enabled: str = "auto"  # auto | true | false
+    max_turns_per_chunk: int = 30
+    max_tokens_per_call: int = 30000
+    model: Optional[str] = None
+    include_doc_id_context: int = 200
+
+    @classmethod
+    def from_mapping(cls, data: dict) -> "SessionExtractionOptions":
+        return cls(
+            enabled=bool(data.get("enabled", True)),
+            llm_enabled=str(data.get("llm_enabled", "auto")).lower(),
+            max_turns_per_chunk=int(data.get("max_turns_per_chunk", 30)),
+            max_tokens_per_call=int(data.get("max_tokens_per_call", 30000)),
+            model=data.get("model") or None,
+            include_doc_id_context=int(data.get("include_doc_id_context", 200)),
+        )
+
+
+@dataclass(frozen=True)
 class ProjectPaths:
     root: Path
     config: Path
@@ -130,6 +160,11 @@ class ProjectPaths:
     # diverged_fields is the per-compile audit log of those diffs.
     vault_snapshot: Path
     diverged_fields: Path
+    # Session graph extractor cache (Phase 5 populates findings.json files;
+    # Phase 3 only needs the directory to exist for future writes). Default
+    # supplied so existing call sites that construct ProjectPaths directly
+    # (test_vault_watch.py and friends) don't need a positional update.
+    session_findings: Path = Path(".tesserae/session_findings")
 
 
 class ProjectWiki:
@@ -165,6 +200,7 @@ class ProjectWiki:
             wiki=self.root / "wiki",
             vault_snapshot=self.root / "vault_snapshot.json",
             diverged_fields=self.root / "diverged-fields.md",
+            session_findings=self.root / "session_findings",
         )
         # In-memory override of the Obsidian vault location, set by
         # obsidian-sync --vault for the duration of a single CLI call.
@@ -312,6 +348,7 @@ class ProjectWiki:
         loader: Optional[SourceLoader] = None,
         store: Optional[GraphStore] = None,
         vault_pull: bool = True,
+        session_options: Optional[SessionExtractionOptions] = None,
     ) -> dict:
         """Run the substrate-discovery + extraction pipeline for this project.
 
@@ -421,6 +458,13 @@ class ProjectWiki:
         # entries; we don't want those duplicating SourceDocument pages in
         # the visual graph. See ``filter_filename_shaped_concepts``.
         graph = filter_filename_shaped_concepts(graph)
+        # Session graph extraction. Runs unconditionally when enabled (the
+        # default); produces a slice of Session + SessionDecision nodes plus
+        # discussed_in / derived_from_session edges that link the agent's
+        # historical conversations into the doc graph. The structural pass
+        # is the only thing Phase 3 wires in; the LLM pass arrives in
+        # Phase 5 of the session-graph plan.
+        graph = self._merge_session_graph(graph, cfg, override=session_options)
         self._write_artifacts(graph, cognify=cognify, store=store, vault_pull=vault_pull)
         return {
             "project_root": str(self.project_root),
@@ -463,6 +507,91 @@ class ProjectWiki:
                 sync_manifest_path=manifest,
             )
         return graph
+
+    def _merge_session_graph(
+        self,
+        graph: ResearchGraph,
+        cfg: dict,
+        override: Optional[SessionExtractionOptions] = None,
+    ) -> ResearchGraph:
+        """Merge the session graph extractor's slice into the doc graph.
+
+        Phase 3 of the session-graph plan: structural pass only. Loads
+        normalized HarnessSession records via ``discover_harness_sessions``
+        (filtered by project_root), builds a multi-key path index from the
+        live doc graph, and returns a slice of ``Session`` + structural
+        ``SessionDecision`` nodes with ``discussed_in`` / ``derived_from_session``
+        edges. The LLM pass is wired in Phase 5.
+
+        The whole pass is skipped when ``sessions.enabled`` is False — either
+        via the ``override`` argument (CLI flag wins) or via the
+        ``sessions.enabled`` config key (fallback when no CLI override).
+        """
+        from .harness_sessions import (
+            HarnessSession,
+            HarnessSessionStore,
+            discover_harness_sessions,
+            session_matches_project,
+        )
+        from .llm_json import build_default_json_client
+        from .session_graph import SessionGraphExtractor
+
+        opts = override or SessionExtractionOptions.from_mapping(
+            cfg.get("sessions") if isinstance(cfg.get("sessions"), dict) else {}
+        )
+        if not opts.enabled:
+            return graph
+
+        # Ensure the cache directory exists for LLM finding caches.
+        self.paths.session_findings.mkdir(parents=True, exist_ok=True)
+
+        # Source-of-truth resolution order:
+        #   1. ``.tesserae/harness_sessions/`` — the normalised import the
+        #      operator opted into via ``tesserae sessions discover --import``.
+        #      Lets tests pre-populate this dir without depending on the
+        #      caller's ``~/.claude``.
+        #   2. ``discover_harness_sessions(project_root)`` — fall back to
+        #      live discovery from the caller's filesystem.
+        # Session source is OPT-IN by cache. We only consume
+        # `.tesserae/harness_sessions/` (populated when the user runs
+        # ``tesserae sessions discover --import``). The compile path does
+        # NOT scan ``~/.claude/projects/`` or ``~/.codex/sessions/`` on
+        # its own — that scan is multi-minute on a machine with
+        # thousands of historical sessions and would silently re-add
+        # multi-minute latency to every ``project compile``.
+        if not self.paths.harness_sessions.exists():
+            return graph
+        store = HarnessSessionStore(self.paths.harness_sessions)
+        cached = store.list_sessions()
+        in_project: List[HarnessSession] = [
+            s for s in cached
+            if session_matches_project(s, self.project_root)
+        ]
+        if not in_project:
+            return graph
+
+        # LLM client gating: build one only when llm_enabled allows it AND
+        # a backend is available. ``build_default_json_client`` returns
+        # None when neither is true — keeps the no-credentials path
+        # silent and structural-only.
+        json_client = None
+        if opts.llm_enabled != "false":
+            json_client = build_default_json_client(model=opts.model)
+        extractor = SessionGraphExtractor(
+            project_root=self.project_root,
+            cache_dir=self.paths.session_findings,
+            doc_graph=graph,
+            sessions=in_project,
+            json_client=json_client,
+            llm_enabled=opts.llm_enabled,
+            max_turns_per_chunk=opts.max_turns_per_chunk,
+            include_doc_id_context=opts.include_doc_id_context,
+            model=opts.model,
+        )
+        session_slice = extractor.extract()
+        if not session_slice.nodes and not session_slice.edges:
+            return graph
+        return merge_graphs([graph, session_slice])
 
     def _merge_configured_raganything_graph(self, graph: ResearchGraph, cfg: dict) -> ResearchGraph:
         """Merge configured RAG-Anything manifest artifacts natively."""
@@ -555,6 +684,7 @@ class ProjectWiki:
         loader: Optional[SourceLoader] = None,
         store: Optional[GraphStore] = None,
         vault_pull: bool = True,
+        session_options: Optional[SessionExtractionOptions] = None,
     ) -> dict:
         """Compile every configured source into the .tesserae artifacts.
 
@@ -595,6 +725,7 @@ class ProjectWiki:
             loader=loader,
             store=store,
             vault_pull=vault_pull,
+            session_options=session_options,
         )
 
     def lint(self, fix_trivial: bool = False, severity_floor: str = "info") -> LintReport:

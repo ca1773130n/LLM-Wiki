@@ -20,7 +20,7 @@ from .llm_extractor import ClaudeCLIResearchExtractor
 from .markdown_projection import GraphMarkdownProjector
 from .persistence import KuzuResearchGraphStore, SQLiteResearchGraphStore
 from .graphiti_adapter import GraphitiSyncUnavailableError
-from .project import CognifyOptions, ProjectWiki, cognify_options_from_config, cognee_backend_config, iter_markdown_files, load_graph_file as _load_graph_file
+from .project import CognifyOptions, ProjectWiki, SessionExtractionOptions, cognify_options_from_config, cognee_backend_config, iter_markdown_files, load_graph_file as _load_graph_file
 from .project_setup import apply_setup_plan, build_setup_plan, interactive_setup_plan, refresh_configured_external_tools, render_setup_summary
 from .report import GraphReporter
 from .understand_anything_refresh import refresh_understand_anything
@@ -885,6 +885,12 @@ def project_main(argv: List[str] | None = None) -> int:
         ),
     )
     compile_parser.add_argument("--refresh-external-tools", action="store_true", help="Run configured external tool refresh commands before compile, even if they are not marked auto_refresh")
+    # --- Session graph extractor (Phase 3 wires only the structural pass; LLM in Phase 5) ----
+    session_group = compile_parser.add_mutually_exclusive_group()
+    session_group.add_argument("--sessions", dest="sessions_enabled", action="store_true", default=None, help="Force session graph extraction on (default if .tesserae/harness_sessions/ exists)")
+    session_group.add_argument("--no-sessions", dest="sessions_enabled", action="store_false", default=None, help="Skip session graph extraction entirely")
+    compile_parser.add_argument("--sessions-llm", choices=["auto", "true", "false"], default=None, help="LLM extraction mode (default 'auto' — runs when an LLM backend is configured). Honored once Phase 5 lands.")
+    compile_parser.add_argument("--sessions-model", default=None, help="Override the LLM model used for session extraction (Phase 5)")
     # --- Cognee cognify pass (opt-in, runs after the bundle is written) ----
     compile_parser.add_argument("--cognee-add", action="store_true", help="After compile, add the Cognee bundle to the Cognee dataset (no cognify)")
     compile_parser.add_argument("--cognee-cognify", action="store_true", help="After compile, add the bundle and run Cognee cognify (uses configured LLM/embedding providers)")
@@ -1225,6 +1231,37 @@ def project_main(argv: List[str] | None = None) -> int:
             system_root=args.cognee_system_root,
             data_root=args.cognee_data_root,
         ) if explicit_cognee else cognify_options_from_config(wiki.config())
+        # Build a SessionExtractionOptions override when any --sessions* CLI
+        # flag was passed. None means "no override — read from config", which
+        # is what _merge_session_graph does by default.
+        session_override = None
+        if (
+            args.sessions_enabled is not None
+            or args.sessions_llm is not None
+            or args.sessions_model is not None
+        ):
+            cfg_sessions = wiki.config().get("sessions") if wiki.paths.config.exists() else {}
+            base = cfg_sessions if isinstance(cfg_sessions, dict) else {}
+            session_override = SessionExtractionOptions(
+                enabled=(
+                    args.sessions_enabled
+                    if args.sessions_enabled is not None
+                    else bool(base.get("enabled", True))
+                ),
+                llm_enabled=(
+                    args.sessions_llm
+                    if args.sessions_llm is not None
+                    else str(base.get("llm_enabled", "auto")).lower()
+                ),
+                max_turns_per_chunk=int(base.get("max_turns_per_chunk", 30)),
+                max_tokens_per_call=int(base.get("max_tokens_per_call", 30000)),
+                model=(
+                    args.sessions_model
+                    if args.sessions_model is not None
+                    else (base.get("model") or None)
+                ),
+                include_doc_id_context=int(base.get("include_doc_id_context", 200)),
+            )
         result = wiki.compile(
             source_kind=args.source_kind,
             changed_only=args.changed_only,
@@ -1234,6 +1271,7 @@ def project_main(argv: List[str] | None = None) -> int:
             exclude_data=args.exclude_data,
             cognify=cognify_options if (cognify_options and cognify_options.is_active) else None,
             vault_pull=not args.no_vault_pull,
+            session_options=session_override,
         )
         print(
             "Compiled project wiki: "
