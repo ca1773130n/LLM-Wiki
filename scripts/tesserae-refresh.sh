@@ -33,9 +33,9 @@ cd "$project_root"
 
 # ---- Step 1: import sessions ---------------------------------------------
 echo
-echo "[1/3] tesserae sessions discover --import"
-if ! tesserae sessions discover --import; then
-  echo "tesserae-refresh: sessions discover --import failed; aborting" >&2
+echo "[1/3] tesserae project sessions discover --import"
+if ! tesserae project sessions discover --import; then
+  echo "tesserae-refresh: project sessions discover --import failed; aborting" >&2
   exit 2
 fi
 
