@@ -16,11 +16,29 @@
 set -euo pipefail
 
 q="${1-}"
+
+# Normalise smart/curly quotes that macOS autocorrect inserts. We
+# convert them to the ASCII equivalent BEFORE the strip step so a
+# question wrapped in “…” or ‘…’ unwraps the same way as the ASCII
+# form.
+q="${q//$'“'/\"}"   # left double quotation mark
+q="${q//$'”'/\"}"   # right double quotation mark
+q="${q//$'‘'/\'}"   # left single quotation mark
+q="${q//$'’'/\'}"   # right single quotation mark
+
+# Strip one matching pair of surrounding ASCII quotes (after the
+# smart-quote normalisation above so all four forms unwrap).
 if [[ "$q" =~ ^\"(.*)\"$ ]]; then
   q="${BASH_REMATCH[1]}"
 elif [[ "$q" =~ ^\'(.*)\'$ ]]; then
   q="${BASH_REMATCH[1]}"
 fi
+
+# Un-escape backslash-quoted inner quotes (\" → ", \' → '). Without
+# this, a user typing /tesserae:ask "say \"hi\" now" would land at
+# the CLI with the literal backslashes still in the question text.
+q="${q//\\\"/\"}"
+q="${q//\\\'/\'}"
 
 if [[ -z "$q" ]]; then
   echo "Error: /tesserae:ask requires a question. Usage: /tesserae:ask \"your question\"" >&2
