@@ -17,7 +17,7 @@ Voraussetzung: `tesserae` bereits installiert (`pip install tesserae` oder `pipx
 
 ## Was enthalten ist
 
-* **9 Slash-Befehle** — sieben 1:1-Wrapper um das CLI (`/tesserae:compile`, `/tesserae:ask`, `/tesserae:sessions-import`, `/tesserae:build-site`, `/tesserae:serve`, `/tesserae:obsidian-sync`, `/tesserae:setup`) plus zwei Workflow-Makros (`/tesserae:refresh` verkettet import + compile + vault-sync; `/tesserae:status` zeigt Graph-Counts und letzte Kompilierung).
+* **9 Slash-Befehle** — sieben 1:1-Wrapper um das CLI (`/tesserae:compile`, `/tesserae:ask`, `/tesserae:sessions-import`, `/tesserae:build-site`, `/tesserae:serve`, `/tesserae:obsidian-sync`, `/tesserae:setup`) plus zwei Workflow-Makros (`/tesserae:refresh` verkettet import + compile + obsidian-sync; `/tesserae:status` zeigt Graph-Counts und letzte Kompilierung).
 * **Automatische Registrierung des `tesserae_mcp` Servers** — der Agent erhält `ask`, `search_nodes`, `list_sessions`, `find_session_findings` etc. als `mcp__plugin_tesserae_tesserae__<tool>` ohne manuelle Config-Edits.
 * **`using-tesserae` Skill** — wird automatisch geladen, wenn du nach dem typisierten Graphen, vergangenem Session-Rückruf, Wiki/Vault-Inhalten oder einem tesserae-Workflow fragst. Lehrt den Agenten, welches MCP-Tool zu verwenden vs welchen Slash-Befehl vorzuschlagen.
 * **4 Hooks** — `SessionStart` druckt eine Graph-Zusammenfassung; `SessionEnd` führt im Hintergrund import+compile aus, damit die Erkenntnisse dieses Gesprächs zu Graph-Knoten für die nächste Sitzung werden; `PostToolUse` (opt-in) macht inkrementelle Neukompilierung bei docs/-Edits; `PreToolUse` gattert große-Graph-Kompilierungen über einen Bestätigungsdialog.
@@ -29,7 +29,7 @@ Vollständige Details, vollständige Befehls-/Hook-Tabellen und Per-Projekt-Opt-
 Unterschiedliche Rollen:
 
 - **MCP-Tools** = Read-only-Graph-Abfragen, die der Agent während eines Gesprächs aufruft. Immer an, geringe Reibung.
-- **Slash-Befehle** = Workflow-Aktionen, die du explizit aufrufst (compile, refresh, vault-sync). Hoher Hebel, aber sollte deine Entscheidung sein.
+- **Slash-Befehle** = Workflow-Aktionen, die du explizit aufrufst (compile, refresh, obsidian-sync). Hoher Hebel, aber sollte deine Entscheidung sein.
 
 Du kannst den MCP-Server allein nutzen (manuelle Bearbeitung von `claude_desktop_config.json` über `tesserae project mcp-config`). Das Plugin verpackt ihn einfach mit den Slash-Befehlen, der Skill und den Hooks, sodass die Installation ein Schritt ist.
 
@@ -51,6 +51,6 @@ Umkehrbar. Berührt das `.tesserae/`-Verzeichnis keines Projekts.
 
 ## Siehe auch
 
-- [Implementierungsplan](../superpowers/plans/2026-05-19-claude-code-plugin-plan.md)
-- [Design-Spezifikation](../superpowers/specs/2026-05-19-claude-code-plugin-design.md)
+- [Implementierungsplan](../../superpowers/plans/2026-05-19-claude-code-plugin-plan.md)
+- [Design-Spezifikation](../../superpowers/specs/2026-05-19-claude-code-plugin-design.md)
 - [Sessions-Integration](sessions.de.md) — die Sessions-Graph-Funktion, deren Schleife die Hooks des Plugins schließen

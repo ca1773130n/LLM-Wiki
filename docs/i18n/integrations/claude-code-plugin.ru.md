@@ -17,7 +17,7 @@ Tesserae поставляется с плагином [Claude Code](https://docs
 
 ## Что входит
 
-* **9 слэш-команд** — семь оберток 1:1 над CLI (`/tesserae:compile`, `/tesserae:ask`, `/tesserae:sessions-import`, `/tesserae:build-site`, `/tesserae:serve`, `/tesserae:obsidian-sync`, `/tesserae:setup`) плюс два рабочих макроса (`/tesserae:refresh` цепочкой import + compile + vault-sync; `/tesserae:status` показывает счетчики графа и последнюю компиляцию).
+* **9 слэш-команд** — семь оберток 1:1 над CLI (`/tesserae:compile`, `/tesserae:ask`, `/tesserae:sessions-import`, `/tesserae:build-site`, `/tesserae:serve`, `/tesserae:obsidian-sync`, `/tesserae:setup`) плюс два рабочих макроса (`/tesserae:refresh` цепочкой import + compile + obsidian-sync; `/tesserae:status` показывает счетчики графа и последнюю компиляцию).
 * **Автоматическая регистрация сервера `tesserae_mcp`** — агент получает `ask`, `search_nodes`, `list_sessions`, `find_session_findings` и т.д. как `mcp__plugin_tesserae_tesserae__<tool>` без ручных правок конфига.
 * **Навык `using-tesserae`** — автозагрузка при запросах о типизированном графе, воспоминаниях из прошлых сессий, контенте wiki/vault или любых рабочих процессах tesserae. Учит агента, какой инструмент MCP использовать vs какую слэш-команду предложить.
 * **4 хука** — `SessionStart` печатает сводку графа; `SessionEnd` фоново выполняет import+compile, чтобы инсайты этого разговора стали узлами графа для следующей сессии; `PostToolUse` (опционально) — инкрементальная перекомпиляция при правках в docs/; `PreToolUse` шлюзует компиляцию большого графа диалогом подтверждения.
@@ -29,7 +29,7 @@ Tesserae поставляется с плагином [Claude Code](https://docs
 Разные роли:
 
 - **Инструменты MCP** = запросы графа только для чтения, которые агент вызывает во время разговора. Всегда включены, низкое трение.
-- **Слэш-команды** = рабочие действия, которые вы явно вызываете (compile, refresh, vault-sync). Высокий рычаг, но должно быть вашим решением.
+- **Слэш-команды** = рабочие действия, которые вы явно вызываете (compile, refresh, obsidian-sync). Высокий рычаг, но должно быть вашим решением.
 
 Можно использовать только сервер MCP (ручное редактирование `claude_desktop_config.json` через `tesserae project mcp-config`). Плагин просто упаковывает его вместе со слэш-командами, навыком и хуками, делая установку одношаговой.
 
@@ -51,6 +51,6 @@ Tesserae поставляется с плагином [Claude Code](https://docs
 
 ## См. также
 
-- [План реализации](../superpowers/plans/2026-05-19-claude-code-plugin-plan.md)
-- [Спецификация дизайна](../superpowers/specs/2026-05-19-claude-code-plugin-design.md)
+- [План реализации](../../superpowers/plans/2026-05-19-claude-code-plugin-plan.md)
+- [Спецификация дизайна](../../superpowers/specs/2026-05-19-claude-code-plugin-design.md)
 - [Интеграция сессий](sessions.ru.md) — функция графа сессий, цикл которой замыкают хуки плагина

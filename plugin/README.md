@@ -24,7 +24,7 @@ For the remote-install form against this repo, check `/plugin install --help` in
 | `/tesserae:build-site` | `tesserae project build-site`. Static site at `.tesserae/site/`. |
 | `/tesserae:serve [--host HOST] [--port PORT]` | `tesserae project serve`. Default port 8765. |
 | `/tesserae:obsidian-sync [--prune-orphans] [--watch]` | `tesserae project obsidian-sync`. |
-| `/tesserae:refresh` | **Macro**: chains import → compile → vault-sync with stop-on-failure semantics. Emits a one-line summary at the end (`nodes=NNN edges=NNN processed=NNN sessions=NNN vault_orphans_pruned=NNN`). |
+| `/tesserae:refresh` | **Macro**: chains import → compile → obsidian-sync with stop-on-failure semantics. Emits a one-line summary at the end (`nodes=NNN edges=NNN processed=NNN sessions=NNN vault_orphans_pruned=NNN`). |
 | `/tesserae:status` | **Macro**: read-only status of the current project — graph counts, last compile, session count, configured Obsidian vault. |
 
 ## Hooks

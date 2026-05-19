@@ -17,7 +17,7 @@ Pre-req: `tesserae` already installed (`pip install tesserae` or `pipx install t
 
 ## What's shipped
 
-* **9 slash commands** — seven 1:1 wrappers around the CLI (`/tesserae:compile`, `/tesserae:ask`, `/tesserae:sessions-import`, `/tesserae:build-site`, `/tesserae:serve`, `/tesserae:obsidian-sync`, `/tesserae:setup`) plus two workflow macros (`/tesserae:refresh` chains import + compile + vault-sync; `/tesserae:status` shows graph counts and last compile).
+* **9 slash commands** — seven 1:1 wrappers around the CLI (`/tesserae:compile`, `/tesserae:ask`, `/tesserae:sessions-import`, `/tesserae:build-site`, `/tesserae:serve`, `/tesserae:obsidian-sync`, `/tesserae:setup`) plus two workflow macros (`/tesserae:refresh` chains import + compile + obsidian-sync; `/tesserae:status` shows graph counts and last compile).
 * **Auto-MCP-registration** for the `tesserae_mcp` server — agent gets `ask`, `search_nodes`, `list_sessions`, `find_session_findings`, etc. as `mcp__plugin_tesserae_tesserae__<tool>` without manual config edits.
 * **`using-tesserae` skill** — auto-loads when you ask about the typed graph, past-session recall, wiki/vault content, or any tesserae workflow. Teaches the agent which MCP tool to use vs which slash command to suggest.
 * **4 hooks** — `SessionStart` prints a graph summary; `SessionEnd` backgrounds an import+compile so this conversation's insights become graph nodes for the next session; `PostToolUse` (opt-in) does an incremental recompile on docs/ edits; `PreToolUse` gates large-graph compiles via a confirmation dialog.
@@ -29,7 +29,7 @@ Full details, the complete command/hook tables, and per-project opt-out instruct
 Different surfaces, different roles:
 
 - **MCP tools** = read-only graph queries the agent calls during a conversation. Always-on, low-friction.
-- **Slash commands** = workflow actions you explicitly invoke (compile, refresh, vault-sync). High-leverage but should be your decision.
+- **Slash commands** = workflow actions you explicitly invoke (compile, refresh, obsidian-sync). High-leverage but should be your decision.
 
 You can use the MCP server alone (manual `claude_desktop_config.json` edit via `tesserae project mcp-config`) — the plugin just packages it together with the slash commands, the skill, and the hooks so installation is one step.
 
