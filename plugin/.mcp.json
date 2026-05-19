@@ -1,0 +1,6 @@
+{
+  "tesserae": {
+    "command": "tesserae_mcp",
+    "args": []
+  }
+}

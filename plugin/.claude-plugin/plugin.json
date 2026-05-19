@@ -1,0 +1,19 @@
+{
+  "name": "tesserae",
+  "description": "Slash commands, hooks, skill, and MCP auto-registration for the Tesserae project-memory compiler.",
+  "version": "0.1.0",
+  "author": {
+    "name": "Tesserae Contributors"
+  },
+  "homepage": "https://github.com/ca1773130n/Tesserae",
+  "repository": "https://github.com/ca1773130n/Tesserae",
+  "license": "MIT",
+  "keywords": [
+    "tesserae",
+    "knowledge-graph",
+    "obsidian",
+    "mcp",
+    "session-memory",
+    "claude-code"
+  ]
+}

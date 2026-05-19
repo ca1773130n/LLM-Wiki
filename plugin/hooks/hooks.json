@@ -1,0 +1,16 @@
+{
+  "description": "Phase 0 spike — one SessionStart hook that touches a marker file so we can confirm hooks fire on install.",
+  "hooks": {
+    "SessionStart": [
+      {
+        "matcher": "",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "${CLAUDE_PLUGIN_ROOT}/hooks/spike-session-start.sh"
+          }
+        ]
+      }
+    ]
+  }
+}
