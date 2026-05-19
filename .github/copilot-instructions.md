@@ -1,5 +1,5 @@
 <!-- Managed by HarnessSync -->
-<!-- Last synced: 2026-05-19T10:19:38Z -->
+<!-- Last synced: 2026-05-19T15:43:02Z -->
 <!-- [harness-sync:start source=CLAUDE.md line=1-97] -->
 # [Project rules from CLAUDE.md]
 
