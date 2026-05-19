@@ -123,6 +123,7 @@ tesserae project build-site && tesserae project serve --port 8765
 
 모든 통합은 옵트인입니다. 일반 마크다운/코드 프로젝트에서 Tesserae를 사용하는 데 필수는 아닙니다.
 
+- **Claude Code 플러그인** — 슬래시 명령(`/tesserae:compile`, `/tesserae:ask "<질문>"`, `/tesserae:refresh`, `/tesserae:status` 등), 네 개의 훅(SessionStart 상태 / SessionEnd 자동 컴파일 / opt-in PostToolUse 증분 재컴파일 / 큰 그래프용 PreToolUse 확인 게이트), `using-tesserae` 스킬, MCP 자동 등록 — 모두 하나의 `/plugin install`로. [docs/integrations/claude-code-plugin.md](docs/integrations/claude-code-plugin.md) 참조.
 - **세션 그래프** — 프로젝트에 대한 Claude Code / Codex 대화를 그래프의 1급 노드(Insight / Decision / Question / TODO / Hypothesis / Takeaway)로 만들어, 등장한 문서에 연결합니다. `tesserae sessions discover --import`를 한 번 실행한 후, 매 `tesserae project compile`이 새 세션을 가져옵니다. 구조적 패스는 무료, LLM 패스는 `claude` CLI에 로그인되어 있으면 자동 실행됩니다 — **API 키 불필요**. [docs/integrations/sessions.md](docs/integrations/sessions.md) 참조.
 - **Understand Anything** — `.understand-anything/knowledge-graph.json`에 코드 지식 그래프를 생성하는 별도 프로젝트([Lum1104/Understand-Anything](https://github.com/Lum1104/Understand-Anything))입니다. `--with-understand-anything`으로 활성화합니다. Tesserae가 관리형 새로고침 래퍼를 저장하므로 `project compile`이 그래프를 최신 상태로 유지합니다. [docs/integrations/understand-anything.md](docs/integrations/understand-anything.md) 참조.
 - **RAG-Anything** — MinerU/Docling/PaddleOCR을 통해 PDF, Office 문서, 이미지를 처리하는 멀티모달 수집([HKUDS/RAG-Anything](https://github.com/HKUDS/RAG-Anything))입니다. `--with-raganything`으로 활성화합니다. 런타임 질문 백엔드(LightRAG) 역할도 합니다. Python 3.10 이상이 필요합니다. [docs/integrations/rag-anything.md](docs/integrations/rag-anything.md) 참조.
